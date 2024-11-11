@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/authentication/forgot_password.dart';
 import 'package:planma_app/authentication/sign_up.dart';
+import 'package:planma_app/core/dashboard.dart';
 
 class LogIn extends StatefulWidget {
   @override
@@ -37,44 +38,48 @@ class _LogInState extends State<LogIn> {
     return Scaffold(
         body: Center(
             child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 40.0), // Increased horizontal padding
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Login',
+            'Login to your account',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 30, // Increased font size
               fontWeight: FontWeight.bold,
               color: Colors.blue[900],
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 30), // Increased space between elements
           TextFormField(
             controller: userNameController,
             decoration: InputDecoration(
               labelText: 'Username',
-              prefixIcon: Icon(Icons.person),
+              prefixIcon: Icon(Icons.person, size: 30), // Increased icon size
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(15), // More rounded borders
               ),
             ),
             validator: (value) =>
                 value!.isEmpty ? 'Please enter your username' : null,
+            style:
+                TextStyle(fontSize: 20), // Increased font size for input text
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 20), // Increased space
           TextFormField(
             controller: passwordController,
             obscureText: obscurePassword,
             decoration: InputDecoration(
               labelText: 'Password',
-              prefixIcon: Icon(Icons.lock),
+              prefixIcon: Icon(Icons.lock, size: 30), // Increased icon size
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(15), // More rounded borders
               ),
               suffixIcon: IconButton(
                 icon: Icon(
-                    obscurePassword ? Icons.visibility : Icons.visibility_off),
+                    obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    size: 30), // Increased icon size
                 onPressed: () {
                   setState(() {
                     obscurePassword = !obscurePassword;
@@ -84,8 +89,10 @@ class _LogInState extends State<LogIn> {
             ),
             validator: (value) =>
                 value!.isEmpty ? 'Please enter your password' : null,
+            style:
+                TextStyle(fontSize: 20), // Increased font size for input text
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 20), // Increased space
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -95,35 +102,50 @@ class _LogInState extends State<LogIn> {
                   MaterialPageRoute(builder: (context) => ForgotPassword()),
                 );
               },
-              child: Text('Forgot Password?'),
+              child: Text(
+                'Forgot Password?',
+                style: TextStyle(fontSize: 18), // Increased font size
+              ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 30), // Increased space
           ElevatedButton(
-            onPressed: _login,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        Dashboard(username: userNameController.text)),
+              );
+            },
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+              padding: EdgeInsets.symmetric(
+                  horizontal: 150, vertical: 20), // Increased button padding
               backgroundColor: Color(0xFF173F70),
+              textStyle:
+                  TextStyle(fontSize: 20), // Increased text size in the button
             ),
             child: Text(
               'Login',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 20, // Increased font size
                 color: Colors.white,
               ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 30), // Increased space
           RichText(
             text: TextSpan(
               text: 'Already have an account? ',
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(
+                  color: Colors.black, fontSize: 18), // Increased font size
               children: <TextSpan>[
                 TextSpan(
                   text: 'Sign Up',
                   style: TextStyle(
                     color: Colors.blue[900],
                     decoration: TextDecoration.underline,
+                    fontSize: 18, // Increased font size
                   ),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
@@ -135,7 +157,7 @@ class _LogInState extends State<LogIn> {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     )));
