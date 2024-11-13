@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from models import CustomTask  
+from accounts.models import CustomTask  
 
 class CreateTaskSerializer(serializers.Serializer):
     
