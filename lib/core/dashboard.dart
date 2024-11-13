@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/task/by_date.dart';
 
 class Dashboard extends StatelessWidget {
   final String username;
@@ -55,7 +56,10 @@ class Dashboard extends StatelessWidget {
                     title: 'Tasks',
                     subtitle: '4 tasks',
                     onPressed: () {
-                      // Navigate to Tasks page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ByDate()),
+                      );
                     },
                   ),
                   SizedBox(height: 15),
