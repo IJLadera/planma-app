@@ -26,7 +26,13 @@ SECRET_KEY = 'django-insecure-slqnuagt*a5=ri*ch72$pylh4^567(r@j+r6oco3knc(2f5^5t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+    'X-CSRFToken',
+]
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
@@ -47,6 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
 ]
+
+
 
 REST_FRAMEWORK={
     'DEFAULT_PERMISSION_CLASSES': (
@@ -71,6 +79,7 @@ SIMPLE_JWT = {
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -78,6 +87,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'planmaDB.urls'
@@ -114,6 +124,23 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+
+
+
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:52667",  # or whatever port your Flutter app uses
+#     "http://127.0.0.1:8000",  # also add this if needed
+# ]
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+
+CORS_ALLOW_CREDENTIALS = True
+
+
 
 
 # Password validation

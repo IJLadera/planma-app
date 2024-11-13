@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/authentication/log_in.dart';
+import 'package:planma_app/auth_service.dart';
+
 
 class SignUp extends StatefulWidget {
   @override
@@ -36,12 +38,37 @@ class _SignUpState extends State<SignUp> {
     super.dispose();
   }
 
-  void _signUp() {
+  void _signUp() async {
     if (_formKey.currentState!.validate()) {
       // Perform sign-up logic (e.g., API call)
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Signing up...")),
       );
+
+      final authService = AuthService();
+      final response = await authService.signUp(
+        firstName: firstNameController.text, 
+        lastName: lastNameController.text, 
+        username: userNameController.text, 
+        email: emailController.text, 
+        password: passwordController.text,
+      );
+
+       if (response != null && response["error"] == null) {
+      // Sign-up successful, navigate to the login page
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Account created successfully!")),
+      );
+       Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LogIn()),
+      );
+      }else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response?["error"] ?? "Unknown error")),
+        );
+      }
+    
     }
   }
 
@@ -174,6 +201,7 @@ class _SignUpState extends State<SignUp> {
                         // Validate the form before navigating
                         if (_formKey.currentState!.validate()) {
                           // If validation is successful, navigate to LogIn screen
+                          _signUp();
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => LogIn()),
