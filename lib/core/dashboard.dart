@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/task/by_date.dart';
+import 'package:planma_app/task/by_date_view.dart';
+import 'package:planma_app/task/task_page.dart';
 
 class Dashboard extends StatelessWidget {
   final String username;
@@ -58,7 +59,7 @@ class Dashboard extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ByDate()),
+                        MaterialPageRoute(builder: (context) => TasksPage()),
                       );
                     },
                   ),
@@ -100,23 +101,34 @@ class Dashboard extends StatelessWidget {
       ),
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
-        notchMargin: 10.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: Icon(Icons.home),
-              onPressed: () {
-                // Navigate to Home page
-              },
+        child: Container(
+          height: 30.0, // Adjust the height as needed
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30.0),
+              topRight: Radius.circular(30.0),
             ),
-            IconButton(
-              icon: Icon(Icons.calendar_today),
-              onPressed: () {
-                // Navigate to Calendar
-              },
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.home),
+                  onPressed: () {
+                    // Navigate to Home page
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.calendar_today),
+                  onPressed: () {
+                    // Navigate to Calendar
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -125,6 +137,8 @@ class Dashboard extends StatelessWidget {
           // Action for floating button
         },
         child: Icon(Icons.add),
+        backgroundColor: Colors.blue,
+        shape: CircleBorder(),
       ),
     );
   }
