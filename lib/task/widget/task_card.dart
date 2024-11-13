@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class TaskItem extends StatefulWidget {
+class TaskCard extends StatefulWidget {
   final String taskName;
   final String subject;
   final String duration;
   final IconData icon;
   final String priority; // Added priority field
 
-  TaskItem({
+  TaskCard({
     required this.taskName,
     required this.subject,
     required this.duration,
@@ -16,10 +16,10 @@ class TaskItem extends StatefulWidget {
   });
 
   @override
-  _TaskItemState createState() => _TaskItemState();
+  _TaskCardState createState() => _TaskCardState();
 }
 
-class _TaskItemState extends State<TaskItem> {
+class _TaskCardState extends State<TaskCard> {
   bool isChecked = false;
 
   void toggleCheckbox() {
