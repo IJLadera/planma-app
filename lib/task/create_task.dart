@@ -1,6 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:planma_app/task/widget/widgets.dart'; // Import your CustomWidgets class
 
-class CreateTask extends StatelessWidget {
+class CreateTask extends StatefulWidget {
+  @override
+  _CreateTaskState createState() => _CreateTaskState();
+}
+
+class _CreateTaskState extends State<CreateTask> {
+  final TextEditingController _taskNameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  DateTime? _scheduledDate;
+  TimeOfDay? _startTime;
+  TimeOfDay? _endTime;
+  DateTime? _deadline;
+
+  String? _subject;
+
+  final List<String> _subjects = [
+    'Math',
+    'Science',
+    'English'
+  ]; // Add your subjects here
+
+  // Method to select date
+  Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isScheduledDate) {
+          _scheduledDate = picked;
+        } else {
+          _deadline = picked;
+        }
+      });
+    }
+  }
+
+  // Method to select time
+  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStartTime) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -8,146 +67,77 @@ class CreateTask extends StatelessWidget {
         title: Text(
           'Add Task',
           style: TextStyle(
-              color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            fontWeight: FontWeight.bold, // Makes the text bold
+          ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTextField('Task Name', 'ex. Create an Essay'),
-            SizedBox(height: 15),
-            _buildTextField('Description', 'ex. Essay about AI'),
-            SizedBox(height: 15),
-            _buildDropdownField('Priority',
-                ['Low Priority', 'Medium Priority', 'High Priority']),
-            SizedBox(height: 15),
-            _buildDateField(context),
-            SizedBox(height: 15),
-            _buildTimeField(context),
-            SizedBox(height: 15),
-            _buildTextField('Duration', 'ex. 30 mins'),
-            SizedBox(height: 15),
-            _buildDropdownField('Subject', ['Math', 'Science', 'English']),
-            Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Create task action
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade700,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  CustomWidgets.buildTextField(
+                      _taskNameController, 'Task Name'),
+                  SizedBox(height: 12), // Added gap
+                  CustomWidgets.buildTextField(
+                      _descriptionController, 'Description'),
+                  SizedBox(height: 12), // Added gap
+                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
+                      context, true, _selectDate),
+                  SizedBox(height: 12), // Added gap
+                  Row(
+                    children: [
+                      Expanded(
+                          child: CustomWidgets.buildTimeField('Start Time',
+                              _startTime, context, true, _selectTime)),
+                      SizedBox(width: 10),
+                      Expanded(
+                          child: CustomWidgets.buildTimeField('End Time',
+                              _endTime, context, false, _selectTime)),
+                    ],
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                ),
-                child: Text(
-                  'Create Task',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
+                  SizedBox(height: 12),
+                  CustomWidgets.buildDateTile(
+                      'Deadline', _deadline, context, false, _selectDate),
+                  SizedBox(height: 12), // Added gap
+                  CustomWidgets.buildDropdownField(
+                      'Subject', _subject, _subjects, (value) {
+                    setState(() {
+                      _subject = value;
+                    });
+                  }),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+            child: ElevatedButton(
+              onPressed: () {
+                // Create task action
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade700,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+              ),
+              child: Text(
+                'Create Task',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildTextField(String label, String hint) {
-    return TextField(
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdownField(String label, List<String> items) {
-    String? selectedValue;
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-      ),
-      items: items
-          .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-          .toList(),
-      onChanged: (value) {
-        selectedValue = value;
-        // Handle selection
-      },
-      value: selectedValue,
-      dropdownColor: Colors.white,
-      style: TextStyle(color: Colors.black),
-      icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade700),
-    );
-  }
-
-  Widget _buildDateField(BuildContext context) {
-    return TextField(
-      decoration: InputDecoration(
-        labelText: 'Deadline',
-        hintText: '11 January 2024',
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        suffixIcon: Icon(Icons.calendar_today, color: Colors.grey.shade700),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-      ),
-      readOnly: true,
-      onTap: () {
-        // Show date picker
-      },
-    );
-  }
-
-  Widget _buildTimeField(BuildContext context) {
-    return TextField(
-      decoration: InputDecoration(
-        labelText: 'Time',
-        hintText: '11:59 PM',
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-      ),
-      readOnly: true,
-      onTap: () {
-        // Show time picker
-      },
     );
   }
 }
