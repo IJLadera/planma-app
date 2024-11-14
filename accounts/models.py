@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
-import uuid 
+import uuid
+from django.conf import settings
 
 
 class AppUserManager(BaseUserManager):
@@ -57,3 +58,30 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
 
     def str(self):
         return self.email
+    
+
+class CustomTask(models.Model):
+    
+     # Primary Key
+    task_id = models.AutoField(primary_key=True)
+    
+    # Task Details
+    task_name = models.CharField(max_length=255)
+    task_desc = models.TextField()
+    scheduled_date = models.DateField()
+    scheduled_start_time = models.TimeField()
+    scheduled_end_time = models.TimeField()
+    priority = models.IntegerField()  # You can also use choices here for priority levels
+    deadline = models.DateTimeField()
+    status = models.CharField(max_length=50)
+    
+    # Foreign Key to CustomUser model
+    subject_code = models.CharField(max_length=50)  # Assuming this is a code instead of a ForeignKey
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='tasks'
+    )
+
+    def __str__(self):
+        return self.task_name
