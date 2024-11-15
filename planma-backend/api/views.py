@@ -14,4 +14,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
 class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomTask.objects.all()
     serializer_class = CreateTaskSerializer
-    lookup_field = 'pk'
+    lookup_field = 'pk' 
+    
+    
+    
