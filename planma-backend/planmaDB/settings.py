@@ -34,7 +34,7 @@ CORS_ALLOW_HEADERS = [
     'X-CSRFToken',
 ]
 
-AUTH_USER_MODEL = "accounts.CustomUser"
+AUTH_USER_MODEL = "api.CustomUser"
 
 # Application definition
 
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'corsheaders',
-    'accounts.apps.AccountsConfig',
+    'api.apps.ApiConfig',
     
     'django.contrib.admin',
     'django.contrib.auth',
