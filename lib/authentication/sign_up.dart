@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/auth_service.dart';
 
-
 class SignUp extends StatefulWidget {
   @override
   _SignUpState createState() => _SignUpState();
@@ -47,28 +46,27 @@ class _SignUpState extends State<SignUp> {
 
       final authService = AuthService();
       final response = await authService.signUp(
-        firstName: firstNameController.text, 
-        lastName: lastNameController.text, 
-        username: userNameController.text, 
-        email: emailController.text, 
+        firstName: firstNameController.text,
+        lastName: lastNameController.text,
+        username: userNameController.text,
+        email: emailController.text,
         password: passwordController.text,
       );
 
-       if (response != null && response["error"] == null) {
-      // Sign-up successful, navigate to the login page
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Account created successfully!")),
-      );
-       Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => LogIn()),
-      );
-      }else {
+      if (response != null && response["error"] == null) {
+        // Sign-up successful, navigate to the login page
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Account created successfully!")),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LogIn()),
+        );
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(response?["error"] ?? "Unknown error")),
         );
       }
-    
     }
   }
 

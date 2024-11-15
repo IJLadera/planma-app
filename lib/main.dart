@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/authentication/log_in.dart';
-import 'package:planma_app/authentication/sign_up.dart';
 
 void main() {
   runApp(MyApp());
