@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/subject/widget/subject_card.dart'; // Import the SubjectCard widget
+import 'package:planma_app/subject/widget/subject_card.dart';
 
 class DaySchedule extends StatelessWidget {
   final String day;
   final bool isByDate;
 
-  // Constructor to accept the day and isByDate parameters
   DaySchedule({required this.day, required this.isByDate});
+
+  // Example list of subjects
+  final List<Map<String, dynamic>> subjects = [
+    {'code': 'MATH101', 'name': 'Calculus I', 'time': '9:00 AM - 10:30 AM'},
+    {'code': 'PHYS102', 'name': 'Physics I', 'time': '11:00 AM - 12:30 PM'},
+    {'code': 'CS103', 'name': 'Intro to Programming', 'time': '2:00 PM - 3:30 PM'},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +26,7 @@ class DaySchedule extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 8),
-          // Generate a list of SubjectCard widgets
-          ...List.generate(
-            3,
-            (index) => SubjectCard(isByDate: isByDate),
-          ).toList(),
+          ...subjects.map((subject) => SubjectCard(isByDate: isByDate, subject: subject)).toList(),
         ],
       ),
     );

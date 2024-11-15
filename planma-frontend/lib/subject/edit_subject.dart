@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 
-class AddClassScreen extends StatefulWidget {
+class EditClass extends StatefulWidget {
   @override
-  _AddClassScreenState createState() => _AddClassScreenState();
+  _EditClass createState() => _EditClass();
 }
 
-class _AddClassScreenState extends State<AddClassScreen> {
+class _EditClass extends State<EditClass> {
   final _subjectCodeController = TextEditingController();
   final _subjectTitleController = TextEditingController();
   final _roomController = TextEditingController();
@@ -37,7 +37,12 @@ class _AddClassScreenState extends State<AddClassScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Class'),
+          title: Text(
+            'Edit Class',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -129,7 +134,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
                 ),
                 child: Text(
-                  'Create Subject',
+                  'Edit Class',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),

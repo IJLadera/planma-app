@@ -4,15 +4,11 @@ class TaskCard extends StatefulWidget {
   final String taskName;
   final String subject;
   final String duration;
-  final IconData icon;
-  final String priority; // Added priority field
 
   TaskCard({
     required this.taskName,
     required this.subject,
     required this.duration,
-    required this.icon,
-    required this.priority, // Pass priority here
   });
 
   @override
@@ -85,16 +81,6 @@ class _TaskCardState extends State<TaskCard> {
                   ),
                   Text('${widget.subject} (${widget.duration})'),
                 ],
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Icon(
-                widget.icon, // Flag icon
-                color: getPriorityColor(
-                    widget.priority), // Set flag color based on priority
-                size: 24, // Icon size
               ),
             ],
           ),
