@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/by_date_view.dart';
 import 'package:planma_app/task/task_page.dart';
 
@@ -65,22 +66,25 @@ class Dashboard extends StatelessWidget {
                   ),
                   SizedBox(height: 15),
                   MenuButton(
+                    color: Colors.teal,
+                    icon: Icons.schedule,
+                    title: 'Class Schedule',
+                    subtitle: '11 classes',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ClassSchedule()),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  MenuButton(
                     color: Colors.orange,
                     icon: Icons.event,
                     title: 'Events',
                     subtitle: '1 event',
                     onPressed: () {
                       // Navigate to Events page
-                    },
-                  ),
-                  SizedBox(height: 15),
-                  MenuButton(
-                    color: Colors.teal,
-                    icon: Icons.schedule,
-                    title: 'Class Schedule',
-                    subtitle: '11 classes',
-                    onPressed: () {
-                      // Navigate to Class Schedule page
                     },
                   ),
                   SizedBox(height: 15),
