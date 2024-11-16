@@ -1,8 +1,13 @@
 from rest_framework import serializers
-from api.models import CustomTask  
+from .models import *
 
-class CreateTaskSerializer(serializers.Serializer):
-    
+class CustomTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomTask
-        fields = [ 'task_id','task_name','task_desc','scheduled_date','scheduled_start_time','scheduled_end_time','priority','deadline','status','subject_code','student']
+        fields = [
+            'task_id', 'task_name', 'task_desc', 
+            'scheduled_date', 'scheduled_start_time', 
+            'scheduled_end_time', 'deadline', 
+            'status', 'subject_code', 'student_id'
+        ]
+        # read_only_fields = ['task_id', 'student_id']
