@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:planma_app/activities/activity_page.dart';
+import 'package:planma_app/core/widget/button_sheet.dart';
+import 'package:planma_app/core/widget/menu_button.dart';
 import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Dashboard extends StatelessWidget {
   final String username;
@@ -31,7 +33,7 @@ class Dashboard extends StatelessWidget {
               child: Icon(Icons.person, color: Colors.black),
             ),
             onPressed: () {
-              //Navigate to profile
+              // Navigate to profile
             },
           ),
         ],
@@ -54,7 +56,7 @@ class Dashboard extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  MenuButton(
+                  MenuButtonWidget(
                     color: Colors.blue,
                     icon: Icons.check_circle,
                     title: 'Tasks',
@@ -67,7 +69,7 @@ class Dashboard extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: 15),
-                  MenuButton(
+                  MenuButtonWidget(
                     color: Colors.teal,
                     icon: Icons.schedule,
                     title: 'Class Schedule',
@@ -81,7 +83,7 @@ class Dashboard extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: 15),
-                  MenuButton(
+                  MenuButtonWidget(
                     color: Colors.orange,
                     icon: Icons.event,
                     title: 'Events',
@@ -94,7 +96,7 @@ class Dashboard extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: 15),
-                  MenuButton(
+                  MenuButtonWidget(
                     color: Colors.redAccent,
                     icon: Icons.accessibility,
                     title: 'Activities',
@@ -102,13 +104,13 @@ class Dashboard extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ActivitiesScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => ActivitiesScreen()),
                       );
                     },
                   ),
                   SizedBox(height: 15),
-                  // Add the "Goals" button
-                  MenuButton(
+                  MenuButtonWidget(
                     color: Colors.purple,
                     icon: FontAwesomeIcons.flag,
                     title: 'Goals',
@@ -126,92 +128,34 @@ class Dashboard extends StatelessWidget {
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         child: Container(
-          height: 30.0, // Adjust the height as needed
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30.0),
-              topRight: Radius.circular(30.0),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.home),
-                  onPressed: () {
-                    // Navigate to Home page
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.calendar_today),
-                  onPressed: () {
-                    // Navigate to Calendar
-                  },
-                ),
-              ],
-            ),
+          height: 60.0, // Adjusted height for better appearance
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: Icon(Icons.home),
+                onPressed: () {
+                  // Navigate to Home page
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.calendar_today),
+                onPressed: () {
+                  // Navigate to Calendar
+                },
+              ),
+            ],
           ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action for floating button
+          BottomSheetWidget.show(context);
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.blue,
         shape: CircleBorder(),
-      ),
-    );
-  }
-}
-
-class MenuButton extends StatelessWidget {
-  final Color color;
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onPressed;
-
-  MenuButton({
-    required this.color,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: EdgeInsets.all(30),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      onPressed: onPressed,
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 30),
-          SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-              Text(
-                subtitle,
-                style: TextStyle(color: Colors.white70),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
