@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
-import 'package:planma_app/task/by_date_view.dart';
 import 'package:planma_app/task/task_page.dart';
 
 class Dashboard extends StatelessWidget {
@@ -84,7 +84,10 @@ class Dashboard extends StatelessWidget {
                     title: 'Events',
                     subtitle: '1 event',
                     onPressed: () {
-                      // Navigate to Events page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => EventsPage()),
+                      );
                     },
                   ),
                   SizedBox(height: 15),

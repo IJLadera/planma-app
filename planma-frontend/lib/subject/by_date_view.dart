@@ -161,14 +161,6 @@ class ByDateView extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Action to add a new schedule entry, if needed
-          print("Add new subject");
-        },
-        backgroundColor: Colors.blue,
-        child: Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 }
