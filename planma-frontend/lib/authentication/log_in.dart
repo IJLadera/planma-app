@@ -6,6 +6,8 @@ import 'package:planma_app/core/dashboard.dart';
 import 'package:planma_app/login_auth.dart';
 
 class LogIn extends StatefulWidget {
+  const LogIn({super.key});
+
   @override
   _LogInState createState() => _LogInState();
 }
@@ -58,7 +60,7 @@ class _LogInState extends State<LogIn> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response?["error"] ?? "Login failed")),
+        SnackBar(content: Text("Logging in...")),
       );
     }
   }
@@ -83,12 +85,12 @@ class _LogInState extends State<LogIn> {
               color: Colors.blue[900],
             ),
           ),
-          SizedBox(height: 30), // Increased space between elements
+          const SizedBox(height: 30), // Increased space between elements
           TextFormField(
             controller: emailController,
             decoration: InputDecoration(
               labelText: 'Username',
-              prefixIcon: Icon(Icons.person, size: 30), // Increased icon size
+              prefixIcon: const Icon(Icons.person, size: 30), // Increased icon size
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15), // More rounded borders
               ),
@@ -96,15 +98,15 @@ class _LogInState extends State<LogIn> {
             validator: (value) =>
                 value!.isEmpty ? 'Please enter your username' : null,
             style:
-                TextStyle(fontSize: 20), // Increased font size for input text
+                const TextStyle(fontSize: 20), // Increased font size for input text
           ),
-          SizedBox(height: 20), // Increased space
+          const SizedBox(height: 20), // Increased space
           TextFormField(
             controller: passwordController,
             obscureText: obscurePassword,
             decoration: InputDecoration(
               labelText: 'Password',
-              prefixIcon: Icon(Icons.lock, size: 30), // Increased icon size
+              prefixIcon: const Icon(Icons.lock, size: 30), // Increased icon size
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15), // More rounded borders
               ),
@@ -122,9 +124,9 @@ class _LogInState extends State<LogIn> {
             validator: (value) =>
                 value!.isEmpty ? 'Please enter your password' : null,
             style:
-                TextStyle(fontSize: 20), // Increased font size for input text
+                const TextStyle(fontSize: 20), // Increased font size for input text
           ),
-          SizedBox(height: 20), // Increased space
+          const SizedBox(height: 20), // Increased space
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -134,13 +136,13 @@ class _LogInState extends State<LogIn> {
                   MaterialPageRoute(builder: (context) => ForgotPassword()),
                 );
               },
-              child: Text(
+              child: const Text(
                 'Forgot Password?',
                 style: TextStyle(fontSize: 18), // Increased font size
               ),
             ),
           ),
-          SizedBox(height: 30), // Increased space
+          const SizedBox(height: 30), // Increased space
           ElevatedButton(
             onPressed: () async {              
               if (_formKey.currentState!.validate()) {
@@ -155,13 +157,13 @@ class _LogInState extends State<LogIn> {
               }
             },
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                   horizontal: 150, vertical: 20), // Increased button padding
-              backgroundColor: Color(0xFF173F70),
+              backgroundColor: const Color(0xFF173F70),
               textStyle:
-                  TextStyle(fontSize: 20), // Increased text size in the button
+                  const TextStyle(fontSize: 20), // Increased text size in the button
             ),
-            child: Text(
+            child: const Text(
               'Login',
               style: TextStyle(
                 fontSize: 20, // Increased font size
@@ -169,11 +171,11 @@ class _LogInState extends State<LogIn> {
               ),
             ),
           ),
-          SizedBox(height: 30), // Increased space
+          const SizedBox(height: 30), // Increased space
           RichText(
             text: TextSpan(
               text: 'Already have an account? ',
-              style: TextStyle(
+              style: const TextStyle(
                   color: Colors.black, fontSize: 18), // Increased font size
               children: <TextSpan>[
                 TextSpan(

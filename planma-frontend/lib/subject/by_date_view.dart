@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/subject/widget/subject_view.dart';
 
 class ByDateView extends StatelessWidget {
   final List<Map<String, dynamic>> scheduleData = [
@@ -84,11 +85,13 @@ class ByDateView extends StatelessWidget {
     },
   ];
 
+  const ByDateView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Class Schedule'),
+        title: const Text('Class Schedule'),
       ),
       body: ListView.builder(
         itemCount: scheduleData.length,
@@ -103,7 +106,7 @@ class ByDateView extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   daySchedule['day'],
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               // Subjects for each day
@@ -111,34 +114,46 @@ class ByDateView extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 4.0),
-                  child: Card(
-                    color: Colors.orange[100],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            subject['code'],
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            subject['name'],
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.grey[700]),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            subject['time'],
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.grey[600]),
-                          ),
-                        ],
+                  child: InkWell(
+                    onTap: () {
+                      // Navigate to SubjectDetailScreen with subject details
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              SubjectDetailScreen(subject: subject),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      color: Colors.orange[100],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              subject['code'],
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              subject['name'],
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.grey[700]),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              subject['time'],
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -154,7 +169,7 @@ class ByDateView extends StatelessWidget {
           print("Add new subject");
         },
         backgroundColor: Colors.blue,
-        child: Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

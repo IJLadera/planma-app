@@ -5,6 +5,8 @@ import 'by_subject_view.dart';
 import 'package:planma_app/task/widget/search_bar.dart'; // Import your search bar widget
 
 class TasksPage extends StatefulWidget {
+  const TasksPage({super.key});
+
   @override
   _TasksPageState createState() => _TasksPageState();
 }
@@ -26,21 +28,21 @@ class _TasksPageState extends State<TasksPage> {
             child: Row(
               children: [
                 Expanded(child: CustomSearchBar()), // Add search bar here
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 PopupMenuButton(
-                  icon: Icon(Icons.filter_list, color: Colors.black),
+                  icon: const Icon(Icons.filter_list, color: Colors.black),
                   onSelected: (value) {
                     setState(() {
                       isByDate = value == 'By Date';
                     });
                   },
                   itemBuilder: (context) => [
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'By Date',
                       child: Text('By date',
                           style: TextStyle(color: Colors.black)),
                     ),
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'By Subject',
                       child: Text('By subject',
                           style: TextStyle(color: Colors.black)),
@@ -64,8 +66,8 @@ class _TasksPageState extends State<TasksPage> {
           );
         },
         backgroundColor: Colors.blue,
+        shape: const CircleBorder(),
         child: Icon(Icons.add, color: Colors.white),
-        shape: CircleBorder(),
       ),
     );
   }

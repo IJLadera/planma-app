@@ -26,5 +26,3 @@ class CustomTaskSerializer(serializers.ModelSerializer):
             'status', 'subject_code', 'student_id'
         ]
         # read_only_fields = ['task_id', 'student_id']
-        
-

@@ -84,6 +84,3 @@ class CustomTask(models.Model):
     def __str__(self):
         return self.task_name
     
-    
-    
-    

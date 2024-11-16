@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 
 class AddClassScreen extends StatefulWidget {
+  const AddClassScreen({super.key});
+
   @override
   _AddClassScreenState createState() => _AddClassScreenState();
 }
@@ -14,8 +16,8 @@ class _AddClassScreenState extends State<AddClassScreen> {
   String? _selectedSemester;
   final List<String> _semesters = ['1', '2', 'Summer'];
   final Set<String> _selectedDays = {};
-  TimeOfDay _startTime = TimeOfDay(hour: 7, minute: 0);
-  TimeOfDay _endTime = TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay _startTime = const TimeOfDay(hour: 7, minute: 0);
+  TimeOfDay _endTime = const TimeOfDay(hour: 8, minute: 0);
 
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -37,9 +39,9 @@ class _AddClassScreenState extends State<AddClassScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Class'),
+          title: const Text('Add Class'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -54,17 +56,17 @@ class _AddClassScreenState extends State<AddClassScreen> {
                 children: [
                   CustomWidgets.buildTextField(
                       _subjectCodeController, 'Subject Code'),
-                  SizedBox(height: 16), // Increased space
+                  const SizedBox(height: 16), // Increased space
                   CustomWidgets.buildTextField(
                       _subjectTitleController, 'Subject Title'),
-                  SizedBox(height: 16), // Increased space
+                  const SizedBox(height: 16), // Increased space
                   CustomWidgets.buildDropdownField(
                       'Semester', _selectedSemester, _semesters, (value) {
                     setState(() {
                       _selectedSemester = value;
                     });
                   }),
-                  SizedBox(height: 16), // Space above the days row
+                  const SizedBox(height: 16), // Space above the days row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -90,27 +92,27 @@ class _AddClassScreenState extends State<AddClassScreen> {
                             });
                           },
                         ),
-                        SizedBox(width: 10), // Space between each DayButton
+                        const SizedBox(width: 10), // Space between each DayButton
                       ],
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                       height: 16), // Space between the days and time fields
                   Row(
                     children: [
                       Expanded(
                           child: CustomWidgets.buildTimeField('Start Time',
                               _startTime, context, true, _selectTime)),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Expanded(
                           child: CustomWidgets.buildTimeField('End Time',
                               _endTime, context, false, _selectTime)),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                       height: 16), // Space between time fields and room field
                   CustomWidgets.buildTextField(_roomController, 'Room'),
-                  SizedBox(height: 20), // Added more gap below the last field
+                  const SizedBox(height: 20), // Added more gap below the last field
                 ],
               ),
             )),
@@ -126,10 +128,10 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
                 ),
-                child: Text(
-                  'Create Task',
+                child: const Text(
+                  'Create Subject',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
