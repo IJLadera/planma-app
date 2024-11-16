@@ -7,7 +7,6 @@ import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class Dashboard extends StatelessWidget {
   final String username;
@@ -70,10 +69,7 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
-                  
                   const SizedBox(height: 15),
-                  MenuButton(
-                  SizedBox(height: 15),
                   MenuButtonWidget(
                     color: Colors.teal,
                     icon: Icons.schedule,
@@ -87,10 +83,7 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
-                    
                   const SizedBox(height: 15),
-                  MenuButton(
-                  SizedBox(height: 15),
                   MenuButtonWidget(
                     color: Colors.orange,
                     icon: Icons.event,
@@ -103,10 +96,7 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
-                    
                   const SizedBox(height: 15),
-                  MenuButton(
-                  SizedBox(height: 15),
                   MenuButtonWidget(
                     color: Colors.redAccent,
                     icon: Icons.accessibility,
@@ -120,8 +110,7 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
-                    
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   MenuButtonWidget(
                     color: Colors.purple,
                     icon: FontAwesomeIcons.flag,
@@ -137,18 +126,16 @@ class Dashboard extends StatelessWidget {
           ],
         ),
       ),
-                  
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        child: Container
-          height: 30.0, // Adjust the height as needed
+        child: Container(
+          height: 60.0, // Adjusted height for better appearance
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(30.0),
               topRight: Radius.circular(30.0),
             ),
           ),
-        
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40.0),
             child: Row(
@@ -160,35 +147,17 @@ class Dashboard extends StatelessWidget {
                     // Navigate to Home page
                   },
                 ),
-                
                 IconButton(
                   icon: const Icon(Icons.calendar_today),
                   onPressed: () {
                     Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CustomCalendar()),
+                      context,
+                      MaterialPageRoute(builder: (context) => CustomCalendar()),
                     );
                   },
                 ),
               ],
             ),
-          height: 60.0, // Adjusted height for better appearance
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: Icon(Icons.home),
-                onPressed: () {
-                  // Navigate to Home page
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.calendar_today),
-                onPressed: () {
-                  // Navigate to Calendar
-                },
-              ),
-            ],
           ),
         ),
       ),
@@ -199,56 +168,7 @@ class Dashboard extends StatelessWidget {
         },
         backgroundColor: Colors.blue,
         shape: const CircleBorder(),
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class MenuButton extends StatelessWidget {
-  final Color color;
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onPressed;
-
-  const MenuButton({super.key, 
-    required this.color,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.all(30),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      onPressed: onPressed,
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 30),
-          const SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(color: Colors.white, fontSize: 18),
-              ),
-              Text(
-                subtitle,
-                style: const TextStyle(color: Colors.white70),
-              ),
-            ],
-          ),
-        ],
+        child: const Icon(Icons.add),
       ),
     );
   }

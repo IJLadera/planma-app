@@ -1,175 +1,174 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/subject/widget/subject_view.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:planma_app/activities/activity_page.dart';
+import 'package:planma_app/core/widget/button_sheet.dart';
+import 'package:planma_app/core/widget/menu_button.dart';
+import 'package:planma_app/event/event_page.dart';
+import 'package:planma_app/subject/subject_page.dart';
+import 'package:planma_app/task/task_page.dart';
+import 'package:planma_app/timetable/calendar.dart';
 
-class ByDateView extends StatelessWidget {
-  final List<Map<String, dynamic>> scheduleData = [
-    {
-      'day': 'Monday',
-      'subjects': [
-        {
-          'code': 'Subject Code 1',
-          'name': 'Subject 1',
-          'time': '9:00 AM - 10:00 AM'
-        },
-        {
-          'code': 'Subject Code 2',
-          'name': 'Subject 2',
-          'time': '10:00 AM - 11:00 AM'
-        },
-      ],
-    },
-    {
-      'day': 'Tuesday',
-      'subjects': [
-        {
-          'code': 'Subject Code 3',
-          'name': 'Subject 3',
-          'time': '9:00 AM - 10:00 AM'
-        },
-      ],
-    },
-    {
-      'day': 'Wednesday',
-      'subjects': [
-        {
-          'code': 'Subject Code 4',
-          'name': 'Subject 4',
-          'time': '9:00 AM - 10:00 AM'
-        },
-        {
-          'code': 'Subject Code 5',
-          'name': 'Subject 5',
-          'time': '10:00 AM - 11:00 AM'
-        },
-      ],
-    },
-    {
-      'day': 'Thursday',
-      'subjects': [
-        {
-          'code': 'Subject Code 6',
-          'name': 'Subject 6',
-          'time': '9:00 AM - 10:00 AM'
-        },
-        {
-          'code': 'Subject Code 7',
-          'name': 'Subject 7',
-          'time': '10:00 AM - 11:00 AM'
-        },
-      ],
-    },
-    {
-      'day': 'Friday',
-      'subjects': [
-        {
-          'code': 'Subject Code 8',
-          'name': 'Subject 8',
-          'time': '9:00 AM - 10:00 AM'
-        },
-        {
-          'code': 'Subject Code 9',
-          'name': 'Subject 9',
-          'time': '10:00 AM - 11:00 AM'
-        },
-      ],
-    },
-    {
-      'day': 'Saturday',
-      'subjects': [
-        {
-          'code': 'Subject Code 10',
-          'name': 'Subject 10',
-          'time': '9:00 AM - 10:00 AM'
-        },
-      ],
-    },
-  ];
+class Dashboard extends StatelessWidget {
+  final String username;
 
-  const ByDateView({super.key});
+  const Dashboard({super.key, required this.username});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Class Schedule'),
+        title: Text(
+          'Hello, $username',
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 2,
+        actions: [
+          IconButton(
+            icon: const CircleAvatar(
+              backgroundColor: Colors.yellow,
+              child: Icon(Icons.person, color: Colors.black),
+            ),
+            onPressed: () {
+              // Navigate to profile
+            },
+          ),
+        ],
       ),
-      body: ListView.builder(
-        itemCount: scheduleData.length,
-        itemBuilder: (context, index) {
-          final daySchedule = scheduleData[index];
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Day title
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text(
-                  daySchedule['day'],
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              // Subjects for each day
-              ...daySchedule['subjects'].map<Widget>((subject) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 4.0),
-                  child: InkWell(
-                    onTap: () {
-                      // Navigate to SubjectDetailScreen with subject details
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Let's make a productive plan together",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Menu',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView(
+                children: [
+                  MenuButtonWidget(
+                    color: Colors.blue,
+                    icon: Icons.check_circle,
+                    title: 'Tasks',
+                    subtitle: '4 tasks',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TasksPage()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  MenuButtonWidget(
+                    color: Colors.teal,
+                    icon: Icons.schedule,
+                    title: 'Class Schedule',
+                    subtitle: '11 classes',
+                    onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              SubjectDetailScreen(subject: subject),
-                        ),
+                            builder: (context) => ClassSchedule()),
                       );
                     },
-                    child: Card(
-                      color: Colors.orange[100],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              subject['code'],
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              subject['name'],
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.grey[700]),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              subject['time'],
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.grey[600]),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   ),
-                );
-              }).toList(),
-            ],
-          );
-        },
+                  const SizedBox(height: 15),
+                  MenuButtonWidget(
+                    color: Colors.orange,
+                    icon: Icons.event,
+                    title: 'Events',
+                    subtitle: '1 event',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => EventsPage()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  MenuButtonWidget(
+                    color: Colors.redAccent,
+                    icon: Icons.accessibility,
+                    title: 'Activities',
+                    subtitle: '1 activity',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ActivitiesScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  MenuButtonWidget(
+                    color: Colors.purple,
+                    icon: FontAwesomeIcons.flag,
+                    title: 'Goals',
+                    subtitle: '1 goal',
+                    onPressed: () {
+                      // Navigate to Goals page
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        child: Container(
+          height: 60.0, // Adjusted height for better appearance
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30.0),
+              topRight: Radius.circular(30.0),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.home),
+                  onPressed: () {
+                    // Navigate to Home page
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CustomCalendar()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action to add a new schedule entry, if needed
-          print("Add new subject");
+          BottomSheetWidget.show(context);
         },
         backgroundColor: Colors.blue,
-        child: const Icon(Icons.add, color: Colors.white),
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add),
       ),
     );
   }

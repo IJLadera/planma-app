@@ -7,32 +7,20 @@ class Timetable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Weekly Timetable'),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 2,
-            child: SfCalendar(
-              view: CalendarView.week,
-              dataSource: ClassScheduleDataSource(getWeeklyClasses()),
-              timeSlotViewSettings: const TimeSlotViewSettings(
-                startHour: 6,
-                endHour: 22,
-              ),
-              onTap: (CalendarTapDetails details) {
-                if (details.appointments != null &&
-                    details.appointments!.isNotEmpty) {
-                  final Appointment appointment =
-                      details.appointments![0];
-                  _showClassDetails(
-                      context, appointment);
-                }
-              },
-            ),
-          ),
-        ],
+      body: SfCalendar(
+        view: CalendarView.week,
+        dataSource: ClassScheduleDataSource(getWeeklyClasses()),
+        timeSlotViewSettings: const TimeSlotViewSettings(
+          startHour: 6,
+          endHour: 22,
+        ),
+        onTap: (CalendarTapDetails details) {
+          if (details.appointments != null &&
+              details.appointments!.isNotEmpty) {
+            final Appointment appointment = details.appointments![0];
+            _showClassDetails(context, appointment);
+          }
+        },
       ),
     );
   }
@@ -48,39 +36,78 @@ class Timetable extends StatelessWidget {
       'Sunday'
     ];
 
-    // Convert to name ang numbered days
-    String dayName =
-        weekDays[appointment.startTime.weekday - 1];
+    String dayName = weekDays[appointment.startTime.weekday - 1];
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled:
-          true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(25.0)),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
-        return Padding(
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.4, // 40% height
+          ),
           padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Class Details',
-                    style: Theme.of(context).textTheme.headlineMedium,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  height: 5,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 16),
-                  Text('Subject: ${appointment.subject}'),
-                  Text(
-                      'Time: ${appointment.startTime.toString().substring(11, 16)} - ${appointment.endTime.toString().substring(11, 16)}'),
-                  Text('Day: $dayName'), // Display the actual day
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Class Details',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.book, color: Colors.blueAccent),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      appointment.subject,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.access_time, color: Colors.green),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '${appointment.startTime.toString().substring(11, 16)} - ${appointment.endTime.toString().substring(11, 16)}',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, color: Colors.orange),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      dayName,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         );
       },
@@ -88,20 +115,18 @@ class Timetable extends StatelessWidget {
   }
 }
 
-// Function to get a list of weekly classes as appointments
 List<Appointment> getWeeklyClasses() {
   final List<Appointment> classes = <Appointment>[];
   final DateTime today = DateTime.now();
 
-  // Example Classes
   classes.addAll(_createRecurringClass(
     subject: 'Subject 1',
     startTime: getNextWeekday(today, DateTime.monday, 9),
     endTime: getNextWeekday(today, DateTime.monday, 11),
-    weeks: 4, // Number of weeks the class will recur
+    weeks: 4,
     color: Colors.blueAccent,
   ));
-  
+
   classes.addAll(_createRecurringClass(
     subject: 'Subject 2',
     startTime: getNextWeekday(today, DateTime.monday, 14),
@@ -118,9 +143,6 @@ List<Appointment> getWeeklyClasses() {
     color: Colors.green,
   ));
 
-  // Continue adding classes as needed...
-  // Temporary until ma settle ang backend ani nga side
-
   return classes;
 }
 
@@ -133,9 +155,10 @@ List<Appointment> _createRecurringClass({
 }) {
   List<Appointment> recurringClasses = [];
   for (int i = 0; i < weeks; i++) {
-    DateTime start = startTime.add(Duration(days: i * 7)); // Add 7 days for each week
+    DateTime start =
+        startTime.add(Duration(days: i * 7)); // Add 7 days for each week
     DateTime end = endTime.add(Duration(days: i * 7));
-    
+
     recurringClasses.add(Appointment(
       startTime: start,
       endTime: end,
@@ -152,7 +175,6 @@ DateTime getNextWeekday(DateTime startDate, int weekday, int hour) {
   return DateTime(nextDate.year, nextDate.month, nextDate.day, hour);
 }
 
-// Custom DataSource class to provide data to the calendar
 class ClassScheduleDataSource extends CalendarDataSource {
   ClassScheduleDataSource(List<Appointment> source) {
     appointments = source;
