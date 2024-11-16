@@ -6,11 +6,13 @@ import 'package:planma_app/core/widget/menu_button.dart';
 import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
+import 'package:planma_app/timetable/calendar.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class Dashboard extends StatelessWidget {
   final String username;
 
-  Dashboard({required this.username});
+  const Dashboard({super.key, required this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +20,7 @@ class Dashboard extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Hello, $username',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -28,7 +30,7 @@ class Dashboard extends StatelessWidget {
         elevation: 2,
         actions: [
           IconButton(
-            icon: CircleAvatar(
+            icon: const CircleAvatar(
               backgroundColor: Colors.yellow,
               child: Icon(Icons.person, color: Colors.black),
             ),
@@ -43,16 +45,16 @@ class Dashboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Let's make a productive plan together",
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Menu',
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView(
                 children: [
@@ -68,6 +70,9 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
+                  
+                  const SizedBox(height: 15),
+                  MenuButton(
                   SizedBox(height: 15),
                   MenuButtonWidget(
                     color: Colors.teal,
@@ -82,6 +87,9 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
+                    
+                  const SizedBox(height: 15),
+                  MenuButton(
                   SizedBox(height: 15),
                   MenuButtonWidget(
                     color: Colors.orange,
@@ -95,6 +103,9 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
+                    
+                  const SizedBox(height: 15),
+                  MenuButton(
                   SizedBox(height: 15),
                   MenuButtonWidget(
                     color: Colors.redAccent,
@@ -109,6 +120,7 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
+                    
                   SizedBox(height: 15),
                   MenuButtonWidget(
                     color: Colors.purple,
@@ -125,9 +137,41 @@ class Dashboard extends StatelessWidget {
           ],
         ),
       ),
+                  
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        child: Container(
+        shape: const CircularNotchedRectangle(),
+        child: Container
+          height: 30.0, // Adjust the height as needed
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30.0),
+              topRight: Radius.circular(30.0),
+            ),
+          ),
+        
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.home),
+                  onPressed: () {
+                    // Navigate to Home page
+                  },
+                ),
+                
+                IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () {
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CustomCalendar()),
+                    );
+                  },
+                ),
+              ],
+            ),
           height: 60.0, // Adjusted height for better appearance
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -153,9 +197,58 @@ class Dashboard extends StatelessWidget {
         onPressed: () {
           BottomSheetWidget.show(context);
         },
-        child: Icon(Icons.add),
         backgroundColor: Colors.blue,
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class MenuButton extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onPressed;
+
+  const MenuButton({super.key, 
+    required this.color,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        padding: const EdgeInsets.all(30),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      onPressed: onPressed,
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 30),
+          const SizedBox(width: 20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              Text(
+                subtitle,
+                style: const TextStyle(color: Colors.white70),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

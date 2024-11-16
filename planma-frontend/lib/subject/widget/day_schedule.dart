@@ -5,7 +5,7 @@ class DaySchedule extends StatelessWidget {
   final String day;
   final bool isByDate;
 
-  DaySchedule({required this.day, required this.isByDate});
+  DaySchedule({super.key, required this.day, required this.isByDate});
 
   // Example list of subjects
   final List<Map<String, dynamic>> subjects = [
@@ -23,9 +23,9 @@ class DaySchedule extends StatelessWidget {
         children: [
           Text(
             day,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           ...subjects.map((subject) => SubjectCard(isByDate: isByDate, subject: subject)).toList(),
         ],
       ),

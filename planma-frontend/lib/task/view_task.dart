@@ -28,14 +28,14 @@ class ViewTask extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.blue),
+          icon: const Icon(Icons.close, color: Colors.blue),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit, color: Colors.blue),
+            icon: const Icon(Icons.edit, color: Colors.blue),
             onPressed: () {
               Navigator.push(
                 context,
@@ -44,7 +44,7 @@ class ViewTask extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(Icons.delete, color: Colors.blue),
+            icon: const Icon(Icons.delete, color: Colors.blue),
             onPressed: () {
               // Navigator.push(
               //   context,
@@ -54,7 +54,7 @@ class ViewTask extends StatelessWidget {
           ),
         ],
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'Task',
           style: TextStyle(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),

@@ -85,11 +85,13 @@ class ByDateView extends StatelessWidget {
     },
   ];
 
+  const ByDateView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Class Schedule'),
+        title: const Text('Class Schedule'),
       ),
       body: ListView.builder(
         itemCount: scheduleData.length,
@@ -104,7 +106,7 @@ class ByDateView extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   daySchedule['day'],
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               // Subjects for each day
@@ -135,16 +137,16 @@ class ByDateView extends StatelessWidget {
                           children: [
                             Text(
                               subject['code'],
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               subject['name'],
                               style: TextStyle(
                                   fontSize: 14, color: Colors.grey[700]),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               subject['time'],
                               style: TextStyle(
@@ -160,6 +162,14 @@ class ByDateView extends StatelessWidget {
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Action to add a new schedule entry, if needed
+          print("Add new subject");
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
