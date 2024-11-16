@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:planma_app/timetable/widget/weeklyschedule.dart'; // wala pa ni na gamit for now
 
 class Timetable extends StatelessWidget {
   const Timetable({super.key});
@@ -49,7 +48,7 @@ class Timetable extends StatelessWidget {
       'Sunday'
     ];
 
-    // Get the weekday name using the weekday number
+    // Convert to name ang numbered days
     String dayName =
         weekDays[appointment.startTime.weekday - 1];
 
@@ -120,6 +119,7 @@ List<Appointment> getWeeklyClasses() {
   ));
 
   // Continue adding classes as needed...
+  // Temporary until ma settle ang backend ani nga side
 
   return classes;
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart'; // Add TableCalendar for monthly view
-import 'package:planma_app/timetable/timetable.dart'; // Import your Timetable view (time-blocking view)
+import 'package:table_calendar/table_calendar.dart'; 
+import 'package:planma_app/timetable/timetable.dart';
 
 class CustomCalendar extends StatefulWidget {
   const CustomCalendar({super.key});
