@@ -24,19 +24,6 @@ class _TaskCardState extends State<TaskCard> {
     });
   }
 
-  Color getPriorityColor(String priority) {
-    switch (priority) {
-      case 'High':
-        return Colors.red; // High priority - red
-      case 'Medium':
-        return Colors.orange; // Medium priority - orange
-      case 'Low':
-        return Colors.green; // Low priority - green
-      default:
-        return Colors.grey; // Default color for no priority
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
