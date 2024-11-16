@@ -55,6 +55,16 @@ INSTALLED_APPS = [
 ]
 
 
+DJOSER = {
+    "SERIALIZERS": {
+        "user_create": "api.serializers.CustomUserCreateSerializer",
+        "user": "api.serializers.CustomUserSerializer",
+        'LOGIN_FIELD': 'email',  # or 'username' depending on your configuration
+        'USER_CREATE_PASSWORD_RETYPE': True,
+    }
+}
+
+
 
 REST_FRAMEWORK={
     'DEFAULT_PERMISSION_CLASSES': (

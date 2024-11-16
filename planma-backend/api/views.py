@@ -45,6 +45,7 @@ class CustomTaskDeleteView(APIView):
         except CustomTask.DoesNotExist:
             return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
+
 class CustomTaskUpdateView(APIView):
     permission_classes = [permissions.AllowAny]
     
