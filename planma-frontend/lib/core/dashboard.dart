@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/activities/activity_page.dart';
 import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Dashboard extends StatelessWidget {
   final String username;
@@ -73,7 +75,8 @@ class Dashboard extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ClassSchedule()),
+                        MaterialPageRoute(
+                            builder: (context) => ClassSchedule()),
                       );
                     },
                   ),
@@ -97,7 +100,21 @@ class Dashboard extends StatelessWidget {
                     title: 'Activities',
                     subtitle: '1 activity',
                     onPressed: () {
-                      // Navigate to Activities page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ActivitiesScreen()),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  // Add the "Goals" button
+                  MenuButton(
+                    color: Colors.purple,
+                    icon: FontAwesomeIcons.flag,
+                    title: 'Goals',
+                    subtitle: '1 goal',
+                    onPressed: () {
+                      // Navigate to Goals page
                     },
                   ),
                 ],
