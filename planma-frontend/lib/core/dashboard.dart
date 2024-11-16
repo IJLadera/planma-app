@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:planma_app/activities/activity_page.dart';
+import 'package:planma_app/core/widget/button_sheet.dart';
+import 'package:planma_app/core/widget/menu_button.dart';
+import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
-import 'package:planma_app/task/by_date_view.dart';
 import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
-import 'package:planma_app/timetable/timetable.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class Dashboard extends StatelessWidget {
@@ -32,7 +35,7 @@ class Dashboard extends StatelessWidget {
               child: Icon(Icons.person, color: Colors.black),
             ),
             onPressed: () {
-              //Navigate to profile
+              // Navigate to profile
             },
           ),
         ],
@@ -55,7 +58,7 @@ class Dashboard extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  MenuButton(
+                  MenuButtonWidget(
                     color: Colors.blue,
                     icon: Icons.check_circle,
                     title: 'Tasks',
@@ -67,8 +70,11 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
+                  
                   const SizedBox(height: 15),
                   MenuButton(
+                  SizedBox(height: 15),
+                  MenuButtonWidget(
                     color: Colors.teal,
                     icon: Icons.schedule,
                     title: 'Class Schedule',
@@ -76,28 +82,53 @@ class Dashboard extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ClassSchedule()),
+                        MaterialPageRoute(
+                            builder: (context) => ClassSchedule()),
                       );
                     },
                   ),
+                    
                   const SizedBox(height: 15),
                   MenuButton(
+                  SizedBox(height: 15),
+                  MenuButtonWidget(
                     color: Colors.orange,
                     icon: Icons.event,
                     title: 'Events',
                     subtitle: '1 event',
                     onPressed: () {
-                      // Navigate to Events page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => EventsPage()),
+                      );
                     },
                   ),
+                    
                   const SizedBox(height: 15),
                   MenuButton(
+                  SizedBox(height: 15),
+                  MenuButtonWidget(
                     color: Colors.redAccent,
                     icon: Icons.accessibility,
                     title: 'Activities',
                     subtitle: '1 activity',
                     onPressed: () {
-                      // Navigate to Activities page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ActivitiesScreen()),
+                      );
+                    },
+                  ),
+                    
+                  SizedBox(height: 15),
+                  MenuButtonWidget(
+                    color: Colors.purple,
+                    icon: FontAwesomeIcons.flag,
+                    title: 'Goals',
+                    subtitle: '1 goal',
+                    onPressed: () {
+                      // Navigate to Goals page
                     },
                   ),
                 ],
@@ -106,9 +137,10 @@ class Dashboard extends StatelessWidget {
           ],
         ),
       ),
+                  
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        child: Container(
+        child: Container
           height: 30.0, // Adjust the height as needed
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
@@ -116,6 +148,7 @@ class Dashboard extends StatelessWidget {
               topRight: Radius.circular(30.0),
             ),
           ),
+        
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40.0),
             child: Row(
@@ -127,6 +160,7 @@ class Dashboard extends StatelessWidget {
                     // Navigate to Home page
                   },
                 ),
+                
                 IconButton(
                   icon: const Icon(Icons.calendar_today),
                   onPressed: () {
@@ -138,13 +172,30 @@ class Dashboard extends StatelessWidget {
                 ),
               ],
             ),
+          height: 60.0, // Adjusted height for better appearance
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: Icon(Icons.home),
+                onPressed: () {
+                  // Navigate to Home page
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.calendar_today),
+                onPressed: () {
+                  // Navigate to Calendar
+                },
+              ),
+            ],
           ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action for floating button
+          BottomSheetWidget.show(context);
         },
         backgroundColor: Colors.blue,
         shape: const CircleBorder(),
