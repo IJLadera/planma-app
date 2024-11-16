@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/by_date_view.dart';
 import 'package:planma_app/task/task_page.dart';
+import 'package:planma_app/providers/user_provider.dart';
 
 class Dashboard extends StatelessWidget {
   final String username;

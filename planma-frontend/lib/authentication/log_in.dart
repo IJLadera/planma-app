@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/authentication/forgot_password.dart';
 import 'package:planma_app/authentication/sign_up.dart';
 import 'package:planma_app/core/dashboard.dart';
+import 'package:planma_app/login_auth.dart';
 
 class LogIn extends StatefulWidget {
   @override
@@ -10,8 +11,10 @@ class LogIn extends StatefulWidget {
 }
 
 class _LogInState extends State<LogIn> {
-  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController userNameController = TextEditingController();
+
 
   bool obscurePassword = true;
 
@@ -19,24 +22,53 @@ class _LogInState extends State<LogIn> {
 
   @override
   void dispose() {
-    userNameController.dispose();
+    emailController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      // Perform login logic (e.g., API call)
+  Future<void> _login() async {
+  if (_formKey.currentState!.validate()) {
+    final email = emailController.text;
+    final password = passwordController.text;
+    
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Logging in...")),
+        SnackBar(content: Text("Email and password cannot be empty")),
+      );
+      return; // Early exit if fields are empty
+    }
+
+    ("Logging in with email: $email and password: $password");
+
+    // Proceed with the login logic
+    final authLogin = AuthLogin();
+    print(email);
+    print(password);
+    final response = await authLogin.logIn(
+      email: email,
+      password: password,
+    );
+    if (response != null && response["error"] == null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Dashboard(username:email),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response?["error"] ?? "Login failed")),
       );
     }
   }
-
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
+        body: Form(
+          key: _formKey,
+          child: Center(
             child: Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: 40.0), // Increased horizontal padding
@@ -53,7 +85,7 @@ class _LogInState extends State<LogIn> {
           ),
           SizedBox(height: 30), // Increased space between elements
           TextFormField(
-            controller: userNameController,
+            controller: emailController,
             decoration: InputDecoration(
               labelText: 'Username',
               prefixIcon: Icon(Icons.person, size: 30), // Increased icon size
@@ -110,13 +142,17 @@ class _LogInState extends State<LogIn> {
           ),
           SizedBox(height: 30), // Increased space
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {              
+              if (_formKey.currentState!.validate()) {
+                          // If validation is successful, navigate to LogIn screen
+                 await _login();
               Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        Dashboard(username: userNameController.text)),
+                        Dashboard(username: emailController.text)),
               );
+              }
             },
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(
@@ -160,6 +196,6 @@ class _LogInState extends State<LogIn> {
           ),
         ],
       ),
-    )));
+    ))),);
   }
 }
