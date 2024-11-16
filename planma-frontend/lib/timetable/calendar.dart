@@ -119,7 +119,7 @@ class _CalendarViewState extends State<CustomCalendar> {
                         shape: BoxShape.circle,
                       ),
                       selectedDecoration: BoxDecoration(
-                        color: Colors.deepOrange,
+                        color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
                     ),
