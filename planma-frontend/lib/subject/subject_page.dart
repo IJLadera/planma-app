@@ -4,6 +4,8 @@ import 'package:planma_app/task/widget/search_bar.dart';
 import 'package:planma_app/subject/widget/day_schedule.dart'; // Import the new file
 
 class ClassSchedule extends StatefulWidget {
+  const ClassSchedule({super.key});
+
   @override
   _ClassScheduleState createState() => _ClassScheduleState();
 }
@@ -25,7 +27,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Class Schedule'),
+        title: const Text('Class Schedule'),
       ),
       body: Column(
         children: [
@@ -34,21 +36,21 @@ class _ClassScheduleState extends State<ClassSchedule> {
             child: Row(
               children: [
                 Expanded(child: CustomSearchBar()),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.filter_list, color: Colors.black),
+                  icon: const Icon(Icons.filter_list, color: Colors.black),
                   onSelected: (value) {
                     setState(() {
                       isByDate = value == 'By Date';
                     });
                   },
                   itemBuilder: (context) => [
-                    PopupMenuItem<String>(
+                    const PopupMenuItem<String>(
                       value: 'By Date',
                       child: Text('By Date',
                           style: TextStyle(color: Colors.black)),
                     ),
-                    PopupMenuItem<String>(
+                    const PopupMenuItem<String>(
                       value: 'By Subject',
                       child: Text('By Subject',
                           style: TextStyle(color: Colors.black)),
@@ -81,7 +83,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
           );
         },
         backgroundColor: Colors.blue,
-        child: Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

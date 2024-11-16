@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 
 class EditClass extends StatefulWidget {
+  const EditClass({super.key});
+
   @override
   _EditClass createState() => _EditClass();
 }
@@ -14,8 +16,8 @@ class _EditClass extends State<EditClass> {
   String? _selectedSemester;
   final List<String> _semesters = ['1', '2', 'Summer'];
   final Set<String> _selectedDays = {};
-  TimeOfDay _startTime = TimeOfDay(hour: 7, minute: 0);
-  TimeOfDay _endTime = TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay _startTime = const TimeOfDay(hour: 7, minute: 0);
+  TimeOfDay _endTime = const TimeOfDay(hour: 8, minute: 0);
 
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -37,14 +39,14 @@ class _EditClass extends State<EditClass> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'Edit Class',
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -59,17 +61,17 @@ class _EditClass extends State<EditClass> {
                 children: [
                   CustomWidgets.buildTextField(
                       _subjectCodeController, 'Subject Code'),
-                  SizedBox(height: 16), // Increased space
+                  const SizedBox(height: 16), // Increased space
                   CustomWidgets.buildTextField(
                       _subjectTitleController, 'Subject Title'),
-                  SizedBox(height: 16), // Increased space
+                  const SizedBox(height: 16), // Increased space
                   CustomWidgets.buildDropdownField(
                       'Semester', _selectedSemester, _semesters, (value) {
                     setState(() {
                       _selectedSemester = value;
                     });
                   }),
-                  SizedBox(height: 16), // Space above the days row
+                  const SizedBox(height: 16), // Space above the days row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -95,27 +97,27 @@ class _EditClass extends State<EditClass> {
                             });
                           },
                         ),
-                        SizedBox(width: 10), // Space between each DayButton
+                        const SizedBox(width: 10), // Space between each DayButton
                       ],
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                       height: 16), // Space between the days and time fields
                   Row(
                     children: [
                       Expanded(
                           child: CustomWidgets.buildTimeField('Start Time',
                               _startTime, context, true, _selectTime)),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Expanded(
                           child: CustomWidgets.buildTimeField('End Time',
                               _endTime, context, false, _selectTime)),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                       height: 16), // Space between time fields and room field
                   CustomWidgets.buildTextField(_roomController, 'Room'),
-                  SizedBox(height: 20), // Added more gap below the last field
+                  const SizedBox(height: 20), // Added more gap below the last field
                 ],
               ),
             )),
@@ -131,9 +133,9 @@ class _EditClass extends State<EditClass> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
                 ),
-                child: Text(
+                child: const Text(
                   'Edit Class',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),

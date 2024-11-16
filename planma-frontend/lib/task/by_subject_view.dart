@@ -4,6 +4,8 @@ import 'package:planma_app/task/widget/task_card.dart';
 import 'package:planma_app/task/widget/task_section.dart';
 
 class BySubjectView extends StatelessWidget {
+  const BySubjectView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -16,7 +18,7 @@ class BySubjectView extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ViewTask(
+                    builder: (context) => const ViewTask(
                       taskName: 'Task Name 1',
                       description: 'Description for Task 1',
                       date: '11 January 2024',
@@ -43,7 +45,7 @@ class BySubjectView extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ViewTask(
+                    builder: (context) => const ViewTask(
                       taskName: 'Task Name 2',
                       description: 'Description for Task 2',
                       date: '12 January 2024',

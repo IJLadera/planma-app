@@ -5,7 +5,7 @@ class TaskCard extends StatefulWidget {
   final String subject;
   final String duration;
 
-  TaskCard({
+  const TaskCard({super.key, 
     required this.taskName,
     required this.subject,
     required this.duration,
@@ -40,8 +40,8 @@ class _TaskCardState extends State<TaskCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
-      padding: EdgeInsets.all(10),
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.blue[100],
         borderRadius: BorderRadius.circular(10),
@@ -63,7 +63,7 @@ class _TaskCardState extends State<TaskCard> {
                         color: Colors.black26), // Border for visual clarity
                   ),
                   child: isChecked
-                      ? Icon(
+                      ? const Icon(
                           Icons.check,
                           size: 16,
                           color: Colors.white,
@@ -71,13 +71,13 @@ class _TaskCardState extends State<TaskCard> {
                       : null,
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     widget.taskName,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('${widget.subject} (${widget.duration})'),
                 ],

@@ -28,7 +28,7 @@ class SubjectDetailRow extends StatelessWidget {
             flex: 5,
             child: Text(
               detail,
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
             ),
           ),
         ],

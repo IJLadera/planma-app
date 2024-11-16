@@ -15,7 +15,7 @@ class CustomWidgets {
         decoration: InputDecoration(
           labelText: labelText,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.all(16),
         ),
       ),
     );
@@ -32,7 +32,7 @@ class CustomWidgets {
       child: ListTile(
         title: Text(
             '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}'),
-        trailing: Icon(Icons.calendar_today),
+        trailing: const Icon(Icons.calendar_today),
         onTap: () => selectDate(context, isScheduledDate),
       ),
     );
@@ -52,10 +52,10 @@ class CustomWidgets {
           child: TextFormField(
             decoration: InputDecoration(
               labelText: label,
-              suffixIcon: Icon(Icons.access_time),
+              suffixIcon: const Icon(Icons.access_time),
               hintText: time != null ? time.format(context) : 'Select Time',
               border: InputBorder.none,
-              contentPadding: EdgeInsets.all(16),
+              contentPadding: const EdgeInsets.all(16),
             ),
           ),
         ),
@@ -75,7 +75,7 @@ class CustomWidgets {
         decoration: InputDecoration(
           labelText: label,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.all(16),
         ),
         items: items.map((item) {
           return DropdownMenuItem<String>(
