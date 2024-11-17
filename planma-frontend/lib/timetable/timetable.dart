@@ -10,9 +10,9 @@ class Timetable extends StatelessWidget {
       body: SfCalendar(
         view: CalendarView.week,
         dataSource: ClassScheduleDataSource(getWeeklyClasses()),
-        timeSlotViewSettings: const TimeSlotViewSettings(
+        timeSlotViewSettings: const TimeSlotViewSettings( // This is where you edit if the start and end time sa table
           startHour: 6,
-          endHour: 22,
+          endHour: 1,
         ),
         onTap: (CalendarTapDetails details) {
           if (details.appointments != null &&

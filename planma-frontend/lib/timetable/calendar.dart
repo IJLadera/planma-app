@@ -115,11 +115,11 @@ class _CalendarViewState extends State<CustomCalendar> {
                     },
                     calendarStyle: CalendarStyle(
                       todayDecoration: BoxDecoration(
-                        color: Colors.blueAccent,
+                        color: Color(0xffC0D7F3),
                         shape: BoxShape.circle,
                       ),
                       selectedDecoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: Color(0xff173F70),
                         shape: BoxShape.circle,
                       ),
                     ),
