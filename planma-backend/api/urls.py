@@ -29,4 +29,24 @@ urlpatterns = [
     path('actlog/<uuid:pk>/', LogActivityDetailView.as_view(), name='actlog-detail'),
     path('deleteactlog/<int:pk>/', LogActivityDeleteView.as_view(), name='actlog-delete'),
     path('updateactlog/<int:pk>/',LogActivityUpdateView.as_view(), name='updateactlog' ),
+    #userpref
+    path('createuserpref/', UserPrefListCreateView.as_view(), name='userpref-list-create'),
+    path('userpref/<uuid:pk>/', UserPrefDetailView.as_view(), name='userpref-detail'),
+    path('deleteuserpref/<int:pk>/', UserPrefDeleteView.as_view(), name='userpref-delete'),
+    path('updateuserpref/<int:pk>/',UserPrefUpdateView.as_view(), name='updateuserpref' ),
+    #class
+    path('createclass/', CustomClassListCreateView.as_view(), name='class-list-create'),
+    path('classes/<uuid:pk>/', CustomClassDetailView.as_view(), name='class-detail'),
+    path('deleteclass/<int:pk>/', CustomClassDeleteView.as_view(), name='class-delete'),
+    path('updateclass/<int:pk>/',CustomClassUpdateView.as_view(), name='updateclass' ),
+    #excused class
+    path('createclassexc/', ExcClassListCreateView.as_view(), name='excclass-list-create'),
+    path('userclassexc/<uuid:pk>/', ExcClassDetailView.as_view(), name='excclass-detail'),
+    path('deleteclassexc/<int:pk>/', ExcClassDeleteView.as_view(), name='excclass-delete'),
+    path('updateclassexc/<int:pk>/',ExcClassUpdateView.as_view(), name='updateexcclass' ),
+    #attended class
+    path('createclassatt/', AttClassListCreateView.as_view(), name='attclass-list-create'),
+    path('userclassatt/<uuid:pk>/', AttClassDetailView.as_view(), name='attclass-detail'),
+    path('deleteclassatt/<int:pk>/', AttClassDeleteView.as_view(), name='attclass-delete'),
+    path('updateclassatt/<int:pk>/',AttClassUpdateView.as_view(), name='updateattclass' ),
 ]
