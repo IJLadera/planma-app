@@ -30,7 +30,7 @@ class _EditActivity extends State<EditActivity> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context, DateTime? selectedDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -40,6 +40,7 @@ class _EditActivity extends State<EditActivity> {
     if (picked != null) {
       setState(() {
         _date = picked;
+        print("Selected date: $_date");
       });
     }
   }
@@ -72,7 +73,8 @@ class _EditActivity extends State<EditActivity> {
                       height: 16), // Space between time fields and room field
                   SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
-                      'Date', _date, context, false, _selectDate),
+                    'Date', _date, context, _selectDate, // No `isScheduledDate`
+                  ),
                   SizedBox(height: 12), // Added gap
                   Row(
                     children: [
