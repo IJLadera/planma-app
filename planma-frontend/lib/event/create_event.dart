@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/event/widget/widget.dart';
+import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 
 class AddEventState extends StatefulWidget {
   @override
@@ -43,6 +44,55 @@ class _AddEventState extends State<AddEventState> {
       setState(() {
         controller.text = picked.format(context);
       });
+    }
+  }
+
+
+
+  Future<void> _createEvent() async {
+    if (_eventCodeController.text.isEmpty ||
+        _eventTitleController.text.isEmpty ||
+        _eventLocationController.text.isEmpty ||
+        _scheduledDate == null ||
+        _startTimeController.text.isEmpty ||
+        _endTimeController.text.isEmpty ||
+        _selectedEventType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill out all fields')),
+      );
+      return;
+    }
+    final eventService = EventsCreate();
+    // Collect data from UI inputs
+    final String eventName = _eventCodeController.text;
+    final String eventDesc = _eventTitleController.text;
+    final String location = _eventLocationController.text;
+    final String scheduledDate = _scheduledDate!.toIso8601String();
+    final String startTime = _startTimeController.text;
+    final String endTime = _endTimeController.text;
+    final String eventType = _selectedEventType!;
+
+    // Call the service
+    final result = await eventService.eventCT(
+      eventname: eventName,
+      eventdesc: eventDesc,
+      location: location,
+      scheduledate: scheduledDate,
+      starttime: startTime,
+      endtime: endTime,
+      eventtype: eventType,
+    );
+
+    // Handle response
+    if (result != null && result.containsKey('error')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['error'])),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Event created successfully!')),
+      );
+      Navigator.of(context).pop(); // Navigate back on success
     }
   }
 
@@ -114,9 +164,8 @@ class _AddEventState extends State<AddEventState> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: _createEvent, 
                   // Create task action
-                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue.shade700,
                   shape: RoundedRectangleBorder(

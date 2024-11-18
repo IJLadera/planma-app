@@ -1,9 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/authentication/forgot_password.dart';
 import 'package:planma_app/authentication/sign_up.dart';
 import 'package:planma_app/core/dashboard.dart';
-import 'package:planma_app/login_auth.dart';
+import 'package:planma_app/Front%20&%20back%20end%20connections/login_auth.dart';
+import 'package:planma_app/main.dart';
+import 'package:provider/provider.dart';
 
 class LogIn extends StatefulWidget {
   const LogIn({super.key});
@@ -29,7 +32,7 @@ class _LogInState extends State<LogIn> {
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _login(BuildContext context) async {
   if (_formKey.currentState!.validate()) {
     final email = emailController.text;
     final password = passwordController.text;
@@ -45,22 +48,30 @@ class _LogInState extends State<LogIn> {
 
     // Proceed with the login logic
     final authLogin = AuthLogin();
-    print(email);
-    print(password);
+    // print(email);
+    // print(password);
     final response = await authLogin.logIn(
       email: email,
       password: password,
     );
     if (response != null && response["error"] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Welcome User")),
+      );
+      context.read<UserProvider>().init(
+        userName: email,
+        accessToken: response['access'],
+        refreshToken: response['refresh']);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => Dashboard(username:email),
+          builder: (context) => Dashboard(),
         ),
       );
+      
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Logging in...")),
+        SnackBar(content: Text("Wrong Credentials")),
       );
     }
   }
@@ -147,13 +158,8 @@ class _LogInState extends State<LogIn> {
             onPressed: () async {              
               if (_formKey.currentState!.validate()) {
                           // If validation is successful, navigate to LogIn screen
-                 await _login();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        Dashboard(username: emailController.text)),
-              );
+                 await _login(context);
+              
               }
             },
             style: ElevatedButton.styleFrom(

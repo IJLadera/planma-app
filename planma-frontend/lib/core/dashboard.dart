@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/activities/activity_page.dart';
+import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/core/widget/button_sheet.dart';
 import 'package:planma_app/core/widget/menu_button.dart';
 import 'package:planma_app/event/event_page.dart';
@@ -8,18 +10,19 @@ import 'package:planma_app/goals/goal_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
+import 'package:provider/provider.dart';
 
 class Dashboard extends StatelessWidget {
-  final String username;
+  
 
-  const Dashboard({super.key, required this.username});
+  const Dashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Hello, $username',
+          'Hello, ${context.watch<UserProvider>().userName}',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
