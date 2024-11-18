@@ -371,10 +371,15 @@ class CustomClassDetailView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self,request,pk):
+        #Subject Code
+        subject = CustomSub.objects.get(subject_code = pk)
+        cusclass = CustomClass.objects.filter(subject_code = subject)
+        serializer = CustomClassSerializer(cusclass, many = True)
         
+        #Student ID
         user = CustomUser.objects.get(student_id = pk)
         cusclass = CustomClass.objects.filter(student_id = user)
-        serializer = UserPrefSerializer(cusclass, many = True)
+        serializer = CustomClassSerializer(cusclass, many = True)
         
         return Response(serializer.data)
     
@@ -390,7 +395,7 @@ class CustomClassDeleteView(APIView):
             deletecusclass.delete()
             
             return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except UserPref.DoesNotExist:
+        except CustomClass.DoesNotExist:
             return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
 class CustomClassUpdateView(APIView):
@@ -408,16 +413,15 @@ class CustomClassUpdateView(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+# Subject
 
-
-# Class Excused
-
-class ExcClassListCreateView(APIView):
+class CustomSubjectListCreateView(APIView):
     
     permission_classes = [permissions.AllowAny]
     def post(self, request):
         data = request.data
-        serializer = ExcusedClassSerializer(data=data)
+        serializer = CustomSubSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({**serializer.data}, status=status.HTTP_200_OK)
@@ -425,50 +429,49 @@ class ExcClassListCreateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         # Set the student_id field to the authenticated user on creation
         
-class ExcClassDetailView(APIView):
+class CustomSubjectDetailView(APIView):
    
     permission_classes = [permissions.AllowAny]
 
     def get(self,request,pk):
         
-        cusclass = CustomClass.objects.get(classsched_id = pk)
-        excclass = ExcusedClass.objects.filter(classsched_id = cusclass)
-        serializer = ExcusedClassSerializer(excclass, many = True)
+        user = CustomUser.objects.get(student_id = pk)
+        subject = CustomClass.objects.filter(student_id = user)
+        serializer = CustomSubSerializer(subject, many = True)
         
         return Response(serializer.data)
     
-class ExcClassDeleteView(APIView):
+class CustomSubjectDeleteView(APIView):
 
     permission_classes = [permissions.AllowAny]
     
     def delete(self,request,pk):
         try:
             
-            deleteexcclass = ExcusedClass.objects.get(exc_class_id = pk)
+            deletesub = CustomSub.objects.get(subject_code = pk)
             
-            deleteexcclass.delete()
+            deletesub.delete()
             
             return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except ExcusedClass.DoesNotExist:
+        except CustomSub.DoesNotExist:
             return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class ExcClassUpdateView(APIView):
+class CustomSubjectUpdateView(APIView):
 
     permission_classes = [permissions.AllowAny]
     
     def put(self, request, pk):
         data= request.data
-        classid= ExcusedClass.objects.get(exc_class_id = pk)
+        subid= CustomSub.objects.get(subject_code = pk)
         
-        serializer = ExcusedClassSerializer(instance=classid, data=data)
+        serializer = CustomSubSerializer(instance=subid, data=data)
         if serializer.is_valid():
             
             serializer.save()
             return Response(serializer.data)
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
-
+     
 # Class Attended
 
 class AttClassListCreateView(APIView):
@@ -520,6 +523,181 @@ class AttClassUpdateView(APIView):
         classid= AttendedClass.objects.get(att_class_id = pk)
         
         serializer = AttendedClassSerializer(instance=classid, data=data)
+        if serializer.is_valid():
+            
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+# Goals
+
+class GoalsListCreateView(APIView):
+    
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        data = request.data
+        serializer = GoalsSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({**serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        # Set the student_id field to the authenticated user on creation
+        
+class GoalsDetailView(APIView):
+   
+    permission_classes = [permissions.AllowAny]
+
+    def get(self,request,pk):
+        
+        user = CustomUser.objects.get(student_id = pk)
+        goals = Goals.objects.filter(student_id = user)
+        serializer = GoalsSerializer(goals, many = True)
+        
+        return Response(serializer.data)
+    
+class GoalsDeleteView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def delete(self,request,pk):
+        try:
+            
+            deletegoals = Goals.objects.get(goal_id = pk)
+            
+            deletegoals.delete()
+            
+            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
+        except Goals.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class GoalsUpdateView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def put(self, request, pk):
+        data= request.data
+        goalid= Goals.objects.get(goal_id = pk)
+        
+        serializer = GoalsSerializer(instance=goalid, data=data)
+        if serializer.is_valid():
+            
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+# Goal Progress
+
+class GoalProgressListCreateView(APIView):
+    
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        data = request.data
+        serializer = GoalProgressSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({**serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        # Set the student_id field to the authenticated user on creation
+        
+class GoalProgressDetailView(APIView):
+   
+    permission_classes = [permissions.AllowAny]
+
+    def get(self,request,pk):
+        
+        goal = Goals.objects.get(goal_id = pk)
+        goalprog = GoalProgress.objects.filter(student_id = goal)
+        serializer = GoalProgressSerializer(goalprog, many = True)
+        
+        return Response(serializer.data)
+    
+class GoalProgressDeleteView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def delete(self,request,pk):
+        try:
+            
+            deletegoals = GoalProgress.objects.get(goalprogress_id = pk)
+            
+            deletegoals.delete()
+            
+            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
+        except GoalProgress.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class GoalProgressUpdateView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def put(self, request, pk):
+        data= request.data
+        goalid= GoalProgress.objects.get(goalprogress_id = pk)
+        
+        serializer = GoalProgressSerializer(instance=goalid, data=data)
+        if serializer.is_valid():
+            
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+# Goal Progress
+
+class GoalScheduleListCreateView(APIView):
+    
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        data = request.data
+        serializer = GoalScheduleSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({**serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        # Set the student_id field to the authenticated user on creation
+        
+class GoalScheduleDetailView(APIView):
+   
+    permission_classes = [permissions.AllowAny]
+
+    def get(self,request,pk):
+        
+        goal = Goals.objects.get(goal_id = pk)
+        goalsched = GoalSchedule.objects.filter(student_id = goal)
+        serializer = GoalProgressSerializer(goalsched, many = True)
+        
+        return Response(serializer.data)
+    
+class GoalScheduleDeleteView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def delete(self,request,pk):
+        try:
+            
+            deletegoals = GoalSchedule.objects.get(goalschedule_id = pk)
+            
+            deletegoals.delete()
+            
+            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
+        except GoalProgress.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class GoalScheduleUpdateView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def put(self, request, pk):
+        data= request.data
+        goalid= GoalSchedule.objects.get(goalprogress_id = pk)
+        
+        serializer = GoalScheduleSerializer(instance=goalid, data=data)
         if serializer.is_valid():
             
             serializer.save()
