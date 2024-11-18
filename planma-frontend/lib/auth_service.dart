@@ -12,7 +12,7 @@ class AuthService {
     required String password,
   }) async {
     final url = "${baseUrl}djoser/users/";
-    return null;
+
 
       try {
         final response = await http.post(
