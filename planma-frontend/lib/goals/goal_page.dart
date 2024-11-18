@@ -26,8 +26,8 @@ class _GoalPageState extends State<GoalPage> {
 
   void _filterGoals(String query) {
     final results = goals
-        .where(
-            (goal) => goal['name'].toLowerCase().contains(query.toLowerCase()))
+        .where((goal) =>
+            goal['name'].toLowerCase().contains(query.toLowerCase()))
         .toList();
     setState(() {
       filteredGoals = results;
@@ -102,7 +102,7 @@ class _GoalPageState extends State<GoalPage> {
           );
         },
         child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF173F70),
       ),
     );
   }

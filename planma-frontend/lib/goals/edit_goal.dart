@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/goals/widget/widget.dart'; // Ensure this file contains the CustomWidgets class
 
-class AddGoalScreen extends StatefulWidget {
+class EditGoal extends StatefulWidget {
   @override
-  _AddGoalScreenState createState() => _AddGoalScreenState();
+  _EditGoal createState() => _EditGoal();
 }
 
-class _AddGoalScreenState extends State<AddGoalScreen> {
+class _EditGoal extends State<EditGoal> {
   final _goalCodeController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -117,7 +117,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Goal Sessions'),
+        title: const Text('Edit Goal Sessions'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -165,8 +165,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                       ),
                     ],
                   ),
-                  const Divider(
-                      thickness: 1, height: 16),
+                  const Divider(thickness: 1, height: 16),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
                       'Goal Type', _selectedGoalType, _goalType, (value) {
@@ -207,7 +206,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                 ),
               ),
               child: const Text(
-                'Create Goal Session',
+                'Edit Goal Session',
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),

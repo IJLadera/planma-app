@@ -82,7 +82,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
             MaterialPageRoute(builder: (context) => AddClassScreen()),
           );
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF173F70),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

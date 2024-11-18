@@ -187,7 +187,7 @@ class _LogInState extends State<LogIn> {
                 TextSpan(
                   text: 'Sign Up',
                   style: TextStyle(
-                    color: Colors.blue[900],
+                    color: Color(0xFF173F70),
                     decoration: TextDecoration.underline,
                     fontSize: 18, // Increased font size
                   ),

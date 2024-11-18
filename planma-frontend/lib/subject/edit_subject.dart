@@ -166,7 +166,7 @@ class _EditClassState extends State<EditClass> {
             child: ElevatedButton(
               onPressed: _handleEditClass,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade700,
+                backgroundColor: Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
