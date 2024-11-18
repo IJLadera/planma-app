@@ -26,3 +26,70 @@ class CustomTaskSerializer(serializers.ModelSerializer):
             'status', 'subject_code', 'student_id'
         ]
         # read_only_fields = ['task_id', 'student_id']
+
+class CustomEventSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = CustomEvents
+        fields = ['event_id', 'event_name', 'event_desc', 
+                  'location', 'scheduled_date', 'scheduled_start_time', 
+                  'scheduled_end_time', 'event_type', 'student_id']
+        
+class ListEventSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = CustomEvents
+        fields = ['event_id', 'event_name', 'scheduled_start_time', 
+                  'scheduled_end_time']
+        
+class AttendedEventSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = AttendedEvents
+        fields = ['att_events_id','event_id', 'date', 'has_attended']
+
+class CustomActivitySerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = CustomActivity
+        fields = ['activity_id', 'activity_name', 'activity_desc', 
+                  'scheduled_date', 'scheduled_start_time', 
+                  'scheduled_end_time', 'status', 'student_id']
+        
+class ListActivitySerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = CustomEvents
+        fields = ['activity_id', 'activity_name', 'scheduled_start_time', 
+                  'scheduled_end_time']
+        
+class ActivityLogSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = ActivityLog
+        fields = ['act_log_id', 'activity_id', 'start_time', 
+                  'end_time', 'duration', 'date_logged']
+
+
+class UserPrefSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = UserPref
+        fields = ['pref_id', 'usual_sleep_time', 'usual_wake_time', 
+                  'notification_enabled', 'reminder_offset_time', 
+                  'student_id']
+        
+
+class CustomClassSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = CustomClass
+        fields = ['classsched_id', 'subject_code', 'day_of_week',
+                  'scheduled_start_time', 'scheduled_end_time',
+                  'room', 'student_id']
+
+
+class ExcusedClassSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = ExcusedClass
+        fields = ['exec_class_id', 'classsched_id', 'date',
+                  'isExcused']
+        
+
+class AttendedClassSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = AttendedClass
+        fields = ['att_class_id', 'classsched_id', 'date',
+                  'hasAttended']
