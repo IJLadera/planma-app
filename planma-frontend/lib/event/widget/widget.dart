@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -45,38 +46,29 @@ class CustomWidgets {
         decoration: InputDecoration(
           labelText: labelText,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding: EdgeInsets.all(16),
         ),
       ),
     );
   }
 
-  static Widget buildDateTile(
-    String label,
-    DateTime? date,
-    BuildContext context,
-    Function(BuildContext, DateTime?) selectDate,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
-        borderRadius: BorderRadius.circular(30),
+  // Method to build a DateTile (with tap to select date)
+  static Widget buildDateTile(String label, DateTime? date, BuildContext context,
+    Function selectDate) {
+  return Container(
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 138, 172, 207),
+      borderRadius: BorderRadius.circular(30),
+    ),
+    child: ListTile(
+      title: Text(
+        '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
       ),
-      child: ListTile(
-        title: Text(
-
-          '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
-          style: TextStyle(fontSize: 16),
-        ),
-        trailing: const Icon(Icons.calendar_today),
-        onTap: () =>
-            selectDate(context, date), // Pass the current date for context
-            '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}'),
-        trailing: const Icon(Icons.calendar_today),
-        onTap: () => selectDate(context, isScheduledDate),
-      ),
-    );
-  }
+      trailing: Icon(Icons.calendar_today),
+      onTap: () => selectDate(context), // Remove isScheduledDate
+    ),
+  );
+}
 
   // Method to build a time field with gesture and custom design
   static Widget buildTimeField(String label, TimeOfDay? time,
@@ -92,10 +84,10 @@ class CustomWidgets {
           child: TextFormField(
             decoration: InputDecoration(
               labelText: label,
-              suffixIcon: const Icon(Icons.access_time),
+              suffixIcon: Icon(Icons.access_time),
               hintText: time != null ? time.format(context) : 'Select Time',
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.all(16),
+              contentPadding: EdgeInsets.all(16),
             ),
           ),
         ),
@@ -121,18 +113,18 @@ class CustomWidgets {
           value: value,
           decoration: InputDecoration(
             labelText: label,
-            labelStyle: const TextStyle(
+            labelStyle: TextStyle(
               color: Colors.black,
             ),
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.all(16),
+            contentPadding: EdgeInsets.all(16),
           ),
           items: items.map((item) {
             return DropdownMenuItem<String>(
               value: item,
               child: Text(
                 item,
-                style: const TextStyle(fontSize: 14, color: Colors.black),
+                style: TextStyle(fontSize: 14, color: Colors.black),
               ),
             );
           }).toList(),

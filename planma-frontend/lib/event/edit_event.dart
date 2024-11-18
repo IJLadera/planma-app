@@ -33,19 +33,21 @@ class _EditEvent extends State<EditEvent> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      setState(() {
-        _date = picked;
-      });
-    }
+  Future<void> _selectDate(BuildContext context, DateTime? selectedDate) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2020),
+    lastDate: DateTime(2101),
+  );
+  if (picked != null) {
+    setState(() {
+      _date = picked;
+      print("Selected date: $_date");
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +81,8 @@ class _EditEvent extends State<EditEvent> {
 
                   SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
-                      'Date', _date, context, false, _selectDate),
+                    'Date', _date, context, _selectDate, // No `isScheduledDate`
+                  ),
                   SizedBox(height: 12), // Added gap
                   Row(
                     children: [
