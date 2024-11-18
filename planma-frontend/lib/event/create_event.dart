@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/subject/widget/widget.dart';
+import 'package:planma_app/event/widget/widget.dart';
 
 class AddEventState extends StatefulWidget {
   @override
@@ -10,40 +10,38 @@ class _AddEventState extends State<AddEventState> {
   final _eventCodeController = TextEditingController();
   final _eventTitleController = TextEditingController();
   final _eventLocationController = TextEditingController();
+  final TextEditingController _startTimeController = TextEditingController();
+  final TextEditingController _endTimeController = TextEditingController();
 
-  TimeOfDay? _startTime;
-  TimeOfDay? _endTime;
-  DateTime? _date;
+  DateTime? _scheduledDate;
+
   String? _selectedEventType;
   final List<String> _semesters = ['Academic', 'Personal'];
 
-  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+  void _selectDate(BuildContext context, DateTime? initialDate) async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _scheduledDate = pickedDate;
+      });
+    }
+  }
+
+  Future<void> _selectTime(
+      BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (picked != null) {
       setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-      });
-    }
-  }
-
-  Future<void> _selectDate(BuildContext context, DateTime? selectedDate) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      setState(() {
-        _date = picked;
-        print("Selected date: $_date");
+        controller.text = picked.format(context);
       });
     }
   }
@@ -76,22 +74,30 @@ class _AddEventState extends State<AddEventState> {
                       height: 16), // Space between time fields and room field
                   CustomWidgets.buildTextField(
                       _eventLocationController, 'Location'),
-                  SizedBox(height: 20), // Added more gap below the last field
-
-                  SizedBox(height: 12),
-                  CustomWidgets.buildDateTile(
-                    'Date', _date, context, _selectDate, // No `isScheduledDate`
-                  ),
-                  SizedBox(height: 12), // Added gap
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
+                      context, true, _selectDate),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
-                          child: CustomWidgets.buildTimeField('Start Time',
-                              _startTime, context, true, _selectTime)),
-                      SizedBox(width: 10),
+                        child: CustomWidgets.buildTimeField(
+                          'Start Time',
+                          _startTimeController,
+                          context,
+                          (context) =>
+                              _selectTime(context, _startTimeController),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                          child: CustomWidgets.buildTimeField('End Time',
-                              _endTime, context, false, _selectTime)),
+                        child: CustomWidgets.buildTimeField(
+                          'End Time',
+                          _endTimeController,
+                          context,
+                          (context) => _selectTime(context, _endTimeController),
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 12), SizedBox(height: 16), // Increased space

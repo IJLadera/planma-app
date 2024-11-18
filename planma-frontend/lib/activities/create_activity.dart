@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/subject/widget/widget.dart';
+import 'package:planma_app/activities/widget/widget.dart';
 
 class AddActivityState extends StatefulWidget {
   @override
@@ -9,42 +9,38 @@ class AddActivityState extends StatefulWidget {
 class _AddActivityState extends State<AddActivityState> {
   final _activityNameController = TextEditingController();
   final _activityDescriptionController = TextEditingController();
+  final TextEditingController _startTimeController = TextEditingController();
+  final TextEditingController _endTimeController = TextEditingController();
 
-  TimeOfDay? _startTime;
-  TimeOfDay? _endTime;
-  DateTime? _date;
+  DateTime? _scheduledDate;
 
-  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+  void _selectDate(BuildContext context, DateTime? initialDate) async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _scheduledDate = pickedDate;
+      });
+    }
+  }
+
+  Future<void> _selectTime(
+      BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (picked != null) {
       setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
+        controller.text = picked.format(context);
       });
     }
   }
-
-  Future<void> _selectDate(BuildContext context, DateTime? selectedDate) async {
-  final DateTime? picked = await showDatePicker(
-    context: context,
-    initialDate: DateTime.now(),
-    firstDate: DateTime(2020),
-    lastDate: DateTime(2101),
-  );
-  if (picked != null) {
-    setState(() {
-      _date = picked;
-      print("Selected date: $_date");
-    });
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -73,19 +69,29 @@ class _AddActivityState extends State<AddActivityState> {
                   SizedBox(
                       height: 16), // Space between time fields and room field
                   SizedBox(height: 12),
-                  CustomWidgets.buildDateTile(
-                    'Date', _date, context, _selectDate, // No `isScheduledDate`
-                  ),
+                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
+                      context, true, _selectDate),
                   SizedBox(height: 12), // Added gap
                   Row(
                     children: [
                       Expanded(
-                          child: CustomWidgets.buildTimeField('Start Time',
-                              _startTime, context, true, _selectTime)),
-                      SizedBox(width: 10),
+                        child: CustomWidgets.buildTimeField(
+                          'Start Time',
+                          _startTimeController,
+                          context,
+                          (context) =>
+                              _selectTime(context, _startTimeController),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                          child: CustomWidgets.buildTimeField('End Time',
-                              _endTime, context, false, _selectTime)),
+                        child: CustomWidgets.buildTimeField(
+                          'End Time',
+                          _endTimeController,
+                          context,
+                          (context) => _selectTime(context, _endTimeController),
+                        ),
+                      ),
                     ],
                   ),
                 ],
