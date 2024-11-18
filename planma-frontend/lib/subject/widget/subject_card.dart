@@ -6,7 +6,7 @@ class SubjectCard extends StatelessWidget {
   final Map<String, dynamic> subject;
 
   // Constructor to accept the isByDate parameter and subject data
-  SubjectCard({required this.isByDate, required this.subject});
+  const SubjectCard({super.key, required this.isByDate, required this.subject});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class SubjectCard extends StatelessWidget {
         child: ListTile(
           title: Text(
             subject['code'], // Use the subject code from the data
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           subtitle: isByDate
               ? Text(subject['name']) // Display subject name for "By Date" view
@@ -26,7 +26,7 @@ class SubjectCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(subject['name']), // Subject name
-                    Text('Free Period'), // You can customize this detail
+                    const Text('Free Period'), // You can customize this detail
                   ],
                 ),
           onTap: () {

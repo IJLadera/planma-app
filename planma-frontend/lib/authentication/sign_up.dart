@@ -4,6 +4,8 @@ import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/auth_service.dart';
 
 class SignUp extends StatefulWidget {
+  const SignUp({super.key});
+
   @override
   _SignUpState createState() => _SignUpState();
 }
@@ -41,7 +43,7 @@ class _SignUpState extends State<SignUp> {
     if (_formKey.currentState!.validate()) {
       // Perform sign-up logic (e.g., API call)
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Signing up...")),
+        const SnackBar(content: Text("Signing up...")),
       );
 
       final authService = AuthService();
@@ -56,7 +58,7 @@ class _SignUpState extends State<SignUp> {
       if (response != null && response["error"] == null) {
         // Sign-up successful, navigate to the login page
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Account created successfully!")),
+          const SnackBar(content: Text("Account created successfully!")),
         );
         Navigator.push(
           context,
@@ -89,7 +91,7 @@ class _SignUpState extends State<SignUp> {
                   color: Colors.blue[900],
                 ),
               ),
-              SizedBox(height: 20), // Spacing between title and form
+              const SizedBox(height: 20), // Spacing between title and form
               Form(
                 key: _formKey,
                 child: Column(
@@ -106,7 +108,7 @@ class _SignUpState extends State<SignUp> {
                           ? 'Please enter your first name'
                           : null,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: lastNameController,
                       decoration: InputDecoration(
@@ -118,7 +120,7 @@ class _SignUpState extends State<SignUp> {
                       validator: (value) =>
                           value!.isEmpty ? 'Please enter your last name' : null,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: userNameController,
                       decoration: InputDecoration(
@@ -130,7 +132,7 @@ class _SignUpState extends State<SignUp> {
                       validator: (value) =>
                           value!.isEmpty ? 'Please enter your username' : null,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: emailController,
                       decoration: InputDecoration(
@@ -142,7 +144,7 @@ class _SignUpState extends State<SignUp> {
                       validator: (value) =>
                           value!.isEmpty ? 'Please enter your email' : null,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: passwordController,
                       obscureText: obscurePassword,
@@ -165,7 +167,7 @@ class _SignUpState extends State<SignUp> {
                       validator: (value) =>
                           value!.isEmpty ? 'Please enter your password' : null,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: confirmPasswordController,
                       obscureText: obscureConfirmPassword,
@@ -186,14 +188,16 @@ class _SignUpState extends State<SignUp> {
                         ),
                       ),
                       validator: (value) {
-                        if (value!.isEmpty)
+                        if (value!.isEmpty) {
                           return 'Please confirm your password';
-                        if (value != passwordController.text)
+                        }
+                        if (value != passwordController.text) {
                           return 'Passwords do not match';
+                        }
                         return null;
                       },
                     ),
-                    SizedBox(height: 50),
+                    const SizedBox(height: 50),
                     ElevatedButton(
                       onPressed: () {
                         // Validate the form before navigating
@@ -208,10 +212,10 @@ class _SignUpState extends State<SignUp> {
                       },
                       style: ElevatedButton.styleFrom(
                         padding:
-                            EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                        backgroundColor: Color(0xFF173F70),
+                            const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                        backgroundColor: const Color(0xFF173F70),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Create Account',
                         style: TextStyle(
                           fontSize: 16,
@@ -219,11 +223,11 @@ class _SignUpState extends State<SignUp> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     RichText(
                       text: TextSpan(
                         text: 'Already have an account? ',
-                        style: TextStyle(color: Colors.black),
+                        style: const TextStyle(color: Colors.black),
                         children: <TextSpan>[
                           TextSpan(
                             text: 'Login',

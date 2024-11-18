@@ -4,6 +4,8 @@ import 'package:planma_app/task/widget/task_section.dart';
 import 'package:planma_app/task/view_task.dart'; // Updated import to match the ViewTask class
 
 class ByDateView extends StatelessWidget {
+  const ByDateView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -16,7 +18,7 @@ class ByDateView extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ViewTask(
+                    builder: (context) => const ViewTask(
                       taskName: 'Task Name 1',
                       description: 'Description for Task 1',
                       date: 'Today',
@@ -38,7 +40,7 @@ class ByDateView extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ViewTask(
+                    builder: (context) => const ViewTask(
                       taskName: 'Task Name 2',
                       description: 'Description for Task 2',
                       date: 'Today',
@@ -60,7 +62,7 @@ class ByDateView extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ViewTask(
+                    builder: (context) => const ViewTask(
                       taskName: 'Task Name 3',
                       description: 'Description for Task 3',
                       date: 'Today',

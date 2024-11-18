@@ -5,7 +5,7 @@ import 'package:planma_app/subject/widget/subject_detail_row.dart';
 class SubjectDetailScreen extends StatelessWidget {
   final Map<String, dynamic> subject;
 
-  SubjectDetailScreen({required this.subject});
+  const SubjectDetailScreen({super.key, required this.subject});
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +15,14 @@ class SubjectDetailScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.close, color: Colors.blue),
+            icon: const Icon(Icons.close, color: Colors.blue),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
           actions: [
             IconButton(
-              icon: Icon(Icons.edit, color: Colors.blue),
+              icon: const Icon(Icons.edit, color: Colors.blue),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -33,13 +33,13 @@ class SubjectDetailScreen extends StatelessWidget {
               },
             ),
             IconButton(
-              icon: Icon(Icons.delete, color: Colors.blue),
+              icon: const Icon(Icons.delete, color: Colors.blue),
               onPressed: () {
                 //
               },
             ),
           ],
-          title: Text(
+          title: const Text(
             'Subject',
             style: TextStyle(
                 color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),

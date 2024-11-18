@@ -4,7 +4,7 @@ class TaskSection extends StatelessWidget {
   final String title;
   final List<Widget> tasks;
 
-  TaskSection({required this.title, required this.tasks});
+  const TaskSection({super.key, required this.title, required this.tasks});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class TaskSection extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           ...tasks,
         ],

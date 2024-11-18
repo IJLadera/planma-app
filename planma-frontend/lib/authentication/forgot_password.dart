@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ForgotPassword extends StatefulWidget {
+  const ForgotPassword({super.key});
+
   @override
   _ForgotPasswordState createState() => _ForgotPasswordState();
 }
@@ -14,7 +16,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context); // Navigate back to the previous page
           },
@@ -39,7 +41,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Text(
               'Enter your e-mail address to reset your password.',
               style: TextStyle(
@@ -48,7 +50,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 32.0),
+            const SizedBox(height: 32.0),
             Form(
               key: _formKey,
               child: TextFormField(
@@ -58,7 +60,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   prefixIcon:
                       Icon(Icons.email_outlined, color: Colors.grey.shade600),
                   hintText: 'Email',
-                  border: UnderlineInputBorder(),
+                  border: const UnderlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -68,22 +70,22 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 },
               ),
             ),
-            SizedBox(height: 32.0),
+            const SizedBox(height: 32.0),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue.shade900,
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Password reset link sent')),
+                      const SnackBar(content: Text('Password reset link sent')),
                     );
                   }
                 },
-                child: Text(
+                child: const Text(
                   'Recover Password',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),

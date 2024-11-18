@@ -3,6 +3,8 @@ import 'package:planma_app/task/widget/widgets.dart';
 // Import your CustomWidgets class
 
 class EditTask extends StatefulWidget {
+  const EditTask({super.key});
+
   @override
   _EditTask createState() => _EditTask();
 }
@@ -64,14 +66,14 @@ class _EditTask extends State<EditTask> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Add Task',
           style: TextStyle(
             fontWeight: FontWeight.bold, // Makes the text bold
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -84,28 +86,28 @@ class _EditTask extends State<EditTask> {
                 children: [
                   CustomWidgets.buildTextField(
                       _taskNameController, 'Task Name'),
-                  SizedBox(height: 12), // Added gap
+                  const SizedBox(height: 12), // Added gap
                   CustomWidgets.buildTextField(
                       _descriptionController, 'Description'),
-                  SizedBox(height: 12), // Added gap
+                  const SizedBox(height: 12), // Added gap
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
-                  SizedBox(height: 12), // Added gap
+                  const SizedBox(height: 12), // Added gap
                   Row(
                     children: [
                       Expanded(
                           child: CustomWidgets.buildTimeField('Start Time',
                               _startTime, context, true, _selectTime)),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                           child: CustomWidgets.buildTimeField('End Time',
                               _endTime, context, false, _selectTime)),
                     ],
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
                       'Deadline', _deadline, context, false, _selectDate),
-                  SizedBox(height: 12), // Added gap
+                  const SizedBox(height: 12), // Added gap
                   CustomWidgets.buildDropdownField(
                       'Subject', _subject, _subjects, (value) {
                     setState(() {
@@ -128,9 +130,9 @@ class _EditTask extends State<EditTask> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
-              child: Text(
+              child: const Text(
                 'Edit Task',
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
