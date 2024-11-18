@@ -12,8 +12,8 @@ class EventsCreate {
     required String eventdesc,
     required String location,
     required String scheduledate,
-    // required String starttime,
-    // required String endtime,
+    required String starttime,
+    required String endtime,
     required String eventtype,
   }) async {
     final url = "${baseUrl}createevents/";
@@ -27,8 +27,8 @@ class EventsCreate {
             "eventdesc": eventdesc,
             "location": location,
             "scheduledate": scheduledate,
-            // "starttime": starttime,
-            // "endtime": endtime,
+            "starttime": starttime,
+            "endtime": endtime,
             "eventtype": eventtype,
           }),
         );

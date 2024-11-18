@@ -33,6 +33,9 @@ class CustomEventSerializer(serializers.ModelSerializer):
         fields = ['event_id', 'event_name', 'event_desc', 
                   'location', 'scheduled_date', 'scheduled_start_time', 
                   'scheduled_end_time', 'event_type', 'student_id']
+        extra_kwargs = {
+            'student_id': {'required': True},
+        }
         
 class ListEventSerializer(serializers.ModelSerializer):
     class Meta: 

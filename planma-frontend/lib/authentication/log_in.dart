@@ -1,9 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/authentication/forgot_password.dart';
 import 'package:planma_app/authentication/sign_up.dart';
 import 'package:planma_app/core/dashboard.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/login_auth.dart';
+import 'package:planma_app/main.dart';
+import 'package:provider/provider.dart';
 
 class LogIn extends StatefulWidget {
   const LogIn({super.key});
@@ -29,7 +32,7 @@ class _LogInState extends State<LogIn> {
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _login(BuildContext context) async {
   if (_formKey.currentState!.validate()) {
     final email = emailController.text;
     final password = passwordController.text;
@@ -55,11 +58,14 @@ class _LogInState extends State<LogIn> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Welcome User")),
       );
-      Future.delayed(Duration(seconds: 3));
+      context.read<UserProvider>().init(
+        userName: email,
+        accessToken: response['access'],
+        refreshToken: response['refresh']);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => Dashboard(username:email),
+          builder: (context) => Dashboard(),
         ),
       );
       
@@ -152,7 +158,7 @@ class _LogInState extends State<LogIn> {
             onPressed: () async {              
               if (_formKey.currentState!.validate()) {
                           // If validation is successful, navigate to LogIn screen
-                 await _login();
+                 await _login(context);
               
               }
             },

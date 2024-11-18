@@ -21,7 +21,8 @@ class AuthLogin {
     );
 
     if (response.statusCode == 200) {
-      
+      final token = jsonDecode(response.body);
+
       return jsonDecode(response.body); // Assuming JWT token is returned here
     } else {
       (response.body.toString());

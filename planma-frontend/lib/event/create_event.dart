@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/event/widget/widget.dart';
+import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 
 class AddEventState extends StatefulWidget {
   @override
@@ -37,70 +38,61 @@ class _AddEventState extends State<AddEventState> {
       BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialDate: initialDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      initialTime: TimeOfDay.now(),
     );
-
-    if (pickedDate != null) {
+    if (picked != null) {
       setState(() {
         controller.text = picked.format(context);
       });
     }
   }
 
-  Future<void> _selectDate(BuildContext context, DateTime? selectedDate) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    if (response != null && response.containsKey('error')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response['error']}')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Event created successfully!')),
-      );
-      Navigator.of(context).pop(); // Return to the previous screen
-    }
-  }
 
 
   Future<void> _createEvent() async {
-    if (_date == null || _startTime == null || _endTime == null || _selectedEventType == null) {
+    if (_eventCodeController.text.isEmpty ||
+        _eventTitleController.text.isEmpty ||
+        _eventLocationController.text.isEmpty ||
+        _scheduledDate == null ||
+        _startTimeController.text.isEmpty ||
+        _endTimeController.text.isEmpty ||
+        _selectedEventType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(content: Text('Please fill out all fields')),
       );
       return;
     }
+    final eventService = EventsCreate();
+    // Collect data from UI inputs
+    final String eventName = _eventCodeController.text;
+    final String eventDesc = _eventTitleController.text;
+    final String location = _eventLocationController.text;
+    final String scheduledDate = _scheduledDate!.toIso8601String();
+    final String startTime = _startTimeController.text;
+    final String endTime = _endTimeController.text;
+    final String eventType = _selectedEventType!;
 
-    final String formattedDate = "${_date!.year}-${_date!.month.toString().padLeft(2, '0')}-${_date!.day.toString().padLeft(2, '0')}";
-    // final String formattedStartTime = "${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}";
-    // final String formattedEndTime = "${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}";
-
-    final   eventsCreate = EventsCreate();
-
-    final response = await eventsCreate.eventCT(
-      eventname: _eventCodeController.text,
-      eventdesc: _eventTitleController.text,
-      location: _eventLocationController.text,
-      scheduledate: formattedDate,
-      // starttime: formattedStartTime,
-      // endtime: formattedEndTime,
-      eventtype: _selectedEventType!,
+    // Call the service
+    final result = await eventService.eventCT(
+      eventname: eventName,
+      eventdesc: eventDesc,
+      location: location,
+      scheduledate: scheduledDate,
+      starttime: startTime,
+      endtime: endTime,
+      eventtype: eventType,
     );
 
-    if (response != null && response.containsKey('error')) {
+    // Handle response
+    if (result != null && result.containsKey('error')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${response['error']}')),
+        SnackBar(content: Text(result['error'])),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Event created successfully!')),
       );
-      Navigator.of(context).pop(); // Return to the previous screen
+      Navigator.of(context).pop(); // Navigate back on success
     }
   }
 
