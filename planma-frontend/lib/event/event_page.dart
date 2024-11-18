@@ -51,7 +51,7 @@ class EventsPage extends StatelessWidget {
                     eventName: 'Math III',
                     timePeriod: '10:00 AM - 11:30 AM',
                     code: 'MATH301',
-                    room: 'Room 3B',
+                    room: 'Room   3B',
                   ),
                 ],
               ),

@@ -43,6 +43,7 @@ class _AddEventState extends State<AddEventState> {
     if (picked != null) {
       setState(() {
         _date = picked;
+        print("Selected date: $_date");
       });
     }
   }
@@ -79,7 +80,8 @@ class _AddEventState extends State<AddEventState> {
 
                   SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
-                      'Date', _date, context, false, _selectDate),
+                    'Date', _date, context, _selectDate, // No `isScheduledDate`
+                  ),
                   SizedBox(height: 12), // Added gap
                   Row(
                     children: [

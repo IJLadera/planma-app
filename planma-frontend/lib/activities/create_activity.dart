@@ -40,6 +40,7 @@ class _AddActivityState extends State<AddActivityState> {
     if (picked != null) {
       setState(() {
         _date = picked;
+        print("Selected date: $_date");
       });
     }
   }
@@ -72,7 +73,8 @@ class _AddActivityState extends State<AddActivityState> {
                       height: 16), // Space between time fields and room field
                   SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
-                      'Date', _date, context, false, _selectDate),
+                    'Date', _date, context, _selectDate, // No `isScheduledDate`
+                  ),
                   SizedBox(height: 12), // Added gap
                   Row(
                     children: [

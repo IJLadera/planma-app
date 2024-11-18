@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/activities/create_activity.dart';
 import 'package:planma_app/activities/widget/event_card.dart';
-import 'package:planma_app/activities/widget/section_title.dart';
 
 class ActivitiesScreen extends StatelessWidget {
   const ActivitiesScreen({Key? key}) : super(key: key);
@@ -45,17 +44,20 @@ class ActivitiesScreen extends StatelessWidget {
                 filled: true,
                 fillColor: Colors.grey[200],
               ),
+              onChanged: (value) {
+                // TODO: Implement search functionality by filtering the goals list.
+              },
             ),
             const SizedBox(height: 20),
             // Event Card
             EventCard(
               activityName: 'Activity Name',
               timePeriod: '(Time Period)',
-              backgroundColor: Colors.pinkAccent.shade100,
+              backgroundColor: const Color.fromARGB(255, 246, 136, 136),
             ),
           ],
         ),
-      ),
+      ),  
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
