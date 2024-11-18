@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+//create events 
+
 
 class EventsCreate {
   final String baseUrl ="http://127.0.0.1:8000/api/";
@@ -10,8 +12,8 @@ class EventsCreate {
     required String eventdesc,
     required String location,
     required String scheduledate,
-    required String starttime,
-    required String endtime,
+    // required String starttime,
+    // required String endtime,
     required String eventtype,
   }) async {
     final url = "${baseUrl}createevents/";
@@ -25,8 +27,8 @@ class EventsCreate {
             "eventdesc": eventdesc,
             "location": location,
             "scheduledate": scheduledate,
-            "starttime": starttime,
-            "endtime": endtime,
+            // "starttime": starttime,
+            // "endtime": endtime,
             "eventtype": eventtype,
           }),
         );
@@ -48,6 +50,9 @@ class EventsCreate {
     }
   }
 }
+
+
+// Edit Events
 
 class EventsEdit {
   final String baseUrl ="http://127.0.0.1:8000/api/";
@@ -96,7 +101,7 @@ class EventsEdit {
   }
 }
 
-
+// for viewig created events
 
 class EventsView {
   final String baseUrl ="http://127.0.0.1:8000/api/";
@@ -146,7 +151,7 @@ class EventsView {
 }
 
 
-
+//for deleting events that has been created
 
 class EventsDelete {
   final String baseUrl ="http://127.0.0.1:8000/api/";

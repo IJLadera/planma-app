@@ -21,9 +21,10 @@ class AuthLogin {
     );
 
     if (response.statusCode == 200) {
+      
       return jsonDecode(response.body); // Assuming JWT token is returned here
     } else {
-      print(response.body.toString());
+      (response.body.toString());
       return {
         "error": jsonDecode(response.body) ?? "Failed to login"
       };

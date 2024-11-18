@@ -45,22 +45,27 @@ class _LogInState extends State<LogIn> {
 
     // Proceed with the login logic
     final authLogin = AuthLogin();
-    print(email);
-    print(password);
+    // print(email);
+    // print(password);
     final response = await authLogin.logIn(
       email: email,
       password: password,
     );
     if (response != null && response["error"] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Welcome User")),
+      );
+      Future.delayed(Duration(seconds: 3));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => Dashboard(username:email),
         ),
       );
+      
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Logging in...")),
+        SnackBar(content: Text("Wrong Credentials")),
       );
     }
   }
@@ -148,12 +153,7 @@ class _LogInState extends State<LogIn> {
               if (_formKey.currentState!.validate()) {
                           // If validation is successful, navigate to LogIn screen
                  await _login();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        Dashboard(username: emailController.text)),
-              );
+              
               }
             },
             style: ElevatedButton.styleFrom(

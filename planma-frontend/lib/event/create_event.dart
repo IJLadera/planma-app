@@ -59,8 +59,8 @@ class _AddEventState extends State<AddEventState> {
     }
 
     final String formattedDate = "${_date!.year}-${_date!.month.toString().padLeft(2, '0')}-${_date!.day.toString().padLeft(2, '0')}";
-    final String formattedStartTime = "${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}";
-    final String formattedEndTime = "${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}";
+    // final String formattedStartTime = "${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}";
+    // final String formattedEndTime = "${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}";
 
     final   eventsCreate = EventsCreate();
 
@@ -69,8 +69,8 @@ class _AddEventState extends State<AddEventState> {
       eventdesc: _eventTitleController.text,
       location: _eventLocationController.text,
       scheduledate: formattedDate,
-      starttime: formattedStartTime,
-      endtime: formattedEndTime,
+      // starttime: formattedStartTime,
+      // endtime: formattedEndTime,
       eventtype: _selectedEventType!,
     );
 

@@ -184,7 +184,7 @@ class CustomSub(models.Model):
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='subject', db_column='student_id'
+        related_name='subjects', db_column='student_id'
     )
     semester_id = models.TextField() #Foreign Key for Semester, pending 
 
@@ -198,7 +198,7 @@ class CustomClass(models.Model):
     subject_code = models.ForeignKey(
         CustomSub,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='subject', db_column='subject_id'
+        related_name='classes', db_column='subject_id'
     )
     day_of_week = models.IntegerField() #numbers with days of the week, 1 for sunday till 7 for saturday
     scheduled_start_time = models.TimeField()
@@ -207,7 +207,7 @@ class CustomClass(models.Model):
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='classes', db_column='student_id'
+        related_name='scheduled_classes', db_column='student_id'
     )
 
 class AttendedClass(models.Model):
@@ -222,7 +222,7 @@ class AttendedClass(models.Model):
         related_name='attendedclass', db_column='classsched_id'
     )
     date = models.DateField()
-    isExcused = models.BooleanField()
+    isExcused = models.BooleanField(default=False)
     hasAttended = models.BooleanField()
 
 class Goals(models.Model):
@@ -282,6 +282,6 @@ class Report(models.Model): #Unfinished as of now
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='subject', db_column='student_id'
+        related_name='reports', db_column='student_id'
     )
     semester_id = models.TextField() #Will be Foreign Key
