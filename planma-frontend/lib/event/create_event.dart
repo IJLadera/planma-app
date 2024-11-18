@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/subject/widget/widget.dart';
+import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 
 class AddEventState extends StatefulWidget {
   @override
@@ -44,6 +45,43 @@ class _AddEventState extends State<AddEventState> {
       setState(() {
         _date = picked;
       });
+    }
+  }
+
+
+  Future<void> _createEvent() async {
+    if (_date == null || _startTime == null || _endTime == null || _selectedEventType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    final String formattedDate = "${_date!.year}-${_date!.month.toString().padLeft(2, '0')}-${_date!.day.toString().padLeft(2, '0')}";
+    final String formattedStartTime = "${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}";
+    final String formattedEndTime = "${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}";
+
+    final   eventsCreate = EventsCreate();
+
+    final response = await eventsCreate.eventCT(
+      eventname: _eventCodeController.text,
+      eventdesc: _eventTitleController.text,
+      location: _eventLocationController.text,
+      scheduledate: formattedDate,
+      starttime: formattedStartTime,
+      endtime: formattedEndTime,
+      eventtype: _selectedEventType!,
+    );
+
+    if (response != null && response.containsKey('error')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${response['error']}')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Event created successfully!')),
+      );
+      Navigator.of(context).pop(); // Return to the previous screen
     }
   }
 
@@ -106,9 +144,8 @@ class _AddEventState extends State<AddEventState> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: _createEvent, 
                   // Create task action
-                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue.shade700,
                   shape: RoundedRectangleBorder(

@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/authentication/log_in.dart';
-import 'package:planma_app/auth_service.dart';
+import 'package:planma_app/Front%20&%20back%20end%20connections/auth_service.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
