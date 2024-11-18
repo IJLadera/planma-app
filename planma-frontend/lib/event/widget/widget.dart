@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -53,43 +52,50 @@ class CustomWidgets {
   }
 
   // Method to build a DateTile (with tap to select date)
-  static Widget buildDateTile(String label, DateTime? date, BuildContext context,
-    Function selectDate) {
-  return Container(
-    decoration: BoxDecoration(
-      color: const Color.fromARGB(255, 138, 172, 207),
-      borderRadius: BorderRadius.circular(30),
-    ),
-    child: ListTile(
-      title: Text(
-        '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
-      ),
-      trailing: Icon(Icons.calendar_today),
-      onTap: () => selectDate(context), // Remove isScheduledDate
-    ),
-  );
-}
-
-  // Method to build a time field with gesture and custom design
-  static Widget buildTimeField(String label, TimeOfDay? time,
-      BuildContext context, bool isStartTime, Function selectTime) {
+  static Widget buildDateTile(
+    String label,
+    DateTime? date,
+    BuildContext context,
+    bool someFlag, // Add this parameter to accept the 'true' value
+    Function(BuildContext, DateTime?) selectDate,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 138, 172, 207),
         borderRadius: BorderRadius.circular(30),
       ),
-      child: GestureDetector(
-        onTap: () => selectTime(context, isStartTime),
-        child: AbsorbPointer(
-          child: TextFormField(
-            decoration: InputDecoration(
-              labelText: label,
-              suffixIcon: Icon(Icons.access_time),
-              hintText: time != null ? time.format(context) : 'Select Time',
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.all(16),
-            ),
-          ),
+      child: ListTile(
+        title: Text(
+          '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
+          style: TextStyle(fontSize: 16),
+        ),
+        trailing: const Icon(Icons.calendar_today),
+        onTap: () => selectDate(context, date),
+      ),
+    );
+  }
+
+  // Method to build a time field with gesture and custom design
+  static Widget buildTimeField(
+    String label,
+    TextEditingController controller,
+    BuildContext context,
+    Function(BuildContext) selectTime,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 138, 172, 207),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: TextField(
+        controller: controller,
+        readOnly: true, // Only allow input via the time picker
+        onTap: () => selectTime(context),
+        decoration: InputDecoration(
+          labelText: label,
+          suffixIcon: const Icon(Icons.access_time),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(16),
         ),
       ),
     );

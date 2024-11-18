@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 
-class EditClass extends StatefulWidget {
-  const EditClass({super.key});
+class AddClassScreen extends StatefulWidget {
+  const AddClassScreen({super.key});
 
   @override
-  _EditClassState createState() => _EditClassState();
+  _AddClassScreenState createState() => _AddClassScreenState();
 }
 
-class _EditClassState extends State<EditClass> {
+class _AddClassScreenState extends State<AddClassScreen> {
   final _subjectCodeController = TextEditingController();
   final _subjectTitleController = TextEditingController();
   final _roomController = TextEditingController();
@@ -19,7 +19,6 @@ class _EditClassState extends State<EditClass> {
   final List<String> _semesters = ['1', '2', 'Summer'];
   final Set<String> _selectedDays = {};
 
-  // Method to select time for start or end
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -33,48 +32,14 @@ class _EditClassState extends State<EditClass> {
     }
   }
 
-  // Method to handle editing a class
-  void _handleEditClass() {
-    if (_subjectCodeController.text.isEmpty ||
-        _subjectTitleController.text.isEmpty ||
-        _roomController.text.isEmpty ||
-        _selectedSemester == null ||
-        _selectedDays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all fields before saving.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // Example of handling form submission
-    print('Class Edited Successfully');
-    print('Subject Code: ${_subjectCodeController.text}');
-    print('Subject Title: ${_subjectTitleController.text}');
-    print('Semester: $_selectedSemester');
-    print('Selected Days: $_selectedDays');
-    print('Start Time: ${_startTimeController.text}');
-    print('End Time: ${_endTimeController.text}');
-    print('Room: ${_roomController.text}');
-
-    Navigator.of(context).pop(); // Navigate back
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Edit Class',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Add Class'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: Column(
@@ -94,11 +59,9 @@ class _EditClassState extends State<EditClass> {
                     'Semester',
                     _selectedSemester,
                     _semesters,
-                    (value) {
-                      setState(() {
-                        _selectedSemester = value;
-                      });
-                    },
+                    (value) => setState(() {
+                      _selectedSemester = value;
+                    }),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -126,7 +89,7 @@ class _EditClassState extends State<EditClass> {
                             });
                           },
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                       ],
                     ],
                   ),
@@ -164,7 +127,17 @@ class _EditClassState extends State<EditClass> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             child: ElevatedButton(
-              onPressed: _handleEditClass,
+              onPressed: () {
+                // Collect all the data here
+                String subjectCode = _subjectCodeController.text;
+                String subjectTitle = _subjectTitleController.text;
+                String room = _roomController.text;
+                print("Subject Code: $subjectCode");
+                print("Subject Title: $subjectTitle");
+                print("Start Time: ${_startTimeController.text}");
+                print("End Time: ${_endTimeController.text}");
+                print("Room: $room");
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade700,
                 shape: RoundedRectangleBorder(
@@ -174,7 +147,7 @@ class _EditClassState extends State<EditClass> {
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
               child: const Text(
-                'Edit Class',
+                'Create Subject',
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),

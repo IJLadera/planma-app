@@ -74,30 +74,31 @@ class CustomWidgets {
   }
 
   // Method to build a time field with gesture and custom design
-  static Widget buildTimeField(String label, TimeOfDay? time,
-      BuildContext context, bool isStartTime, Function selectTime) {
+  static Widget buildTimeField(
+    String label,
+    TextEditingController controller,
+    BuildContext context,
+    Function(BuildContext) selectTime,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 138, 172, 207),
         borderRadius: BorderRadius.circular(30),
       ),
-      child: GestureDetector(
-        onTap: () => selectTime(context, isStartTime),
-        child: AbsorbPointer(
-          child: TextFormField(
-            decoration: InputDecoration(
-              labelText: label,
-              suffixIcon: const Icon(Icons.access_time),
-              hintText: time != null ? time.format(context) : 'Select Time',
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.all(16),
-            ),
-          ),
+      child: TextField(
+        controller: controller,
+        readOnly: true, // Only allow input via the time picker
+        onTap: () => selectTime(context),
+        decoration: InputDecoration(
+          labelText: label,
+          suffixIcon: const Icon(Icons.access_time),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(16),
         ),
       ),
     );
   }
-
+  
   // Method to build a dropdown field with custom design
   static Widget buildDropdownField(
     String label,
