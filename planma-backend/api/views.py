@@ -65,9 +65,11 @@ class CustomTaskUpdateView(APIView):
 
 class CustomEventListCreateView(APIView):
     
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         data = request.data
+        data['student_id'] = request.user.id
+        
         serializer = CustomEventSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
