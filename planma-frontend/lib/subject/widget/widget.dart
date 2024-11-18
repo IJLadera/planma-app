@@ -64,17 +64,11 @@ class CustomWidgets {
       ),
       child: ListTile(
         title: Text(
-
           '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
           style: TextStyle(fontSize: 16),
         ),
         trailing: const Icon(Icons.calendar_today),
-      //   onTap: () =>
-      //       selectDate(context, date), // Pass the current date for context
-      //       '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}'),
-      //   trailing: const Icon(Icons.calendar_today),
-      //   onTap: () => selectDate(context, isScheduledDate),
-      // 
+        onTap: () => selectDate(context, date),
       ),
     );
   }
