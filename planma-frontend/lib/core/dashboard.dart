@@ -49,7 +49,6 @@ class Dashboard extends StatelessWidget {
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 20),
-    
             Text(
               'Menu',
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),

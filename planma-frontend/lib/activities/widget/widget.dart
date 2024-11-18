@@ -51,12 +51,9 @@ class CustomWidgets {
     );
   }
 
+  // Method to build a DateTile (with tap to select date)
   static Widget buildDateTile(
-    String label,
-    DateTime? date,
-    BuildContext context,
-    Function(BuildContext, DateTime?) selectDate,
-  ) {
+      String label, DateTime? date, BuildContext context, Function selectDate) {
     return Container(
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 138, 172, 207),
@@ -65,11 +62,9 @@ class CustomWidgets {
       child: ListTile(
         title: Text(
           '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
-          style: TextStyle(fontSize: 16),
         ),
-        trailing: const Icon(Icons.calendar_today),
-        onTap: () =>
-            selectDate(context, date), // Pass the current date for context
+        trailing: Icon(Icons.calendar_today),
+        onTap: () => selectDate(context), // Remove isScheduledDate
       ),
     );
   }
