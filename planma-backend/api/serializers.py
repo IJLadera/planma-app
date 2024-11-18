@@ -80,16 +80,33 @@ class CustomClassSerializer(serializers.ModelSerializer):
                   'scheduled_start_time', 'scheduled_end_time',
                   'room', 'student_id']
 
-
-class ExcusedClassSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = ExcusedClass
-        fields = ['exec_class_id', 'classsched_id', 'date',
-                  'isExcused']
-        
+class CustomSubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomSub
+        fields = ['subject_code', 'subject_title',
+                  'student_id', 'semester_id']
 
 class AttendedClassSerializer(serializers.ModelSerializer):
     class Meta: 
         model = AttendedClass
-        fields = ['att_class_id', 'classsched_id', 'date',
-                  'hasAttended']
+        fields = ['att_class_id', 'classsched_id', 'date', 
+                  'isExcused', 'hasAttended']
+        
+class GoalsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goals
+        fields = ['goal_id', 'goal_name', 'target_hours', 
+                  'timeframe', 'goal_desc', 'goal_type',
+                  'student_id', 'semester_id']
+        
+class GoalProgressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoalProgress
+        fields = ['goalprogress_id', 'goal_id', 'scheduled_start_time'
+                  'scheduled_end_time', 'session_duration']
+        
+class GoalScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goals
+        fields = ['goalschedule_id', 'goal_id', 'scheduled_start_time',
+                  'scheduled_end_time']
