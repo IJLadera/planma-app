@@ -139,7 +139,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                 print("Room: $room");
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade700,
+                backgroundColor: Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

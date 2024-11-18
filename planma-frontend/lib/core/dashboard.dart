@@ -8,6 +8,7 @@ import 'package:planma_app/goals/goal_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
+import 'package:planma_app/user_profiile/user_page.dart';
 
 class Dashboard extends StatelessWidget {
   final String username;
@@ -35,7 +36,10 @@ class Dashboard extends StatelessWidget {
               child: Icon(Icons.person, color: Colors.black),
             ),
             onPressed: () {
-              // Navigate to profile
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserProfileScreen()),
+              );
             },
           ),
         ],
@@ -59,7 +63,7 @@ class Dashboard extends StatelessWidget {
               child: ListView(
                 children: [
                   MenuButtonWidget(
-                    color: Colors.blue,
+                    color: const Color(0xFF173F70),
                     icon: Icons.check_circle,
                     title: 'Tasks',
                     subtitle: '4 tasks',
@@ -147,6 +151,7 @@ class Dashboard extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.home),
+                  color: Color(0xFF173F70),
                   onPressed: () {
                     // Navigate to Home page
                   },
@@ -170,9 +175,12 @@ class Dashboard extends StatelessWidget {
         onPressed: () {
           BottomSheetWidget.show(context);
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF173F70),
         shape: const CircleBorder(),
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
     );
   }

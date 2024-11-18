@@ -65,7 +65,7 @@ class _TasksPageState extends State<TasksPage> {
             MaterialPageRoute(builder: (context) => CreateTask()),
           );
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF173F70),
         shape: const CircleBorder(),
         child: Icon(Icons.add, color: Colors.white),
       ),

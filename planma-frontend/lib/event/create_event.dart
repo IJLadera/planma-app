@@ -16,7 +16,7 @@ class _AddEventState extends State<AddEventState> {
   DateTime? _scheduledDate;
 
   String? _selectedEventType;
-  final List<String> _semesters = ['Academic', 'Personal'];
+  final List<String> _EventType = ['Academic', 'Personal'];
 
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
@@ -102,7 +102,7 @@ class _AddEventState extends State<AddEventState> {
                   ),
                   SizedBox(height: 12), SizedBox(height: 16), // Increased space
                   CustomWidgets.buildDropdownField(
-                      'Event Type', _selectedEventType, _semesters, (value) {
+                      'Event Type', _selectedEventType, _EventType, (value) {
                     setState(() {
                       _selectedEventType = value;
                     });

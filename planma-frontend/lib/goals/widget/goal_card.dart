@@ -44,9 +44,13 @@ class GoalCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => ViewGoal(
-                  goalName: goalName,
-                  targetHours: targetHours,
-                  progress: progress,
+                  goalDetails: {
+                    "Name": goalName,
+                    "Target Hours": targetHours.toString(),
+                    "Progress": "${(progress * 100).toInt()}%"
+                  },
+                  sessions: [],
+                  filteredGoals: [],
                 ),
               ),
             );
@@ -66,8 +70,8 @@ class GoalCard extends StatelessWidget {
                 Center(
                   child: Text(
                     '${(progress * 100).toInt()}%',
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: TextStyle(
+                      fontSize: progress < 0.1 ? 10 : 12,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
