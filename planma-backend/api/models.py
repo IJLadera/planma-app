@@ -174,6 +174,19 @@ class UserPref(models.Model):
         related_name='userpref', db_column='student_id'
     )
 
+class CustomSemester(models.Model):
+    
+     # Primary Key
+    semester_id = models.AutoField(primary_key=True)
+
+    # Class Details
+    acad_year_start = models.DateField()
+    acad_year_end = models.DateField()
+    year_level = models.CharField(max_length=20)
+    semester = models.CharField(max_length=10)
+    sem_start_date = models.DateField()
+    sem_end_date = models.DateField()
+
 class CustomSub(models.Model):
     #Primary Key
     #subject_id = models.AutoField(primary_key=True) #mainly for database classification, not integration with frontend
@@ -186,7 +199,11 @@ class CustomSub(models.Model):
         on_delete=models.CASCADE,
         related_name='subjects', db_column='student_id'
     )
-    semester_id = models.TextField() #Foreign Key for Semester, pending 
+    semester_id = models.ForeignKey(
+        CustomSemester,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='subsems', db_column='semester_id'
+    ) 
 
 
 class CustomClass(models.Model):
@@ -241,7 +258,11 @@ class Goals(models.Model):
         on_delete=models.CASCADE,
         related_name='goals', db_column='student_id'
     )
-    semester_id = models.TextField() #Foreign Key for Semester, pending 
+    semester_id = models.ForeignKey(
+        CustomSemester,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='subsems', db_column='semester_id'
+    ) 
 
 class GoalProgress(models.Model):
     
@@ -278,10 +299,24 @@ class Report(models.Model): #Unfinished as of now
     #Primary Key
     report_id = models.AutoField(primary_key=True)
 
-    #Reports (Alot of Foreign Keys honestly)
+    #Reports details
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='reports', db_column='student_id'
+        related_name='reportstud', db_column='student_id'
     )
-    semester_id = models.TextField() #Will be Foreign Key
+    semester_id = models.ForeignKey(
+        CustomSemester,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='subsems', db_column='semester_id'
+    ) 
+    #These are for the count within reports. 
+    #These would have to be filtered with the Student ID
+    count_activities = models.IntegerField(default=0)
+    count_events = models.IntegerField(default=0)
+    count_tasks = models.IntegerField(default=0)
+    count_class = models.IntegerField(default=0)
+    count_subjects = models.IntegerField(default=0)
+    count_goals = models.IntegerField(default=0)
+    #Sleep is weird, as it should count the sleep time of the user?
+    sleep_count = models.IntegerField(default=0)

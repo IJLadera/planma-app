@@ -373,10 +373,6 @@ class CustomClassDetailView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self,request,pk):
-        #Subject Code
-        subject = CustomSub.objects.get(subject_code = pk)
-        cusclass = CustomClass.objects.filter(subject_code = subject)
-        serializer = CustomClassSerializer(cusclass, many = True)
         
         #Student ID
         user = CustomUser.objects.get(student_id = pk)
@@ -591,6 +587,63 @@ class GoalsUpdateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+# Semester
+
+class SemesterListCreateView(APIView):
+    
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        data = request.data
+        serializer = CustomSemesterSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({**serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        # Set the student_id field to the authenticated user on creation
+        
+class SemesterDetailView(APIView):
+   
+    permission_classes = [permissions.AllowAny]
+
+    def get(self,request,pk):
+        goal = CustomSemester.objects.get(semester_id = pk)
+        sem = CustomSemester.objects.filter(semester_id = goal)
+        serializer = CustomSemesterSerializer(sem, many = True)
+        
+        return Response(serializer.data)
+    
+class SemesterDeleteView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def delete(self,request,pk):
+        try:
+            
+            deletesem = CustomSemester.objects.get(semester_id = pk)
+            
+            deletesem.delete()
+            
+            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
+        except CustomSemester.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class SemesterUpdateView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def put(self, request, pk):
+        data= request.data
+        semid= CustomSemester.objects.get(semester_id = pk)
+        
+        serializer = CustomSemesterSerializer(instance=semid, data=data)
+        if serializer.is_valid():
+            
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
 # Goal Progress
 
 class GoalProgressListCreateView(APIView):
@@ -702,6 +755,71 @@ class GoalScheduleUpdateView(APIView):
         serializer = GoalScheduleSerializer(instance=goalid, data=data)
         if serializer.is_valid():
             
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+#report
+
+class ReportListCreateView(APIView):
+    
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        data = request.data
+        #Testing filtering for activities
+        def update_product_count(student_id):
+            # Filter activity by category
+            filtered_by_studentid = ActivityLog.objects.filter(student_id=request.user.id).count()
+            # Get the activities (if it exists)
+            report = Report.objects.get(student_id=request.user.id)
+            # Update the product_count field in the order
+            Report.count_activities = filtered_by_studentid
+            report.save()
+        serializer = ReportsSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({**serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        # Set the student_id field to the authenticated user on creation
+        
+class ReportDetailView(APIView):
+   
+    permission_classes = [permissions.AllowAny]
+
+    def get(self,request,pk):
+        
+        user = CustomUser.objects.get(student_id = pk)
+        rep = CustomSemester.objects.filter(student_id = user)
+        serializer = GoalProgressSerializer(rep, many = True)
+        
+        return Response(serializer.data)
+    
+class ReportDeleteView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def delete(self,request,pk):
+        try:
+            
+            deleterep = Report.objects.get(report_id = pk)
+            
+            deleterep.delete()
+            
+            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
+        except Report.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class ReportUpdateView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    
+    def put(self, request, pk):
+        data= request.data
+        repid= Report.objects.get(report_id = pk)
+        serializer = ReportsSerializer(instance=repid, data=data)
+        if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         else:
