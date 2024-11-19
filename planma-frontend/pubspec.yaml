@@ -38,6 +38,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^1.2.2
   
+
+  
   # Calendar
   syncfusion_flutter_calendar: ^27.2.2
   
@@ -59,6 +61,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - lib/user_preferences/assets/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
