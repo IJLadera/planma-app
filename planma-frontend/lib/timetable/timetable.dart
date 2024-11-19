@@ -12,7 +12,7 @@ class Timetable extends StatelessWidget {
         dataSource: ClassScheduleDataSource(getWeeklyClasses()),
         timeSlotViewSettings: const TimeSlotViewSettings(
           startHour: 6,
-          endHour: 22,
+          endHour: 24,
         ),
         onTap: (CalendarTapDetails details) {
           if (details.appointments != null &&
@@ -73,7 +73,7 @@ class Timetable extends StatelessWidget {
                 children: [
                   const Icon(Icons.book, color: Colors.blueAccent),
                   const SizedBox(width: 10),
-                  Expanded(
+                  Expanded( 
                     child: Text(
                       appointment.subject,
                       style: Theme.of(context).textTheme.bodyLarge,

@@ -6,15 +6,19 @@ import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.d
 class ViewEvent extends StatelessWidget {
   final String eventName;
   final String timePeriod;
-  final String code;
-  final String room;
+  final String description;
+  final String location;
+  final String date;
+  final String type;
 
   const ViewEvent({
     Key? key,
     required this.eventName,
     required this.timePeriod,
-    required this.code,
-    required this.room,
+    required this.description,
+    required this.location,
+    required this.date,
+    required this.type,
   }) : super(key: key);
 
   @override
@@ -74,16 +78,24 @@ class ViewEvent extends StatelessWidget {
                     value: eventName,
                   ),
                   EventDetailRow(
-                    title: 'Code',
-                    value: code,
+                    title: 'Description',
+                    value: description,
+                  ),
+                  EventDetailRow(
+                    title: 'Location',
+                    value: location,
+                  ),
+                  EventDetailRow(
+                    title: 'Date',
+                    value: date,
                   ),
                   EventDetailRow(
                     title: 'Time',
                     value: timePeriod,
                   ),
                   EventDetailRow(
-                    title: 'Room',
-                    value: room,
+                    title: 'Type',
+                    value: type,
                   ),
                 ],
               ),

@@ -97,7 +97,13 @@ class AttendedClassSerializer(serializers.ModelSerializer):
         model = AttendedClass
         fields = ['att_class_id', 'classsched_id', 'date', 
                   'isExcused', 'hasAttended']
-        
+
+class CustomSemesterSerializer(serializers.modelSerializer):
+    class Meta:
+        model = CustomSemester
+        fields = ['semester_id', 'acad_year_start', 'acad_year_end',
+                  'year_level', 'semester', 'sem_start_date',
+                  'sem_end_date']    
 class GoalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Goals
@@ -116,3 +122,11 @@ class GoalScheduleSerializer(serializers.ModelSerializer):
         model = Goals
         fields = ['goalschedule_id', 'goal_id', 'scheduled_start_time',
                   'scheduled_end_time']
+
+class ReportsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['report_id', 'student_id', 'semester_id',
+                  'count_activities', 'count_events',
+                  'count_tasks', 'count_subjects', 'count_goals',
+                  'sleep_count']
