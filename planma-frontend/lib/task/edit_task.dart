@@ -63,7 +63,7 @@ class _EditTask extends State<EditTask> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Add Task',
+          'Edit Task',
           style: TextStyle(
             fontWeight: FontWeight.bold, // Makes the text bold
           ),
