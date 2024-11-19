@@ -1,5 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/authentication/log_in.dart';
+import 'package:provider/provider.dart';
 
 class AuthLogin {
   final String baseUrl = "http://127.0.0.1:8000/api/";
@@ -22,6 +26,7 @@ class AuthLogin {
 
     if (response.statusCode == 200) {
       final token = jsonDecode(response.body);
+      
 
       return jsonDecode(response.body); // Assuming JWT token is returned here
     } else {

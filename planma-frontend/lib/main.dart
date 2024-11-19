@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         home: LogIn(),
+        debugShowCheckedModeBanner: false,
           //home: Dashboard (username: 'jian),
       )
     );    

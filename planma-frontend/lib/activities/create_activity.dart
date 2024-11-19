@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/activities/widget/widget.dart';
+import 'package:provider/provider.dart';
+import 'package:jwt_decode/jwt_decode.dart';
+import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/Front%20&%20back%20end%20connections/activity_service.dart';
+
 
 class AddActivityState extends StatefulWidget {
   @override
@@ -39,6 +44,74 @@ class _AddActivityState extends State<AddActivityState> {
       setState(() {
         controller.text = picked.format(context);
       });
+    }
+  }
+
+   String to24HourFormat(String time) {
+  String finalStrTime = "";
+  List<String> timeSplit = time.split(":");
+  timeSplit[1] = timeSplit[1].split(" ").first;
+  if (time.split(" ")[1] == "PM") {
+    if (time.split(":").first == "12") {
+      // dont adjust by 12 hours if 12 PM
+      finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+    } else {
+      finalStrTime = "${(int.parse(timeSplit[0]) + 12).toString()}:${timeSplit[1]}";
+    }
+  } else if (time.split(" ")[1] == "AM" && time.split(":").first == "12") {
+    // if 12 AM, adjust by - 12
+    finalStrTime = "${(int.parse(timeSplit[0]) - 12).toString()}:${timeSplit[1]}";
+  } else {
+    // if <12 PM just return hh:mm
+    finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+  }
+  return finalStrTime;
+}
+
+  Future<void> _createActivity() async {
+    if (_activityNameController.text.isEmpty ||
+        _activityDescriptionController.text.isEmpty ||
+        _scheduledDate == null ||
+        _startTimeController.text.isEmpty ||
+        _endTimeController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill out all fields')),
+      );
+      return;
+    }
+    final eventService = ActivityCreate();
+    // Collect data from UI inputs
+    final String activityName = _activityNameController.text;
+    final String activityDesc = _activityDescriptionController.text;
+    final String activityDate = _scheduledDate!.toIso8601String().split("T").first;
+    final String startTime = _startTimeController.text;
+    final String endTime = _endTimeController.text;
+    
+    
+    
+
+    // Call the service
+
+    final result = await eventService.activityCT(
+      activityname: activityName,
+      activitydesc: activityDesc,
+      scheduledate: activityDate,
+      starttime: to24HourFormat(startTime),
+      endtime: to24HourFormat(endTime),
+      status: (context.read<UserProvider>().userName!), // need to change for now para walay error
+      studentID: Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']
+    );
+
+    // Handle response
+    if (result != null && result.containsKey('error')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['error'])),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Event created successfully!')),
+      );
+      Navigator.of(context).pop(); // Navigate back on success
     }
   }
 
@@ -101,9 +174,7 @@ class _AddActivityState extends State<AddActivityState> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
-                  // Create task action
-                },
+                onPressed: _createActivity,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue.shade700,
                   shape: RoundedRectangleBorder(

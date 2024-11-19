@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:jwt_decode/jwt_decode.dart';
+import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/event/widget/widget.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
+import 'package:provider/provider.dart';
 
 class AddEventState extends StatefulWidget {
   @override
@@ -47,7 +51,26 @@ class _AddEventState extends State<AddEventState> {
     }
   }
 
-
+  String to24HourFormat(String time) {
+  String finalStrTime = "";
+  List<String> timeSplit = time.split(":");
+  timeSplit[1] = timeSplit[1].split(" ").first;
+  if (time.split(" ")[1] == "PM") {
+    if (time.split(":").first == "12") {
+      // dont adjust by 12 hours if 12 PM
+      finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+    } else {
+      finalStrTime = "${(int.parse(timeSplit[0]) + 12).toString()}:${timeSplit[1]}";
+    }
+  } else if (time.split(" ")[1] == "AM" && time.split(":").first == "12") {
+    // if 12 AM, adjust by - 12
+    finalStrTime = "${(int.parse(timeSplit[0]) - 12).toString()}:${timeSplit[1]}";
+  } else {
+    // if <12 PM just return hh:mm
+    finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+  }
+  return finalStrTime;
+}
 
   Future<void> _createEvent() async {
     if (_eventCodeController.text.isEmpty ||
@@ -67,20 +90,25 @@ class _AddEventState extends State<AddEventState> {
     final String eventName = _eventCodeController.text;
     final String eventDesc = _eventTitleController.text;
     final String location = _eventLocationController.text;
-    final String scheduledDate = _scheduledDate!.toIso8601String();
+    final String scheduledDate = _scheduledDate!.toIso8601String().split("T").first;
     final String startTime = _startTimeController.text;
     final String endTime = _endTimeController.text;
     final String eventType = _selectedEventType!;
+    
+    
+    
 
     // Call the service
+
     final result = await eventService.eventCT(
       eventname: eventName,
       eventdesc: eventDesc,
       location: location,
       scheduledate: scheduledDate,
-      starttime: startTime,
-      endtime: endTime,
+      starttime: to24HourFormat(startTime),
+      endtime: to24HourFormat(endTime),
       eventtype: eventType,
+      studentID: Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']
     );
 
     // Handle response

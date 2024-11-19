@@ -53,7 +53,10 @@ class CustomActivitySerializer(serializers.ModelSerializer):
         model = CustomActivity
         fields = ['activity_id', 'activity_name', 'activity_desc', 
                   'scheduled_date', 'scheduled_start_time', 
-                  'scheduled_end_time', 'status', 'student_id']
+                  'scheduled_end_time', 'status', 'student_id']       
+        extra_kwargs = {
+            'student_id': {'required': True},
+        }
         
 class ListActivitySerializer(serializers.ModelSerializer):
     class Meta: 
