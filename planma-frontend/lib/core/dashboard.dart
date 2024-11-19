@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/activities/activity_page.dart';
+import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/core/widget/button_sheet.dart';
 import 'package:planma_app/core/widget/menu_button.dart';
 import 'package:planma_app/event/event_page.dart';
+import 'package:planma_app/goals/goal_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
+import 'package:planma_app/user_profiile/user_page.dart';
+import 'package:provider/provider.dart';
+
 
 class Dashboard extends StatelessWidget {
-  final String username;
+  
 
-  const Dashboard({super.key, required this.username});
+  const Dashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Hello, $username',
+          'Hello, ${context.watch<UserProvider>().userName}',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -34,7 +40,10 @@ class Dashboard extends StatelessWidget {
               child: Icon(Icons.person, color: Colors.black),
             ),
             onPressed: () {
-              // Navigate to profile
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserProfileScreen()),
+              );
             },
           ),
         ],
@@ -58,7 +67,7 @@ class Dashboard extends StatelessWidget {
               child: ListView(
                 children: [
                   MenuButtonWidget(
-                    color: Colors.blue,
+                    color: const Color(0xFF173F70),
                     icon: Icons.check_circle,
                     title: 'Tasks',
                     subtitle: '4 tasks',
@@ -117,7 +126,10 @@ class Dashboard extends StatelessWidget {
                     title: 'Goals',
                     subtitle: '1 goal',
                     onPressed: () {
-                      // Navigate to Goals page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => GoalPage()),
+                      );
                     },
                   ),
                 ],
@@ -143,6 +155,7 @@ class Dashboard extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.home),
+                  color: Color(0xFF173F70),
                   onPressed: () {
                     // Navigate to Home page
                   },
@@ -166,9 +179,12 @@ class Dashboard extends StatelessWidget {
         onPressed: () {
           BottomSheetWidget.show(context);
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF173F70),
         shape: const CircleBorder(),
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
     );
   }

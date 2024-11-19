@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/subject/create_class.dart';
+import 'package:planma_app/subject/create_subject.dart';
 import 'package:planma_app/task/widget/search_bar.dart';
 import 'package:planma_app/subject/widget/day_schedule.dart'; // Import the new file
 
@@ -82,7 +82,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
             MaterialPageRoute(builder: (context) => AddClassScreen()),
           );
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF173F70),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

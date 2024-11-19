@@ -174,13 +174,49 @@ class UserPref(models.Model):
         related_name='userpref', db_column='student_id'
     )
 
+class CustomSemester(models.Model):
+    
+     # Primary Key
+    semester_id = models.AutoField(primary_key=True)
+
+    # Class Details
+    acad_year_start = models.DateField()
+    acad_year_end = models.DateField()
+    year_level = models.CharField(max_length=20)
+    semester = models.CharField(max_length=10)
+    sem_start_date = models.DateField()
+    sem_end_date = models.DateField()
+
+class CustomSub(models.Model):
+    #Primary Key
+    #subject_id = models.AutoField(primary_key=True) #mainly for database classification, not integration with frontend
+
+    #Subject Details
+    subject_code = models.CharField(max_length=20, primary_key=True)
+    subject_title = models.TextField()
+    student_id = models.ForeignKey(
+        CustomUser,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='subjects', db_column='student_id'
+    )
+    semester_id = models.ForeignKey(
+        CustomSemester,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='subsems', db_column='semester_id'
+    ) 
+
+
 class CustomClass(models.Model):
     
      # Primary Key
     classsched_id = models.AutoField(primary_key=True)
 
     # Class Details
-    subject_code = models.CharField(max_length=10) #will update when Subject Backend is finished
+    subject_code = models.ForeignKey(
+        CustomSub,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='classes', db_column='subject_id'
+    )
     day_of_week = models.IntegerField() #numbers with days of the week, 1 for sunday till 7 for saturday
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
@@ -188,22 +224,8 @@ class CustomClass(models.Model):
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='classes', db_column='student_id'
+        related_name='scheduled_classes', db_column='student_id'
     )
-
-class ExcusedClass(models.Model):
-    
-     # Primary Key
-    exc_class_id = models.AutoField(primary_key=True)
-
-    # Class Details
-    classched_id = models.ForeignKey(
-        CustomClass,  # This links to your custom class model
-        on_delete=models.CASCADE,
-        related_name='excusedclass', db_column='classsched_id'
-    )
-    date = models.DateField()
-    isExcused = models.BooleanField()
 
 class AttendedClass(models.Model):
 
@@ -217,7 +239,84 @@ class AttendedClass(models.Model):
         related_name='attendedclass', db_column='classsched_id'
     )
     date = models.DateField()
+    isExcused = models.BooleanField(default=False)
     hasAttended = models.BooleanField()
 
+class Goals(models.Model):
+
+    # Primary Key
+    goal_id = models.AutoField(primary_key=True)
+
+    # Goal Details
+    goal_name = models.CharField(max_length=100)
+    target_hours = models.TimeField() #if this is merely target hours, then Time Field might not work since it is at max 23 hours
+    timeframe = models.TimeField()
+    goal_desc = models.TextField()
+    goal_type = models.CharField(max_length=30)
+    student_id = models.ForeignKey(
+        CustomUser,  # This links to your custom class model
+        on_delete=models.CASCADE,
+        related_name='goals', db_column='student_id'
+    )
+    semester_id = models.ForeignKey(
+        CustomSemester,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='subsems', db_column='semester_id'
+    ) 
+
+class GoalProgress(models.Model):
     
+    # Primary Key
+    goalprogress_id = models.AutoField(primary_key=True)
+
+    # Goal Progress Details
+    goal_id = models.ForeignKey(
+        Goals,  # This links to your custom class model
+        on_delete=models.CASCADE,
+        related_name='goalprog', db_column='goal_id'
+    )
+    scheduled_start_time = models.TimeField()
+    scheduled_end_time = models.TimeField()
+    session_duration = models.TimeField()
+
+
+class GoalSchedule(models.Model):
     
+    # Primary Key
+    goalschedule_id = models.AutoField(primary_key=True)
+
+    # Goal Progress Details
+    goal_id = models.ForeignKey(
+        Goals,  # This links to your custom class model
+        on_delete=models.CASCADE,
+        related_name='goalsched', db_column='goal_id'
+    )
+    scheduled_start_time = models.TimeField()
+    scheduled_end_time = models.TimeField()
+
+class Report(models.Model): #Unfinished as of now
+
+    #Primary Key
+    report_id = models.AutoField(primary_key=True)
+
+    #Reports details
+    student_id = models.ForeignKey(
+        CustomUser,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='reportstud', db_column='student_id'
+    )
+    semester_id = models.ForeignKey(
+        CustomSemester,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='subsems', db_column='semester_id'
+    ) 
+    #These are for the count within reports. 
+    #These would have to be filtered with the Student ID
+    count_activities = models.IntegerField(default=0)
+    count_events = models.IntegerField(default=0)
+    count_tasks = models.IntegerField(default=0)
+    count_class = models.IntegerField(default=0)
+    count_subjects = models.IntegerField(default=0)
+    count_goals = models.IntegerField(default=0)
+    #Sleep is weird, as it should count the sleep time of the user?
+    sleep_count = models.IntegerField(default=0)

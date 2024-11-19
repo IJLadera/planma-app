@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/subject/widget/widget.dart';
+import 'package:planma_app/event/widget/widget.dart';
+import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 
 class AddEventState extends StatefulWidget {
   @override
@@ -10,40 +11,88 @@ class _AddEventState extends State<AddEventState> {
   final _eventCodeController = TextEditingController();
   final _eventTitleController = TextEditingController();
   final _eventLocationController = TextEditingController();
+  final TextEditingController _startTimeController = TextEditingController();
+  final TextEditingController _endTimeController = TextEditingController();
 
-  TimeOfDay? _startTime;
-  TimeOfDay? _endTime;
-  DateTime? _date;
+  DateTime? _scheduledDate;
+
   String? _selectedEventType;
-  final List<String> _semesters = ['Academic', 'Personal'];
+  final List<String> _EventType = ['Academic', 'Personal'];
 
-  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+  void _selectDate(BuildContext context, DateTime? initialDate) async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _scheduledDate = pickedDate;
+      });
+    }
+  }
+
+  Future<void> _selectTime(
+      BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (picked != null) {
       setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
+        controller.text = picked.format(context);
       });
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
+
+
+  Future<void> _createEvent() async {
+    if (_eventCodeController.text.isEmpty ||
+        _eventTitleController.text.isEmpty ||
+        _eventLocationController.text.isEmpty ||
+        _scheduledDate == null ||
+        _startTimeController.text.isEmpty ||
+        _endTimeController.text.isEmpty ||
+        _selectedEventType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill out all fields')),
+      );
+      return;
+    }
+    final eventService = EventsCreate();
+    // Collect data from UI inputs
+    final String eventName = _eventCodeController.text;
+    final String eventDesc = _eventTitleController.text;
+    final String location = _eventLocationController.text;
+    final String scheduledDate = _scheduledDate!.toIso8601String();
+    final String startTime = _startTimeController.text;
+    final String endTime = _endTimeController.text;
+    final String eventType = _selectedEventType!;
+
+    // Call the service
+    final result = await eventService.eventCT(
+      eventname: eventName,
+      eventdesc: eventDesc,
+      location: location,
+      scheduledate: scheduledDate,
+      starttime: startTime,
+      endtime: endTime,
+      eventtype: eventType,
     );
-    if (picked != null) {
-      setState(() {
-        _date = picked;
-      });
+
+    // Handle response
+    if (result != null && result.containsKey('error')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['error'])),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Event created successfully!')),
+      );
+      Navigator.of(context).pop(); // Navigate back on success
     }
   }
 
@@ -75,26 +124,35 @@ class _AddEventState extends State<AddEventState> {
                       height: 16), // Space between time fields and room field
                   CustomWidgets.buildTextField(
                       _eventLocationController, 'Location'),
-                  SizedBox(height: 20), // Added more gap below the last field
-
-                  SizedBox(height: 12),
-                  CustomWidgets.buildDateTile(
-                      'Date', _date, context, false, _selectDate),
-                  SizedBox(height: 12), // Added gap
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
+                      context, true, _selectDate),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
-                          child: CustomWidgets.buildTimeField('Start Time',
-                              _startTime, context, true, _selectTime)),
-                      SizedBox(width: 10),
+                        child: CustomWidgets.buildTimeField(
+                          'Start Time',
+                          _startTimeController,
+                          context,
+                          (context) =>
+                              _selectTime(context, _startTimeController),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                          child: CustomWidgets.buildTimeField('End Time',
-                              _endTime, context, false, _selectTime)),
+                        child: CustomWidgets.buildTimeField(
+                          'End Time',
+                          _endTimeController,
+                          context,
+                          (context) => _selectTime(context, _endTimeController),
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 12), SizedBox(height: 16), // Increased space
                   CustomWidgets.buildDropdownField(
-                      'Event Type', _selectedEventType, _semesters, (value) {
+                      'Event Type', _selectedEventType, _EventType, (value) {
                     setState(() {
                       _selectedEventType = value;
                     });
@@ -106,9 +164,8 @@ class _AddEventState extends State<AddEventState> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: _createEvent, 
                   // Create task action
-                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue.shade700,
                   shape: RoundedRectangleBorder(

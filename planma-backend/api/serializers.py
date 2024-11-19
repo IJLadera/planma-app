@@ -33,6 +33,9 @@ class CustomEventSerializer(serializers.ModelSerializer):
         fields = ['event_id', 'event_name', 'event_desc', 
                   'location', 'scheduled_date', 'scheduled_start_time', 
                   'scheduled_end_time', 'event_type', 'student_id']
+        extra_kwargs = {
+            'student_id': {'required': True},
+        }
         
 class ListEventSerializer(serializers.ModelSerializer):
     class Meta: 
@@ -80,16 +83,47 @@ class CustomClassSerializer(serializers.ModelSerializer):
                   'scheduled_start_time', 'scheduled_end_time',
                   'room', 'student_id']
 
-
-class ExcusedClassSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = ExcusedClass
-        fields = ['exec_class_id', 'classsched_id', 'date',
-                  'isExcused']
-        
+class CustomSubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomSub
+        fields = ['subject_code', 'subject_title',
+                  'student_id', 'semester_id']
 
 class AttendedClassSerializer(serializers.ModelSerializer):
     class Meta: 
         model = AttendedClass
-        fields = ['att_class_id', 'classsched_id', 'date',
-                  'hasAttended']
+        fields = ['att_class_id', 'classsched_id', 'date', 
+                  'isExcused', 'hasAttended']
+
+class CustomSemesterSerializer(serializers.modelSerializer):
+    class Meta:
+        model = CustomSemester
+        fields = ['semester_id', 'acad_year_start', 'acad_year_end',
+                  'year_level', 'semester', 'sem_start_date',
+                  'sem_end_date']    
+class GoalsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goals
+        fields = ['goal_id', 'goal_name', 'target_hours', 
+                  'timeframe', 'goal_desc', 'goal_type',
+                  'student_id', 'semester_id']
+        
+class GoalProgressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoalProgress
+        fields = ['goalprogress_id', 'goal_id', 'scheduled_start_time'
+                  'scheduled_end_time', 'session_duration']
+        
+class GoalScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goals
+        fields = ['goalschedule_id', 'goal_id', 'scheduled_start_time',
+                  'scheduled_end_time']
+
+class ReportsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['report_id', 'student_id', 'semester_id',
+                  'count_activities', 'count_events',
+                  'count_tasks', 'count_subjects', 'count_goals',
+                  'sleep_count']

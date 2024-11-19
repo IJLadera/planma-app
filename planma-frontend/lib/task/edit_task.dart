@@ -12,6 +12,8 @@ class EditTask extends StatefulWidget {
 class _EditTask extends State<EditTask> {
   final TextEditingController _taskNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final _startTimeController = TextEditingController();
+  final _endTimeController = TextEditingController();
 
   DateTime? _scheduledDate;
   TimeOfDay? _startTime;
@@ -27,37 +29,31 @@ class _EditTask extends State<EditTask> {
   ]; // Add your subjects here
 
   // Method to select date
-  Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
-    final DateTime? picked = await showDatePicker(
+  void _selectDate(BuildContext context, DateTime? initialDate) async {
+    final pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
     );
-    if (picked != null) {
+
+    if (pickedDate != null) {
       setState(() {
-        if (isScheduledDate) {
-          _scheduledDate = picked;
-        } else {
-          _deadline = picked;
-        }
+        _scheduledDate = pickedDate;
       });
     }
   }
 
   // Method to select time
-  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+  Future<void> _selectTime(
+      BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (picked != null) {
       setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
+        controller.text = picked.format(context);
       });
     }
   }
@@ -92,16 +88,27 @@ class _EditTask extends State<EditTask> {
                   const SizedBox(height: 12), // Added gap
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
-                  const SizedBox(height: 12), // Added gap
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
-                          child: CustomWidgets.buildTimeField('Start Time',
-                              _startTime, context, true, _selectTime)),
-                      const SizedBox(width: 10),
+                        child: CustomWidgets.buildTimeField(
+                          'Start Time',
+                          _startTimeController,
+                          context,
+                          (context) =>
+                              _selectTime(context, _startTimeController),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                          child: CustomWidgets.buildTimeField('End Time',
-                              _endTime, context, false, _selectTime)),
+                        child: CustomWidgets.buildTimeField(
+                          'End Time',
+                          _endTimeController,
+                          context,
+                          (context) => _selectTime(context, _endTimeController),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -126,11 +133,12 @@ class _EditTask extends State<EditTask> {
                 // Create task action
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade700,
+                backgroundColor: Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
               child: const Text(
                 'Edit Task',

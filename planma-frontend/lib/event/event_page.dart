@@ -51,7 +51,7 @@ class EventsPage extends StatelessWidget {
                     eventName: 'Math III',
                     timePeriod: '10:00 AM - 11:30 AM',
                     code: 'MATH301',
-                    room: 'Room 3B',
+                    room: 'Room   3B',
                   ),
                 ],
               ),
@@ -67,7 +67,7 @@ class EventsPage extends StatelessWidget {
           );
         },
         child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF173F70),
       ),
     );
   }
