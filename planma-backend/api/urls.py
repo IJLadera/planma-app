@@ -10,9 +10,9 @@ urlpatterns = [
     path('deletetask/<int:pk>/', CustomTaskDeleteView.as_view(), name='task-delete'),
     path('updatetask/<int:pk>/',CustomTaskUpdateView.as_view(), name='updatetask' ),
     #events
-    path('createevents/', CustomEventListCreateView.as_view(), name='event-list-create'),
-    path('events/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
-    path('deleteevents/<int:pk>/', CustomEventDeleteView.as_view(), name='event-delete'),
+    path('createevent/', CustomEventListCreateView.as_view(), name='event-list-create'),
+    path('event/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
+    path('deleteevent/<int:pk>/', CustomEventDeleteView.as_view(), name='event-delete'),
     path('updateevent/<int:pk>/',CustomEventUpdateView.as_view(), name='updateevent' ),
     #attended event
     path('createattevents/', AttendedEventListCreateView.as_view(), name='attevent-list-create'),
@@ -49,6 +49,11 @@ urlpatterns = [
     path('classatt/<uuid:pk>/', AttClassDetailView.as_view(), name='attclass-detail'),
     path('deleteclassatt/<int:pk>/', AttClassDeleteView.as_view(), name='attclass-delete'),
     path('updateclassatt/<int:pk>/',AttClassUpdateView.as_view(), name='updateattclass' ),
+    #report
+    path('createsemester/', SemesterListCreateView.as_view(), name='semester-list-create'),
+    path('semester/<uuid:pk>/', SemesterDetailView.as_view(), name='semester-detail'),
+    path('deletesemester/<int:pk>/', SemesterDeleteView.as_view(), name='semester-delete'),
+    path('updatesemester/<int:pk>/', SemesterUpdateView.as_view(), name='updatesemester' ),
     #goals
     path('creategoals/', GoalsListCreateView.as_view(), name='goals-list-create'),
     path('goals/<uuid:pk>/', GoalsDetailView.as_view(), name='goals-detail'),
@@ -64,4 +69,9 @@ urlpatterns = [
     path('goalsched/<uuid:pk>/', GoalScheduleDetailView.as_view(), name='goalsched-detail'),
     path('deletegoalsched/<int:pk>/', GoalScheduleDeleteView.as_view(), name='goalsched-delete'),
     path('updategoalsched/<int:pk>/',GoalScheduleUpdateView.as_view(), name='updateschedprog' ),
+    #report
+    path('createreport/', ReportListCreateView.as_view(), name='report-list-create'),
+    path('report/<uuid:pk>/', ReportDetailView.as_view(), name='report-detail'),
+    path('deletereport/<int:pk>/', ReportDeleteView.as_view(), name='report-delete'),
+    path('updatereport/<int:pk>/', ReportUpdateView.as_view(), name='updatereport' ),
 ]
