@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/timer/countdown/countdown_timer.dart'; // Import TimerPage
 
 class TaskCard extends StatefulWidget {
   final String taskName;
   final String subject;
   final String duration;
 
-  const TaskCard({super.key, 
+  const TaskCard({
+    super.key,
     required this.taskName,
     required this.subject,
     required this.duration,
@@ -16,14 +18,6 @@ class TaskCard extends StatefulWidget {
 }
 
 class _TaskCardState extends State<TaskCard> {
-  bool isChecked = false;
-
-  void toggleCheckbox() {
-    setState(() {
-      isChecked = !isChecked;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -39,23 +33,17 @@ class _TaskCardState extends State<TaskCard> {
           Row(
             children: [
               GestureDetector(
-                onTap: toggleCheckbox,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isChecked ? Colors.green : Colors.white,
-                    border: Border.all(
-                        color: Colors.black26), // Border for visual clarity
-                  ),
-                  child: isChecked
-                      ? const Icon(
-                          Icons.check,
-                          size: 16,
-                          color: Colors.white,
-                        )
-                      : null,
+                onTap: () {
+                  // Navigate to TimerPage
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TimerPage()),
+                  );
+                },
+                child: const Icon(
+                  Icons.access_time, // Time icon
+                  size: 24,
+                  color: Colors.blue, // Icon color
                 ),
               ),
               const SizedBox(width: 10),

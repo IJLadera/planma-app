@@ -10,9 +10,9 @@ class Timetable extends StatelessWidget {
       body: SfCalendar(
         view: CalendarView.week,
         dataSource: ClassScheduleDataSource(getWeeklyClasses()),
-        timeSlotViewSettings: const TimeSlotViewSettings( // This is where you edit if the start and end time sa table
+        timeSlotViewSettings: const TimeSlotViewSettings(
           startHour: 6,
-          endHour: 1,
+          endHour: 24,
         ),
         onTap: (CalendarTapDetails details) {
           if (details.appointments != null &&
@@ -73,7 +73,7 @@ class Timetable extends StatelessWidget {
                 children: [
                   const Icon(Icons.book, color: Colors.blueAccent),
                   const SizedBox(width: 10),
-                  Expanded(
+                  Expanded( 
                     child: Text(
                       appointment.subject,
                       style: Theme.of(context).textTheme.bodyLarge,
