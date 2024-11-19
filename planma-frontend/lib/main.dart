@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/core/dashboard.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/Providers/time_provider.dart';
@@ -19,7 +20,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => UserProvider()),
       ],
       child: MaterialApp(
-        home: const LogIn(), // Login as the entry point
+        //home: const LogIn(), // Login as the entry point
+        home: Dashboard(),
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue,

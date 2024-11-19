@@ -4,14 +4,18 @@ import 'package:planma_app/event/view_event.dart';
 class EventCard extends StatelessWidget {
   final String eventName;
   final String timePeriod;
-  final String code;
-  final String room;
+  final String description;
+  final String location;
+  final String date;
+  final String type;
 
   const EventCard({
     required this.eventName,
     required this.timePeriod,
-    required this.code,
-    required this.room,
+    required this.description,
+    required this.location,
+    required this.date,
+    required this.type,
   });
 
   @override
@@ -26,9 +30,11 @@ class EventCard extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => ViewEvent(
                 eventName: eventName,
+                description: description,
+                location: location,
+                date: date,
                 timePeriod: timePeriod,
-                code: code,
-                room: room,
+                type: type,
               ),
             ),
           );
