@@ -10,7 +10,7 @@ urlpatterns = [
     path('deletetask/<int:pk>/', CustomTaskDeleteView.as_view(), name='task-delete'),
     path('updatetask/<int:pk>/',CustomTaskUpdateView.as_view(), name='updatetask' ),
     #events
-    path('createevent/', CustomEventListCreateView.as_view(), name='event-list-create'),
+    path('createevents/', CustomEventListCreateView.as_view(), name='event-list-create'),
     path('event/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
     path('deleteevent/<int:pk>/', CustomEventDeleteView.as_view(), name='event-delete'),
     path('updateevent/<int:pk>/',CustomEventUpdateView.as_view(), name='updateevent' ),

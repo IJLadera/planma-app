@@ -205,7 +205,7 @@ class CustomActivityDetailView(APIView):
         serializer = CustomActivitySerializer(act, many = True)
         
         return Response(serializer.data)
-    
+
 class CustomActivityDeleteView(APIView):
 
     permission_classes = [permissions.AllowAny]
@@ -765,18 +765,20 @@ class GoalScheduleUpdateView(APIView):
 class ReportListCreateView(APIView):
     
     permission_classes = [permissions.AllowAny]
-    def post(self, request):
+    def post(self, request, pk):
         data = request.data
-        #Testing filtering for activities
-        def update_product_count(student_id):
-            # Filter activity by category
-            filtered_by_studentid = ActivityLog.objects.filter(student_id=request.user.id).count()
-            # Get the activities (if it exists)
-            report = Report.objects.get(student_id=request.user.id)
-            # Update the product_count field in the order
-            Report.count_activities = filtered_by_studentid
-            report.save()
         serializer = ReportsSerializer(data=data)
+        #Testing filtering for activities
+        def update_product_count(stud_id):
+            # Filter activity by student id
+            filtered_by_studentid = ActivityLog.objects.filter(student_id=stud_id).count()
+            # Get the activities (if it exists)
+            acttot = Report.objects.get(student_id=stud_id)
+            # Update the product_count field in the order
+            Report.count_activities_total = filtered_by_studentid
+            acttot.save()
+
+        update_product_count(pk)
         if serializer.is_valid():
             serializer.save()
             return Response({**serializer.data}, status=status.HTTP_200_OK)
