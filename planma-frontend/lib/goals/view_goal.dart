@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/goals/edit_goal.dart';
+import 'package:planma_app/goals/edit_goal_session.dart';
 import 'package:planma_app/goals/widget/goal_card.dart';
 import 'package:planma_app/goals/widget/goal_detail_row.dart';
 
@@ -131,7 +132,12 @@ class ViewGoal extends StatelessWidget {
                         alignment: Alignment.center,
                         child: ElevatedButton(
                           onPressed: () {
-                            // Add session functionality
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditGoalSession(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
