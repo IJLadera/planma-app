@@ -68,12 +68,12 @@ class CustomEventListCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         data = request.data
-        data['student_id'] = request.user.id
+        # data['student_id'] = request.data.student_id
         
         serializer = CustomEventSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
+            return Response({**serializer.data}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         # Set the student field to the authenticated user on creation
@@ -183,7 +183,7 @@ class AttendedEventUpdateView(APIView):
 
 class CustomActivityListCreateView(APIView):
     
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         data = request.data
         serializer = CustomActivitySerializer(data=data)

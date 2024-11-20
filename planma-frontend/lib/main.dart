@@ -20,14 +20,17 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => UserProvider()),
       ],
       child: MaterialApp(
-        //home: const LogIn(), // Login as the entry point
-        home: Dashboard(),
+        home: LogIn(),
         debugShowCheckedModeBanner: false,
+          //home: Dashboard (username: 'jian),
         theme: ThemeData(
           primarySwatch: Colors.blue,
           scaffoldBackgroundColor: Colors.blue[50],
-        ),
-      ),
-    );
+      )
+    ), 
+        
+  );
+      
+    
   }
 }

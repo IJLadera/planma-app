@@ -61,6 +61,7 @@ DJOSER = {
         "user": "api.serializers.CustomUserSerializer",
         'LOGIN_FIELD': 'email',  # or 'username' depending on your configuration
         'USER_CREATE_PASSWORD_RETYPE': True,
+        # 'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     }
 }
 
