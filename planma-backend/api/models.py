@@ -3,7 +3,12 @@ from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
 import uuid
 from django.conf import settings
+from django_enumfield import enum
 
+class EnumFields(enum.Enum):
+    PENDING = 0
+    IN_PROGRESS = 1
+    COMPLETED = 2
 
 class AppUserManager(BaseUserManager):
     def create_user(self,firstname, lastname, email, username, password=None):
@@ -71,7 +76,7 @@ class CustomTask(models.Model):
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
     deadline = models.DateTimeField()
-    status = models.CharField(max_length=50)
+    status = enum.EnumField(EnumFields,default=EnumFields.PENDING)
     subject_code = models.CharField(max_length=50)
     
     # Foreign Key to CustomUser model
@@ -105,6 +110,7 @@ class CustomEvents(models.Model):
     )
     def __str__(self):
         return self.event_name
+
 class AttendedEvents(models.Model):
     
      # Primary Key
@@ -130,7 +136,7 @@ class CustomActivity(models.Model):
     scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
-    status = models.CharField(max_length=50) 
+    status = enum.EnumField(EnumFields, default=EnumFields.PENDING)
     # Foreign Key
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
@@ -187,6 +193,9 @@ class CustomSemester(models.Model):
     sem_start_date = models.DateField()
     sem_end_date = models.DateField()
 
+    def __str__(self):
+        return self.semester
+
 class CustomSub(models.Model):
     #Primary Key
     #subject_id = models.AutoField(primary_key=True) #mainly for database classification, not integration with frontend
@@ -204,6 +213,9 @@ class CustomSub(models.Model):
         on_delete=models.CASCADE,
         related_name='subsems', db_column='semester_id'
     ) 
+
+    def __str__(self):
+        return self.subject_title
 
 
 class CustomClass(models.Model):
@@ -226,6 +238,8 @@ class CustomClass(models.Model):
         on_delete=models.CASCADE,
         related_name='scheduled_classes', db_column='student_id'
     )
+
+    
 
 class AttendedClass(models.Model):
 
@@ -261,8 +275,11 @@ class Goals(models.Model):
     semester_id = models.ForeignKey(
         CustomSemester,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='subsems', db_column='semester_id'
+        related_name='goalsems', db_column='semester_id'
     ) 
+
+    def __str__(self):
+        return self.goal_name
 
 class GoalProgress(models.Model):
     
@@ -308,15 +325,29 @@ class Report(models.Model): #Unfinished as of now
     semester_id = models.ForeignKey(
         CustomSemester,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='subsems', db_column='semester_id'
+        related_name='repsems', db_column='semester_id'
     ) 
     #These are for the count within reports. 
     #These would have to be filtered with the Student ID
-    count_activities = models.IntegerField(default=0)
-    count_events = models.IntegerField(default=0)
-    count_tasks = models.IntegerField(default=0)
-    count_class = models.IntegerField(default=0)
-    count_subjects = models.IntegerField(default=0)
+    #Activities
+    count_activities_total = models.IntegerField(default=0)
+    count_activities_finished = models.IntegerField(default=0)
+    count_activities_missed = models.IntegerField(default=0)
+    #Events
+    count_events_total = models.IntegerField(default=0)
+    count_events_attended = models.IntegerField(default=0)
+    count_events_missed = models.IntegerField(default=0)
+    count_events_academictype = models.IntegerField(default=0)
+    count_events_personaltype = models.IntegerField(default=0)
+    #Tasks
+    count_tasks_total = models.IntegerField(default=0)
+    count_tasks_finished = models.IntegerField(default=0)
+    count_tasks_missed = models.IntegerField(default=0)
+    #class
+    count_class_total = models.IntegerField(default=0)
+    count_class_attended = models.IntegerField(default=0)
+    count_class_excused = models.IntegerField(default=0)
+    #goals
     count_goals = models.IntegerField(default=0)
-    #Sleep is weird, as it should count the sleep time of the user?
-    sleep_count = models.IntegerField(default=0)
+    #Sleep
+    count_sleep = models.IntegerField(default=0)
