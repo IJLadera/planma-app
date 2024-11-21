@@ -3,7 +3,8 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/reports/reportservice.dart';
-import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:jwt_decode/jwt_decode.dart';
  
 class ReportPage extends StatefulWidget {
   // ignore: prefer_const_constructors_in_immutables
@@ -13,18 +14,18 @@ class ReportPage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-final result = ReportAct().fetchActivities();
 class _MyHomePageState extends State<ReportPage> {
   late List<_ChartData> data;
   late TooltipBehavior _tooltip;
   @override
   void initState() {
-    data = [ //    X    y
-      _ChartData('CHN', 12),
+    final carreon = Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id'];
+    final result = ReportAct().fetchActivities(carreon);
+    data = [ //X y
+      _ChartData('CN', 12),
     ];
     _tooltip = TooltipBehavior(enable: true);
     super.initState();
-    print(result);
   }
  
   @override
@@ -47,6 +48,7 @@ class _MyHomePageState extends State<ReportPage> {
             ]));
   }
 }
+
  
 class _ChartData {
   _ChartData(this.x, this.y);
