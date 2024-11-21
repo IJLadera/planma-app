@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/subject/create_subject.dart';
-import 'package:planma_app/task/widget/search_bar.dart';
+import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/day_schedule.dart'; // Import the new file
 
 class ClassSchedule extends StatefulWidget {
@@ -13,7 +13,7 @@ class ClassSchedule extends StatefulWidget {
 class _ClassScheduleState extends State<ClassSchedule> {
   bool isByDate = true;
 
-  // List of days, which can be modified
+  // List of days
   List<String> days = [
     'Monday',
     'Tuesday',
@@ -22,6 +22,23 @@ class _ClassScheduleState extends State<ClassSchedule> {
     'Friday',
     'Saturday'
   ];
+
+  // Dummy data for subjects
+  List<Map<String, String>> subjects = [
+    {'name': 'Math 101', 'schedule': 'Monday 10:00 AM - 12:00 PM'},
+    {'name': 'Physics 202', 'schedule': 'Wednesday 1:00 PM - 3:00 PM'},
+    {'name': 'English 303', 'schedule': 'Friday 8:00 AM - 10:00 AM'},
+  ];
+
+  // List of semesters
+  List<String> semesters = [
+    '2024-2025 1st Semester',
+    '2024-2025 2nd Semester',
+    '- Add Semester -'
+  ];
+
+  // Selected semester
+  String selectedSemester = '2024-2025 1st Semester';
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +52,49 @@ class _ClassScheduleState extends State<ClassSchedule> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
             child: Row(
               children: [
-                Expanded(child: CustomSearchBar()),
+                // Dropdown Button for semesters
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: Colors.grey.shade400),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: selectedSemester,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        iconSize: 24,
+                        style:
+                            const TextStyle(color: Colors.black, fontSize: 16),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            if (newValue == '- Add Semester -') {
+                              // Navigate to a screen to add a semester
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditSemesterScreen(),
+                                ),
+                              );
+                            } else {
+                              selectedSemester = newValue!;
+                            }
+                          });
+                        },
+                        items: semesters
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 10),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.filter_list, color: Colors.black),
@@ -71,7 +130,19 @@ class _ClassScheduleState extends State<ClassSchedule> {
                       );
                     },
                   )
-                : Container(), // Empty container for "By Subject" view
+                : ListView.builder(
+                    itemCount: subjects.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: ListTile(
+                          title: Text(subjects[index]['name']!),
+                          subtitle: Text(subjects[index]['schedule']!),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -82,7 +153,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
             MaterialPageRoute(builder: (context) => AddClassScreen()),
           );
         },
-        backgroundColor: Color(0xFF173F70),
+        backgroundColor: const Color(0xFF173F70),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

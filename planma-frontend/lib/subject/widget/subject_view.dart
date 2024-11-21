@@ -3,10 +3,24 @@ import 'package:planma_app/subject/edit_subject.dart';
 import 'package:planma_app/subject/widget/subject_detail_row.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> subject;
+  final String subject_code;
+  final String subject_title;
+  final String semester;
+  final String start_time;
+  final String end_time;
+  final String room;
+  final String selected_days;
 
-  const SubjectDetailScreen({Key? key, required this.subject})
-      : super(key: key);
+  const SubjectDetailScreen({
+    Key? key,
+    required this.subject_code,
+    required this.subject_title,
+    required this.semester,
+    required this.start_time,
+    required this.end_time,
+    required this.room,
+    required this.selected_days,
+  }) : super(key: key);
 
   @override
   _SubjectDetailScreenState createState() => _SubjectDetailScreenState();
@@ -27,6 +41,33 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       default:
         return Colors.grey; // Default for unselected
     }
+  }
+
+  // Handle delete functionality (stub for now)
+  void _handleDelete() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Subject'),
+        content: Text('Are you sure you want to delete this subject?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              // Add delete functionality here
+              Navigator.pop(context);
+              Navigator.pop(context); // Go back after deletion
+            },
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -56,9 +97,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.blue),
-            onPressed: () {
-              // Handle delete action
-            },
+            onPressed: _handleDelete,
           ),
         ],
         title: const Text(
@@ -80,13 +119,34 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SubjectDetailRow(
-                    title: 'Title:', detail: widget.subject['name']),
+                  title: 'Code:',
+                  detail: widget.subject_code, // Directly using widget.property
+                ),
                 SubjectDetailRow(
-                    title: 'Code:', detail: widget.subject['code']),
+                  title: 'Title:',
+                  detail:
+                      widget.subject_title, // Directly using widget.property
+                ),
                 SubjectDetailRow(
-                    title: 'Time:', detail: widget.subject['time']),
+                  title: 'Semester:',
+                  detail: widget.semester, // Directly using widget.property
+                ),
                 SubjectDetailRow(
-                    title: 'Room:', detail: widget.subject['room'] ?? 'N/A'),
+                  title: 'Day:',
+                  detail:
+                      widget.selected_days, // Directly using widget.property
+                ),
+                SubjectDetailRow(
+                  title: 'Time:',
+                  detail:
+                      '${widget.start_time} - ${widget.end_time}', // Combining times
+                ),
+                SubjectDetailRow(
+                  title: 'Room:',
+                  detail: widget.room.isNotEmpty
+                      ? widget.room
+                      : 'N/A', // Handling room
+                ),
                 const SizedBox(height: 20),
                 Container(
                   padding:
