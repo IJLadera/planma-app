@@ -98,7 +98,8 @@ class _AddActivityState extends State<AddActivityState> {
       scheduledate: activityDate,
       starttime: to24HourFormat(startTime),
       endtime: to24HourFormat(endTime),
-      status: (context.read<UserProvider>().userName!), // need to change for now para walay error
+      status: "0",
+      //status: (context.read<UserProvider>().userName!), // need to change for now para walay error
       studentID: Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']
     );
 

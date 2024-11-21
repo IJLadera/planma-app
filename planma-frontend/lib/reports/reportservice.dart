@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:planma_app/Providers/user_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 
 class ReportAct {
   final String baseUrl = "http://127.0.0.1:8000/api";
@@ -12,11 +13,9 @@ class ReportAct {
     return prefs.getString("access");
   }
 
-  Future<List<Map<String, dynamic>>?> fetchActivities() async {
-    final url = "$baseUrl/activities/";
+  Future<List<Map<String, dynamic>>?> fetchActivities(carreon) async {
+    final url = "$baseUrl/activities/$carreon";
     final String? token = await getToken();
-    print(token);
-
     if (token == null) {
       print("No token found! Please log in first.");
       return null;
