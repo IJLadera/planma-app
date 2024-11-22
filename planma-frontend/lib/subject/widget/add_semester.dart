@@ -18,7 +18,7 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Semester'),
+        title: const Text('Add Semester'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

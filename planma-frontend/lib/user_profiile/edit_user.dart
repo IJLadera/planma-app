@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/userprof_provider.dart';
+import 'package:planma_app/activities/create_activity.dart';
+import 'package:provider/provider.dart';
 
 class EditProfileScreen extends StatelessWidget {
   final String username;
@@ -97,6 +100,7 @@ class EditProfileScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
+                    context.read<UserProfileProvider>().updateUserProfile(firstNameController.text, lastNameController.text, usernameController.text); 
                     Navigator.pop(context, {
                       'username': usernameController.text,
                       'firstName': firstNameController.text,
