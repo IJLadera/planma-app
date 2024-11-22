@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 
 class EditClass extends StatefulWidget {
@@ -16,7 +17,12 @@ class _EditClassState extends State<EditClass> {
   final _endTimeController = TextEditingController();
 
   String? _selectedSemester;
-  final List<String> _semesters = ['1', '2', 'Summer'];
+  String selectedSemester = '2024-2025 1st Semester';
+  List<String> semesters = [
+    '2024-2025 1st Semester',
+    '2024-2025 2nd Semester',
+    '- Add Semester -'
+  ];
   final Set<String> _selectedDays = {};
 
   // Method to select time for start or end
@@ -91,12 +97,20 @@ class _EditClassState extends State<EditClass> {
                       _subjectTitleController, 'Subject Title'),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
-                    'Semester',
-                    _selectedSemester,
-                    _semesters,
-                    (value) {
+                    label: 'Semester',
+                    value: selectedSemester,
+                    items: semesters,
+                    onChanged: (String? value) {
                       setState(() {
-                        _selectedSemester = value;
+                        if (value == '- Add Semester -') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EditSemesterScreen()),
+                          );
+                        } else {
+                          selectedSemester = value!;
+                        }
                       });
                     },
                   ),

@@ -24,7 +24,7 @@ class _TasksPageState extends State<TasksPage> {
         children: [
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
             child: Row(
               children: [
                 Expanded(child: CustomSearchBar()), // Add search bar here

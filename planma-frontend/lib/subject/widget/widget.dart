@@ -98,42 +98,45 @@ class CustomWidgets {
       ),
     );
   }
-  
+
   // Method to build a dropdown field with custom design
-  static Widget buildDropdownField(
-    String label,
-    String? value,
-    List<String> items,
-    Function(String?) onChanged,
-  ) {
+  static Widget buildDropdownField({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+    Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
+    Color labelColor = Colors.black,
+    Color textColor = Colors.black,
+    double borderRadius = 30.0,
+    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    double fontSize = 14.0,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
-        borderRadius: BorderRadius.circular(30),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
-      child: SizedBox(
-        width: 400,
-        child: DropdownButtonFormField<String>(
-          value: value,
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: const TextStyle(
-              color: Colors.black,
-            ),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.all(16),
+      child: DropdownButtonFormField<String>(
+        value: value,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: labelColor,
           ),
-          items: items.map((item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item,
-                style: const TextStyle(fontSize: 14, color: Colors.black),
-              ),
-            );
-          }).toList(),
-          onChanged: (value) => onChanged(value),
+          border: InputBorder.none,
+          contentPadding: contentPadding,
         ),
+        items: items.map((item) {
+          return DropdownMenuItem<String>(
+            value: item,
+            child: Text(
+              item,
+              style: TextStyle(fontSize: fontSize, color: textColor),
+            ),
+          );
+        }).toList(),
+        onChanged: onChanged,
       ),
     );
   }
