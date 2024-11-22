@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/authentication/forgot_password.dart';
 import 'package:planma_app/authentication/sign_up.dart';
 import 'package:planma_app/core/dashboard.dart';
@@ -62,6 +63,7 @@ class _LogInState extends State<LogIn> {
         userName: email,
         accessToken: response['access'],
         refreshToken: response['refresh']);
+      context.read<UserProfileProvider>().init();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

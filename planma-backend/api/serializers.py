@@ -11,7 +11,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 class CustomUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         model = CustomUser
-        fields = ('student_id', 'email', 'firstname', 'lastname', 'username')
+        fields = ('student_id', 'username', 'firstname', 'lastname')
 
 
 
@@ -98,7 +98,7 @@ class AttendedClassSerializer(serializers.ModelSerializer):
         fields = ['att_class_id', 'classsched_id', 'date', 
                   'isExcused', 'hasAttended']
 
-class CustomSemesterSerializer(serializers.modelSerializer):
+class CustomSemesterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomSemester
         fields = ['semester_id', 'acad_year_start', 'acad_year_end',
@@ -127,6 +127,10 @@ class ReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ['report_id', 'student_id', 'semester_id',
-                  'count_activities', 'count_events',
-                  'count_tasks', 'count_subjects', 'count_goals',
-                  'sleep_count']
+                  'count_activities_total', 'count_activities_finished',
+                  'count_activities_missed', 'count_events_total', 
+                  'count_events_attended', 'count_events_missed', 
+                  'counts_events_academictype', 'count_events_personaltype',
+                  'count_tasks_total', 'count_tasks_finished', 'count_tasks_missed',
+                  'count_class_total', 'count_class_attended', 'count_class_excused',
+                  'count_goals', 'count_sleep']

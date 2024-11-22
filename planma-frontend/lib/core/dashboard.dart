@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/activities/activity_page.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/core/widget/button_sheet.dart';
@@ -11,6 +12,7 @@ import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
 import 'package:planma_app/user_profiile/user_page.dart';
+import 'package:planma_app/reports/reporttest.dart';
 import 'package:provider/provider.dart';
 
 class Dashboard extends StatelessWidget {
@@ -21,7 +23,7 @@ class Dashboard extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Hello, ${context.watch<UserProvider>().userName}',
+          'Hello, ${context.watch<UserProfileProvider>().username}',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
