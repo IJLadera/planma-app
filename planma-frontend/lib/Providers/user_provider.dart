@@ -27,6 +27,7 @@ class UserProvider extends ChangeNotifier {
     _refreshToken = refreshToken;
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setString("access", accessToken);
+    await sharedPreferences.setString("refresh", refreshToken);
     notifyListeners();
   }
   void setName (String name){

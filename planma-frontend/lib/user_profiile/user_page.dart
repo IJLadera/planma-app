@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/user_profiile/edit_user.dart';
+import 'package:provider/provider.dart';
 
 class UserProfileScreen extends StatefulWidget {
   @override
@@ -7,12 +10,13 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
-  String username = 'Johndoe';
-  String firstName = 'John';
-  String lastName = 'Doe';
 
   @override
   Widget build(BuildContext context) {
+    String? username = context.watch<UserProfileProvider>().username;
+    String? firstName = context.watch<UserProfileProvider>().firstName;
+    String? lastName = context.watch<UserProfileProvider>().lastName;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -39,7 +43,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              username,
+              username!,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -59,9 +63,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditProfileScreen(
-                      username: username,
-                      firstName: firstName,
-                      lastName: lastName,
+                      username: username!,
+                      firstName: firstName!,
+                      lastName: lastName!,  
                     ),
                   ),
                 );
