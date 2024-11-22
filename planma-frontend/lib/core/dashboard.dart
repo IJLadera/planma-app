@@ -135,10 +135,10 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Colors.red,
-                    icon: FontAwesomeIcons.flag,
+                    color: const Color.fromARGB(255, 144, 144, 144),
+                    icon: FontAwesomeIcons.chartBar,
                     title: 'Reports',
-                    subtitle: 'none',
+                    subtitle: 'Weekly Report',
                     onPressed: () {
                       Navigator.push(
                         context,
