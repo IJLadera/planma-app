@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/subject/create_subject.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
-import 'package:planma_app/subject/widget/day_schedule.dart'; // Import the new file
+import 'package:planma_app/subject/widget/day_schedule.dart';
+import 'package:planma_app/subject/widget/widget.dart'; // Assuming this contains `CustomWidgets`
 
 class ClassSchedule extends StatefulWidget {
-  const ClassSchedule({super.key});
+  const ClassSchedule({Key? key}) : super(key: key);
 
   @override
   _ClassScheduleState createState() => _ClassScheduleState();
@@ -14,7 +15,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
   bool isByDate = true;
 
   // List of days
-  List<String> days = [
+  final List<String> days = [
     'Monday',
     'Tuesday',
     'Wednesday',
@@ -24,14 +25,14 @@ class _ClassScheduleState extends State<ClassSchedule> {
   ];
 
   // Dummy data for subjects
-  List<Map<String, String>> subjects = [
+  final List<Map<String, String>> subjects = [
     {'name': 'Math 101', 'schedule': 'Monday 10:00 AM - 12:00 PM'},
     {'name': 'Physics 202', 'schedule': 'Wednesday 1:00 PM - 3:00 PM'},
     {'name': 'English 303', 'schedule': 'Friday 8:00 AM - 10:00 AM'},
   ];
 
   // List of semesters
-  List<String> semesters = [
+  final List<String> semesters = [
     '2024-2025 1st Semester',
     '2024-2025 2nd Semester',
     '- Add Semester -'
@@ -52,47 +53,31 @@ class _ClassScheduleState extends State<ClassSchedule> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
             child: Row(
               children: [
-                // Dropdown Button for semesters
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: selectedSemester,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        iconSize: 24,
-                        style:
-                            const TextStyle(color: Colors.black, fontSize: 16),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            if (newValue == '- Add Semester -') {
-                              // Navigate to a screen to add a semester
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditSemesterScreen(),
-                                ),
-                              );
-                            } else {
-                              selectedSemester = newValue!;
-                            }
-                          });
-                        },
-                        items: semesters
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
+                  child: CustomWidgets.buildDropdownField(
+                    label: 'Semester',
+                    value: selectedSemester,
+                    items: semesters,
+                    onChanged: (String? value) {
+                      setState(() {
+                        if (value == '- Add Semester -') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditSemesterScreen(),
+                            ),
                           );
-                        }).toList(),
-                      ),
-                    ),
+                        } else if (value != null) {
+                          selectedSemester = value;
+                        }
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -150,7 +135,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddClassScreen()),
+            MaterialPageRoute(builder: (context) => const AddClassScreen()),
           );
         },
         backgroundColor: const Color(0xFF173F70),

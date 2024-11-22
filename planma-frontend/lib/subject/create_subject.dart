@@ -72,13 +72,20 @@ class _AddClassScreenState extends State<AddClassScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => EditSemesterScreen()),
+                              builder: (context) => EditSemesterScreen(),
+                            ),
                           );
                         } else {
                           selectedSemester = value!;
                         }
                       });
                     },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
                   ),
                   const SizedBox(height: 16),
                   const Text(

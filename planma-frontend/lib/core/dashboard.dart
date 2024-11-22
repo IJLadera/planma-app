@@ -13,10 +13,7 @@ import 'package:planma_app/timetable/calendar.dart';
 import 'package:planma_app/user_profiile/user_page.dart';
 import 'package:provider/provider.dart';
 
-
 class Dashboard extends StatelessWidget {
-  
-
   const Dashboard({super.key});
 
   @override
@@ -132,6 +129,30 @@ class Dashboard extends StatelessWidget {
                       );
                     },
                   ),
+                  const SizedBox(height: 15),
+                  MenuButtonWidget(
+                      color: Color(0xFF535D88),
+                      icon: FontAwesomeIcons.moon,
+                      title: 'Sleep',
+                      subtitle: '',
+                      onPressed: () {
+                        //   Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => SleepPage()),
+                        // );
+                      }),
+                  const SizedBox(height: 15),
+                  MenuButtonWidget(
+                      color: Color(0xFF537488),
+                      icon: Icons.bar_chart_outlined,
+                      title: 'Reports',
+                      subtitle: '',
+                      onPressed: () {
+                        //   Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => ReportPage()),
+                        // );
+                      }),
                 ],
               ),
             ),

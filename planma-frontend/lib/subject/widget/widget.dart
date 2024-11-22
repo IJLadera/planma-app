@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class DayButton extends StatelessWidget {
   final String day;
@@ -19,7 +20,7 @@ class DayButton extends StatelessWidget {
       onTap: onTap,
       child: CircleAvatar(
         radius: 16,
-        backgroundColor: isSelected ? Colors.blue : Colors.grey[200],
+        backgroundColor: isSelected ? Color(0xFFF5F5F5) : Colors.grey[200],
         child: Text(
           day,
           style: TextStyle(
@@ -37,7 +38,7 @@ class CustomWidgets {
       TextEditingController controller, String labelText) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
@@ -117,26 +118,46 @@ class CustomWidgets {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            color: labelColor,
-          ),
-          border: InputBorder.none,
-          contentPadding: contentPadding,
-        ),
-        items: items.map((item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(
-              item,
-              style: TextStyle(fontSize: fontSize, color: textColor),
+      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          hint: Text(
+            label,
+            style: TextStyle(
+              color: labelColor,
+              fontSize: fontSize,
             ),
-          );
-        }).toList(),
-        onChanged: onChanged,
+          ),
+          value: value,
+          onChanged: onChanged,
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                item,
+                style: TextStyle(fontSize: fontSize, color: textColor),
+              ),
+            );
+          }).toList(),
+          buttonStyleData: ButtonStyleData(
+            padding: contentPadding,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+          ),
+          dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+              color: Colors.white, // Background color of the dropdown menu
+            ),
+          ),
+          iconStyleData: IconStyleData(
+            icon: Icon(Icons.arrow_drop_down, color: labelColor),
+            iconSize: 24,
+          ),
+        ),
       ),
     );
   }
