@@ -14,7 +14,7 @@ class ReportAct {
   }
 
   Future<List<Map<String, dynamic>>?> fetchActivities(carreon) async {
-    final url = "$baseUrl/activities/$carreon";
+    final url = "$baseUrl/activities/$carreon/";
     final String? token = await getToken();
     if (token == null) {
       print("No token found! Please log in first.");
