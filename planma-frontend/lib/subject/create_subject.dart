@@ -72,7 +72,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => EditSemesterScreen(),
+                              builder: (context) => AddSemesterScreen(),
                             ),
                           );
                         } else {

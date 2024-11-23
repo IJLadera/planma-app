@@ -103,7 +103,14 @@ class CustomSemesterSerializer(serializers.ModelSerializer):
         model = CustomSemester
         fields = ['semester_id', 'acad_year_start', 'acad_year_end',
                   'year_level', 'semester', 'sem_start_date',
-                  'sem_end_date']    
+                  'sem_end_date']
+    def validate(self, data):
+        if data['acad_year_end'] <= data['acad_year_start']:
+            raise serializers.ValidationError("Academic year end must be greater than start year.")
+        if data['sem_start_date'] >= data['sem_end_date']:
+            raise serializers.ValidationError("Start date must be before end date.")
+        return data
+                
 class GoalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Goals
