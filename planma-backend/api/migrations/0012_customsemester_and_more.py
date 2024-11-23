@@ -15,8 +15,8 @@ class Migration(migrations.Migration):
             name='CustomSemester',
             fields=[
                 ('semester_id', models.AutoField(primary_key=True, serialize=False)),
-                ('acad_year_start', models.DateField()),
-                ('acad_year_end', models.DateField()),
+                ('acad_year_start', models.IntegerField()),
+                ('acad_year_end', models.IntegerField()),
                 ('year_level', models.CharField(max_length=20)),
                 ('semester', models.CharField(max_length=10)),
                 ('sem_start_date', models.DateField()),

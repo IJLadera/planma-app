@@ -106,7 +106,7 @@ class _EditClassState extends State<EditClass> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => EditSemesterScreen()),
+                                builder: (context) => AddSemesterScreen()),
                           );
                         } else {
                           selectedSemester = value!;

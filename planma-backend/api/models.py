@@ -181,20 +181,32 @@ class UserPref(models.Model):
     )
 
 class CustomSemester(models.Model):
+    YEAR_LEVEL_CHOICES = [
+        ('1st Year', '1st Year'),
+        ('2nd Year', '2nd Year'),
+        ('3rd Year', '3rd Year'),
+        ('4th Year', '4th Year'),
+        ('5th Year', '5th Year'),
+    ]
+
+    SEMESTER_CHOICES = [
+        ('1st Semester', '1st Semester'),
+        ('2nd Semester', '2nd Semester'),
+    ]
     
-     # Primary Key
+    # Primary Key
     semester_id = models.AutoField(primary_key=True)
 
     # Class Details
-    acad_year_start = models.DateField()
-    acad_year_end = models.DateField()
-    year_level = models.CharField(max_length=20)
-    semester = models.CharField(max_length=10)
+    acad_year_start = models.PositiveIntegerField()
+    acad_year_end = models.PositiveIntegerField()
+    year_level = models.CharField(max_length=9, choices=YEAR_LEVEL_CHOICES)
+    semester = models.CharField(max_length=12, choices=SEMESTER_CHOICES)
     sem_start_date = models.DateField()
     sem_end_date = models.DateField()
 
     def __str__(self):
-        return self.semester
+        return f"{self.acad_year_start}-{self.acad_year_end} {self.semester}"
 
 class CustomSub(models.Model):
     #Primary Key

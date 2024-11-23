@@ -1,9 +1,16 @@
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import *
+
+# router = DefaultRouter()
+# router.register(r'semesters', SemesterViewSet, basename='semester')
 
 urlpatterns = [
     path ('djoser/', include ('djoser.urls')),
     path ('auth/', include ('djoser.urls.jwt')),
+    #semester
+    path('semesters/', SemesterListView.as_view(), name='semester-list-create'),
+    path('semesters/<int:pk>/', SemesterDeleteView.as_view(), name='semester-delete'),
     #tasks
     path('createtask/', CustomTaskListCreateView.as_view(), name='task-list-create'),
     path('tasks/<uuid:pk>/', CustomTaskDetailView.as_view(), name='task-detail'),

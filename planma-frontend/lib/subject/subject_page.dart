@@ -64,7 +64,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => EditSemesterScreen(),
+                              builder: (context) => AddSemesterScreen(),
                             ),
                           );
                         } else if (value != null) {
