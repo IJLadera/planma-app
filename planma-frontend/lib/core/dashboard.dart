@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/activities/activity_page.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/core/widget/button_sheet.dart';
@@ -14,10 +15,7 @@ import 'package:planma_app/user_profiile/user_page.dart';
 import 'package:planma_app/reports/reporttest.dart';
 import 'package:provider/provider.dart';
 
-
 class Dashboard extends StatelessWidget {
-  
-
   const Dashboard({super.key});
 
   @override
@@ -25,7 +23,7 @@ class Dashboard extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Hello, ${context.watch<UserProvider>().userName}',
+          'Hello, ${context.watch<UserProfileProvider>().username}',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -135,17 +133,28 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Colors.red,
-                    icon: FontAwesomeIcons.flag,
-                    title: 'Reports',
-                    subtitle: 'none',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ReportPage()),
-                      );
-                    },
-                  ),
+                      color: Color(0xFF535D88),
+                      icon: FontAwesomeIcons.moon,
+                      title: 'Sleep',
+                      subtitle: '',
+                      onPressed: () {
+                        //   Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => SleepPage()),
+                        // );
+                      }),
+                  const SizedBox(height: 15),
+                  MenuButtonWidget(
+                      color: Color(0xFF537488),
+                      icon: Icons.bar_chart_outlined,
+                      title: 'Reports',
+                      subtitle: '',
+                      onPressed: () {
+                        //   Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => ReportPage()),
+                        // );
+                      }),
                 ],
               ),
             ),

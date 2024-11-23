@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 
 class AddClassScreen extends StatefulWidget {
@@ -15,8 +16,12 @@ class _AddClassScreenState extends State<AddClassScreen> {
   final _startTimeController = TextEditingController();
   final _endTimeController = TextEditingController();
 
-  String? _selectedSemester;
-  final List<String> _semesters = ['1', '2', 'Summer'];
+  String selectedSemester = '2024-2025 1st Semester';
+  List<String> semesters = [
+    '2024-2025 1st Semester',
+    '2024-2025 2nd Semester',
+    '- Add Semester -'
+  ];
   final Set<String> _selectedDays = {};
 
   Future<void> _selectTime(
@@ -48,6 +53,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomWidgets.buildTextField(
                       _subjectCodeController, 'Subject Code'),
@@ -55,27 +61,45 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   CustomWidgets.buildTextField(
                       _subjectTitleController, 'Subject Title'),
                   const SizedBox(height: 16),
+                  // Dropdown for Semester
                   CustomWidgets.buildDropdownField(
-                    'Semester',
-                    _selectedSemester,
-                    _semesters,
-                    (value) => setState(() {
-                      _selectedSemester = value;
-                    }),
+                    label: 'Semester',
+                    value: selectedSemester,
+                    items: semesters,
+                    onChanged: (String? value) {
+                      setState(() {
+                        if (value == '- Add Semester -') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditSemesterScreen(),
+                            ),
+                          );
+                        } else {
+                          selectedSemester = value!;
+                        }
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
                   ),
                   const SizedBox(height: 16),
+                  const Text(
+                    'Days',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      for (var day in [
-                        'S',
-                        'M',
-                        'T',
-                        'W',
-                        'TH',
-                        'F',
-                        'Sa'
-                      ]) ...[
+                      for (var day in ['S', 'M', 'T', 'W', 'TH', 'F', 'Sa'])
                         DayButton(
                           day: day,
                           isSelected: _selectedDays.contains(day),
@@ -89,29 +113,30 @@ class _AddClassScreenState extends State<AddClassScreen> {
                             });
                           },
                         ),
-                        const SizedBox(width: 10),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 16),
+                  // Time Pickers
                   Row(
                     children: [
                       Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'Start Time',
-                          _startTimeController,
-                          context,
-                          (context) =>
+                        child: GestureDetector(
+                          onTap: () =>
                               _selectTime(context, _startTimeController),
+                          child: AbsorbPointer(
+                            child: CustomWidgets.buildTextField(
+                                _startTimeController, 'Start Time'),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'End Time',
-                          _endTimeController,
-                          context,
-                          (context) => _selectTime(context, _endTimeController),
+                        child: GestureDetector(
+                          onTap: () => _selectTime(context, _endTimeController),
+                          child: AbsorbPointer(
+                            child: CustomWidgets.buildTextField(
+                                _endTimeController, 'End Time'),
+                          ),
                         ),
                       ),
                     ],
@@ -132,14 +157,17 @@ class _AddClassScreenState extends State<AddClassScreen> {
                 String subjectCode = _subjectCodeController.text;
                 String subjectTitle = _subjectTitleController.text;
                 String room = _roomController.text;
+
                 print("Subject Code: $subjectCode");
                 print("Subject Title: $subjectTitle");
+                print("Semester: $selectedSemester");
                 print("Start Time: ${_startTimeController.text}");
                 print("End Time: ${_endTimeController.text}");
                 print("Room: $room");
+                print("Selected Days: $_selectedDays");
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF173F70),
+                backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

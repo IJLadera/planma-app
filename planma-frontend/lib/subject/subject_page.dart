@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/subject/create_subject.dart';
-import 'package:planma_app/task/widget/search_bar.dart';
-import 'package:planma_app/subject/widget/day_schedule.dart'; // Import the new file
+import 'package:planma_app/subject/widget/add_semester.dart';
+import 'package:planma_app/subject/widget/day_schedule.dart';
+import 'package:planma_app/subject/widget/widget.dart'; // Assuming this contains `CustomWidgets`
 
 class ClassSchedule extends StatefulWidget {
-  const ClassSchedule({super.key});
+  const ClassSchedule({Key? key}) : super(key: key);
 
   @override
   _ClassScheduleState createState() => _ClassScheduleState();
@@ -13,8 +14,8 @@ class ClassSchedule extends StatefulWidget {
 class _ClassScheduleState extends State<ClassSchedule> {
   bool isByDate = true;
 
-  // List of days, which can be modified
-  List<String> days = [
+  // List of days
+  final List<String> days = [
     'Monday',
     'Tuesday',
     'Wednesday',
@@ -22,6 +23,23 @@ class _ClassScheduleState extends State<ClassSchedule> {
     'Friday',
     'Saturday'
   ];
+
+  // Dummy data for subjects
+  final List<Map<String, String>> subjects = [
+    {'name': 'Math 101', 'schedule': 'Monday 10:00 AM - 12:00 PM'},
+    {'name': 'Physics 202', 'schedule': 'Wednesday 1:00 PM - 3:00 PM'},
+    {'name': 'English 303', 'schedule': 'Friday 8:00 AM - 10:00 AM'},
+  ];
+
+  // List of semesters
+  final List<String> semesters = [
+    '2024-2025 1st Semester',
+    '2024-2025 2nd Semester',
+    '- Add Semester -'
+  ];
+
+  // Selected semester
+  String selectedSemester = '2024-2025 1st Semester';
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +53,33 @@ class _ClassScheduleState extends State<ClassSchedule> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
             child: Row(
               children: [
-                Expanded(child: CustomSearchBar()),
+                Expanded(
+                  child: CustomWidgets.buildDropdownField(
+                    label: 'Semester',
+                    value: selectedSemester,
+                    items: semesters,
+                    onChanged: (String? value) {
+                      setState(() {
+                        if (value == '- Add Semester -') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditSemesterScreen(),
+                            ),
+                          );
+                        } else if (value != null) {
+                          selectedSemester = value;
+                        }
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
+                  ),
+                ),
                 const SizedBox(width: 10),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.filter_list, color: Colors.black),
@@ -71,7 +115,19 @@ class _ClassScheduleState extends State<ClassSchedule> {
                       );
                     },
                   )
-                : Container(), // Empty container for "By Subject" view
+                : ListView.builder(
+                    itemCount: subjects.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: ListTile(
+                          title: Text(subjects[index]['name']!),
+                          subtitle: Text(subjects[index]['schedule']!),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -79,10 +135,10 @@ class _ClassScheduleState extends State<ClassSchedule> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddClassScreen()),
+            MaterialPageRoute(builder: (context) => const AddClassScreen()),
           );
         },
-        backgroundColor: Color(0xFF173F70),
+        backgroundColor: const Color(0xFF173F70),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
