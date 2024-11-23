@@ -90,144 +90,42 @@ class EventsCreate {
   }
 }
 
+// Viewing Events
 
-// Edit Events
+// class EventsView {
+//   final String baseUrl = "http://127.0.0.1:8000/api";
 
-class EventsEdit {
-  final String baseUrl ="http://127.0.0.1:8000/api/";
+//   Future<String?> getToken() async {
+//     final prefs = await SharedPreferences.getInstance();
+//     return prefs.getString("access");
+//   }
 
-  Future<Map<String, dynamic>?> eventUP({
-    required String eventname,
-    required String eventdesc,
-    required String location,
-    required String scheduledate,
-    required String starttime,
-    required String endtime,
-    required String eventtype,
-  }) async {
-    final url = "${baseUrl}updateevent/";
+//   Future<List<Map<String, dynamic>>> fetchEvents() async {
+//     final url = "$baseUrl/events/";
+//     final String? token = await getToken();
 
-      try {
-        final response = await http.put(
-          Uri.parse(url),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode({
-            "eventname": eventname,
-            "eventdesc": eventdesc,
-            "location": location,
-            "scheduledate": scheduledate,
-            "starttime": starttime,
-            "endtime": endtime,
-            "eventtype": eventtype,
-          }),
-        );
+//     if (token == null) {
+//       print("No token found! Please log in first.");
+//       throw Exception("Authentication token not available");
+//     }
 
-      if (response.statusCode == 201) {
+//     try {
+//       final response = await http.get(
+//         Uri.parse(url),
+//         headers: {
+//           "Authorization": "Bearer $token",
+//         },
+//       );
 
-        return jsonDecode(response.body);
-      } else {
-
-        return {
-          "error": jsonDecode(response.body)["detail"] ??
-                "Failed to Update Events"
-        };
-      }
-    } catch (e) {
-      print("error An error occurred. Please try again later:$e.");
-        // Handle any errors that occurred during the request
-        return {"error": "An error occurred. Please try again later:$e."};
-    }
-  }
-}
-
-// for viewig created events
-
-class EventsView {
-  final String baseUrl = "http://127.0.0.1:8000/api";
-
-  Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("access");
-  }
-
-  Future<List<Map<String, dynamic>>?> fetchEvents() async {
-    final url = "$baseUrl/events/";
-    final String? token = await getToken();
-
-    if (token == null) {
-      print("No token found! Please log in first.");
-      return null;
-    }
-
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          "Authorization": "Bearer $token",
-        },
-      );
-
-      if (response.statusCode == 200) {
-        // Assuming the response body contains a list of events in JSON format
-        final List<dynamic> events = jsonDecode(response.body);
-        return events.map((event) => event as Map<String, dynamic>).toList();
-      } else {
-        print("Failed to fetch events: ${response.body}");
-        return null;
-      }
-    } catch (e) {
-      print("An error occurred while fetching events: $e");
-      return null;
-    }
-  }
-}
-
-
-//for deleting events that has been created
-
-class EventsDelete {
-  final String baseUrl ="http://127.0.0.1:8000/api/";
-
-  Future<Map<String, dynamic>?> eventDEL({
-    required String eventname,
-    required String eventdesc,
-    required String location,
-    required String scheduledate,
-    required String starttime,
-    required String endtime,
-    required String eventtype,
-  }) async {
-    final url = "${baseUrl}deleteevent/";
-
-      try {
-        final response = await http.delete(
-          Uri.parse(url),
-          headers: {"Content-Type": "application/json"},
-          // body: jsonEncode({
-          //   "eventname": eventname,
-          //   "eventdesc": eventdesc,
-          //   "location": location,
-          //   "scheduledate": scheduledate,
-          //   "starttime": starttime,
-          //   "endtime": endtime,
-          //   "eventtype": eventtype,
-          // }),
-        );
-
-      if (response.statusCode == 201) {
-
-        return jsonDecode(response.body);
-      } else {
-
-        return {
-          "error": jsonDecode(response.body)["detail"] ??
-                "Failed to Update Events"
-        };
-      }
-    } catch (e) {
-      print("error An error occurred. Please try again later:$e.");
-        // Handle any errors that occurred during the request
-        return {"error": "An error occurred. Please try again later:$e."};
-    }
-  }
-}
+//       if (response.statusCode == 200) {
+//         return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+//       } else {
+//         print("Failed to fetch events: ${response.body}");
+//         throw Exception("Failed to fetch events");
+//       }
+//     } catch (e) {
+//       print("Error fetching events: $e");
+//       throw Exception("An error occurred while fetching events.");
+//     }
+//   }
+// }
