@@ -25,6 +25,8 @@ class _MyHomePageState extends State<Report> {
     data = [
       //X y
       _ChartData('CN', 12),
+    data = [ //X y
+      _ChartData('${context.watch<ReportAct>().activName}', 12),
     ];
     _tooltip = TooltipBehavior(enable: true);
     super.initState();

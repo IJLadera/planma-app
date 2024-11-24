@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/create_subject.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/day_schedule.dart';
-import 'package:planma_app/subject/widget/widget.dart'; // Assuming this contains `CustomWidgets`
+import 'package:planma_app/subject/widget/widget.dart';
+import 'package:provider/provider.dart'; // Assuming this contains `CustomWidgets`
 
 class ClassSchedule extends StatefulWidget {
   const ClassSchedule({Key? key}) : super(key: key);
@@ -31,15 +33,24 @@ class _ClassScheduleState extends State<ClassSchedule> {
     {'name': 'English 303', 'schedule': 'Friday 8:00 AM - 10:00 AM'},
   ];
 
-  // List of semesters
-  final List<String> semesters = [
-    '2024-2025 1st Semester',
-    '2024-2025 2nd Semester',
-    '- Add Semester -'
-  ];
-
   // Selected semester
-  String selectedSemester = '2024-2025 1st Semester';
+  String? selectedSemester;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch semesters when the screen loads
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
+    semesterProvider.fetchSemesters().then((_) {
+      setState(() {
+        // Access the updated semesters from the provider
+        selectedSemester = semesterProvider.semesters.isNotEmpty
+            ? "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}"
+            : null;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,89 +58,107 @@ class _ClassScheduleState extends State<ClassSchedule> {
       appBar: AppBar(
         title: const Text('Class Schedule'),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: CustomWidgets.buildDropdownField(
-                    label: 'Semester',
-                    value: selectedSemester,
-                    items: semesters,
-                    onChanged: (String? value) {
-                      setState(() {
-                        if (value == '- Add Semester -') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditSemesterScreen(),
+      body: Consumer<SemesterProvider>(
+        builder: (context, semesterProvider, child) {
+          // Update semesters list every time it changes
+          List<String> semesters = semesterProvider.semesters
+              .map((semester) =>
+                  "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
+              .toList();
+          semesters.add('- Add Semester -');
+
+          return semesters.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: CustomWidgets.buildDropdownField(
+                              label: 'Semester',
+                              value: selectedSemester,
+                              items: semesters,
+                              onChanged: (String? value) {
+                                setState(() {
+                                  if (value == '- Add Semester -') {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            AddSemesterScreen(),
+                                      ),
+                                    );
+                                  } else if (value != null) {
+                                    selectedSemester = value;
+                                  }
+                                });
+                              },
+                              backgroundColor: const Color(0xFFF5F5F5),
+                              labelColor: Colors.black,
+                              textColor: Colors.black,
+                              borderRadius: 30.0,
+                              contentPadding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              fontSize: 14.0,
                             ),
-                          );
-                        } else if (value != null) {
-                          selectedSemester = value;
-                        }
-                      });
-                    },
-                    backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
-                    borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    fontSize: 14.0,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.filter_list, color: Colors.black),
-                  onSelected: (value) {
-                    setState(() {
-                      isByDate = value == 'By Date';
-                    });
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem<String>(
-                      value: 'By Date',
-                      child: Text('By Date',
-                          style: TextStyle(color: Colors.black)),
+                          ),
+                          const SizedBox(width: 10),
+                          PopupMenuButton<String>(
+                            icon: const Icon(Icons.filter_list,
+                                color: Colors.black),
+                            onSelected: (value) {
+                              setState(() {
+                                isByDate = value == 'By Date';
+                              });
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem<String>(
+                                value: 'By Date',
+                                child: Text('By Date',
+                                    style: TextStyle(color: Colors.black)),
+                              ),
+                              const PopupMenuItem<String>(
+                                value: 'By Subject',
+                                child: Text('By Subject',
+                                    style: TextStyle(color: Colors.black)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    const PopupMenuItem<String>(
-                      value: 'By Subject',
-                      child: Text('By Subject',
-                          style: TextStyle(color: Colors.black)),
+                    Expanded(
+                      child: isByDate
+                          ? ListView.builder(
+                              itemCount: days.length,
+                              itemBuilder: (context, index) {
+                                return DaySchedule(
+                                  day: days[index],
+                                  isByDate: isByDate,
+                                );
+                              },
+                            )
+                          : ListView.builder(
+                              itemCount: subjects.length,
+                              itemBuilder: (context, index) {
+                                return Card(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  child: ListTile(
+                                    title: Text(subjects[index]['name']!),
+                                    subtitle:
+                                        Text(subjects[index]['schedule']!),
+                                  ),
+                                );
+                              },
+                            ),
                     ),
                   ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: isByDate
-                ? ListView.builder(
-                    itemCount: days.length,
-                    itemBuilder: (context, index) {
-                      return DaySchedule(
-                        day: days[index],
-                        isByDate: isByDate,
-                      );
-                    },
-                  )
-                : ListView.builder(
-                    itemCount: subjects.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          title: Text(subjects[index]['name']!),
-                          subtitle: Text(subjects[index]['schedule']!),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

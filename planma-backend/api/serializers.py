@@ -103,7 +103,14 @@ class CustomSemesterSerializer(serializers.ModelSerializer):
         model = CustomSemester
         fields = ['semester_id', 'acad_year_start', 'acad_year_end',
                   'year_level', 'semester', 'sem_start_date',
-                  'sem_end_date']    
+                  'sem_end_date']
+    def validate(self, data):
+        if data['acad_year_end'] <= data['acad_year_start']:
+            raise serializers.ValidationError("Academic year end must be greater than start year.")
+        if data['sem_start_date'] >= data['sem_end_date']:
+            raise serializers.ValidationError("Start date must be before end date.")
+        return data
+                
 class GoalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Goals
@@ -123,14 +130,8 @@ class GoalScheduleSerializer(serializers.ModelSerializer):
         fields = ['goalschedule_id', 'goal_id', 'scheduled_start_time',
                   'scheduled_end_time']
 
-class ReportsSerializer(serializers.ModelSerializer):
+class SleepLogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Report
-        fields = ['report_id', 'student_id', 'semester_id',
-                  'count_activities_total', 'count_activities_finished',
-                  'count_activities_missed', 'count_events_total', 
-                  'count_events_attended', 'count_events_missed', 
-                  'counts_events_academictype', 'count_events_personaltype',
-                  'count_tasks_total', 'count_tasks_finished', 'count_tasks_missed',
-                  'count_class_total', 'count_class_attended', 'count_class_excused',
-                  'count_goals', 'count_sleep']
+        model = SleepLog
+        fields = ['sleep_log_id', 'student_id', 'start_time',
+                  'end_time', 'duration', 'date_logged']
