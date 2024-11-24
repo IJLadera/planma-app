@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, viewsets
 from .models import *
 from .serializers import *
 from rest_framework.views import APIView
@@ -589,7 +589,23 @@ class GoalsUpdateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 # Semester
+class SemesterListView(APIView):
+    permission_classes = [permissions.AllowAny]
 
+    def get(self, request):
+        semesters = CustomSemester.objects.all()
+        serializer = CustomSemesterSerializer(semesters, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = CustomSemesterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#Might delete
 class SemesterListCreateView(APIView):
     
     permission_classes = [permissions.AllowAny]
