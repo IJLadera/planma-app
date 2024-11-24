@@ -8,6 +8,7 @@ import 'package:planma_app/core/widget/button_sheet.dart';
 import 'package:planma_app/core/widget/menu_button.dart';
 import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/goals/goal_page.dart';
+import 'package:planma_app/reports/report_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
@@ -150,10 +151,11 @@ class Dashboard extends StatelessWidget {
                       title: 'Reports',
                       subtitle: '',
                       onPressed: () {
-                        //   Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => ReportPage()),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ReportsPage()),
+                        );
                       }),
                 ],
               ),

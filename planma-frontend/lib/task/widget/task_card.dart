@@ -21,8 +21,7 @@ class _TaskCardState extends State<TaskCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-          left: 10, top: 5, bottom: 5), // Left margin for the whole card
+      padding: const EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
           // Navigate to TimerPage
