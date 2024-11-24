@@ -828,25 +828,25 @@ class GoalScheduleUpdateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-#report
+#Sleep
 
-class ReportListCreateView(APIView):
+    permission_classes = [permissions.AllowAny]
+    
+    def put(self, request, pk):
+        data= request.data
+        repid= SleepLog.objects.get(report_id = pk)
+        serializer = SleepLogSerializer(instance=repid, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+class SleepLogListCreateView(APIView):
     
     permission_classes = [permissions.AllowAny]
-    def post(self, request, pk):
+    def post(self, request):
         data = request.data
-        serializer = ReportsSerializer(data=data)
-        #Testing filtering for activities
-        def update_product_count(stud_id):
-            # Filter activity by student id
-            filtered_by_studentid = ActivityLog.objects.filter(student_id=stud_id).count()
-            # Get the activities (if it exists)
-            acttot = Report.objects.get(student_id=stud_id)
-            # Update the product_count field in the order
-            Report.count_activities_total = filtered_by_studentid
-            acttot.save()
-
-        update_product_count(pk)
+        serializer = SleepLogSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({**serializer.data}, status=status.HTTP_200_OK)
@@ -854,43 +854,46 @@ class ReportListCreateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         # Set the student_id field to the authenticated user on creation
         
-class ReportDetailView(APIView):
+class SleepLogDetailView(APIView):
    
     permission_classes = [permissions.AllowAny]
 
     def get(self,request,pk):
         
         user = CustomUser.objects.get(student_id = pk)
-        rep = CustomSemester.objects.filter(student_id = user)
-        serializer = GoalProgressSerializer(rep, many = True)
-        
+        sleep = CustomTask.objects.filter(student_id = user)
+        serializer = CustomTaskSerializer(sleep, many = True)
+
         return Response(serializer.data)
     
-class ReportDeleteView(APIView):
+class SleepLogDeleteView(APIView):
 
     permission_classes = [permissions.AllowAny]
     
     def delete(self,request,pk):
         try:
             
-            deleterep = Report.objects.get(report_id = pk)
+            deletegoals = SleepLog.objects.get(goalschedule_id = pk)
             
-            deleterep.delete()
+            deletegoals.delete()
             
             return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except Report.DoesNotExist:
+        except SleepLog.DoesNotExist:
             return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class ReportUpdateView(APIView):
+class SleepLogUpdateView(APIView):
 
     permission_classes = [permissions.AllowAny]
     
     def put(self, request, pk):
         data= request.data
-        repid= Report.objects.get(report_id = pk)
-        serializer = ReportsSerializer(instance=repid, data=data)
+        sleeplog= SleepLog.objects.get(sleep_log_id = pk)
+        
+        serializer = GoalScheduleSerializer(instance=sleeplog, data=data)
         if serializer.is_valid():
+            
             serializer.save()
             return Response(serializer.data)
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+

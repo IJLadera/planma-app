@@ -5,29 +5,33 @@ import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/reports/reportservice.dart';
 import 'package:provider/provider.dart';
 import 'package:jwt_decode/jwt_decode.dart';
- 
-class ReportPage extends StatefulWidget {
+
+class Report extends StatefulWidget {
   // ignore: prefer_const_constructors_in_immutables
-  ReportPage({Key? key}) : super(key: key);
- 
+  Report({Key? key}) : super(key: key);
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<ReportPage> {
+class _MyHomePageState extends State<Report> {
   late List<_ChartData> data;
   late TooltipBehavior _tooltip;
   @override
   void initState() {
-    final carreon = Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id'];
+    final carreon =
+        Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id'];
     final result = ReportAct().fetchActivities(carreon);
-    data = [ //X y
+    data = [
+      //X y
       _ChartData('CN', 12),
+    data = [ //X y
+      _ChartData('${context.watch<ReportAct>().activName}', 12),
     ];
     _tooltip = TooltipBehavior(enable: true);
     super.initState();
   }
- 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,10 +53,9 @@ class _MyHomePageState extends State<ReportPage> {
   }
 }
 
- 
 class _ChartData {
   _ChartData(this.x, this.y);
- 
+
   final String x;
   final double y;
 }
