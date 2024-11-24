@@ -7,7 +7,8 @@ import 'package:jwt_decode/jwt_decode.dart';
 
 class ReportAct {
   final String baseUrl = "http://127.0.0.1:8000/api";
-
+  String? activityName;
+  String? get activName => activityName;
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString("access");
@@ -31,8 +32,9 @@ class ReportAct {
 
       if (response.statusCode == 200) {
         // Assuming the response body contains a list of events in JSON format
-        final List<dynamic> activities = jsonDecode(response.body);
-        return activities.map((activity) => activity as Map<String, dynamic>).toList();
+        final activities = json.decode(response.body);
+        activityName = activities['activity_name'];
+        print(activityName);
       } else {
         print("Failed to fetch events: ${response.body}");
         return null;

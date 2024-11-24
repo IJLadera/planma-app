@@ -76,9 +76,9 @@ urlpatterns = [
     path('goalsched/<uuid:pk>/', GoalScheduleDetailView.as_view(), name='goalsched-detail'),
     path('deletegoalsched/<int:pk>/', GoalScheduleDeleteView.as_view(), name='goalsched-delete'),
     path('updategoalsched/<int:pk>/',GoalScheduleUpdateView.as_view(), name='updateschedprog' ),
-    #report
-    path('createreport/', ReportListCreateView.as_view(), name='report-list-create'),
-    path('report/<uuid:pk>/', ReportDetailView.as_view(), name='report-detail'),
-    path('deletereport/<int:pk>/', ReportDeleteView.as_view(), name='report-delete'),
-    path('updatereport/<int:pk>/', ReportUpdateView.as_view(), name='updatereport' ),
+    #sleep log
+    path('createsleeplog/', SleepLogListCreateView.as_view(), name='sleeplog-list-create'),
+    path('sleeplog/<uuid:pk>/', SleepLogDetailView.as_view(), name='sleeplog-detail'),
+    path('deletesleeplog/<int:pk>/', SleepLogDeleteView.as_view(), name='sleeplog-delete'),
+    path('updatesleeplog/<int:pk>/', SleepLogUpdateView.as_view(), name='updatesleeplog' ),
 ]

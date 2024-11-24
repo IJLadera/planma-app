@@ -22,7 +22,7 @@ class _MyHomePageState extends State<ReportPage> {
     final carreon = Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id'];
     final result = ReportAct().fetchActivities(carreon);
     data = [ //X y
-      _ChartData('CN', 12),
+      _ChartData('${context.watch<ReportAct>().activName}', 12),
     ];
     _tooltip = TooltipBehavior(enable: true);
     super.initState();

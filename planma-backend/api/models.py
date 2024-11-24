@@ -323,43 +323,19 @@ class GoalSchedule(models.Model):
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
 
-class Report(models.Model): #Unfinished as of now
+class SleepLog(models.Model):
 
-    #Primary Key
-    report_id = models.AutoField(primary_key=True)
+    # Primary Key
+    sleep_log_id = models.AutoField(primary_key=True)
 
-    #Reports details
+    # Sleep Details
     student_id = models.ForeignKey(
-        CustomUser,  # This links to your custom user model
+        CustomUser,  # This links to your custom class model
         on_delete=models.CASCADE,
-        related_name='reportstud', db_column='student_id'
+        related_name='sleep', db_column='student_id'
     )
-    semester_id = models.ForeignKey(
-        CustomSemester,  # This links to your custom user model
-        on_delete=models.CASCADE,
-        related_name='repsems', db_column='semester_id'
-    ) 
-    #These are for the count within reports. 
-    #These would have to be filtered with the Student ID
-    #Activities
-    count_activities_total = models.IntegerField(default=0)
-    count_activities_finished = models.IntegerField(default=0)
-    count_activities_missed = models.IntegerField(default=0)
-    #Events
-    count_events_total = models.IntegerField(default=0)
-    count_events_attended = models.IntegerField(default=0)
-    count_events_missed = models.IntegerField(default=0)
-    count_events_academictype = models.IntegerField(default=0)
-    count_events_personaltype = models.IntegerField(default=0)
-    #Tasks
-    count_tasks_total = models.IntegerField(default=0)
-    count_tasks_finished = models.IntegerField(default=0)
-    count_tasks_missed = models.IntegerField(default=0)
-    #class
-    count_class_total = models.IntegerField(default=0)
-    count_class_attended = models.IntegerField(default=0)
-    count_class_excused = models.IntegerField(default=0)
-    #goals
-    count_goals = models.IntegerField(default=0)
-    #Sleep
-    count_sleep = models.IntegerField(default=0)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    duration = models.TimeField()
+    date_logged = models.DateField()
+
