@@ -6,13 +6,10 @@ import 'package:intl/intl.dart';
 
 class SemesterProvider with ChangeNotifier {
   List<Map<String, dynamic>> _semesters = [];
-  // Map<String, dynamic>? _selectedSemester;
   String? _accessToken;
 
   List<Map<String, dynamic>> get semesters => _semesters;
-  // Map<String, dynamic>? get selectedSemester => _selectedSemester;
   String? get accessToken => _accessToken;
-
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
@@ -38,7 +35,7 @@ class SemesterProvider with ChangeNotifier {
         throw Exception('Failed to fetch semesters. Status Code: ${response.statusCode}');
       }
     } catch (error) {
-      rethrow;
+      print(error);
     }
   }
 
@@ -51,6 +48,13 @@ class SemesterProvider with ChangeNotifier {
     required DateTime selectedStartDate,
     required DateTime selectedEndDate,
   }) async {
+    if (acadYearEnd <= acadYearStart) {
+      throw Exception("Academic year end must be greater than the start year.");
+    }
+    if (selectedStartDate.isAfter(selectedEndDate)) {
+      throw Exception("Start date must be before the end date.");
+    }
+
     final url = Uri.parse("${baseUrl}semesters/");
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -76,21 +80,15 @@ class SemesterProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 201) {
-        // Parse the response body to ensure consistent data format
         final newSemester = json.decode(response.body) as Map<String, dynamic>;
         _semesters.add(newSemester);
         notifyListeners();
       } else {
-        throw Exception('Failed to add semester. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to add semester. Status Code: ${response.statusCode}');
       }
     } catch (error) {
       rethrow;
     }
   }
-
-  // //Set the selected semester
-  // void selectSemester(Map<String, dynamic> semester) {
-  //   _selectedSemester = semester;
-  //   notifyListeners();
-  // }
 }
