@@ -79,16 +79,16 @@ class UserPrefSerializer(serializers.ModelSerializer):
                   'student_id']
         
 
-class CustomClassSerializer(serializers.ModelSerializer):
+class CustomClassScheduleSerializer(serializers.ModelSerializer):
     class Meta: 
-        model = CustomClass
+        model = CustomClassSchedule
         fields = ['classsched_id', 'subject_code', 'day_of_week',
                   'scheduled_start_time', 'scheduled_end_time',
                   'room', 'student_id']
 
-class CustomSubSerializer(serializers.ModelSerializer):
+class CustomSubjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomSub
+        model = CustomSubject
         fields = ['subject_code', 'subject_title',
                   'student_id', 'semester_id']
 
