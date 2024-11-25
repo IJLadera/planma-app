@@ -3,6 +3,7 @@ from rest_framework import generics, permissions, status, viewsets
 from .models import *
 from .serializers import *
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 
 #Tasks
 class CustomTaskListCreateView(APIView):
@@ -415,6 +416,8 @@ class CustomClassUpdateView(APIView):
         
 # Subject
 
+
+
 class CustomSubjectListCreateView(APIView):
     
     permission_classes = [permissions.AllowAny]
@@ -587,6 +590,54 @@ class GoalsUpdateView(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+# OLANGO VIEWS
+# Class Schedule & Subject
+class ClassScheduleViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = CustomClassSchedule.objects.all()
+    serializer_class = CustomClassScheduleSerializer
+
+    @action(detail=False, methods=['post'])
+    def add_schedule(self, request):
+        data = request.data
+        
+        # Extract data from request
+        subject_code = data.get('subject_code')
+        subject_title = data.get('subject_title')
+        semester_id = data.get('semester_id')
+        day_of_week = data.get('day_of_week')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        room = data.get('room')
+        student_id = data.get('student_id')
+
+        # Validate input
+        if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room, student_id]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Step 1: Create or get the Subject
+        subject, created = CustomSubject.objects.get_or_create(
+            subject_code=subject_code,
+            defaults={
+                'subject_title': subject_title,
+                'semester_id_id': semester_id,  # ForeignKey fields require the _id suffix for direct assignment
+                'student_id_id': student_id,
+            }
+        )
+
+        # Step 2: Create the Class Schedule
+        class_schedule = CustomClassSchedule.objects.create(
+            subject_code=subject,  # Pass the subject object
+            day_of_week=day_of_week,
+            scheduled_start_time=start_time,
+            scheduled_end_time=end_time,
+            room=room,
+            student_id_id=student_id,
+        )
+
+        # Serialize and return the created data
+        serializer = self.get_serializer(class_schedule)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # Semester
 class SemesterListView(APIView):
@@ -777,25 +828,25 @@ class GoalScheduleUpdateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-#report
+#Sleep
 
-class ReportListCreateView(APIView):
+    permission_classes = [permissions.AllowAny]
+    
+    def put(self, request, pk):
+        data= request.data
+        repid= SleepLog.objects.get(report_id = pk)
+        serializer = SleepLogSerializer(instance=repid, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+class SleepLogListCreateView(APIView):
     
     permission_classes = [permissions.AllowAny]
-    def post(self, request, pk):
+    def post(self, request):
         data = request.data
-        serializer = ReportsSerializer(data=data)
-        #Testing filtering for activities
-        def update_product_count(stud_id):
-            # Filter activity by student id
-            filtered_by_studentid = ActivityLog.objects.filter(student_id=stud_id).count()
-            # Get the activities (if it exists)
-            acttot = Report.objects.get(student_id=stud_id)
-            # Update the product_count field in the order
-            Report.count_activities_total = filtered_by_studentid
-            acttot.save()
-
-        update_product_count(pk)
+        serializer = SleepLogSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({**serializer.data}, status=status.HTTP_200_OK)
@@ -803,43 +854,46 @@ class ReportListCreateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         # Set the student_id field to the authenticated user on creation
         
-class ReportDetailView(APIView):
+class SleepLogDetailView(APIView):
    
     permission_classes = [permissions.AllowAny]
 
     def get(self,request,pk):
         
         user = CustomUser.objects.get(student_id = pk)
-        rep = CustomSemester.objects.filter(student_id = user)
-        serializer = GoalProgressSerializer(rep, many = True)
-        
+        sleep = CustomTask.objects.filter(student_id = user)
+        serializer = CustomTaskSerializer(sleep, many = True)
+
         return Response(serializer.data)
     
-class ReportDeleteView(APIView):
+class SleepLogDeleteView(APIView):
 
     permission_classes = [permissions.AllowAny]
     
     def delete(self,request,pk):
         try:
             
-            deleterep = Report.objects.get(report_id = pk)
+            deletegoals = SleepLog.objects.get(goalschedule_id = pk)
             
-            deleterep.delete()
+            deletegoals.delete()
             
             return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except Report.DoesNotExist:
+        except SleepLog.DoesNotExist:
             return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class ReportUpdateView(APIView):
+class SleepLogUpdateView(APIView):
 
     permission_classes = [permissions.AllowAny]
     
     def put(self, request, pk):
         data= request.data
-        repid= Report.objects.get(report_id = pk)
-        serializer = ReportsSerializer(instance=repid, data=data)
+        sleeplog= SleepLog.objects.get(sleep_log_id = pk)
+        
+        serializer = GoalScheduleSerializer(instance=sleeplog, data=data)
         if serializer.is_valid():
+            
             serializer.save()
             return Response(serializer.data)
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+

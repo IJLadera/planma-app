@@ -11,7 +11,7 @@ class TimerPage extends StatefulWidget {
 }
 
 class _TimerPageState extends State<TimerPage> {
-  bool disableBackButton = false; // Controls back button availability
+  bool disableBackButton = false; // Controls back button visibility
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class _TimerPageState extends State<TimerPage> {
 
     return WillPopScope(
       onWillPop: () async {
-        // Disable the back button functionality only when it's disabled
+        // Prevent back navigation only when the button is disabled
         return !disableBackButton;
       },
       child: Scaffold(
@@ -28,11 +28,11 @@ class _TimerPageState extends State<TimerPage> {
           backgroundColor: Colors.blue[100],
           title: const Text("Countdown Timer"),
           leading: disableBackButton
-              ? null // Remove back button if disabled
+              ? null // Hide back button if disabled
               : IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () {
-                    Navigator.pop(context); // Navigate back if enabled
+                    Navigator.pop(context); // Navigate back
                   },
                 ),
         ),

@@ -28,9 +28,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => EventsProvider()),
       ],
       child: MaterialApp(
-          //home: LogIn(),
+          home: Dashboard(),
           debugShowCheckedModeBanner: false,
-          home: AuthGate(),
+          //home: AuthGate(),
           theme: ThemeData(
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor: Colors.white,
@@ -47,16 +47,14 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-  Future<void> _loadProviders({
-    required BuildContext context,
-    required List<Function> initFunctions}) async {
-    
+  Future<void> _loadProviders(
+      {required BuildContext context,
+      required List<Function> initFunctions}) async {
     for (Function func in initFunctions) {
-      
       if (func is Future<dynamic> Function()) {
         print(func.toString());
         await func();
-      } else if (func is Future <dynamic> Function(BuildContext)) {
+      } else if (func is Future<dynamic> Function(BuildContext)) {
         if (context.mounted) {
           await func(context);
         }
@@ -67,53 +65,47 @@ class _AuthGateState extends State<AuthGate> {
     return;
   }
 
-Future<bool> _authCheck() async {
-  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-  String? accessToken = sharedPreferences.getString("access");
-  String? refreshToken = sharedPreferences.getString("refresh");
+  Future<bool> _authCheck() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String? accessToken = sharedPreferences.getString("access");
+    String? refreshToken = sharedPreferences.getString("refresh");
 
-  if (accessToken == null && refreshToken == null) {
-    return false;
-  } else {
-    return true;
+    if (accessToken == null && refreshToken == null) {
+      return false;
+    } else {
+      return true;
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _authCheck(), 
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasData) {
-          if (snapshot.data!) {
-            return FutureBuilder(
-              future: _loadProviders(
-                context: context, 
-                initFunctions: [
-                  context.read<UserProfileProvider>().init,
-                ]
-              ),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                return Dashboard();
-              }
-            );
-          } else {
-            return LogIn();
+        future: _authCheck(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
           }
-        }
-        return const Center(
-          child: Text('AuthorPage._authCheck has returned null value.'),
-        );
-      }
-    );
-    
+
+          if (snapshot.hasData) {
+            if (snapshot.data!) {
+              return FutureBuilder(
+                  future: _loadProviders(context: context, initFunctions: [
+                    context.read<UserProfileProvider>().init,
+                  ]),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return Dashboard();
+                  });
+            } else {
+              return LogIn();
+            }
+          }
+          return const Center(
+            child: Text('AuthorPage._authCheck has returned null value.'),
+          );
+        });
   }
 }
