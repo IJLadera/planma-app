@@ -29,6 +29,7 @@ class SemesterProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
+        // print("Semesters fetched: $data");
         _semesters = data.map((item) => Map<String, dynamic>.from(item)).toList();
         notifyListeners();
       } else {
