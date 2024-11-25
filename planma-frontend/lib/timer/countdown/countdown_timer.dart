@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/time_provider.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 class TimerPage extends StatefulWidget {
   const TimerPage({super.key});
@@ -12,6 +13,10 @@ class TimerPage extends StatefulWidget {
 
 class _TimerPageState extends State<TimerPage> {
   bool disableBackButton = false; // Controls back button visibility
+  bool isTimerMode = true; // Toggles between Timer and Stopwatch
+  Timer? _stopwatchTimer;
+  int _stopwatchElapsed = 0;
+  bool _isStopwatchRunning = false;
 
   @override
   Widget build(BuildContext context) {
@@ -19,120 +24,218 @@ class _TimerPageState extends State<TimerPage> {
 
     return WillPopScope(
       onWillPop: () async {
-        // Prevent back navigation only when the button is disabled
+        // Prevent back navigation when the stopwatch is running or timer is running
         return !disableBackButton;
       },
       child: Scaffold(
         backgroundColor: Colors.blue[100],
         appBar: AppBar(
           backgroundColor: Colors.blue[100],
-          title: const Text("Countdown Timer"),
+          title: const Text("Timer & Stopwatch"),
           leading: disableBackButton
-              ? null // Hide back button if disabled
+              ? null
               : IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () {
-                    Navigator.pop(context); // Navigate back
+                    Navigator.pop(context);
                   },
                 ),
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    height: 280,
-                    width: 280,
-                    child: CircularProgressIndicator(
-                      backgroundColor: Colors.white,
-                      value: timeProvider.initialTime > 0
-                          ? timeProvider.remainingTime /
-                              timeProvider.initialTime
-                          : 0,
-                      strokeWidth: 8,
-                    ),
+        body: Column(
+          children: [
+            // Toggle Buttons for Timer/Stopwatch
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ToggleButtons(
+                isSelected: [isTimerMode, !isTimerMode],
+                onPressed: timeProvider.isRunning || _isStopwatchRunning
+                    ? null // Disable switching between modes if timer or stopwatch is running
+                    : (index) {
+                        setState(() {
+                          isTimerMode = index == 0;
+                        });
+                      },
+                borderRadius: BorderRadius.circular(10),
+                selectedColor: Colors.white,
+                fillColor: Colors.blue,
+                children: const [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text("Timer"),
                   ),
-                  GestureDetector(
-                    onTap: () => _showTimePicker(context, timeProvider),
-                    child: Text(
-                      _formatTime(timeProvider.remainingTime),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 45,
-                      ),
-                    ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text("Stopwatch"),
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      if (timeProvider.isRunning) {
-                        timeProvider.pauseTimer();
-                        setState(() {
-                          disableBackButton = false; // Enable back button
-                        });
-                      } else {
-                        timeProvider.startTimer();
-                        setState(() {
-                          disableBackButton = true; // Disable back button
-                        });
-                      }
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.blue,
-                      ),
-                      child: Icon(
-                        timeProvider.isRunning ? Icons.pause : Icons.play_arrow,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  GestureDetector(
-                    onTap: () {
-                      timeProvider.resetTimer();
-                      setState(() {
-                        disableBackButton = false; // Enable back button
-                      });
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.blue,
-                      ),
-                      child: const Icon(
-                        Icons.stop,
-                        size: 35,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
+            ),
+
+            // Conditionally Render Timer or Stopwatch
+            Expanded(
+              child: isTimerMode
+                  ? _buildTimerView(context, timeProvider)
+                  : _buildStopwatchView(),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // Displays the CupertinoTimerPicker to select the timer duration
+  // Timer View
+  Widget _buildTimerView(BuildContext context, TimeProvider timeProvider) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                height: 280,
+                width: 280,
+                child: CircularProgressIndicator(
+                  backgroundColor: Colors.white,
+                  value: timeProvider.initialTime > 0
+                      ? timeProvider.remainingTime / timeProvider.initialTime
+                      : 0,
+                  strokeWidth: 8,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => _showTimePicker(context, timeProvider),
+                child: Text(
+                  _formatTime(timeProvider.remainingTime),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 45,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  if (timeProvider.isRunning) {
+                    timeProvider.pauseTimer();
+                    setState(() {
+                      disableBackButton = false;
+                    });
+                  } else {
+                    timeProvider.startTimer();
+                    setState(() {
+                      disableBackButton = true;
+                    });
+                  }
+                },
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue,
+                  ),
+                  child: Icon(
+                    timeProvider.isRunning ? Icons.pause : Icons.play_arrow,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20),
+              GestureDetector(
+                onTap: () {
+                  timeProvider.resetTimer();
+                  setState(() {
+                    disableBackButton = false;
+                  });
+                },
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue,
+                  ),
+                  child: const Icon(
+                    Icons.stop,
+                    size: 35,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  // Stopwatch View
+  Widget _buildStopwatchView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _formatTime(_stopwatchElapsed),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 45,
+            ),
+          ),
+          const SizedBox(height: 30),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: _toggleStopwatch,
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue,
+                  ),
+                  child: Icon(
+                    _isStopwatchRunning ? Icons.pause : Icons.play_arrow,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20),
+              GestureDetector(
+                onTap: _resetStopwatch,
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue,
+                  ),
+                  child: const Icon(
+                    Icons.stop,
+                    size: 35,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper Methods (for Timer)
   void _showTimePicker(BuildContext context, TimeProvider timerProvider) {
-    timerProvider.pauseTimer(); // Pause the timer during editing
+    timerProvider.pauseTimer();
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -141,8 +244,7 @@ class _TimerPageState extends State<TimerPage> {
           height: 300,
           child: CupertinoTimerPicker(
             mode: CupertinoTimerPickerMode.hms,
-            initialTimerDuration:
-                Duration(seconds: timerProvider.remainingTime),
+            initialTimerDuration: Duration(seconds: timerProvider.remainingTime),
             onTimerDurationChanged: (Duration newDuration) {
               if (newDuration.inSeconds > 0) {
                 timerProvider.setTime(newDuration.inSeconds);
@@ -154,11 +256,37 @@ class _TimerPageState extends State<TimerPage> {
     );
   }
 
-  // Formats the remaining time into a readable string (HH:MM:SS)
   String _formatTime(int totalSeconds) {
     int hours = totalSeconds ~/ 3600;
     int minutes = (totalSeconds % 3600) ~/ 60;
     int seconds = totalSeconds % 60;
     return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
+  }
+
+  // Stopwatch Methods
+  void _toggleStopwatch() {
+    if (_isStopwatchRunning) {
+      _stopwatchTimer?.cancel();
+    } else {
+      _stopwatchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          _stopwatchElapsed++;
+        });
+      });
+    }
+    setState(() {
+      _isStopwatchRunning = !_isStopwatchRunning;
+      // Disable back button when stopwatch is running
+      disableBackButton = _isStopwatchRunning;
+    });
+  }
+
+  void _resetStopwatch() {
+    _stopwatchTimer?.cancel();
+    setState(() {
+      _stopwatchElapsed = 0;
+      _isStopwatchRunning = false;
+      disableBackButton = false;
+    });
   }
 }
