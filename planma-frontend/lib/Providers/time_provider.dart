@@ -2,11 +2,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class TimeProvider with ChangeNotifier {
+  // Timer Logic
   int remainingTime = 0; // Time in seconds
   int initialTime = 0; // Original timer duration
   bool isRunning = false;
   Timer? _timer;
 
+  // Stopwatch Logic
+  int elapsedTime = 0; // Time in seconds
+  bool isStopwatchRunning = false;
+  Timer? _stopwatchTimer;
+
+  // Timer Methods
   void setTime(int seconds) {
     remainingTime = seconds;
     initialTime = seconds;
@@ -38,6 +45,30 @@ class TimeProvider with ChangeNotifier {
     _timer?.cancel();
     remainingTime = initialTime;
     isRunning = false;
+    notifyListeners();
+  }
+
+  // Stopwatch Methods
+  void startStopwatch() {
+    if (!isStopwatchRunning) {
+      isStopwatchRunning = true;
+      _stopwatchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        elapsedTime++;
+        notifyListeners();
+      });
+    }
+  }
+
+  void pauseStopwatch() {
+    _stopwatchTimer?.cancel();
+    isStopwatchRunning = false;
+    notifyListeners();
+  }
+
+  void resetStopwatch() {
+    _stopwatchTimer?.cancel();
+    elapsedTime = 0;
+    isStopwatchRunning = false;
     notifyListeners();
   }
 }
