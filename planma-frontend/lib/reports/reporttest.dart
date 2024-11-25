@@ -22,12 +22,12 @@ class _MyHomePageState extends State<Report> {
     final carreon =
         Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id'];
     final result = ReportAct().fetchActivities(carreon);
-    data = [
-      //X y
-      _ChartData('CN', 12),
-    data = [ //X y
-      _ChartData('${context.watch<ReportAct>().activName}', 12),
-    ];
+    // data = [
+    //   //X y
+    //   _ChartData('CN', 12),
+    // data = [ //X y
+    //   _ChartData('${context.watch<ReportAct>().activName}', 12),
+    // ];
     _tooltip = TooltipBehavior(enable: true);
     super.initState();
   }
