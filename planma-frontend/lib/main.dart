@@ -8,6 +8,7 @@ import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/Providers/time_provider.dart';
 import 'package:planma_app/Providers/user_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:planma_app/Providers/events_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => UserProfileProvider()),
         ChangeNotifierProvider(create: (context) => SemesterProvider()),
+        ChangeNotifierProvider(create: (context) => EventsProvider()),
       ],
       child: MaterialApp(
           home: Dashboard(),
