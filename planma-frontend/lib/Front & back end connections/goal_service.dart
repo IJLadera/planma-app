@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 //create events 
 
 
-class EventsCreate {
+class GoalCreate {
   final String baseUrl ="http://127.0.0.1:8000/api";
 
 
@@ -35,7 +35,7 @@ class EventsCreate {
 
 
   }) async {
-    final url = "$baseUrl/createevents/";
+    final url = "$baseUrl/creategoals/";
     final String? token = await getToken();
     print(token);
     print (eventname);
@@ -89,43 +89,3 @@ class EventsCreate {
     }
   }
 }
-
-// Viewing Events
-
-// class EventsView {
-//   final String baseUrl = "http://127.0.0.1:8000/api";
-
-//   Future<String?> getToken() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     return prefs.getString("access");
-//   }
-
-//   Future<List<Map<String, dynamic>>> fetchEvents() async {
-//     final url = "$baseUrl/events/";
-//     final String? token = await getToken();
-
-//     if (token == null) {
-//       print("No token found! Please log in first.");
-//       throw Exception("Authentication token not available");
-//     }
-
-//     try {
-//       final response = await http.get(
-//         Uri.parse(url),
-//         headers: {
-//           "Authorization": "Bearer $token",
-//         },
-//       );
-
-//       if (response.statusCode == 200) {
-//         return List<Map<String, dynamic>>.from(jsonDecode(response.body));
-//       } else {
-//         print("Failed to fetch events: ${response.body}");
-//         throw Exception("Failed to fetch events");
-//       }
-//     } catch (e) {
-//       print("Error fetching events: $e");
-//       throw Exception("An error occurred while fetching events.");
-//     }
-//   }
-// }
