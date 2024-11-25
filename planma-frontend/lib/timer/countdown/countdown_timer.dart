@@ -24,7 +24,8 @@ class _TimerPageState extends State<TimerPage> {
 
     return WillPopScope(
       onWillPop: () async {
-        return !disableBackButton; // Prevent back navigation when disabled
+        // Prevent back navigation when the stopwatch is running or timer is running
+        return !disableBackButton;
       },
       child: Scaffold(
         backgroundColor: Colors.blue[100],
@@ -47,11 +48,13 @@ class _TimerPageState extends State<TimerPage> {
               padding: const EdgeInsets.all(8.0),
               child: ToggleButtons(
                 isSelected: [isTimerMode, !isTimerMode],
-                onPressed: (index) {
-                  setState(() {
-                    isTimerMode = index == 0;
-                  });
-                },
+                onPressed: timeProvider.isRunning || _isStopwatchRunning
+                    ? null // Disable switching between modes if timer or stopwatch is running
+                    : (index) {
+                        setState(() {
+                          isTimerMode = index == 0;
+                        });
+                      },
                 borderRadius: BorderRadius.circular(10),
                 selectedColor: Colors.white,
                 fillColor: Colors.blue,
@@ -241,8 +244,7 @@ class _TimerPageState extends State<TimerPage> {
           height: 300,
           child: CupertinoTimerPicker(
             mode: CupertinoTimerPickerMode.hms,
-            initialTimerDuration:
-                Duration(seconds: timerProvider.remainingTime),
+            initialTimerDuration: Duration(seconds: timerProvider.remainingTime),
             onTimerDurationChanged: (Duration newDuration) {
               if (newDuration.inSeconds > 0) {
                 timerProvider.setTime(newDuration.inSeconds);
@@ -274,6 +276,8 @@ class _TimerPageState extends State<TimerPage> {
     }
     setState(() {
       _isStopwatchRunning = !_isStopwatchRunning;
+      // Disable back button when stopwatch is running
+      disableBackButton = _isStopwatchRunning;
     });
   }
 
@@ -282,6 +286,7 @@ class _TimerPageState extends State<TimerPage> {
     setState(() {
       _stopwatchElapsed = 0;
       _isStopwatchRunning = false;
+      disableBackButton = false;
     });
   }
 }
