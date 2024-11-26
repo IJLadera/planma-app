@@ -28,9 +28,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => EventsProvider()),
       ],
       child: MaterialApp(
-          // home: Dashboard(),
+          home: Dashboard(),
           debugShowCheckedModeBanner: false,
-          home: AuthGate(),
+          // home: AuthGate(),
           theme: ThemeData(
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor: Colors.white,

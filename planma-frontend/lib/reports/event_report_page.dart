@@ -103,7 +103,7 @@ class _EventReportsPageState extends State<EventReportsPage> {
 
   // Function to show bottom sheet when the toggle is pressed
   void _showBottomSheet() {
-    BottomSheetWidget.show(context);
+    // BottomSheetWidget.show(context);
   }
 
   @override
