@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/activities/activity_page.dart';
-import 'package:planma_app/event/event_page.dart';
-import 'package:planma_app/goals/goal_page.dart';
-import 'package:planma_app/reports/event_report_page.dart';
-import 'package:planma_app/reports/task_report_page.dart';
-import 'package:planma_app/task/task_page.dart';
 
-class BottomSheetWidget {
-  static void show(BuildContext context) {
+class BottomSheetWidget extends StatelessWidget {
+  final Function(String) onCategorySelected;
+  final String initialSelection;
+
+  const BottomSheetWidget({
+    Key? key,
+    required this.onCategorySelected,
+    required this.initialSelection,
+  }) : super(key: key);
+
+  // Static method to show the BottomSheet
+  static void show(BuildContext context,
+      {required Function(String) onCategorySelected,
+      required String initialSelection}) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
       ),
       isScrollControlled: true,
       builder: (context) {
-        return BottomSheetContent();
+        return BottomSheetWidget(
+            onCategorySelected: onCategorySelected,
+            initialSelection: initialSelection);
       },
     );
   }
-}
-
-class BottomSheetContent extends StatefulWidget {
-  @override
-  _BottomSheetContentState createState() => _BottomSheetContentState();
-}
-
-class _BottomSheetContentState extends State<BottomSheetContent> {
-  String? selectedOption = "Task";
 
   @override
   Widget build(BuildContext context) {
@@ -40,61 +39,58 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
             Center(
               child: Text(
                 "Categories",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildRadioTile(
               title: "Task",
               value: "Task",
               onChanged: (value) {
-                setState(() => selectedOption = value);
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => ReportPage()),
-                // );
+                onCategorySelected(
+                    value!); // Pass the selected category to the callback
+                Navigator.pop(context); // Close the bottom sheet
               },
             ),
             _buildRadioTile(
               title: "Event",
               value: "Event",
               onChanged: (value) {
-                setState(() => selectedOption = value);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EventReportsPage()),
-                );
+                onCategorySelected(value!);
+                Navigator.pop(context);
               },
             ),
             _buildRadioTile(
-              title: "Goal",
-              value: "Goal",
+              title: "Class Schedules",
+              value: "Class Schedules",
               onChanged: (value) {
-                setState(() => selectedOption = value);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => GoalPage()),
-                );
+                onCategorySelected(value!);
+                Navigator.pop(context);
               },
             ),
             _buildRadioTile(
-              title: "Activity",
-              value: "Activity",
+              title: "Activities",
+              value: "Activities",
               onChanged: (value) {
-                setState(() => selectedOption = value);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ActivitiesScreen()),
-                );
+                onCategorySelected(value!);
+                Navigator.pop(context);
+              },
+            ),
+            _buildRadioTile(
+              title: "Goals",
+              value: "Goals",
+              onChanged: (value) {
+                onCategorySelected(value!);
+                Navigator.pop(context);
               },
             ),
             _buildRadioTile(
               title: "Sleep",
               value: "Sleep",
               onChanged: (value) {
-                setState(() => selectedOption = value);
-                // Uncomment when SleepPage is implemented
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => SleepPage()));
+                onCategorySelected(value!);
+                Navigator.pop(context);
               },
             ),
           ],
@@ -103,7 +99,6 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
     );
   }
 
-  // Helper method to build a RadioListTile
   Widget _buildRadioTile({
     required String title,
     required String value,
@@ -114,9 +109,9 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
         RadioListTile<String>(
           title: Text(title),
           value: value,
-          groupValue: selectedOption,
+          groupValue: initialSelection,
           onChanged: onChanged,
-          controlAffinity: ListTileControlAffinity.trailing, // Radio at the end
+          controlAffinity: ListTileControlAffinity.trailing,
         ),
         if (title != "Sleep") // No divider below the last option
           Divider(
