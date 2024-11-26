@@ -239,7 +239,7 @@ class CustomClassSchedule(models.Model):
         on_delete=models.CASCADE,
         related_name='classes', db_column='subject_code'
     )
-    day_of_week = models.CharField(max_length=2)  # Storing a single day abbreviation (e.g., 'M', 'T', etc.)
+    day_of_week = models.CharField(max_length=10)
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
     room = models.CharField(max_length=75)
@@ -249,23 +249,10 @@ class CustomClassSchedule(models.Model):
         related_name='scheduled_classes', db_column='student_id'
     )
 
-    def get_day_of_week_full(self):
-        # Mapping abbreviated days to full names
-        day_mapping = {
-            'S': 'Sunday',
-            'M': 'Monday',
-            'T': 'Tuesday',
-            'W': 'Wednesday',
-            'TH': 'Thursday',
-            'F': 'Friday',
-            'Sa': 'Saturday',
-        }
-        return day_mapping.get(self.day_of_week, 'Unknown')  # Return full day name
-
     def __str__(self):
         # Access the related CustomSubject's title
         subject_title = self.subject_code.subject_title
-        return f"{self.subject_code.subject_code} - {subject_title} | {self.room} | {self.get_day_of_week_full()}"
+        return f"{self.subject_code.subject_code} - {subject_title} | {self.room} | {self.day_of_week}"
 
 class AttendedClass(models.Model):
 

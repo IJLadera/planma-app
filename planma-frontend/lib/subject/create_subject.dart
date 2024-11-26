@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
@@ -21,7 +22,17 @@ class _AddClassScreenState extends State<AddClassScreen> {
   String? selectedSemester;
   int? selectedSemesterId;
   String? selectedSemId;
-  final Set<String> _selectedDays = {};
+  String? _selectedDay;
+
+  final Map<String, String> dayAbbreviationToFull = {
+  'S': 'Sunday',
+  'M': 'Monday',
+  'T': 'Tuesday',
+  'W': 'Wednesday',
+  'Th': 'Thursday',
+  'F': 'Friday',
+  'Sa': 'Saturday',
+  };
 
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
@@ -36,7 +47,8 @@ class _AddClassScreenState extends State<AddClassScreen> {
     }
   }
 
-  void _addClassSchedule() {
+  void _submitClassSchedule() {
+
     String subjectCode = _subjectCodeController.text.trim();
     String subjectTitle = _subjectTitleController.text.trim();
     String startTime = _startTimeController.text.trim();
@@ -48,13 +60,17 @@ class _AddClassScreenState extends State<AddClassScreen> {
         room.isEmpty ||
         startTime.isEmpty ||
         endTime.isEmpty ||
-        _selectedDays.isEmpty) {
-      _showErrorDialog("All fields are required!");
+        _selectedDay == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields!')),
+      );
       return;
     }
 
     if (!_isValidTimeRange(startTime, endTime)) {
-      _showErrorDialog("Start Time must be before End Time.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Start Time must be before End Time.')),
+      );
       return;
     }
 
@@ -62,7 +78,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
     print("Subject Code: $subjectCode");
     print("Subject Title: $subjectTitle");
     print("Semester: $selectedSemesterId");
-    print("Days: $_selectedDays");
+    print("Days: $_selectedDay");
     print("Start Time: $startTime");
     print("End Time: $endTime");
     print("Room: $room");
@@ -91,50 +107,40 @@ class _AddClassScreenState extends State<AddClassScreen> {
     }
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          )
-        ],
-      ),
-    );
-  }
-
   void _clearFields() {
     _subjectCodeController.clear();
     _subjectTitleController.clear();
     _startTimeController.clear();
     _endTimeController.clear();
     _roomController.clear();
-    _selectedDays.clear();
+    _selectedDay == null;
     setState(() {});
   }
 
   @override
-  void initState() {
-    super.initState();
-    // Fetch semesters when the screen loads
-    final semesterProvider =
-        Provider.of<SemesterProvider>(context, listen: false);
-    semesterProvider.fetchSemesters().then((_) {
-      setState(() {
-        // Set default value if there are semesters available
-        if (semesterProvider.semesters.isNotEmpty) {
-          selectedSemester =
-              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
-          selectedSemesterId =
-              semesterProvider.semesters[0]['id']; // Capture the semester ID
-        }
-      });
+void initState() {
+  super.initState();
+  // Fetch semesters when the screen loads
+  final semesterProvider =
+      Provider.of<SemesterProvider>(context, listen: false);
+  semesterProvider.fetchSemesters().then((_) {
+    setState(() {
+      // Set default value if there are semesters available
+      if (semesterProvider.semesters.isNotEmpty) {
+        // Select the first semester
+        selectedSemester =
+            "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+        
+        final defaultSemester = semesterProvider.semesters.first;
+        selectedSemesterId = defaultSemester['semester_id'];
+
+        // Log the selected semester
+        print("Default selected semester: $selectedSemester");
+        print("Default selected semester ID: $selectedSemesterId");
+      }
     });
-  }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -216,7 +222,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        'Days',
+                        'Day of the Week',
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -226,16 +232,16 @@ class _AddClassScreenState extends State<AddClassScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          for (var day in ['S', 'M', 'T', 'W', 'TH', 'F', 'Sa'])
+                          for (var day in ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'])
                             DayButton(
                               day: day,
-                              isSelected: _selectedDays.contains(day),
+                              isSelected: _selectedDay == dayAbbreviationToFull[day], // Match full day name
                               onTap: () {
                                 setState(() {
-                                  if (_selectedDays.contains(day)) {
-                                    _selectedDays.remove(day);
+                                  if (_selectedDay == dayAbbreviationToFull[day]) {
+                                    _selectedDay == null;
                                   } else {
-                                    _selectedDays.add(day);
+                                    _selectedDay = dayAbbreviationToFull[day];
                                   }
                                 });
                               },
@@ -278,7 +284,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16.0, vertical: 20.0),
                 child: ElevatedButton(
-                  onPressed: _addClassSchedule,
+                  onPressed: _submitClassSchedule,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),
                     shape: RoundedRectangleBorder(
