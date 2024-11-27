@@ -5,10 +5,10 @@ import uuid
 from django.conf import settings
 from django_enumfield import enum
 
-class EnumFields(enum.Enum):
-    PENDING = 0
-    IN_PROGRESS = 1
-    COMPLETED = 2
+# class EnumFields(enum.Enum):
+#     PENDING = 0
+#     IN_PROGRESS = 1
+#     COMPLETED = 2
 
 class AppUserManager(BaseUserManager):
     def create_user(self,firstname, lastname, email, username, password=None):
@@ -66,6 +66,13 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     
 
 class CustomTask(models.Model):
+    
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('In Progress', 'In Progress'),
+        ('Completed', 'Completed'),
+    ]
+    
     # Primary Key
     task_id = models.AutoField(primary_key=True)
     
@@ -76,7 +83,7 @@ class CustomTask(models.Model):
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
     deadline = models.DateTimeField()
-    status = enum.EnumField(EnumFields,default=EnumFields.PENDING)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
     subject_code = models.CharField(max_length=50)
     
     # Foreign Key to CustomUser model
@@ -127,6 +134,12 @@ class AttendedEvents(models.Model):
     has_attended = models.BooleanField()  # True and False
 class CustomActivity(models.Model):
     
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('In Progress', 'In Progress'),
+        ('Completed', 'Completed'),
+    ]
+    
      # Primary Key
     activity_id = models.AutoField(primary_key=True)
     
@@ -136,7 +149,7 @@ class CustomActivity(models.Model):
     scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
-    status = enum.EnumField(EnumFields, default=EnumFields.PENDING)
+    status =  models.CharField(max_length=50, choices=STATUS_CHOICES)
     # Foreign Key
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
@@ -194,7 +207,7 @@ class CustomSemester(models.Model):
         ('1st Semester', '1st Semester'),
         ('2nd Semester', '2nd Semester'),
     ]
-    
+        
     # Primary Key
     semester_id = models.AutoField(primary_key=True)
 
