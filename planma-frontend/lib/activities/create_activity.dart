@@ -101,15 +101,6 @@ class _AddActivityState extends State<AddActivityState> {
         //status: (context.read<UserProvider>().userName!), // need to change for now para walay error
         studentID:
             Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']);
-      activityname: activityName,
-      activitydesc: activityDesc,
-      scheduledate: activityDate,
-      starttime: to24HourFormat(startTime),
-      endtime: to24HourFormat(endTime),
-      status: "Pending",
-      //status: (context.read<UserProvider>().userName!), // need to change for now para walay error
-      studentID: Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']
-    );
 
     // Handle response
     if (result != null && result.containsKey('error')) {
