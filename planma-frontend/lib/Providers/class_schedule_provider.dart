@@ -58,6 +58,16 @@ class ClassScheduleProvider with ChangeNotifier {
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
 
+    print("PROV Subject Code: $subjectCode");
+    print("PROV Subject Title: $subjectTitle");
+    print("PROV Semester: $semesterId");
+    print("PROV Days: $dayOfWeek");
+    print("PROV Start Time: $startTime");
+    print("PROV End Time: $endTime");
+    print("PROV Room: $room");
+    print("PROV Start Time 2: $formattedStartTime");
+    print("PROV End Time 2: $formattedEndTime");
+
     try {
       final response = await http.post(
         url,
