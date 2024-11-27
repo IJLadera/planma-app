@@ -7,11 +7,11 @@ class DayButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const DayButton({
-    Key? key,
+    super.key,
     required this.day,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,6 +7,8 @@ import 'package:planma_app/Front%20&%20back%20end%20connections/activity_service
 
 
 class AddActivityState extends StatefulWidget {
+  const AddActivityState({super.key});
+
   @override
   _AddActivityState createState() => _AddActivityState();
 }

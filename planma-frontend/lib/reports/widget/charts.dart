@@ -9,12 +9,12 @@ class TaskCharts extends StatelessWidget {
   final List<FinishedTask> taskFinished;
 
   const TaskCharts({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.taskTimeSpent,
     required this.taskTimeDistribution,
     required this.taskFinished,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -129,12 +129,12 @@ class EventCharts extends StatelessWidget {
   final List<EventAttendanceDistribution> eventAttendanceDistribution;
 
   const EventCharts({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.eventAttendanceSummary,
     required this.eventTypeDistribution,
     required this.eventAttendanceDistribution,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -262,11 +262,11 @@ class ClassScheduleCharts extends StatelessWidget {
   final List<ClassAttendanceDistribution> classAttendanceDistribution;
 
   const ClassScheduleCharts({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.classAttendanceSummary,
     required this.classAttendanceDistribution,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -367,11 +367,11 @@ class ActivitiesChart extends StatelessWidget {
   final List<ActivitiesDone> activitiesDone;
 
   const ActivitiesChart({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.activitiesTimeSpent,
     required this.activitiesDone,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -420,8 +420,7 @@ class GoalsCharts extends StatelessWidget {
   final List<GoalTimeSpent> goalTimeSpent;
 
   const GoalsCharts(
-      {Key? key, required this.isLoading, required this.goalTimeSpent})
-      : super(key: key);
+      {super.key, required this.isLoading, required this.goalTimeSpent});
 
   @override
   Widget build(BuildContext context) {
@@ -466,8 +465,7 @@ class SleepCharts extends StatelessWidget {
   final bool isLoading;
   final List<SleepDuration> sleepDuration;
 
-  SleepCharts({Key? key, required this.isLoading, required this.sleepDuration})
-      : super(key: key);
+  const SleepCharts({super.key, required this.isLoading, required this.sleepDuration});
 
   @override
   Widget build(BuildContext context) {

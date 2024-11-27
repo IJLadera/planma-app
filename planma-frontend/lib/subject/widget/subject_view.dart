@@ -12,7 +12,7 @@ class SubjectDetailScreen extends StatefulWidget {
   final String selected_days;
 
   const SubjectDetailScreen({
-    Key? key,
+    super.key,
     required this.subject_code,
     required this.subject_title,
     required this.semester,
@@ -20,7 +20,7 @@ class SubjectDetailScreen extends StatefulWidget {
     required this.end_time,
     required this.room,
     required this.selected_days,
-  }) : super(key: key);
+  });
 
   @override
   _SubjectDetailScreenState createState() => _SubjectDetailScreenState();

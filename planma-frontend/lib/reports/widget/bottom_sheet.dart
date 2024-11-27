@@ -5,10 +5,10 @@ class BottomSheetWidget extends StatelessWidget {
   final String initialSelection;
 
   const BottomSheetWidget({
-    Key? key,
+    super.key,
     required this.onCategorySelected,
     required this.initialSelection,
-  }) : super(key: key);
+  });
 
   // Static method to show the BottomSheet
   static void show(BuildContext context,

@@ -12,14 +12,14 @@ class ViewEvent extends StatefulWidget {
   final String type;
 
   const ViewEvent({
-    Key? key,
+    super.key,
     required this.eventName,
     required this.timePeriod,
     required this.description,
     required this.location,
     required this.date,
     required this.type,
-  }) : super(key: key);
+  });
 
   @override
   _ViewEventState createState() => _ViewEventState();
@@ -149,12 +149,12 @@ class _ViewEventState extends State<ViewEvent> {
                     },
                     items: <String>['Did Not Attend', 'Excused', 'Attended']
                         .map<DropdownMenuItem<String>>((String value) {
-                      return new DropdownMenuItem<String>(
+                      return DropdownMenuItem<String>(
                         value: value,
                         child: Row(
                           children: [
                             Expanded(
-                              child: new Text(
+                              child: Text(
                                 value,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,

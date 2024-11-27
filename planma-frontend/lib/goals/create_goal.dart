@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/goals/widget/widget.dart'; // Ensure this file contains the CustomWidgets class
 
 class AddGoalScreen extends StatefulWidget {
+  const AddGoalScreen({super.key});
+
   @override
   _AddGoalScreenState createState() => _AddGoalScreenState();
 }

@@ -203,13 +203,9 @@ void initState() {
                                   semester['semester'] == semesterType;
                                 }, orElse: () => {},  // Return null if no match is found
                               );
-                              if (selectedSemesterMap != null) {
-                                selectedSemesterId = selectedSemesterMap['semester_id'];
-                                print("Found semester ID: ${selectedSemesterMap['semester_id']}");
-                              } else {
-                                print("No matching semester found for acad_year_start: $acadYearStart.");
-                              }  
-                            }
+                              selectedSemesterId = selectedSemesterMap['semester_id'];
+                              print("Found semester ID: ${selectedSemesterMap['semester_id']}");
+                                                        }
                           });
                         },
                         backgroundColor: const Color(0xFFF5F5F5),

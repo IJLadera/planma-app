@@ -5,10 +5,10 @@ class ActivityDetailsScreen extends StatelessWidget {
   final String detail;
 
   const ActivityDetailsScreen({
-    Key? key,
+    super.key,
     required this.title,
     required this.detail,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:planma_app/Providers/user_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
-import 'package:jwt_decode/jwt_decode.dart';
 
 class ReportAct {
   final String baseUrl = "http://127.0.0.1:8000/api";

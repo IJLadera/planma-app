@@ -6,10 +6,10 @@ class SubjectDetailRow extends StatelessWidget {
   final String detail;
 
   const SubjectDetailRow({
-    Key? key,
+    super.key,
     required this.title,
     required this.detail,
-  }) : super(key: key);
+  });
   @override
   Widget build(BuildContext context) {
     return Padding(

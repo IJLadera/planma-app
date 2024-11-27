@@ -7,7 +7,7 @@ class MenuButtonWidget extends StatelessWidget {
   final String subtitle;
   final VoidCallback onPressed;
 
-  MenuButtonWidget({
+  const MenuButtonWidget({super.key, 
     required this.color,
     required this.icon,
     required this.title,

@@ -3,7 +3,7 @@ import 'package:planma_app/activities/create_activity.dart';
 import 'package:planma_app/activities/widget/event_card.dart';
 
 class ActivitiesScreen extends StatelessWidget {
-  const ActivitiesScreen({Key? key}) : super(key: key);
+  const ActivitiesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

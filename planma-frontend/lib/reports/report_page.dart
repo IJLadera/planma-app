@@ -5,7 +5,7 @@ import 'package:planma_app/reports/widget/class.dart';
 import 'package:planma_app/reports/widget/charts.dart'; // Import the new charts file
 
 class ReportsPage extends StatefulWidget {
-  const ReportsPage({Key? key}) : super(key: key);
+  const ReportsPage({super.key});
 
   @override
   State<ReportsPage> createState() => _ReportsPageState();

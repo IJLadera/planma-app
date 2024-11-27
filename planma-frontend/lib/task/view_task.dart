@@ -11,14 +11,14 @@ class ViewTask extends StatelessWidget {
   final String subject;
 
   const ViewTask({
-    Key? key,
+    super.key,
     required this.taskName,
     required this.description,
     required this.date,
     required this.time,
     required this.deadline,
     required this.subject,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

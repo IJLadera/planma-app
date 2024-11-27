@@ -3,6 +3,8 @@ import 'package:planma_app/user_preferences/setting_reminder.dart';
 import 'package:planma_app/user_preferences/widget/widget.dart';
 
 class SleepWakeSetupScreen extends StatefulWidget {
+  const SleepWakeSetupScreen({super.key});
+
   @override
   _SleepWakeSetupScreenState createState() => _SleepWakeSetupScreenState();
 }

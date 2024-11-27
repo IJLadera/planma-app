@@ -6,6 +6,8 @@ import 'package:planma_app/Providers/events_provider.dart';
 import 'package:provider/provider.dart';
 
 class EventsPage extends StatelessWidget {
+  const EventsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     String? eventName = context.watch<EventsProvider>().eventName;
@@ -81,8 +83,8 @@ class EventsPage extends StatelessWidget {
             MaterialPageRoute(builder: (context) => AddEventState()),
           );
         },
-        child: Icon(Icons.add),
         backgroundColor: Color(0xFF173F70),
+        child: Icon(Icons.add),
       ),
     );
   }

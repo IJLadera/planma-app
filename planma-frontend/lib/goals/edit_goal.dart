@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/goals/widget/widget.dart'; // Ensure this file contains the CustomWidgets class
 
 class EditGoal extends StatefulWidget {
+  const EditGoal({super.key});
+
   @override
   _EditGoal createState() => _EditGoal();
 }
