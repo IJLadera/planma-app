@@ -102,7 +102,7 @@ class _LogInState extends State<LogIn> {
           TextFormField(
             controller: emailController,
             decoration: InputDecoration(
-              labelText: 'Username',
+              labelText: 'Email',
               prefixIcon: const Icon(Icons.person, size: 30), // Increased icon size
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15), // More rounded borders

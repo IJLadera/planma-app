@@ -41,6 +41,7 @@ class ActivityCreate {
     print (activitydesc);
     print (scheduledate);
     print (starttime);
+    print (status);
     print (endtime);
 
 
