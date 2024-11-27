@@ -32,7 +32,7 @@ class EventsProvider with ChangeNotifier {
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  //Fetch user profile
+  //Fetch events list
   Future<void> fetchEventsList() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -65,7 +65,7 @@ class EventsProvider with ChangeNotifier {
     }
   }
 
-  //Update user profile
+  //Update events list
   Future<void> updateEventsList(
     String eventName, 
     String eventDesc, 

@@ -7,7 +7,7 @@ class CustomWidgets {
       TextEditingController controller, String labelText) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
@@ -31,7 +31,7 @@ class CustomWidgets {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: ListTile(
@@ -54,7 +54,7 @@ class CustomWidgets {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
@@ -67,31 +67,6 @@ class CustomWidgets {
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
         ),
-      ),
-    );
-  }
-
-  static Widget buildDropdownField(String label, String? value,
-      List<String> items, Function(String?) onChanged) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        decoration: InputDecoration(
-          labelText: label,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
-        ),
-        items: items.map((item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(item),
-          );
-        }).toList(),
-        onChanged: (value) => onChanged(value),
       ),
     );
   }

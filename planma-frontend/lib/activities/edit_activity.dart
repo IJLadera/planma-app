@@ -105,7 +105,7 @@ class _EditActivity extends State<EditActivity> {
                   // Create task action
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade700,
+                  backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

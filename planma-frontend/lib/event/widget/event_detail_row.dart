@@ -16,22 +16,19 @@ class EventDetailRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Text(
-            '$title: ',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+          Expanded(
+            flex: 3,
+            child: Text(
+              title,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.grey[800]),
             ),
           ),
-          SizedBox(width: 32), // Add space between title and value
           Expanded(
+            flex: 5,
             child: Text(
               value,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.black),
             ),
           ),
         ],
