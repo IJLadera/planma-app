@@ -29,9 +29,8 @@ class _ReportState extends State<Report> {
     try {
       final carreon =
           Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id'];
-      await context.read<ReportAct>().fetchActivities(carreon);
-      final activityName = context.read<ReportAct>().activName ?? 'Unknown Activity';
-
+          await context.read<ReportAct>().fetchActivities(carreon);
+          final activityName = context.read<ReportAct>().activName ?? 'Unknown Activity';
       setState(() {
         data = [
           _ChartData('CN', 12),

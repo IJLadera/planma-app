@@ -58,7 +58,10 @@ class _ReportsPageState extends State<ReportsPage> {
         selectedDate = startOfWeek;
         break;
       case 'Month':
+        formattedTimeFilter = DateFormat('MMMM').format(today);
+        selectedDate = today;
       case 'Year':
+      
       case 'Semester':
         formattedTimeFilter =
             DateFormat(selectedTimeFilter == 'Semester' ? 'MMMM yyyy' : 'yyyy')
