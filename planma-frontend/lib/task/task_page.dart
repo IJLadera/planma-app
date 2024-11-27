@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/task/create_task.dart';
+import 'package:planma_app/task/widget/search_bar.dart';
 import 'by_date_view.dart';
 import 'by_subject_view.dart';
-import 'package:planma_app/task/widget/search_bar.dart'; // Import your search bar widget
 
 class TasksPage extends StatefulWidget {
   const TasksPage({super.key});
@@ -13,6 +13,52 @@ class TasksPage extends StatefulWidget {
 
 class _TasksPageState extends State<TasksPage> {
   bool isByDate = true;
+
+  final tasksBySubject = {
+    'Subject Code 1': [
+      {
+        'taskName': 'Task Name 1',
+        'subject': 'Subject Code 1',
+        'duration': '2 hours',
+        'description': 'Description for Task 1',
+        'date': '2024-01-11',
+        'time': '10:00 AM - 12:00 PM',
+        'deadline': '2024-01-14',
+      },
+    ],
+    'Subject Code 2': [
+      {
+        'taskName': 'Task Name 2',
+        'subject': 'Subject Code 2',
+        'duration': '1 hour',
+        'description': 'Description for Task 2',
+        'date': '2024-01-12',
+        'time': '01:00 PM - 02:00 PM',
+        'deadline': '2024-01-16',
+      },
+    ],
+  };
+
+  final tasks = [
+    {
+      'taskName': 'Task Name 1',
+      'subject': 'Subject Code 1',
+      'duration': '2 hours',
+      'description': 'Description for Task 1',
+      'date': '2024-01-11',
+      'time': '10:00 AM - 12:00 PM',
+      'deadline': '2024-01-14',
+    },
+    {
+      'taskName': 'Task Name 2',
+      'subject': 'Subject Code 2',
+      'duration': '1 hour',
+      'description': 'Description for Task 2',
+      'date': '2024-01-12',
+      'time': '01:00 PM - 02:00 PM',
+      'deadline': '2024-01-16',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +99,9 @@ class _TasksPageState extends State<TasksPage> {
             ),
           ),
           Expanded(
-            // Use ByDateView or BySubjectView based on the isByDate variable
-            child: isByDate ? ByDateView() : BySubjectView(),
+            child: isByDate
+                ? ByDateView(tasks: tasks)
+                : BySubjectView(tasksBySubject: tasksBySubject),
           ),
         ],
       ),

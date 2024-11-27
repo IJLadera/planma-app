@@ -81,8 +81,9 @@ class EventsPage extends StatelessWidget {
             MaterialPageRoute(builder: (context) => AddEventState()),
           );
         },
-        child: Icon(Icons.add),
         backgroundColor: Color(0xFF173F70),
+        shape: const CircleBorder(),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }

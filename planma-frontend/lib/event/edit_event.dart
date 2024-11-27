@@ -15,7 +15,7 @@ class _EditEvent extends State<EditEvent> {
 
   DateTime? _scheduledDate;
   String? _selectedEventType;
-  final List<String> _semesters = ['Academic', 'Personal'];
+  final List<String> _EventType = ['Academic', 'Personal'];
 
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
@@ -103,11 +103,22 @@ class _EditEvent extends State<EditEvent> {
                   ),
                   SizedBox(height: 12), SizedBox(height: 16), // Increased space
                   CustomWidgets.buildDropdownField(
-                      'Event Type', _selectedEventType, _semesters, (value) {
-                    setState(() {
-                      _selectedEventType = value;
-                    });
-                  }),
+                    label:
+                        'Choose Subject', // Updated the label for consistency
+                    value: _selectedEventType,
+                    items: _EventType,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedEventType = value;
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
+                  )
                 ],
               ),
             )),
