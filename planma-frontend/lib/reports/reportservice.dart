@@ -31,10 +31,10 @@ class ReportAct {
       );
 
       if (response.statusCode == 200) {
-        // Assuming the response body contains a list of events in JSON format
+        // Assuming the response body contains a list of activities in JSON format
         final activities = json.decode(response.body);
         activityName = activities['activity_name'];
-        print(activityName);
+        return fetchActivities(carreon);
       } else {
         print("Failed to fetch events: ${response.body}");
         return null;
