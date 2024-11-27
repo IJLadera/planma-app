@@ -19,8 +19,9 @@ class _CreateTaskState extends State<CreateTask> {
 
   String? _subject;
 
-  final List<String> _subjects = ['Math', 'Science', 'English'];
+  final List<String> _subjectsOptions = ['Math', 'Science', 'English'];
 
+  // Method to select date
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -36,6 +37,7 @@ class _CreateTaskState extends State<CreateTask> {
     }
   }
 
+  // Method to select time
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -54,7 +56,7 @@ class _CreateTaskState extends State<CreateTask> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Add Task',
+          'Create Task',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -71,15 +73,18 @@ class _CreateTaskState extends State<CreateTask> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  // Text fields for Task Name and Description
                   CustomWidgets.buildTextField(
                       _taskNameController, 'Task Name'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _descriptionController, 'Description'),
                   const SizedBox(height: 12),
+                  // Scheduled Date Picker
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
                   const SizedBox(height: 12),
+                  // Time pickers for Start Time and End Time
                   Row(
                     children: [
                       Expanded(
@@ -103,15 +108,28 @@ class _CreateTaskState extends State<CreateTask> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  // Deadline Date Picker
                   CustomWidgets.buildDateTile(
                       'Deadline', _deadline, context, false, _selectDate),
                   const SizedBox(height: 12),
+                  // Dropdown field for choosing subject
                   CustomWidgets.buildDropdownField(
-                      'Subject', _subject, _subjects, (value) {
-                    setState(() {
-                      _subject = value;
-                    });
-                  }),
+                    label:
+                        'Choose Subject', // Updated the label for consistency
+                    value: _subject,
+                    items: _subjectsOptions,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _subject = value;
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
+                  )
                 ],
               ),
             ),
@@ -121,10 +139,10 @@ class _CreateTaskState extends State<CreateTask> {
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             child: ElevatedButton(
               onPressed: () {
-                // Create task action
+                // Action to create the task can be implemented here
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF173F70),
+                backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

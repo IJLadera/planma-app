@@ -15,14 +15,14 @@ class _AddEventState extends State<AddEventState> {
   final _eventCodeController = TextEditingController();
   final _eventTitleController = TextEditingController();
   final _eventLocationController = TextEditingController();
-  final TextEditingController _startTimeController = TextEditingController();
-  final TextEditingController _endTimeController = TextEditingController();
+  final _startTimeController = TextEditingController();
+  final _endTimeController = TextEditingController();
 
   DateTime? _scheduledDate;
-
   String? _selectedEventType;
-  final List<String> _EventType = ['Academic', 'Personal'];
+  final List<String> _eventTypes = ['Academic', 'Personal'];
 
+  // Method to select date
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -38,6 +38,7 @@ class _AddEventState extends State<AddEventState> {
     }
   }
 
+  // Method to select time
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -51,27 +52,28 @@ class _AddEventState extends State<AddEventState> {
     }
   }
 
+  // Convert time to 24-hour format
   String to24HourFormat(String time) {
-  String finalStrTime = "";
-  List<String> timeSplit = time.split(":");
-  timeSplit[1] = timeSplit[1].split(" ").first;
-  if (time.split(" ")[1] == "PM") {
-    if (time.split(":").first == "12") {
-      // dont adjust by 12 hours if 12 PM
-      finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+    String finalStrTime = "";
+    List<String> timeSplit = time.split(":");
+    timeSplit[1] = timeSplit[1].split(" ").first;
+    if (time.split(" ")[1] == "PM") {
+      if (time.split(":").first == "12") {
+        finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+      } else {
+        finalStrTime =
+            "${(int.parse(timeSplit[0]) + 12).toString()}:${timeSplit[1]}";
+      }
+    } else if (time.split(" ")[1] == "AM" && time.split(":").first == "12") {
+      finalStrTime =
+          "${(int.parse(timeSplit[0]) - 12).toString()}:${timeSplit[1]}";
     } else {
-      finalStrTime = "${(int.parse(timeSplit[0]) + 12).toString()}:${timeSplit[1]}";
+      finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
     }
-  } else if (time.split(" ")[1] == "AM" && time.split(":").first == "12") {
-    // if 12 AM, adjust by - 12
-    finalStrTime = "${(int.parse(timeSplit[0]) - 12).toString()}:${timeSplit[1]}";
-  } else {
-    // if <12 PM just return hh:mm
-    finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+    return finalStrTime;
   }
-  return finalStrTime;
-}
 
+  // Create event function
   Future<void> _createEvent() async {
     if (_eventCodeController.text.isEmpty ||
         _eventTitleController.text.isEmpty ||
@@ -85,33 +87,28 @@ class _AddEventState extends State<AddEventState> {
       );
       return;
     }
+
     final eventService = EventsCreate();
-    // Collect data from UI inputs
     final String eventName = _eventCodeController.text;
     final String eventDesc = _eventTitleController.text;
     final String location = _eventLocationController.text;
-    final String scheduledDate = _scheduledDate!.toIso8601String().split("T").first;
+    final String scheduledDate =
+        _scheduledDate!.toIso8601String().split("T").first;
     final String startTime = _startTimeController.text;
     final String endTime = _endTimeController.text;
     final String eventType = _selectedEventType!;
-    
-    
-    
-
-    // Call the service
 
     final result = await eventService.eventCT(
-      eventname: eventName,
-      eventdesc: eventDesc,
-      location: location,
-      scheduledate: scheduledDate,
-      starttime: to24HourFormat(startTime),
-      endtime: to24HourFormat(endTime),
-      eventtype: eventType,
-      studentID: Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']
-    );
+        eventname: eventName,
+        eventdesc: eventDesc,
+        location: location,
+        scheduledate: scheduledDate,
+        starttime: to24HourFormat(startTime),
+        endtime: to24HourFormat(endTime),
+        eventtype: eventType,
+        studentID:
+            Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']);
 
-    // Handle response
     if (result != null && result.containsKey('error')) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['error'])),
@@ -127,29 +124,28 @@ class _AddEventState extends State<AddEventState> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Add Event'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
+      appBar: AppBar(
+        title: const Text('Add Event'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        body: Column(
-          children: [
-            Expanded(
-                child: SingleChildScrollView(
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   CustomWidgets.buildTextField(
                       _eventCodeController, 'Event Name'),
-                  SizedBox(height: 16), // Increased space
+                  const SizedBox(height: 16),
                   CustomWidgets.buildTextField(
                       _eventTitleController, 'Description'),
-                  SizedBox(
-                      height: 16), // Space between time fields and room field
+                  const SizedBox(height: 16),
                   CustomWidgets.buildTextField(
                       _eventLocationController, 'Location'),
                   const SizedBox(height: 12),
@@ -178,36 +174,48 @@ class _AddEventState extends State<AddEventState> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 12), SizedBox(height: 16), // Increased space
+                  const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
-                      'Event Type', _selectedEventType, _EventType, (value) {
-                    setState(() {
-                      _selectedEventType = value;
-                    });
-                  }),
+                    label: 'Choose Event Type',
+                    value: _selectedEventType,
+                    items: _eventTypes,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedEventType = value;
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
+                  ),
                 ],
               ),
-            )),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-              child: ElevatedButton(
-                onPressed: _createEvent, 
-                  // Create task action
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade700,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+            ),
+          ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+            child: ElevatedButton(
+              onPressed: _createEvent,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF173F70),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(
-                  'Create Event',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+              ),
+              child: const Text(
+                'Create Event',
+                style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }

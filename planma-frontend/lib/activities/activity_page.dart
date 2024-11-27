@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/activities/create_activity.dart';
-import 'package:planma_app/activities/widget/event_card.dart';
+import 'package:planma_app/activities/view_activity.dart';
+import 'package:planma_app/activities/widget/activity_card.dart';
 
 class ActivitiesScreen extends StatelessWidget {
-  const ActivitiesScreen({Key? key}) : super(key: key);
+  ActivitiesScreen({Key? key}) : super(key: key);
+
+  final List<Map<String, String>> activities = [
+    {
+      'name': 'Yoga Class',
+      'time': '9:00 AM - 10:00 AM',
+      'description': 'A relaxing yoga session.',
+      'date': '2024-11-16',
+    },
+    {
+      'name': 'Cooking Workshop',
+      'time': '11:00 AM - 1:00 PM',
+      'description': 'Learn to cook delicious dishes.',
+      'date': '2024-11-18',
+    },
+    // Add more activities as needed
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -45,30 +62,55 @@ class ActivitiesScreen extends StatelessWidget {
                 fillColor: Colors.grey[200],
               ),
               onChanged: (value) {
-                // TODO: Implement search functionality by filtering the goals list.
+                // TODO: Implement search functionality by filtering the activities list.
               },
             ),
             const SizedBox(height: 20),
-            // Event Card
-            EventCard(
-              activityName: 'Activity Name',
-              timePeriod: '(Time Period)',
-              backgroundColor: const Color.fromARGB(255, 246, 136, 136),
+            // List of Activities
+            Expanded(
+              child: ListView.builder(
+                itemCount: activities.length,
+                itemBuilder: (context, index) {
+                  var activity = activities[index];
+                  return GestureDetector(
+                    onTap: () {
+                      // Navigate to the ViewActivity screen and pass the selected activity data
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ViewActivity(
+                            activityName: activity['name']!,
+                            description: activity['description']!,
+                            date: activity['date']!,
+                            time: activity['time']!,
+                          ),
+                        ),
+                      );
+                    },
+                    child: ActivityCard(
+                      activityName: activity['name']!,
+                      timePeriod: activity['time']!,
+                      description: activity['description']!,
+                      date: activity['date']!,
+                      backgroundColor: const Color.fromARGB(255, 246, 136, 136),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
-      ),  
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => AddActivityState(),
-            ),
+            MaterialPageRoute(builder: (context) => AddActivityState()),
           );
         },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
+        backgroundColor: const Color(0xFF173F70),
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
