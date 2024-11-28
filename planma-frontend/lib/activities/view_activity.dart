@@ -49,7 +49,7 @@ class ViewActivity extends StatelessWidget {
         ],
         centerTitle: true,
         title: const Text(
-          'Task',
+          'Activities',
           style: TextStyle(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
         ),

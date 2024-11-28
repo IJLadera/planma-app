@@ -12,6 +12,7 @@ import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
 import 'package:planma_app/user_profiile/user_page.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -27,7 +28,7 @@ class Dashboard extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFFFFFFF),
         foregroundColor: Colors.black,
         elevation: 2,
         actions: [
@@ -64,7 +65,7 @@ class Dashboard extends StatelessWidget {
               child: ListView(
                 children: [
                   MenuButtonWidget(
-                    color: const Color(0xFF173F70),
+                    color: const Color(0xFF50B6FF),
                     icon: Icons.check_circle,
                     title: 'Tasks',
                     subtitle: '4 tasks',
@@ -77,8 +78,8 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Colors.teal,
-                    icon: Icons.schedule,
+                    color: Color(0xFF7DCFB6),
+                    icon: Icons.description,
                     title: 'Class Schedule',
                     subtitle: '11 classes',
                     onPressed: () {
@@ -91,7 +92,7 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Colors.orange,
+                    color: Color(0xFFFBD1A2),
                     icon: Icons.event,
                     title: 'Events',
                     subtitle: '1 event',
@@ -104,7 +105,7 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Colors.redAccent,
+                    color: Color(0xFFFBA2A2),
                     icon: Icons.accessibility,
                     title: 'Activities',
                     subtitle: '1 activity',
@@ -118,7 +119,7 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Colors.purple,
+                    color: Color(0xFFD7C0F3),
                     icon: FontAwesomeIcons.flag,
                     title: 'Goals',
                     subtitle: '1 goal',

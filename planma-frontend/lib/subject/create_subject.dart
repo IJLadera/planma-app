@@ -38,7 +38,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
       BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: TimeOfDay(hour: 12, minute: 0),
     );
     if (picked != null) {
       setState(() {
@@ -47,19 +47,42 @@ class _AddClassScreenState extends State<AddClassScreen> {
     }
   }
 
-  void _submitClassSchedule() {
+  TimeOfDay? _stringToTimeOfDay(String timeString) {
+    try {
+      final timeParts = timeString.split(':');
+      final hour = int.parse(timeParts[0].trim());
+      final minuteParts = timeParts[1].split(' ');
+      final minute = int.parse(minuteParts[0].trim());
+      final period = minuteParts[1].toLowerCase();
+
+      // Adjust for AM/PM
+      final isPM = period == 'pm';
+      final adjustedHour = (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
+
+      return TimeOfDay(hour: adjustedHour, minute: minute);
+    } catch (e) {
+      return null; // Return null if parsing fails
+    }
+  }
+
+  void _submitClassSchedule(BuildContext context) async {
+    final provider = Provider.of<ClassScheduleProvider>(context, listen: false);
 
     String subjectCode = _subjectCodeController.text.trim();
     String subjectTitle = _subjectTitleController.text.trim();
-    String startTime = _startTimeController.text.trim();
-    String endTime = _endTimeController.text.trim();
+    String startTimeString = _startTimeController.text.trim();
+    String endTimeString = _endTimeController.text.trim();
     String room = _roomController.text.trim();
+
+    // Convert String to TimeOfDay
+    final startTime = _stringToTimeOfDay(startTimeString);
+    final endTime = _stringToTimeOfDay(endTimeString);
 
     if (subjectCode.isEmpty ||
         subjectTitle.isEmpty ||
         room.isEmpty ||
-        startTime.isEmpty ||
-        endTime.isEmpty ||
+        startTimeString.isEmpty ||
+        endTimeString.isEmpty ||
         _selectedDay == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields!')),
@@ -67,7 +90,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
       return;
     }
 
-    if (!_isValidTimeRange(startTime, endTime)) {
+    if (!_isValidTimeRange(startTime!, endTime!)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Start Time must be before End Time.')),
       );
@@ -83,64 +106,75 @@ class _AddClassScreenState extends State<AddClassScreen> {
     print("End Time: $endTime");
     print("Room: $room");
 
-    // After validation and adding logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Class Schedule Added Successfully!')),
-    );
-
-    // Clear fields after adding
-    _clearFields();
-  }
-
-  bool _isValidTimeRange(String startTime, String endTime) {
     try {
-      final start = TimeOfDay(
-          hour: int.parse(startTime.split(":")[0]),
-          minute: int.parse(startTime.split(":")[1].split(" ")[0]));
-      final end = TimeOfDay(
-          hour: int.parse(endTime.split(":")[0]),
-          minute: int.parse(endTime.split(":")[1].split(" ")[0]));
-      return start.hour < end.hour ||
-          (start.hour == end.hour && start.minute < end.minute);
-    } catch (e) {
-      return false; // Invalid time format
+      await provider.addClassScheduleWithSubject(
+        subjectCode: subjectCode,
+        subjectTitle: subjectTitle,
+        semesterId: selectedSemesterId!,
+        dayOfWeek: _selectedDay!,
+        startTime: startTime,
+        endTime: endTime,
+        room: room
+      );
+
+      
+
+      // After validation and adding logic
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Class Schedule added successfully!')),
+      );
+
+      // Clear fields after adding
+      _clearFields();
+
+      Navigator.pop(context);
+
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add class schedule 1: $error')),
+      );
     }
   }
 
+  // Valid Time Range Check
+  bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
+  return startTime.hour < endTime.hour ||
+      (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+  }
+
+  // Clear fields after submit
   void _clearFields() {
     _subjectCodeController.clear();
     _subjectTitleController.clear();
     _startTimeController.clear();
     _endTimeController.clear();
     _roomController.clear();
-    _selectedDay == null;
+    _selectedDay = null;
     setState(() {});
   }
 
   @override
-void initState() {
-  super.initState();
-  // Fetch semesters when the screen loads
-  final semesterProvider =
-      Provider.of<SemesterProvider>(context, listen: false);
-  semesterProvider.fetchSemesters().then((_) {
-    setState(() {
-      // Set default value if there are semesters available
-      if (semesterProvider.semesters.isNotEmpty) {
-        // Select the first semester
-        selectedSemester =
-            "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+  void initState() {
+    super.initState();
+    // Fetch semesters when the screen loads
+    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+    semesterProvider.fetchSemesters().then((_) {
+      setState(() {
+        // Set default value if there are semesters available
+        if (semesterProvider.semesters.isNotEmpty) {
+          // Select the first semester
+          selectedSemester = "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
         
-        final defaultSemester = semesterProvider.semesters.first;
-        selectedSemesterId = defaultSemester['semester_id'];
+          final defaultSemester = semesterProvider.semesters.first;
+          selectedSemesterId = defaultSemester['semester_id'];
 
-        // Log the selected semester
-        print("Default selected semester: $selectedSemester");
-        print("Default selected semester ID: $selectedSemesterId");
-      }
+          // Log the selected semester
+          print("Default selected semester: $selectedSemester");
+          print("Default selected semester ID: $selectedSemesterId");
+        }
+      });
     });
-  });
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +269,7 @@ void initState() {
                               onTap: () {
                                 setState(() {
                                   if (_selectedDay == dayAbbreviationToFull[day]) {
-                                    _selectedDay == null;
+                                    _selectedDay = null;
                                   } else {
                                     _selectedDay = dayAbbreviationToFull[day];
                                   }
@@ -280,7 +314,7 @@ void initState() {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16.0, vertical: 20.0),
                 child: ElevatedButton(
-                  onPressed: _submitClassSchedule,
+                  onPressed: () => _submitClassSchedule(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),
                     shape: RoundedRectangleBorder(

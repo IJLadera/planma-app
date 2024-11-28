@@ -15,21 +15,20 @@ class ActivityDetailsScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$title ',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Expanded(
+              flex: 3,
+              child: Text(
+                title,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.grey[800]),
+              ),
             ),
-          ),
-          Flexible(
+            Expanded(
+            flex: 5,
             child: Text(
               detail,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Colors.black),
             ),
           ),
         ],

@@ -85,6 +85,8 @@ class EventsPage extends StatelessWidget {
         },
         backgroundColor: Color(0xFF173F70),
         child: Icon(Icons.add),
+        shape: const CircleBorder(),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }

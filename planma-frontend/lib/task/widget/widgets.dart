@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class CustomWidgets {
   // Method to build a TextField with custom style
@@ -7,7 +8,7 @@ class CustomWidgets {
       TextEditingController controller, String labelText) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
@@ -31,7 +32,7 @@ class CustomWidgets {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: ListTile(
@@ -54,7 +55,7 @@ class CustomWidgets {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
@@ -71,27 +72,63 @@ class CustomWidgets {
     );
   }
 
-  static Widget buildDropdownField(String label, String? value,
-      List<String> items, Function(String?) onChanged) {
+  static Widget buildDropdownField({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+    Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
+    Color labelColor = Colors.black,
+    Color textColor = Colors.black,
+    double borderRadius = 30.0,
+    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    double fontSize = 14.0,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
-        borderRadius: BorderRadius.circular(30),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        decoration: InputDecoration(
-          labelText: label,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          hint: Text(
+            label,
+            style: TextStyle(
+              color: labelColor,
+              fontSize: fontSize,
+            ),
+          ),
+          value: value,
+          onChanged: onChanged,
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                item,
+                style: TextStyle(fontSize: fontSize, color: textColor),
+              ),
+            );
+          }).toList(),
+          buttonStyleData: ButtonStyleData(
+            padding: contentPadding,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+          ),
+          dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+              color: Colors.white, // Background color of the dropdown menu
+            ),
+          ),
+          iconStyleData: IconStyleData(
+            icon: Icon(Icons.arrow_drop_down, color: labelColor),
+            iconSize: 24,
+          ),
         ),
-        items: items.map((item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(item),
-          );
-        }).toList(),
-        onChanged: (value) => onChanged(value),
       ),
     );
   }

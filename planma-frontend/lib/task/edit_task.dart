@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/task/widget/widgets.dart';
-// Import your CustomWidgets class
+import 'package:intl/intl.dart'; // For date formatting
 
 class EditTask extends StatefulWidget {
   const EditTask({super.key});
@@ -16,17 +16,11 @@ class _EditTask extends State<EditTask> {
   final _endTimeController = TextEditingController();
 
   DateTime? _scheduledDate;
-  TimeOfDay? _startTime;
-  TimeOfDay? _endTime;
   DateTime? _deadline;
 
   String? _subject;
 
-  final List<String> _subjects = [
-    'Math',
-    'Science',
-    'English'
-  ]; // Add your subjects here
+  final List<String> _subjectsOptions = ['Math', 'Science', 'English'];
 
   // Method to select date
   void _selectDate(BuildContext context, DateTime? initialDate) async {
@@ -65,7 +59,7 @@ class _EditTask extends State<EditTask> {
         title: const Text(
           'Edit Task',
           style: TextStyle(
-            fontWeight: FontWeight.bold, // Makes the text bold
+            fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
@@ -81,13 +75,22 @@ class _EditTask extends State<EditTask> {
               child: Column(
                 children: [
                   CustomWidgets.buildTextField(
-                      _taskNameController, 'Task Name'),
-                  const SizedBox(height: 12), // Added gap
+                    _taskNameController,
+                    'Task Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                      _descriptionController, 'Description'),
-                  const SizedBox(height: 12), // Added gap
-                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
-                      context, true, _selectDate),
+                    _descriptionController,
+                    'Description',
+                  ),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildDateTile(
+                    'Scheduled Date',
+                    _scheduledDate,
+                    context,
+                    true, // Indicates it's the start date
+                    _selectDate, // Pass the selectDate function reference
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -113,14 +116,30 @@ class _EditTask extends State<EditTask> {
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
-                      'Deadline', _deadline, context, false, _selectDate),
-                  const SizedBox(height: 12), // Added gap
+                    'Deadline',
+                    _deadline,
+                    context,
+                    false, // Indicates it's the deadline date
+                    _selectDate, // Pass the selectDate function reference
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
-                      'Subject', _subject, _subjects, (value) {
-                    setState(() {
-                      _subject = value;
-                    });
-                  }),
+                    label:
+                        'Choose Subject', // Updated the label for consistency
+                    value: _subject,
+                    items: _subjectsOptions,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _subject = value;
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
+                  )
                 ],
               ),
             ),
@@ -133,7 +152,7 @@ class _EditTask extends State<EditTask> {
                 // Create task action
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF173F70),
+                backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

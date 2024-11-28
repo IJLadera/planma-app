@@ -600,7 +600,7 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def add_schedule(self, request):
         data = request.data
-        
+
         # Extract data from request
         subject_code = data.get('subject_code')
         subject_title = data.get('subject_title')
@@ -609,23 +609,25 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
         start_time = data.get('scheduled_start_time')
         end_time = data.get('scheduled_end_time')
         room = data.get('room')
-        student_id = data.get('student_id')
+
+        # Use the authenticated user's student_id
+        student_id = request.user.student_id
 
         # Validate input
-        if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room, student_id]):
-            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Step 1: Create or get the Subject
+        # Create or get the Subject
         subject, created = CustomSubject.objects.get_or_create(
             subject_code=subject_code,
             defaults={
                 'subject_title': subject_title,
-                'semester_id_id': semester_id,  # ForeignKey fields require the _id suffix for direct assignment
+                'semester_id_id': semester_id,
                 'student_id_id': student_id,
             }
         )
 
-        # Step 2: Create the Class Schedule
+        # Create the Class Schedule
         class_schedule = CustomClassSchedule.objects.create(
             subject_code=subject,  # Pass the subject object
             day_of_week=day_of_week,
