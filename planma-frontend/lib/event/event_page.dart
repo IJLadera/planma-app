@@ -10,18 +10,13 @@ class EventsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? eventName = context.watch<EventsProvider>().eventName;
-    String? eventDesc = context.watch<EventsProvider>().eventDesc;
-    String? location = context.watch<EventsProvider>().location;
-    String? date = context.watch<EventsProvider>().date;
-    String? time = context.watch<EventsProvider>().time;
-    String? eventType = context.watch<EventsProvider>().eventType;
+    final eventsProvider = context.watch<EventsProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Events'),
+        title: const Text('Events'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -31,44 +26,47 @@ class EventsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Search bar
             TextField(
               decoration: InputDecoration(
                 hintText: 'Search',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
+            // List of events
             Expanded(
               child: ListView(
                 children: [
-                  SectionTitle(title: 'Today'),
+                  const SectionTitle(title: 'Today'),
                   EventCard(
-                    eventName: '$eventName',
-                    description: '$eventDesc',
-                    location: '$location',
-                    date: '$date',
-                    timePeriod: '$time',
-                    type: '$eventType',
+                    eventName: eventsProvider.eventName ?? 'No Event Name',
+                    description: eventsProvider.eventDesc ?? 'No Description',
+                    location: eventsProvider.location ?? 'No Location',
+                    date: eventsProvider.date ?? 'No Date',
+                    timePeriod: eventsProvider.time ?? 'No Time',
+                    type: eventsProvider.eventType ?? 'No Type',
                   ),
-                  EventCard(
+                  // Hardcoded event
+                  const EventCard(
                     eventName: 'Date with GF',
                     description: 'Monthsary Date',
                     location: 'SM Downtown',
                     date: '11 January 2024',
                     timePeriod: '11:00 AM - 12:30 PM',
-                    type: 'Academic',
+                    type: 'Personal',
                   ),
-                  SectionTitle(title: 'December 18'),
-                  EventCard(
-                    eventName: 'Date with GF',
-                    description: 'Monthsary Date',
-                    location: 'SM Downtown',
-                    date: '11 January 2024',
-                    timePeriod: '11:00 AM - 12:30 PM',
-                    type: 'Academic',
+                  const SectionTitle(title: 'December 18'),
+                  const EventCard(
+                    eventName: 'Team Meeting',
+                    description: 'Discuss project progress',
+                    location: 'Office Meeting Room',
+                    date: '18 December 2024',
+                    timePeriod: '10:00 AM - 11:30 AM',
+                    type: 'Work',
                   ),
                 ],
               ),
@@ -80,13 +78,11 @@ class EventsPage extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddEventState()),
+            MaterialPageRoute(builder: (context) => const AddEventState()),
           );
         },
-        backgroundColor: Color(0xFF173F70),
-        child: Icon(Icons.add),
-        shape: const CircleBorder(),
-        child: Icon(Icons.add, color: Colors.white),
+        backgroundColor: const Color(0xFF173F70),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
