@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/activities/widget/widget.dart';
 
 class EditActivity extends StatefulWidget {
+  const EditActivity({super.key});
+
   @override
   _EditActivity createState() => _EditActivity();
 }

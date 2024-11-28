@@ -7,11 +7,11 @@ class GoalCard extends StatelessWidget {
   final double progress;
 
   const GoalCard({
-    Key? key,
+    super.key,
     required this.goalName,
     required this.targetHours,
     required this.progress,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

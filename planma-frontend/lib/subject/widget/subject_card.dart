@@ -13,7 +13,7 @@ class SubjectCard extends StatelessWidget {
 
   // Constructor to accept the isByDate parameter and subject data
   const SubjectCard({
-    Key? key,
+    super.key,
     required this.isByDate,
     required this.subject_code,
     required this.subject_title,
@@ -22,7 +22,7 @@ class SubjectCard extends StatelessWidget {
     required this.end_time,
     required this.room,
     required this.selected_days,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

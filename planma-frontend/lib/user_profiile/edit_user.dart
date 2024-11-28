@@ -9,7 +9,7 @@ class EditProfileScreen extends StatelessWidget {
   final String lastName;
   final _formKey = GlobalKey<FormState>();
 
-  EditProfileScreen({
+  EditProfileScreen({super.key, 
     required this.username,
     required this.firstName,
     required this.lastName,

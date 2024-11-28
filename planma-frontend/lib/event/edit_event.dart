@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/event/widget/widget.dart';
 
 class EditEvent extends StatefulWidget {
+  const EditEvent({super.key});
+
   @override
   _EditEvent createState() => _EditEvent();
 }

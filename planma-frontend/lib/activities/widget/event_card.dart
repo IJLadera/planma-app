@@ -2,19 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/activities/view_activity.dart';
 import 'package:planma_app/timer/countdown/countdown_timer.dart';
 
-class ActivityCard extends StatelessWidget {
+class EventCard extends StatelessWidget {
   final String activityName;
   final String timePeriod;
-  final String description;
-  final String date;
   final Color backgroundColor;
 
-  const ActivityCard({
-    Key? key,
+  const EventCard({
+    super.key,
     required this.activityName,
     required this.timePeriod,
-    required this.description,
-    required this.date,
     required this.backgroundColor,
   });
 
@@ -24,15 +20,14 @@ class ActivityCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: InkWell(
         onTap: () {
-          // Navigate to ViewActivity screen and pass dynamic data
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ViewActivity(
                 activityName: activityName,
-                description: description, // Passing real description data
-                date: date, // Passing real date data
-                time: timePeriod, // Passing real time data
+                description: 'Sample Description', // Replace with real data
+                date: '2024-11-16', // Replace with real data
+                time: timePeriod,
               ),
             ),
           );
@@ -72,17 +67,16 @@ class ActivityCard extends StatelessWidget {
                     Text(
                       activityName,
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(255, 11, 54, 89),
-                      ),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color.fromARGB(255, 11, 54, 89)),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       timePeriod,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600], // Styling the timePeriod
+                        color: Colors.grey[600], // This resolves the issue
                       ),
                     ),
                   ],

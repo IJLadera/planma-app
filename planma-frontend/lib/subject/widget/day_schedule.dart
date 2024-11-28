@@ -55,7 +55,7 @@ class DaySchedule extends StatelessWidget {
             itemCount: subjects.length,
             itemBuilder: (context, index) {
               var subject = subjects[index];
-              return Container(
+              return SizedBox(
                 height: 120, // Fixed height for each card
                 child: SubjectCard(
                   isByDate: isByDate,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/user_preferences/setting_goal.dart';
 
 class SleepWakeReminderScreen extends StatefulWidget {
+  const SleepWakeReminderScreen({super.key});
+
   @override
   _SleepWakeReminderScreenState createState() =>
       _SleepWakeReminderScreenState();
