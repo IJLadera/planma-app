@@ -22,47 +22,48 @@ class _TaskCardState extends State<TaskCard> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: InkWell(
-        onTap: () {
-          // Navigate to TimerPage
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => TimerPage()),
-          );
-        },
-        borderRadius:
-            BorderRadius.circular(10), // Match container border radius
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.blue[100],
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Icon(
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.blue[100],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to TimerPage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TimerPage(themeColor: Colors.blueAccent),
+                      ),
+                    );
+                  },
+                  child: const Icon(
                     Icons.access_time, // Time icon
                     size: 24,
                     color: Colors.blue, // Icon color
                   ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.taskName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text('${widget.subject} (${widget.duration})'),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.taskName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text('${widget.subject} (${widget.duration})'),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

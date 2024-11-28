@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/activities/view_activity.dart';
+import 'package:planma_app/timer/countdown/countdown_timer.dart';
 
 class EventCard extends StatelessWidget {
   final String activityName;
@@ -49,7 +50,13 @@ class EventCard extends StatelessWidget {
                     size: 30,
                   ),
                   onPressed: () {
-                    // Add functionality to play or start the activity
+                    // Navigate to TimerPage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TimerPage(themeColor: Colors.redAccent),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(width: 10), // Spacing between button and text

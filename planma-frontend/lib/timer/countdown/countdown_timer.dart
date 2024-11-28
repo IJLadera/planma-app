@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 
 class TimerPage extends StatefulWidget {
-  const TimerPage({super.key});
+  final Color themeColor;
+
+  const TimerPage({super.key, required this.themeColor});
 
   @override
   State<TimerPage> createState() => _TimerPageState();
@@ -28,9 +30,9 @@ class _TimerPageState extends State<TimerPage> {
         return !disableBackButton;
       },
       child: Scaffold(
-        backgroundColor: Colors.blue[100],
+        backgroundColor: widget.themeColor.withOpacity(0.1), // Use themeColor
         appBar: AppBar(
-          backgroundColor: Colors.blue[100],
+          backgroundColor: widget.themeColor, // Use themeColor
           title: const Text("Timer & Stopwatch"),
           leading: disableBackButton
               ? null
@@ -57,7 +59,7 @@ class _TimerPageState extends State<TimerPage> {
                       },
                 borderRadius: BorderRadius.circular(10),
                 selectedColor: Colors.white,
-                fillColor: Colors.blue,
+                fillColor: widget.themeColor, // Use themeColor
                 children: const [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
@@ -101,6 +103,7 @@ class _TimerPageState extends State<TimerPage> {
                       ? timeProvider.remainingTime / timeProvider.initialTime
                       : 0,
                   strokeWidth: 8,
+                  color: widget.themeColor, // Use themeColor
                 ),
               ),
               GestureDetector(
@@ -136,9 +139,9 @@ class _TimerPageState extends State<TimerPage> {
                 child: Container(
                   height: 50,
                   width: 50,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue,
+                    color: widget.themeColor, // Use themeColor
                   ),
                   child: Icon(
                     timeProvider.isRunning ? Icons.pause : Icons.play_arrow,
@@ -158,9 +161,9 @@ class _TimerPageState extends State<TimerPage> {
                 child: Container(
                   height: 50,
                   width: 50,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue,
+                    color: widget.themeColor, // Use themeColor
                   ),
                   child: const Icon(
                     Icons.stop,
@@ -198,9 +201,9 @@ class _TimerPageState extends State<TimerPage> {
                 child: Container(
                   height: 50,
                   width: 50,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue,
+                    color: widget.themeColor, // Use themeColor
                   ),
                   child: Icon(
                     _isStopwatchRunning ? Icons.pause : Icons.play_arrow,
@@ -215,9 +218,9 @@ class _TimerPageState extends State<TimerPage> {
                 child: Container(
                   height: 50,
                   width: 50,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue,
+                    color: widget.themeColor, // Use themeColor
                   ),
                   child: const Icon(
                     Icons.stop,
