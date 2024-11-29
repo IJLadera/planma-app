@@ -1,3 +1,5 @@
+from django.db import IntegrityError, transaction
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status, viewsets
 from .models import *
@@ -609,37 +611,122 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
         start_time = data.get('scheduled_start_time')
         end_time = data.get('scheduled_end_time')
         room = data.get('room')
-
-        # Use the authenticated user's student_id
-        student_id = request.user.student_id
+        student_id = request.user.student_id  # Authenticated user
 
         # Validate input
         if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Create or get the Subject
-        subject, created = CustomSubject.objects.get_or_create(
-            subject_code=subject_code,
-            defaults={
-                'subject_title': subject_title,
-                'semester_id_id': semester_id,
-                'student_id_id': student_id,
-            }
-        )
+        try:
+            # Check for duplicate schedule
+            duplicate = CustomClassSchedule.objects.filter(
+                Q(day_of_week=day_of_week) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(room=room) &
+                Q(student_id=student_id) 
+            ).exists()
 
-        # Create the Class Schedule
-        class_schedule = CustomClassSchedule.objects.create(
-            subject_code=subject,  # Pass the subject object
-            day_of_week=day_of_week,
-            scheduled_start_time=start_time,
-            scheduled_end_time=end_time,
-            room=room,
-            student_id_id=student_id,
-        )
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate schedule entry detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        # Serialize and return the created data
-        serializer = self.get_serializer(class_schedule)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Create or get the Subject
+            subject, created = CustomSubject.objects.get_or_create(
+                subject_code=subject_code,
+                defaults={
+                    'subject_title': subject_title,
+                    'semester_id_id': semester_id,
+                    'student_id_id': student_id,
+                }
+            )
+
+            # Create the Class Schedule
+            class_schedule = CustomClassSchedule.objects.create(
+                subject_code=subject,
+                day_of_week=day_of_week,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time,
+                room=room,
+                student_id_id=student_id,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(class_schedule)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the class schedule
+        subject_code = data.get('subject_code')
+        subject_title = data.get('subject_title')
+        semester_id = data.get('semester_id')
+        day_of_week = data.get('day_of_week')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        room = data.get('room')
+
+        # Validate input
+        if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Check if the subject needs updating or creation
+            subject, created = CustomSubject.objects.get_or_create(
+                subject_code=subject_code,
+                defaults={
+                    'subject_title': subject_title,
+                    'semester_id_id': semester_id,
+                    'student_id_id': request.user.student_id,
+                },
+            )
+            if not created:  # If the subject already exists, update its details
+                subject.subject_title = subject_title
+                subject.semester_id_id = semester_id
+                subject.save()
+
+            # Update the class schedule instance
+            instance.subject_code = subject
+            instance.day_of_week = day_of_week
+            instance.scheduled_start_time = start_time
+            instance.scheduled_end_time = end_time
+            instance.room = room
+            instance.save()
+
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        subject_code = instance.subject_code
+
+        with transaction.atomic():
+            self.perform_destroy(instance)
+            if not CustomClassSchedule.objects.filter(subject_code=subject_code).exists():
+                subject_code.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Semester
 class SemesterListView(APIView):

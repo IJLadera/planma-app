@@ -262,6 +262,9 @@ class CustomClassSchedule(models.Model):
         related_name='scheduled_classes', db_column='student_id'
     )
 
+    class Meta:
+        unique_together = ('day_of_week', 'scheduled_start_time', 'scheduled_end_time', 'room', 'student_id')
+
     def __str__(self):
         # Access the related CustomSubject's title
         subject_title = self.subject_code.subject_title
