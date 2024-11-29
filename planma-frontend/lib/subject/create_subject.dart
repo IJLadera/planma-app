@@ -124,10 +124,9 @@ class _AddClassScreenState extends State<AddClassScreen> {
         const SnackBar(content: Text('Class Schedule added successfully!')),
       );
 
+      Navigator.pop(context);
       // Clear fields after adding
       _clearFields();
-
-      Navigator.pop(context);
 
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -239,7 +238,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                               );
                               selectedSemesterId = selectedSemesterMap['semester_id'];
                               print("Found semester ID: ${selectedSemesterMap['semester_id']}");
-                                                        }
+                            }
                           });
                         },
                         backgroundColor: const Color(0xFFF5F5F5),

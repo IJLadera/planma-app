@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:planma_app/models/class_schedules_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ClassScheduleProvider with ChangeNotifier {
-  List<Map<String, dynamic>> _classSchedules = [];
+  List<ClassSchedule> _classSchedules = [];
   String? _accessToken;
 
-  List<Map<String, dynamic>> get classSchedules => _classSchedules;
+  List<ClassSchedule> get classSchedules => _classSchedules;
   String? get accessToken => _accessToken;
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
@@ -29,8 +30,7 @@ class ClassScheduleProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
-        _classSchedules =
-            data.map((item) => Map<String, dynamic>.from(item)).toList();
+        _classSchedules = data.map((item) => ClassSchedule.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception(
@@ -87,21 +87,31 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 201) {
-        final newSchedule = json.decode(response.body) as Map<String, dynamic>;
-        _classSchedules.add(newSchedule);
-        notifyListeners();
+        print("Class schedule added successfully.");
+        print("Response body: ${response.body}"); // Debugging
+        try {
+          final newSchedule = ClassSchedule.fromJson(json.decode(response.body));
+          _classSchedules.add(newSchedule);
+          notifyListeners();
+        } catch (e) {
+          print('Error parsing schedule from response: $e');
+          throw Exception('Error parsing schedule: $e');
+        }
       } else {
-        throw Exception(
-            'Failed to add class schedule. Status Code: ${response.statusCode}');
+        print('Failed to add schedule: ${response.body}');
+        throw Exception('Error adding schedule: ${response.body}');
       }
-    } catch (error) {
-      rethrow;
+
+    } catch (error, stackTrace) {
+      print('Add schedule error: $error');
+      print('Stack trace: $stackTrace');
+      throw Exception('Error adding schedule: $error');
     }
   }
 
   //Edit a class schedule
   Future<void> editClassSchedule({
-    required int scheduleId,
+    required int classScheduleId,
     required String subjectCode,
     required String subjectTitle,
     required int semesterId,
@@ -113,7 +123,7 @@ class ClassScheduleProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/$scheduleId/");
+    final url = Uri.parse("${baseUrl}class-schedules/$classScheduleId/");
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
 
@@ -136,8 +146,9 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final updatedSchedule = json.decode(response.body) as Map<String, dynamic>;
-        int index = _classSchedules.indexWhere((schedule) => schedule['id'] == scheduleId);
+        final updatedSchedule = ClassSchedule.fromJson(json.decode(response.body));
+        int index = _classSchedules
+            .indexWhere((schedule) => schedule.classschedId == classScheduleId);
         if (index != -1) {
           _classSchedules[index] = updatedSchedule;
           notifyListeners();
@@ -152,11 +163,11 @@ class ClassScheduleProvider with ChangeNotifier {
   }
 
   // Delete a class schedule
-  Future<void> deleteClassSchedule(int scheduleId) async {
+  Future<void> deleteClassSchedule(int classschedId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/$scheduleId/");
+    final url = Uri.parse("${baseUrl}class-schedules/$classschedId/");
 
     try {
       final response = await http.delete(
@@ -167,7 +178,7 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _classSchedules.removeWhere((schedule) => schedule['id'] == scheduleId);
+        _classSchedules.removeWhere((schedule) => schedule.classschedId == classschedId);
         notifyListeners();
       } else {
         throw Exception(

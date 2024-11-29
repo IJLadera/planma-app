@@ -85,6 +85,7 @@ class CustomClassScheduleSerializer(serializers.ModelSerializer):
         fields = ['classsched_id', 'subject_code', 'day_of_week',
                   'scheduled_start_time', 'scheduled_end_time',
                   'room', 'student_id']
+        read_only_fields = ['classsched_id']
 
 class CustomSubjectSerializer(serializers.ModelSerializer):
     class Meta:
