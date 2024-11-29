@@ -62,3 +62,46 @@ class ActivityProvider with ChangeNotifier {
     }
   }
 }
+
+
+
+//   Future<void> updateActivity(
+//     String _activityName, 
+//     String _activityDesc, 
+//     String _date,
+//     String _time,
+//     String _status
+//     ) async {
+//     final url = Uri.parse("${baseUrl}updateactivity");
+
+//     try {
+//       final response = await http.put(
+//         url,
+//         headers: {
+//           'Authorization': 'Bearer $_accessToken',
+//           'Content-Type': 'application/json',
+//         },
+//         body: json.encode({
+//           'activity_name': _activityName,
+//           'activity_desc': _activityDesc,
+//           'scheduled_date': _date,
+//           'scheduled_start_time''scheduled_end_time': _time,
+//           'status': _status
+//         }),
+//       );
+
+//       if (response.statusCode == 200) {
+//         _activityName = activityName;
+//         _activityDesc = lastName;
+//         _date = username;
+//         _time = email;
+//         _status = status;
+//         notifyListeners();
+//       } else {
+//         throw Exception('Failed to fetch profile. Status Code: ${response.statusCode}');
+//       }
+//     } catch (error) {
+//       rethrow;
+//   }
+// }
+
