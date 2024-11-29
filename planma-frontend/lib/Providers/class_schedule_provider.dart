@@ -54,20 +54,22 @@ class ClassScheduleProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/add_schedule/");
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
 
-    print("PROV Subject Code: $subjectCode");
-    print("PROV Subject Title: $subjectTitle");
-    print("PROV Semester: $semesterId");
-    print("PROV Days: $dayOfWeek");
-    print("PROV Start Time: $startTime");
-    print("PROV End Time: $endTime");
-    print("PROV Room: $room");
-    print("PROV Start Time 2: $formattedStartTime");
-    print("PROV End Time 2: $formattedEndTime");
+    // Check for duplicates locally
+    bool isDuplicate = _classSchedules.any((schedule) =>
+        schedule.subjectCode == subjectCode &&
+        schedule.dayOfWeek == dayOfWeek &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime &&
+        schedule.room == room);
 
+    if (isDuplicate) {
+      throw Exception('Duplicate schedule detected locally. Please modify your entry.');
+    }
+
+    final url = Uri.parse("${baseUrl}class-schedules/add_schedule/");
     try {
       final response = await http.post(
         url,
@@ -88,30 +90,29 @@ class ClassScheduleProvider with ChangeNotifier {
 
       if (response.statusCode == 201) {
         print("Class schedule added successfully.");
-        print("Response body: ${response.body}"); // Debugging
-        try {
-          final newSchedule = ClassSchedule.fromJson(json.decode(response.body));
-          _classSchedules.add(newSchedule);
-          notifyListeners();
-        } catch (e) {
-          print('Error parsing schedule from response: $e');
-          throw Exception('Error parsing schedule: $e');
+        final newSchedule = ClassSchedule.fromJson(json.decode(response.body));
+        _classSchedules.add(newSchedule);
+        notifyListeners();
+      } else if (response.statusCode == 400) {
+        // Handle duplicate check from the backend
+        final responseBody = json.decode(response.body);
+        if (responseBody['error'] == 'Duplicate schedule entry detected.') {
+          throw Exception('Duplicate schedule detected on the server.');
+        } else {
+          throw Exception('Error adding schedule: ${response.body}');
         }
       } else {
-        print('Failed to add schedule: ${response.body}');
-        throw Exception('Error adding schedule: ${response.body}');
+        throw Exception('Failed to add schedule: ${response.body}');
       }
-
-    } catch (error, stackTrace) {
+    } catch (error) {
       print('Add schedule error: $error');
-      print('Stack trace: $stackTrace');
       throw Exception('Error adding schedule: $error');
     }
   }
 
   //Edit a class schedule
-  Future<void> editClassSchedule({
-    required int classScheduleId,
+  Future<void> updateClassSchedule({
+    required int classschedId,
     required String subjectCode,
     required String subjectTitle,
     required int semesterId,
@@ -123,7 +124,7 @@ class ClassScheduleProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/$classScheduleId/");
+    final url = Uri.parse("${baseUrl}class-schedules/$classschedId/");
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
 
@@ -147,18 +148,17 @@ class ClassScheduleProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final updatedSchedule = ClassSchedule.fromJson(json.decode(response.body));
-        int index = _classSchedules
-            .indexWhere((schedule) => schedule.classschedId == classScheduleId);
+        final index = _classSchedules.indexWhere((schedule) => schedule.classschedId == classschedId);
         if (index != -1) {
           _classSchedules[index] = updatedSchedule;
           notifyListeners();
         }
       } else {
-        throw Exception(
-            'Failed to edit class schedule. Status Code: ${response.statusCode}');
+        throw Exception('Failed to update class schedule: ${response.body}');
       }
     } catch (error) {
-      rethrow;
+      print('Update schedule error: $error');
+      throw Exception('Error updating schedule: $error');
     }
   }
 
