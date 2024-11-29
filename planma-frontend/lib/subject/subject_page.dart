@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/subject/by_date_view.dart';
+import 'package:planma_app/subject/by_subject_view.dart';
 import 'package:planma_app/subject/create_subject.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
-import 'package:planma_app/subject/widget/day_schedule.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart'; // Assuming this contains `CustomWidgets`
 
@@ -27,10 +28,25 @@ class _ClassScheduleState extends State<ClassSchedule> {
   ];
 
   // Dummy data for subjects
-  final List<Map<String, String>> subjects = [
-    {'name': 'Math 101', 'schedule': 'Monday 10:00 AM - 12:00 PM'},
-    {'name': 'Physics 202', 'schedule': 'Wednesday 1:00 PM - 3:00 PM'},
-    {'name': 'English 303', 'schedule': 'Friday 8:00 AM - 10:00 AM'},
+  final List<Map<String, String>> subjectsView = [
+    {
+      'code': 'IT311',
+      'name': 'Information Assurance and Security',
+      'semester': '2024-2025 1st Semester',
+      'day': 'Wednesday',
+      'start_time': '01:00 PM',
+      'end_time': '02:00 PM',
+      'room': '09-305',
+    },
+    {
+      'code': 'IT312',
+      'name': 'Advanced Networking',
+      'semester': '2024-2025 1st Semester',
+      'day': 'Friday',
+      'start_time': '03:00 PM',
+      'end_time': '04:30 PM',
+      'room': '09-307',
+    },
   ];
 
   // Selected semester
@@ -132,29 +148,11 @@ class _ClassScheduleState extends State<ClassSchedule> {
                     ),
                     Expanded(
                       child: isByDate
-                          ? ListView.builder(
-                              itemCount: days.length,
-                              itemBuilder: (context, index) {
-                                return DaySchedule(
-                                  day: days[index],
-                                  isByDate: isByDate,
-                                );
-                              },
+                          ? ByDateView(
+                              days: days,
+                              subjectsView: subjectsView,
                             )
-                          : ListView.builder(
-                              itemCount: subjects.length,
-                              itemBuilder: (context, index) {
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  child: ListTile(
-                                    title: Text(subjects[index]['name']!),
-                                    subtitle:
-                                        Text(subjects[index]['schedule']!),
-                                  ),
-                                );
-                              },
-                            ),
+                          : BySubjectView(subjectsView: subjectsView),
                     ),
                   ],
                 );
