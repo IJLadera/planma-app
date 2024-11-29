@@ -7,6 +7,8 @@ import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.d
 import 'package:provider/provider.dart';
 
 class AddEventState extends StatefulWidget {
+  const AddEventState({super.key});
+
   @override
   _AddEventState createState() => _AddEventState();
 }

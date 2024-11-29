@@ -3,7 +3,7 @@ import 'package:planma_app/goals/create_goal.dart';
 import 'package:planma_app/goals/widget/goal_card.dart';
 
 class GoalPage extends StatefulWidget {
-  const GoalPage({Key? key}) : super(key: key);
+  const GoalPage({super.key});
 
   @override
   State<GoalPage> createState() => _GoalPageState();
@@ -101,8 +101,8 @@ class _GoalPageState extends State<GoalPage> {
             MaterialPageRoute(builder: (context) => AddGoalScreen()),
           );
         },
-        child: Icon(Icons.add),
         backgroundColor: Color(0xFF173F70),
+        child: Icon(Icons.add),
       ),
     );
   }

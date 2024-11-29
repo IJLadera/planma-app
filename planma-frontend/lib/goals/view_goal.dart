@@ -10,11 +10,11 @@ class ViewGoal extends StatelessWidget {
   final List<Map<String, dynamic>> filteredGoals;
 
   const ViewGoal({
-    Key? key,
+    super.key,
     required this.goalDetails,
     required this.sessions,
     required this.filteredGoals,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

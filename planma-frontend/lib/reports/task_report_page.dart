@@ -4,7 +4,7 @@ import 'package:planma_app/reports/widget/bottom_sheet.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ReportsPage extends StatefulWidget {
-  const ReportsPage({Key? key}) : super(key: key);
+  const ReportsPage({super.key});
 
   @override
   State<ReportsPage> createState() => _ReportsPageState();
@@ -177,6 +177,7 @@ class _ReportsPageState extends State<ReportsPage> {
               // Bar chart: Time spent
               ChartContainer(
                 title: 'Time Spent on Tasks',
+                isLoading: isLoading,
                 child: SfCartesianChart(
                   primaryXAxis: CategoryAxis(),
                   primaryYAxis: NumericAxis(
@@ -194,7 +195,6 @@ class _ReportsPageState extends State<ReportsPage> {
                     ),
                   ],
                 ),
-                isLoading: isLoading,
               ),
 
               const SizedBox(height: 16),
@@ -202,6 +202,7 @@ class _ReportsPageState extends State<ReportsPage> {
               // Doughnut chart: Task distribution
               ChartContainer(
                 title: 'Task Time Distribution',
+                isLoading: isLoading,
                 child: SfCircularChart(
                   legend:
                       Legend(isVisible: true, position: LegendPosition.bottom),
@@ -214,7 +215,6 @@ class _ReportsPageState extends State<ReportsPage> {
                     ),
                   ],
                 ),
-                isLoading: isLoading,
               ),
 
               const SizedBox(height: 16),
@@ -222,6 +222,7 @@ class _ReportsPageState extends State<ReportsPage> {
               // Bar chart: Tasks finished
               ChartContainer(
                 title: 'Tasks Finished',
+                isLoading: isLoading,
                 child: SfCartesianChart(
                   primaryXAxis: CategoryAxis(),
                   primaryYAxis: NumericAxis(title: AxisTitle(text: 'Tasks')),
@@ -234,7 +235,6 @@ class _ReportsPageState extends State<ReportsPage> {
                     ),
                   ],
                 ),
-                isLoading: isLoading,
               ),
             ],
           ),
@@ -254,8 +254,8 @@ class ChartContainer extends StatelessWidget {
     required this.title,
     required this.child,
     required this.isLoading,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -290,8 +290,8 @@ class ToggleButtonsDemo extends StatefulWidget {
   const ToggleButtonsDemo({
     required this.labels,
     required this.onSelected,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _ToggleButtonsDemoState createState() => _ToggleButtonsDemoState();
@@ -324,6 +324,12 @@ class _ToggleButtonsDemoState extends State<ToggleButtonsDemo> {
             // Call the provided callback with the selected label
             widget.onSelected(widget.labels[index]);
           },
+          borderRadius: BorderRadius.circular(8), // Rounded corners
+          borderColor: const Color(0xFF173F70), // Default border color
+          selectedBorderColor: const Color(0xFF173F70), // Active border color
+          fillColor: const Color(0xFF173F70), // Active button background
+          selectedColor: Colors.white, // Active button text color
+          color: const Color(0xFF173F70),
           // Configure the appearance of the toggle buttons
           children: widget.labels
               .map(
@@ -338,13 +344,7 @@ class _ToggleButtonsDemoState extends State<ToggleButtonsDemo> {
                   ),
                 ),
               )
-              .toList(),
-          borderRadius: BorderRadius.circular(8), // Rounded corners
-          borderColor: const Color(0xFF173F70), // Default border color
-          selectedBorderColor: const Color(0xFF173F70), // Active border color
-          fillColor: const Color(0xFF173F70), // Active button background
-          selectedColor: Colors.white, // Active button text color
-          color: const Color(0xFF173F70), // Default text color
+              .toList(), // Default text color
         ),
       ],
     );

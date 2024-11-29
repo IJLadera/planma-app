@@ -6,6 +6,8 @@ import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/activity_service.dart';
 
 class AddActivityState extends StatefulWidget {
+  const AddActivityState({super.key});
+
   @override
   _AddActivityState createState() => _AddActivityState();
 }

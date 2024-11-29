@@ -9,7 +9,7 @@ class EventCard extends StatelessWidget {
   final String date;
   final String type;
 
-  const EventCard({
+  const EventCard({super.key, 
     required this.eventName,
     required this.timePeriod,
     required this.description,

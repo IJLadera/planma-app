@@ -9,12 +9,12 @@ class ViewActivity extends StatelessWidget {
   final String time;
 
   const ViewActivity({
-    Key? key,
+    super.key,
     required this.activityName,
     required this.description,
     required this.date,
     required this.time,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -30,7 +30,7 @@ class _TaskCardState extends State<TaskCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 8, 15, 8),
+      padding: const EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
           // Navigate to ViewTask with dynamic data
@@ -63,51 +63,44 @@ class _TaskCardState extends State<TaskCard> {
             children: [
               Row(
                 children: [
-                  // Separate InkWell for the time icon
-                  InkWell(
+                  // Separate GestureDetector for the time icon
+                  GestureDetector(
                     onTap: () {
                       // Navigate to TimerPage when the time icon is tapped
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TimerPage()),
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TimerPage(themeColor: Colors.blueAccent),
+                        ),
                       );
                     },
-                    borderRadius:
-                        BorderRadius.circular(50), // Circular for icon
-                    child: const Padding(
-                      padding: EdgeInsets.all(
-                          12.0), // Increased padding around the icon
-                      child: Icon(
-                        Icons.access_time, // Time icon
-                        size: 28, // Slightly larger icon size
-                        color: Colors.blue, // Icon color
-                      ),
+                    child: const Icon(
+                      Icons.access_time, // Time icon
+                      size: 28, // Slightly larger icon size
+                      color: Colors.blue, // Icon color
                     ),
                   ),
                   const SizedBox(
                       width: 12), // Increased space between icon and text
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(left: 8.0), // Padding around text
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.taskName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16, // Larger font size for task name
-                          ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.taskName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16, // Larger font size for task name
                         ),
-                        Text(
-                          '${widget.subject} (${widget.duration})',
-                          style: const TextStyle(
-                            fontSize:
-                                14, // Smaller font size for subject/duration
-                          ),
+                      ),
+                      Text(
+                        '${widget.subject} (${widget.duration})',
+                        style: const TextStyle(
+                          fontSize:
+                              14, // Smaller font size for subject/duration
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),

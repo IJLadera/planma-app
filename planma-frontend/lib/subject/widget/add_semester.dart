@@ -4,6 +4,8 @@ import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
 
 class AddSemesterScreen extends StatefulWidget {
+  const AddSemesterScreen({super.key});
+
   @override
   _AddSemesterScreenState createState() => _AddSemesterScreenState();
 }

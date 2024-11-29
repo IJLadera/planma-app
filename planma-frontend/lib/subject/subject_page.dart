@@ -7,7 +7,7 @@ import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart'; // Assuming this contains `CustomWidgets`
 
 class ClassSchedule extends StatefulWidget {
-  const ClassSchedule({Key? key}) : super(key: key);
+  const ClassSchedule({super.key});
 
   @override
   _ClassScheduleState createState() => _ClassScheduleState();

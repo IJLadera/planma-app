@@ -5,6 +5,8 @@ import 'package:planma_app/user_profiile/edit_user.dart';
 import 'package:provider/provider.dart';
 
 class UserProfileScreen extends StatefulWidget {
+  const UserProfileScreen({super.key});
+
   @override
   _UserProfileScreenState createState() => _UserProfileScreenState();
 }

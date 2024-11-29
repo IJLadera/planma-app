@@ -6,7 +6,6 @@ import 'package:planma_app/authentication/forgot_password.dart';
 import 'package:planma_app/authentication/sign_up.dart';
 import 'package:planma_app/core/dashboard.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/login_auth.dart';
-import 'package:planma_app/main.dart';
 import 'package:provider/provider.dart';
 
 class LogIn extends StatefulWidget {

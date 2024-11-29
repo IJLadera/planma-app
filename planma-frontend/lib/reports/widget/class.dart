@@ -109,8 +109,8 @@ class ToggleButtonsDemo extends StatefulWidget {
   const ToggleButtonsDemo({
     required this.labels,
     required this.onSelected,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _ToggleButtonsDemoState createState() => _ToggleButtonsDemoState();
@@ -179,8 +179,8 @@ class ChartContainer extends StatelessWidget {
     required this.title,
     required this.child,
     required this.isLoading,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

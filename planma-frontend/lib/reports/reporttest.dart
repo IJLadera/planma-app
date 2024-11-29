@@ -7,7 +7,7 @@ import 'package:jwt_decode/jwt_decode.dart';
 
 class Report extends StatefulWidget {
   // ignore: prefer_const_constructors_in_immutables
-  Report({Key? key}) : super(key: key);
+  Report({super.key});
 
   @override
   _ReportState createState() => _ReportState();

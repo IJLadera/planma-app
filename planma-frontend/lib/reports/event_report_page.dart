@@ -4,7 +4,7 @@ import 'package:planma_app/reports/widget/bottom_sheet.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class EventReportsPage extends StatefulWidget {
-  const EventReportsPage({Key? key}) : super(key: key);
+  const EventReportsPage({super.key});
 
   @override
   State<EventReportsPage> createState() => _EventReportsPageState();
@@ -166,6 +166,7 @@ class _EventReportsPageState extends State<EventReportsPage> {
               const SizedBox(height: 32),
               ChartContainer(
                 title: 'Time Spent on Tasks',
+                isLoading: isLoading,
                 child: SfCartesianChart(
                   primaryXAxis: CategoryAxis(),
                   primaryYAxis: NumericAxis(
@@ -182,11 +183,11 @@ class _EventReportsPageState extends State<EventReportsPage> {
                     ),
                   ],
                 ),
-                isLoading: isLoading,
               ),
               const SizedBox(height: 16),
               ChartContainer(
                 title: 'Task Time Distribution',
+                isLoading: isLoading,
                 child: SfCircularChart(
                   legend:
                       Legend(isVisible: true, position: LegendPosition.bottom),
@@ -199,11 +200,11 @@ class _EventReportsPageState extends State<EventReportsPage> {
                     ),
                   ],
                 ),
-                isLoading: isLoading,
               ),
               const SizedBox(height: 16),
               ChartContainer(
                 title: 'Tasks Finished',
+                isLoading: isLoading,
                 child: SfCartesianChart(
                   primaryXAxis: CategoryAxis(),
                   primaryYAxis: NumericAxis(title: AxisTitle(text: 'Tasks')),
@@ -216,7 +217,6 @@ class _EventReportsPageState extends State<EventReportsPage> {
                     ),
                   ],
                 ),
-                isLoading: isLoading,
               ),
             ],
           ),
@@ -235,8 +235,8 @@ class ChartContainer extends StatelessWidget {
     required this.title,
     required this.child,
     required this.isLoading,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -271,8 +271,8 @@ class ToggleButtonsDemo extends StatefulWidget {
   const ToggleButtonsDemo({
     required this.labels,
     required this.onSelected,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _ToggleButtonsDemoState createState() => _ToggleButtonsDemoState();
@@ -301,6 +301,12 @@ class _ToggleButtonsDemoState extends State<ToggleButtonsDemo> {
             });
             widget.onSelected(widget.labels[index]);
           },
+          borderRadius: BorderRadius.circular(8),
+          borderColor: const Color(0xFF173F70),
+          selectedBorderColor: const Color(0xFF173F70),
+          fillColor: const Color(0xFF173F70),
+          selectedColor: Colors.white,
+          color: Colors.black,
           children: widget.labels
               .map(
                 (label) => SizedBox(
@@ -312,12 +318,6 @@ class _ToggleButtonsDemoState extends State<ToggleButtonsDemo> {
                 ),
               )
               .toList(),
-          borderRadius: BorderRadius.circular(8),
-          borderColor: const Color(0xFF173F70),
-          selectedBorderColor: const Color(0xFF173F70),
-          fillColor: const Color(0xFF173F70),
-          selectedColor: Colors.white,
-          color: Colors.black,
         ),
       ],
     );
