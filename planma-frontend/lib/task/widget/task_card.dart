@@ -30,7 +30,8 @@ class _TaskCardState extends State<TaskCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(
+          vertical: 8, horizontal: 16), // Add padding around the whole list
       child: InkWell(
         onTap: () {
           // Navigate to ViewTask with dynamic data
