@@ -124,10 +124,9 @@ class _AddClassScreenState extends State<AddClassScreen> {
         const SnackBar(content: Text('Class Schedule added successfully!')),
       );
 
+      Navigator.pop(context);
       // Clear fields after adding
       _clearFields();
-
-      Navigator.pop(context);
 
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -237,12 +236,8 @@ class _AddClassScreenState extends State<AddClassScreen> {
                                   semester['semester'] == semesterType;
                                 }, orElse: () => {},  // Return null if no match is found
                               );
-                              if (selectedSemesterMap != null) {
-                                selectedSemesterId = selectedSemesterMap['semester_id'];
-                                print("Found semester ID: ${selectedSemesterMap['semester_id']}");
-                              } else {
-                                print("No matching semester found for acad_year_start: $acadYearStart.");
-                              }  
+                              selectedSemesterId = selectedSemesterMap['semester_id'];
+                              print("Found semester ID: ${selectedSemesterMap['semester_id']}");
                             }
                           });
                         },
