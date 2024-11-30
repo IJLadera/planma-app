@@ -319,4 +319,13 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
       ),
     );
   }
+
+    @override
+  void dispose() {
+    // Dispose controllers and clean up listeners
+    startDateController.dispose();
+    endDateController.dispose();
+
+    super.dispose();
+  }
 }

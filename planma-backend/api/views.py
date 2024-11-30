@@ -6,6 +6,7 @@ from .models import *
 from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 
 #Tasks
 class CustomTaskListCreateView(APIView):
@@ -668,6 +669,15 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        semester_id = self.request.query_params.get('semester_id')
+        if semester_id:
+            # Validate if the semester_id exists
+            get_object_or_404(CustomSemester, pk=semester_id)
+            queryset = queryset.filter(subject_code__semester_id=semester_id)
+        return queryset
+    
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         data = request.data
@@ -728,15 +738,39 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# Semester
-class SemesterListView(APIView):
+# Subject
+class SubjectViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
+    queryset = CustomSubject.objects.all()
+    serializer_class = CustomSubjectSerializer
 
-    def get(self, request):
-        semesters = CustomSemester.objects.all()
-        serializer = CustomSemesterSerializer(semesters, many=True)
-        return Response(serializer.data)
+    @action(detail=False, methods=['get'], url_path='(?P<subject_code>[^/.]+)')
+    def get_subject_by_code(self, request, subject_code):
+        try:
+            subject = CustomSubject.objects.get(subject_code=subject_code)
+            serializer = self.get_serializer(subject)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except CustomSubject.DoesNotExist:
+            return Response({'error': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    def get_queryset(self):
+        subject_code = self.kwargs.get('subject_code')
+        if subject_code:
+            return CustomSubject.objects.filter(subject_code=subject_code)  # Filter by subject_code
+        return CustomSubject.objects.all()
+
+# Semester
+class SemesterViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = CustomSemester.objects.all()
+    serializer_class = CustomSemesterSerializer
+
+    # def get(self, request):
+    #     semesters = CustomSemester.objects.all()
+    #     serializer = CustomSemesterSerializer(semesters, many=True)
+    #     return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
     def post(self, request):
         serializer = CustomSemesterSerializer(data=request.data)
         if serializer.is_valid():

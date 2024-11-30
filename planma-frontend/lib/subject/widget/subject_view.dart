@@ -1,25 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/edit_subject.dart';
 import 'package:planma_app/subject/widget/subject_detail_row.dart';
+import 'package:planma_app/models/class_schedules_model.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
-  final String subject_code;
-  final String subject_title;
-  final String semester;
-  final String start_time;
-  final String end_time;
-  final String room;
-  final String selected_days;
+  final ClassSchedule classSchedule;
 
   const SubjectDetailScreen({
     super.key,
-    required this.subject_code,
-    required this.subject_title,
-    required this.semester,
-    required this.start_time,
-    required this.end_time,
-    required this.room,
-    required this.selected_days,
+    required this.classSchedule,
   });
 
   @override
@@ -28,6 +18,30 @@ class SubjectDetailScreen extends StatefulWidget {
 
 class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   String selectedAttendance = 'Did Not Attend';
+  String semesterDetails = 'Loading...';
+  late SemesterProvider semesterProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    semesterProvider = SemesterProvider();
+    _fetchSemesterDetails();
+  }
+
+  Future<void> _fetchSemesterDetails() async {
+    print('Fetching semester with ID: ${widget.classSchedule.semesterId}');
+    try {
+      final semester = await semesterProvider.getSemesterDetails(widget.classSchedule.semesterId);
+      print(semester);
+      setState(() {
+        semesterDetails = "${semester?['acad_year_start']} - ${semester?['acad_year_end']} ${semester?['semester']}";
+      });
+    } catch (e) {
+      setState(() {
+        semesterDetails = 'Error fetching semester details';
+      });
+    }
+  }
 
   // Function to determine color based on the selected value
   Color getColor(String value) {
@@ -44,34 +58,35 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   }
 
   // Handle delete functionality (stub for now)
-  void _handleDelete() {
-    showDialog(
+  void _handleDelete() async {
+    final isConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Subject'),
-        content: Text('Are you sure you want to delete this subject?'),
+        title: const Text('Delete Subject'),
+        content: const Text('Are you sure you want to delete this subject?'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text('Cancel'),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              // Add delete functionality here
-              Navigator.pop(context);
-              Navigator.pop(context); // Go back after deletion
-            },
-            child: Text('Delete'),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
+
+    if (isConfirmed == true) {
+      // Perform deletion logic here
+      Navigator.pop(context); // Go back after deletion
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final schedule = widget.classSchedule;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -120,31 +135,31 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
               children: [
                 SubjectDetailRow(
                   title: 'Code:',
-                  detail: widget.subject_code, // Directly using widget.property
+                  detail: schedule.subjectCode, // Directly using widget.property
                 ),
                 SubjectDetailRow(
                   title: 'Title:',
                   detail:
-                      widget.subject_title, // Directly using widget.property
+                      schedule.subjectTitle, // Directly using widget.property
                 ),
                 SubjectDetailRow(
                   title: 'Semester:',
-                  detail: widget.semester, // Directly using widget.property
+                  detail: semesterDetails, // Directly using widget.property
                 ),
                 SubjectDetailRow(
                   title: 'Day:',
                   detail:
-                      widget.selected_days, // Directly using widget.property
+                      schedule.dayOfWeek, // Directly using widget.property
                 ),
                 SubjectDetailRow(
                   title: 'Time:',
                   detail:
-                      '${widget.start_time} - ${widget.end_time}', // Combining times
+                      '${schedule.scheduledStartTime} - ${schedule.scheduledEndTime}', // Combining times
                 ),
                 SubjectDetailRow(
                   title: 'Room:',
-                  detail: widget.room.isNotEmpty
-                      ? widget.room
+                  detail: schedule.room.isNotEmpty
+                      ? schedule.room
                       : 'N/A', // Handling room
                 ),
                 const SizedBox(height: 20),

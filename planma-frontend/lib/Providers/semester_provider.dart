@@ -40,7 +40,43 @@ class SemesterProvider with ChangeNotifier {
     }
   }
 
-  // Add a semester
+  //Fetch semester details
+  Future<Map<String, dynamic>?> getSemesterDetails(int semesterId) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final semesterUrl = Uri.parse("${baseUrl}semesters/$semesterId/"); // Correct URL format
+
+    try {
+      // Sending GET request to fetch the semester details
+      final response = await http.get(
+        semesterUrl,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // If successful, parse the response body
+        final semesterData = json.decode(response.body);
+        print("Semester details: $semesterData");
+
+        // Return the semester data as a Map
+        return semesterData;
+      } else {
+        // If request fails, throw an exception with error details
+        throw Exception('Failed to load semester: ${response.body}');
+      }
+    } catch (error) {
+      // Handle errors such as network issues
+      print('Error fetching semester: $error');
+      throw Exception('Error fetching semester: $error');
+    }
+  }
+
+
+  //Add a semester
   Future<void> addSemester({
     required int acadYearStart,
     required int acadYearEnd,

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/by_date_view.dart';
 import 'package:planma_app/subject/by_subject_view.dart';
 import 'package:planma_app/subject/create_subject.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
-import 'package:provider/provider.dart'; // Assuming this contains `CustomWidgets`
+import 'package:provider/provider.dart';
 
 class ClassSchedule extends StatefulWidget {
   const ClassSchedule({super.key});
@@ -27,40 +28,17 @@ class _ClassScheduleState extends State<ClassSchedule> {
     'Saturday'
   ];
 
-  // Dummy data for subjects
-  final List<Map<String, String>> subjectsView = [
-    {
-      'code': 'IT311',
-      'name': 'Information Assurance and Security',
-      'semester': '2024-2025 1st Semester',
-      'day': 'Wednesday',
-      'start_time': '01:00 PM',
-      'end_time': '02:00 PM',
-      'room': '09-305',
-    },
-    {
-      'code': 'IT312',
-      'name': 'Advanced Networking',
-      'semester': '2024-2025 1st Semester',
-      'day': 'Friday',
-      'start_time': '03:00 PM',
-      'end_time': '04:30 PM',
-      'room': '09-307',
-    },
-  ];
-
   // Selected semester
   String? selectedSemester;
 
   @override
   void initState() {
     super.initState();
-    // Fetch semesters when the screen loads
+    // Initially fetch semesters when the screen loads
     final semesterProvider =
         Provider.of<SemesterProvider>(context, listen: false);
     semesterProvider.fetchSemesters().then((_) {
       setState(() {
-        // Access the updated semesters from the provider
         selectedSemester = semesterProvider.semesters.isNotEmpty
             ? "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}"
             : null;
@@ -74,9 +52,9 @@ class _ClassScheduleState extends State<ClassSchedule> {
       appBar: AppBar(
         title: const Text('Class Schedule'),
       ),
-      body: Consumer<SemesterProvider>(
-        builder: (context, semesterProvider, child) {
-          // Update semesters list every time it changes
+      body: Consumer2<SemesterProvider, ClassScheduleProvider>(
+        builder: (context, semesterProvider, classScheduleProvider, child) {
+          // Update semesters list
           List<String> semesters = semesterProvider.semesters
               .map((semester) =>
                   "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
@@ -100,15 +78,59 @@ class _ClassScheduleState extends State<ClassSchedule> {
                               onChanged: (String? value) {
                                 setState(() {
                                   if (value == '- Add Semester -') {
+                                    // Navigate to Add Semester screen
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
                                             AddSemesterScreen(),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      // Refresh semesters after returning
+                                      semesterProvider.fetchSemesters();
+                                    });
                                   } else if (value != null) {
+                                    // Update the selected semester
                                     selectedSemester = value;
+
+                                    // Parse selectedSemester to extract its components
+                                    List<String> semesterParts =
+                                        selectedSemester!.split(' ');
+                                    int acadYearStart =
+                                        int.parse(semesterParts[0]);
+                                    int acadYearEnd =
+                                        int.parse(semesterParts[2]);
+                                    String semesterType =
+                                        "${semesterParts[3]} ${semesterParts[4]}";
+
+                                    // Find the corresponding semester_id
+                                    final selectedSemesterMap =
+                                        semesterProvider.semesters.firstWhere(
+                                      (semester) {
+                                        return semester['acad_year_start'] ==
+                                                acadYearStart &&
+                                            semester['acad_year_end'] ==
+                                                acadYearEnd &&
+                                            semester['semester'] ==
+                                                semesterType;
+                                      },
+                                      orElse: () =>
+                                          {}, // Return empty map if no match is found
+                                    );
+
+                                    if (selectedSemesterMap.isNotEmpty) {
+                                      final selectedSemesterId =
+                                          selectedSemesterMap['semester_id'];
+                                      print(
+                                          "Found semester ID: $selectedSemesterId");
+
+                                      // Trigger fetching of class schedules using semester_id
+                                      classScheduleProvider.fetchClassSchedules(
+                                        selectedSemesterId: selectedSemesterId,
+                                      );
+                                    } else {
+                                      print("No matching semester found!");
+                                    }
                                   }
                                 });
                               },
@@ -147,12 +169,18 @@ class _ClassScheduleState extends State<ClassSchedule> {
                       ),
                     ),
                     Expanded(
-                      child: isByDate
-                          ? ByDateView(
-                              days: days,
-                              subjectsView: subjectsView,
-                            )
-                          : BySubjectView(subjectsView: subjectsView),
+                      child: classScheduleProvider.classSchedules.isEmpty
+                          ? const Center(child: Text('No schedules available'))
+                          : isByDate
+                              ? ByDateView(
+                                  days: days,
+                                  subjectsView:
+                                      classScheduleProvider.classSchedules,
+                                )
+                              : BySubjectView(
+                                  subjectsView:
+                                      classScheduleProvider.classSchedules,
+                                ),
                     ),
                   ],
                 );

@@ -4,21 +4,25 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/subjects_model.dart';
 
 class ClassScheduleProvider with ChangeNotifier {
   List<ClassSchedule> _classSchedules = [];
+  List<String> subjectCodes = [];
+  Subject? _selectedSubject;
   String? _accessToken;
 
   List<ClassSchedule> get classSchedules => _classSchedules;
+  Subject? get selectedSubject => _selectedSubject;
   String? get accessToken => _accessToken;
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  //Fetch all class schedules
-  Future<void> fetchClassSchedules() async {
+  //Fetch existing subject details
+  Future<void> fetchSubjectDetails(String subjectCode) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${baseUrl}class-schedules/");
+    final url = Uri.parse("${baseUrl}subjects/$subjectCode/");
 
     try {
       final response = await http.get(
@@ -29,15 +33,59 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-        _classSchedules = data.map((item) => ClassSchedule.fromJson(item)).toList();
+        final data = json.decode(response.body);
+        _selectedSubject = Subject.fromJson(data);
+        notifyListeners();
+      } else if (response.statusCode == 404) {
+        _selectedSubject = null;
+        notifyListeners();
+        print('Subject not found');
+      } else {
+        throw Exception('Error fetching subject details');
+      }
+    } catch (error) {
+      print('Error fetching subject: $error');
+      throw Exception('Error fetching subject details: $error');
+    }
+  }
+
+  //Fetch all class schedules
+  Future<void> fetchClassSchedules({int? selectedSemesterId}) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    // Ensure semester_id is provided
+    if (selectedSemesterId == null) {
+      print("Error: Semester ID is required.");
+      return;
+    }
+
+    // Construct the URL with semester_id
+    final url =
+        Uri.parse("${baseUrl}class-schedules/?semester_id=$selectedSemesterId");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        print(data);
+
+        // Parse the response body as a list of class schedules
+        _classSchedules =
+            data.map((item) => ClassSchedule.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception(
             'Failed to fetch class schedules. Status Code: ${response.statusCode}');
       }
     } catch (error) {
-      print(error);
+      print("Error fetching class schedules: $error");
     }
   }
 
@@ -66,7 +114,8 @@ class ClassScheduleProvider with ChangeNotifier {
         schedule.room == room);
 
     if (isDuplicate) {
-      throw Exception('Duplicate schedule detected locally. Please modify your entry.');
+      throw Exception(
+          'Duplicate schedule detected locally. Please modify your entry.');
     }
 
     final url = Uri.parse("${baseUrl}class-schedules/add_schedule/");
@@ -147,8 +196,10 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final updatedSchedule = ClassSchedule.fromJson(json.decode(response.body));
-        final index = _classSchedules.indexWhere((schedule) => schedule.classschedId == classschedId);
+        final updatedSchedule =
+            ClassSchedule.fromJson(json.decode(response.body));
+        final index = _classSchedules
+            .indexWhere((schedule) => schedule.classschedId == classschedId);
         if (index != -1) {
           _classSchedules[index] = updatedSchedule;
           notifyListeners();
@@ -178,7 +229,8 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _classSchedules.removeWhere((schedule) => schedule.classschedId == classschedId);
+        _classSchedules
+            .removeWhere((schedule) => schedule.classschedId == classschedId);
         notifyListeners();
       } else {
         throw Exception(
