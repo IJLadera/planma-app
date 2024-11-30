@@ -20,7 +20,7 @@ class TaskReminder extends StatelessWidget {
         children: [
           // Calendar Icon
           Image.asset(
-            'lib/reminder/assests/feature.png',
+            'lib/reminder/assets/feature.png',
             width: 48,
             height: 48,
           ),

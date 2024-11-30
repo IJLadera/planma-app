@@ -20,7 +20,7 @@ class EventReminderDialog extends StatelessWidget {
         children: [
           // Calendar Icon
           Image.asset(
-            'lib/reminder/assests/calendar.png', 
+            'lib/reminder/assets/calendar.png', 
             width: 48, 
             height: 48, 
           ),
