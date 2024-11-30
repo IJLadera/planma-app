@@ -4,13 +4,16 @@ from .views import *
 
 router = DefaultRouter()
 router.register(r'class-schedules', ClassScheduleViewSet, basename='classschedule')
+router.register(r'subjects', SubjectViewSet, basename='subject')
+router.register(r'semesters', SemesterViewSet, basename='semester')
 
 urlpatterns = [
     path ('djoser/', include ('djoser.urls')),
     path ('auth/', include ('djoser.urls.jwt')),
     #semester
-    path('semesters/', SemesterListView.as_view(), name='semester-list-create'),
-    path('semesters/<int:pk>/', SemesterDeleteView.as_view(), name='semester-delete'),
+    # path('semesters/', SemesterListView.as_view(), name='semester-list-create'),
+    # path('semesters/<int:semester_id>/', SemesterDetailView.as_view(), name='semester-detail'),
+    # path('semesters/<int:pk>/', SemesterDeleteView.as_view(), name='semester-delete'),
     #ModelViewSet
     path('', include(router.urls)),
     #tasks

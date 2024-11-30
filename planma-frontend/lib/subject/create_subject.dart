@@ -97,15 +97,6 @@ class _AddClassScreenState extends State<AddClassScreen> {
       return;
     }
 
-    // Log for now (you can replace with API/database calls)
-    print("Subject Code: $subjectCode");
-    print("Subject Title: $subjectTitle");
-    print("Semester: $selectedSemesterId");
-    print("Days: $_selectedDay");
-    print("Start Time: $startTime");
-    print("End Time: $endTime");
-    print("Room: $room");
-
     try {
       await provider.addClassScheduleWithSubject(
         subjectCode: subjectCode,
@@ -116,8 +107,6 @@ class _AddClassScreenState extends State<AddClassScreen> {
         endTime: endTime,
         room: room
       );
-
-      
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
@@ -172,6 +161,31 @@ class _AddClassScreenState extends State<AddClassScreen> {
           print("Default selected semester ID: $selectedSemesterId");
         }
       });
+    });
+
+    // Add listener for subject code controller to auto-fill subject title
+    _subjectCodeController.addListener(() {
+      final subjectProvider = Provider.of<ClassScheduleProvider>(context, listen: false);
+      String subjectCode = _subjectCodeController.text.trim();
+
+      if (subjectCode.isNotEmpty) {
+        subjectProvider.fetchSubjectDetails(subjectCode).then((_) {
+          setState(() {
+            if (subjectProvider.selectedSubject != null) {
+              _subjectTitleController.text = subjectProvider.selectedSubject!.subjectTitle;
+            } else {
+              _subjectTitleController.clear(); // Clear if no subject is found
+            }
+          });
+        }).catchError((error) {
+          print("Error fetching subject details: $error");
+          _subjectTitleController.clear();
+        });
+      } else {
+        setState(() {
+          _subjectTitleController.clear();
+        });
+      }
     });
   }
 
@@ -333,5 +347,18 @@ class _AddClassScreenState extends State<AddClassScreen> {
         },
       ),
     );
+  }
+
+    @override
+  void dispose() {
+    // Dispose controllers and clean up listeners
+    _subjectCodeController.dispose();
+    _subjectTitleController.dispose();
+    _roomController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+
+    // Always call super.dispose()
+    super.dispose();
   }
 }

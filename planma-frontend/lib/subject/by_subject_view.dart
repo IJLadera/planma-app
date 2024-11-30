@@ -1,9 +1,10 @@
 // by_subject_view.dart
 import 'package:flutter/material.dart';
+import 'package:planma_app/models/class_schedules_model.dart';
 import 'package:planma_app/subject/widget/subject_card.dart'; // Import the SubjectCard widget
 
 class BySubjectView extends StatelessWidget {
-  final List<Map<String, String>> subjectsView;
+  final List<ClassSchedule> subjectsView;
 
   const BySubjectView({
     Key? key,
@@ -15,18 +16,12 @@ class BySubjectView extends StatelessWidget {
     return ListView.builder(
       itemCount: subjectsView.length,
       itemBuilder: (context, index) {
-        final subject = subjectsView[index];
+        final schedule = subjectsView[index];
         return SizedBox(
           height: 120, // Adjust height as needed
           child: SubjectCard(
             isByDate: false,
-            subject_code: subject['code']!,
-            subject_title: subject['name']!,
-            semester: subject['semester']!,
-            start_time: subject['start_time']!,
-            end_time: subject['end_time']!,
-            room: subject['room']!,
-            selected_days: subject['day']!,
+            schedule: schedule,
           ),
         );
       },

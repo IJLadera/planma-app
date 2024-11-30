@@ -21,18 +21,19 @@ class ClassSchedule {
 
   // Factory method to create an instance from JSON
   factory ClassSchedule.fromJson(Map<String, dynamic> json) {
-  return ClassSchedule(
-    classschedId: json['classsched_id'] as int?, // Optional
-    subjectCode: json['subject_code'] ?? 'N/A', // Default if null
-    subjectTitle: json['subject_title'] ?? 'N/A', // Default if null
-    semesterId: json['semester_id'] ?? 0, // Default to 0 if null
-    dayOfWeek: json['day_of_week'] ?? 'Unknown',
-    scheduledStartTime: json['scheduled_start_time'] ?? '00:00', // Default time
-    scheduledEndTime: json['scheduled_end_time'] ?? '00:00',
-    room: json['room'] ?? 'No Room',
-  );
-}
-
+    return ClassSchedule(
+      classschedId: json['classsched_id'] as int?, // Optional
+      subjectCode: json['subject_code']['subject_code'] ?? 'N/A', // Default if null
+      subjectTitle: json['subject_code']['subject_title'] ?? 'N/A', // Default if null
+      semesterId: json['semester_id'] != null
+          ? json['semester_id']['semester_id'] ?? 0
+          : 0, // Extract the semester_id if it's present, otherwise default to 0
+      dayOfWeek: json['day_of_week'] ?? 'Unknown',
+      scheduledStartTime: json['scheduled_start_time'] ?? '00:00', // Default time
+      scheduledEndTime: json['scheduled_end_time'] ?? '00:00',
+      room: json['room'] ?? 'No Room',
+    );
+  }
 
   // Convert a ClassSchedule instance to JSON
   Map<String, dynamic> toJson() {

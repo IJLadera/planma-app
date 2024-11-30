@@ -1,10 +1,11 @@
 // by_date_view.dart
 import 'package:flutter/material.dart';
-import 'package:planma_app/subject/widget/subject_card.dart'; // Import the SubjectCard widget
+import 'package:planma_app/subject/widget/subject_card.dart';
+import 'package:planma_app/models/class_schedules_model.dart';
 
 class ByDateView extends StatelessWidget {
   final List<String> days;
-  final List<Map<String, String>> subjectsView;
+  final List<ClassSchedule> subjectsView;
 
   const ByDateView({
     Key? key,
@@ -17,8 +18,9 @@ class ByDateView extends StatelessWidget {
     return ListView.builder(
       itemCount: days.length,
       itemBuilder: (context, index) {
+        // Filter ClassSchedule objects by day
         final filteredSubjects = subjectsView
-            .where((subject) => subject['day'] == days[index])
+            .where((schedule) => schedule.dayOfWeek == days[index])
             .toList();
 
         return filteredSubjects.isNotEmpty
@@ -28,8 +30,7 @@ class ByDateView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(
-                          left: 16.0, right: 16.0), // Adjust the margins here
+                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                       child: Text(
                         days[index], // The day name
                         style: const TextStyle(
@@ -44,18 +45,12 @@ class ByDateView extends StatelessWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: filteredSubjects.length,
                       itemBuilder: (context, idx) {
-                        final subject = filteredSubjects[idx];
+                        final schedule = filteredSubjects[idx];
                         return SizedBox(
                           height: 120, // Adjust height as needed
                           child: SubjectCard(
                             isByDate: true,
-                            subject_code: subject['code']!,
-                            subject_title: subject['name']!,
-                            semester: subject['semester']!,
-                            start_time: subject['start_time']!,
-                            end_time: subject['end_time']!,
-                            room: subject['room']!,
-                            selected_days: subject['day']!,
+                            schedule: schedule,
                           ),
                         );
                       },
@@ -63,7 +58,7 @@ class ByDateView extends StatelessWidget {
                   ],
                 ),
               )
-            : Container(); // If no subjects for the day, return empty Container
+            : Container(); // If no subjects for the day, return an empty Container
       },
     );
   }

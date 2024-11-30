@@ -78,27 +78,6 @@ class UserPrefSerializer(serializers.ModelSerializer):
                   'notification_enabled', 'reminder_offset_time', 
                   'student_id']
         
-
-class CustomClassScheduleSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = CustomClassSchedule
-        fields = ['classsched_id', 'subject_code', 'day_of_week',
-                  'scheduled_start_time', 'scheduled_end_time',
-                  'room', 'student_id']
-        read_only_fields = ['classsched_id']
-
-class CustomSubjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomSubject
-        fields = ['subject_code', 'subject_title',
-                  'student_id', 'semester_id']
-
-class AttendedClassSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = AttendedClass
-        fields = ['att_class_id', 'classsched_id', 'date', 
-                  'isExcused', 'hasAttended']
-
 class CustomSemesterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomSemester
@@ -111,6 +90,30 @@ class CustomSemesterSerializer(serializers.ModelSerializer):
         if data['sem_start_date'] >= data['sem_end_date']:
             raise serializers.ValidationError("Start date must be before end date.")
         return data
+
+class CustomSubjectSerializer(serializers.ModelSerializer):
+    semester_id = CustomSemesterSerializer()
+
+    class Meta:
+        model = CustomSubject
+        fields = ['subject_code', 'subject_title',
+                  'student_id', 'semester_id']
+
+class CustomClassScheduleSerializer(serializers.ModelSerializer):
+    subject_code = CustomSubjectSerializer()
+
+    class Meta: 
+        model = CustomClassSchedule
+        fields = ['classsched_id', 'subject_code', 'day_of_week',
+                  'scheduled_start_time', 'scheduled_end_time',
+                  'room', 'student_id']
+        read_only_fields = ['classsched_id']
+
+class AttendedClassSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = AttendedClass
+        fields = ['att_class_id', 'classsched_id', 'date', 
+                  'isExcused', 'hasAttended']
                 
 class GoalsSerializer(serializers.ModelSerializer):
     class Meta:

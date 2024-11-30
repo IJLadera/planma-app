@@ -1,27 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/subject/widget/subject_view.dart'; // Import the SubjectDetailScreen
+import 'package:planma_app/subject/widget/subject_view.dart';
+import 'package:planma_app/models/class_schedules_model.dart';
 
 class SubjectCard extends StatelessWidget {
   final bool isByDate;
-  final String subject_code;
-  final String subject_title;
-  final String semester;
-  final String start_time;
-  final String end_time;
-  final String room;
-  final String selected_days;
+  final ClassSchedule schedule;
 
   // Constructor to accept the isByDate parameter and subject data
   const SubjectCard({
     super.key,
     required this.isByDate,
-    required this.subject_code,
-    required this.subject_title,
-    required this.semester,
-    required this.start_time,
-    required this.end_time,
-    required this.room,
-    required this.selected_days,
+    required this.schedule,
   });
 
   @override
@@ -39,13 +28,7 @@ class SubjectCard extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => SubjectDetailScreen(
-                    subject_code: subject_code,
-                    subject_title: subject_title,
-                    semester: semester,
-                    start_time: start_time,
-                    end_time: end_time,
-                    room: room,
-                    selected_days: selected_days,
+                    classSchedule: schedule,
                   ),
                 ),
               );
@@ -62,7 +45,7 @@ class SubjectCard extends StatelessWidget {
                   children: [
                     // Subject Code
                     Text(
-                      subject_code,
+                      schedule.subjectCode,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -72,7 +55,7 @@ class SubjectCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     // Subject Title
                     Text(
-                      subject_title,
+                      schedule.subjectTitle,
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -83,7 +66,7 @@ class SubjectCard extends StatelessWidget {
                     // Time Info
                     Row(children: [
                       Text(
-                        'Time: $start_time - $end_time',
+                        'Time: ${schedule.scheduledStartTime} - ${schedule.scheduledEndTime}',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
