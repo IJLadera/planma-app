@@ -19,7 +19,7 @@ class ActivityReminder extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
-            'lib/reminder/assests/puzzle-pieces.png',
+            'lib/reminder/assets/puzzle-pieces.png',
             width: 48,
             height: 48,
           ),
