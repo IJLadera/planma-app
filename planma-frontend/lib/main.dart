@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
+import 'package:planma_app/authentication/splash_screen.dart';
 import 'package:planma_app/core/dashboard.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/authentication/log_in.dart';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
           // home: Dashboard(),
           debugShowCheckedModeBanner: false,
-          home: AuthGate(),
+          home: SplashScreen(),
           theme: ThemeData(
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor: Colors.white,

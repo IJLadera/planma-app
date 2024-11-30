@@ -16,7 +16,7 @@ class ReminderDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              'lib/reminder/assests/training.png',
+              'lib/reminder/assets/training.png',
               width: 48,
               height: 48,
             ),
