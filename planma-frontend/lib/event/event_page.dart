@@ -78,10 +78,11 @@ class EventsPage extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddEventState()),
+            MaterialPageRoute(builder: (context) => const AddEventScreen()),
           );
         },
         backgroundColor: const Color(0xFF173F70),
+        shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

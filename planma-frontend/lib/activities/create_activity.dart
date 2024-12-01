@@ -5,14 +5,14 @@ import 'package:jwt_decode/jwt_decode.dart';
 import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/activity_service.dart';
 
-class AddActivityState extends StatefulWidget {
-  const AddActivityState({super.key});
+class AddActivityScreen extends StatefulWidget {
+  const AddActivityScreen({super.key});
 
   @override
   _AddActivityState createState() => _AddActivityState();
 }
 
-class _AddActivityState extends State<AddActivityState> {
+class _AddActivityState extends State<AddActivityScreen> {
   final _activityNameController = TextEditingController();
   final _activityDescriptionController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();

@@ -167,8 +167,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                       ),
                     ],
                   ),
-                  const Divider(
-                      thickness: 1, height: 16),
+                  const Divider(thickness: 1, height: 16),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
                       'Goal Type', _selectedGoalType, _goalType, (value) {
@@ -190,7 +189,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
-              vertical: 20.0,
+              vertical: 15.0,
             ),
             child: ElevatedButton(
               onPressed: () {
@@ -205,7 +204,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                 ),
                 padding: const EdgeInsets.symmetric(
                   vertical: 15,
-                  horizontal: 120,
+                  horizontal: 100,
                 ),
               ),
               child: const Text(

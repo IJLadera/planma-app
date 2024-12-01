@@ -105,7 +105,7 @@ class ActivitiesScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddActivityState()),
+            MaterialPageRoute(builder: (context) => AddActivityScreen()),
           );
         },
         backgroundColor: const Color(0xFF173F70),

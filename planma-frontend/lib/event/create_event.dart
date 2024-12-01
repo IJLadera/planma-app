@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:planma_app/Providers/user_provider.dart';
-import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/event/widget/widget.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 import 'package:provider/provider.dart';
 
-class AddEventState extends StatefulWidget {
-  const AddEventState({super.key});
+class AddEventScreen extends StatefulWidget {
+  const AddEventScreen({super.key});
 
   @override
-  _AddEventState createState() => _AddEventState();
+  _AddEventScreen createState() => _AddEventScreen();
 }
 
-class _AddEventState extends State<AddEventState> {
+class _AddEventScreen extends State<AddEventScreen> {
   final _eventCodeController = TextEditingController();
   final _eventTitleController = TextEditingController();
   final _eventLocationController = TextEditingController();
