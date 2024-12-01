@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/task/create_task.dart';
 import 'package:planma_app/task/widget/search_bar.dart';
 import 'by_date_view.dart';
@@ -64,7 +65,12 @@ class _TasksPageState extends State<TasksPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tasks'),
+        title: Text(
+          'Tasks',
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+        ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
         children: [
@@ -73,7 +79,7 @@ class _TasksPageState extends State<TasksPage> {
                 const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
             child: Row(
               children: [
-                Expanded(child: CustomSearchBar()), // Add search bar here
+                Expanded(child: CustomSearchBar()),
                 const SizedBox(width: 8),
                 PopupMenuButton(
                   icon: const Icon(Icons.filter_list, color: Colors.black),
@@ -83,15 +89,19 @@ class _TasksPageState extends State<TasksPage> {
                     });
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'By Date',
-                      child: Text('By date',
-                          style: TextStyle(color: Colors.black)),
+                      child: Text(
+                        'By date',
+                        style: GoogleFonts.openSans(color: Colors.black),
+                      ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'By Subject',
-                      child: Text('By subject',
-                          style: TextStyle(color: Colors.black)),
+                      child: Text(
+                        'By subject',
+                        style: GoogleFonts.openSans(color: Colors.black),
+                      ),
                     ),
                   ],
                 ),
@@ -109,12 +119,12 @@ class _TasksPageState extends State<TasksPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CreateTask()),
+            MaterialPageRoute(builder: (context) => const AddTaskScreen()),
           );
         },
-        backgroundColor: Color(0xFF173F70),
+        backgroundColor: const Color(0xFF173F70),
         shape: const CircleBorder(),
-        child: Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

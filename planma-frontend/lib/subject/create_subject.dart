@@ -4,6 +4,7 @@ import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class AddClassScreen extends StatefulWidget {
   const AddClassScreen({super.key});
@@ -25,13 +26,13 @@ class _AddClassScreenState extends State<AddClassScreen> {
   String? _selectedDay;
 
   final Map<String, String> dayAbbreviationToFull = {
-  'S': 'Sunday',
-  'M': 'Monday',
-  'T': 'Tuesday',
-  'W': 'Wednesday',
-  'Th': 'Thursday',
-  'F': 'Friday',
-  'Sa': 'Saturday',
+    'S': 'Sunday',
+    'M': 'Monday',
+    'T': 'Tuesday',
+    'W': 'Wednesday',
+    'Th': 'Thursday',
+    'F': 'Friday',
+    'Sa': 'Saturday',
   };
 
   Future<void> _selectTime(
@@ -57,7 +58,8 @@ class _AddClassScreenState extends State<AddClassScreen> {
 
       // Adjust for AM/PM
       final isPM = period == 'pm';
-      final adjustedHour = (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
+      final adjustedHour =
+          (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
 
       return TimeOfDay(hour: adjustedHour, minute: minute);
     } catch (e) {
@@ -99,14 +101,13 @@ class _AddClassScreenState extends State<AddClassScreen> {
 
     try {
       await provider.addClassScheduleWithSubject(
-        subjectCode: subjectCode,
-        subjectTitle: subjectTitle,
-        semesterId: selectedSemesterId!,
-        dayOfWeek: _selectedDay!,
-        startTime: startTime,
-        endTime: endTime,
-        room: room
-      );
+          subjectCode: subjectCode,
+          subjectTitle: subjectTitle,
+          semesterId: selectedSemesterId!,
+          dayOfWeek: _selectedDay!,
+          startTime: startTime,
+          endTime: endTime,
+          room: room);
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +117,6 @@ class _AddClassScreenState extends State<AddClassScreen> {
       Navigator.pop(context);
       // Clear fields after adding
       _clearFields();
-
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add class schedule 1: $error')),
@@ -126,8 +126,8 @@ class _AddClassScreenState extends State<AddClassScreen> {
 
   // Valid Time Range Check
   bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
-  return startTime.hour < endTime.hour ||
-      (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
 
   // Clear fields after submit
@@ -145,14 +145,16 @@ class _AddClassScreenState extends State<AddClassScreen> {
   void initState() {
     super.initState();
     // Fetch semesters when the screen loads
-    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
     semesterProvider.fetchSemesters().then((_) {
       setState(() {
         // Set default value if there are semesters available
         if (semesterProvider.semesters.isNotEmpty) {
           // Select the first semester
-          selectedSemester = "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
-        
+          selectedSemester =
+              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+
           final defaultSemester = semesterProvider.semesters.first;
           selectedSemesterId = defaultSemester['semester_id'];
 
@@ -165,14 +167,16 @@ class _AddClassScreenState extends State<AddClassScreen> {
 
     // Add listener for subject code controller to auto-fill subject title
     _subjectCodeController.addListener(() {
-      final subjectProvider = Provider.of<ClassScheduleProvider>(context, listen: false);
+      final subjectProvider =
+          Provider.of<ClassScheduleProvider>(context, listen: false);
       String subjectCode = _subjectCodeController.text.trim();
 
       if (subjectCode.isNotEmpty) {
         subjectProvider.fetchSubjectDetails(subjectCode).then((_) {
           setState(() {
             if (subjectProvider.selectedSubject != null) {
-              _subjectTitleController.text = subjectProvider.selectedSubject!.subjectTitle;
+              _subjectTitleController.text =
+                  subjectProvider.selectedSubject!.subjectTitle;
             } else {
               _subjectTitleController.clear(); // Clear if no subject is found
             }
@@ -193,7 +197,10 @@ class _AddClassScreenState extends State<AddClassScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Class Schedule'),
+        title: Text(
+          'Add Class Schedule',
+          style: GoogleFonts.openSans(fontWeight: FontWeight.bold),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -217,14 +224,26 @@ class _AddClassScreenState extends State<AddClassScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CustomWidgets.buildTextField(
-                          _subjectCodeController, 'Subject Code'),
+                        _subjectTitleController,
+                        'Subject Title',
+                        style: GoogleFonts.openSans(),
+                      ),
+
                       const SizedBox(height: 16),
                       CustomWidgets.buildTextField(
-                          _subjectTitleController, 'Subject Title'),
+                        _subjectTitleController,
+                        'Subject Title',
+                        style: GoogleFonts.openSans(),
+                      ),
                       const SizedBox(height: 16),
                       // Dropdown for Semester
                       CustomWidgets.buildDropdownField(
                         label: 'Select Semester',
+                        textStyle: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color:
+                              Colors.black, // Adjust the text color as needed
+                        ),
                         value: selectedSemester,
                         items: semesterItems,
                         onChanged: (value) {
@@ -232,26 +251,36 @@ class _AddClassScreenState extends State<AddClassScreen> {
                             if (value == '- Add Semester -') {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => AddSemesterScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => AddSemesterScreen()),
                               ).then((_) => semesterProvider.fetchSemesters());
                             } else {
                               selectedSemester = value;
 
                               // Split data from value for firstWhere comparison
-                              List<String> semesterParts = selectedSemester!.split(' ');
+                              List<String> semesterParts =
+                                  selectedSemester!.split(' ');
                               int acadYearStart = int.parse(semesterParts[0]);
                               int acadYearEnd = int.parse(semesterParts[2]);
-                              String semesterType = "${semesterParts[3]} ${semesterParts[4]}";
-                              
-                              final selectedSemesterMap = semesterProvider.semesters.firstWhere(
+                              String semesterType =
+                                  "${semesterParts[3]} ${semesterParts[4]}";
+
+                              final selectedSemesterMap =
+                                  semesterProvider.semesters.firstWhere(
                                 (semester) {
-                                  return semester['acad_year_start'] == acadYearStart &&
-                                  semester['acad_year_end'] == acadYearEnd &&
-                                  semester['semester'] == semesterType;
-                                }, orElse: () => {},  // Return null if no match is found
+                                  return semester['acad_year_start'] ==
+                                          acadYearStart &&
+                                      semester['acad_year_end'] ==
+                                          acadYearEnd &&
+                                      semester['semester'] == semesterType;
+                                },
+                                orElse: () =>
+                                    {}, // Return null if no match is found
                               );
-                              selectedSemesterId = selectedSemesterMap['semester_id'];
-                              print("Found semester ID: ${selectedSemesterMap['semester_id']}");
+                              selectedSemesterId =
+                                  selectedSemesterMap['semester_id'];
+                              print(
+                                  "Found semester ID: ${selectedSemesterMap['semester_id']}");
                             }
                           });
                         },
@@ -263,14 +292,13 @@ class _AddClassScreenState extends State<AddClassScreen> {
                             const EdgeInsets.symmetric(horizontal: 16),
                         fontSize: 14.0,
                       ),
+
                       const SizedBox(height: 16),
-                      const Text(
-                        'Day of the Week',
-                        style: TextStyle(
+                      Text('Day of the Week',
+                          style: GoogleFonts.openSans(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
+                            color: Colors.white,
+                          )),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -278,10 +306,13 @@ class _AddClassScreenState extends State<AddClassScreen> {
                           for (var day in ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'])
                             DayButton(
                               day: day,
-                              isSelected: _selectedDay == dayAbbreviationToFull[day], // Match full day name
+                              isSelected: _selectedDay ==
+                                  dayAbbreviationToFull[
+                                      day], // Match full day name
                               onTap: () {
                                 setState(() {
-                                  if (_selectedDay == dayAbbreviationToFull[day]) {
+                                  if (_selectedDay ==
+                                      dayAbbreviationToFull[day]) {
                                     _selectedDay = null;
                                   } else {
                                     _selectedDay = dayAbbreviationToFull[day];
@@ -300,7 +331,11 @@ class _AddClassScreenState extends State<AddClassScreen> {
                                   _selectTime(context, _startTimeController),
                               child: AbsorbPointer(
                                 child: CustomWidgets.buildTextField(
-                                    _startTimeController, 'Start Time'),
+                                    _startTimeController, 'Start Time',
+                                    style: GoogleFonts.openSans(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    )),
                               ),
                             ),
                           ),
@@ -311,14 +346,22 @@ class _AddClassScreenState extends State<AddClassScreen> {
                                   _selectTime(context, _endTimeController),
                               child: AbsorbPointer(
                                 child: CustomWidgets.buildTextField(
-                                    _endTimeController, 'End Time'),
+                                    _endTimeController, 'End Time',
+                                    style: GoogleFonts.openSans(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    )),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      CustomWidgets.buildTextField(_roomController, 'Room'),
+                      CustomWidgets.buildTextField(_roomController, 'Room',
+                          style: GoogleFonts.openSans(
+                            fontSize: 16,
+                            color: Colors.white,
+                          )),
                     ],
                   ),
                 ),
@@ -336,10 +379,11 @@ class _AddClassScreenState extends State<AddClassScreen> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 120),
                   ),
-                  child: const Text(
-                    'Add Schedule',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                  child: Text('Add Schedule',
+                      style: GoogleFonts.openSans(
+                        fontSize: 16,
+                        color: Colors.white,
+                      )),
                 ),
               ),
             ],
@@ -349,7 +393,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
     );
   }
 
-    @override
+  @override
   void dispose() {
     // Dispose controllers and clean up listeners
     _subjectCodeController.dispose();

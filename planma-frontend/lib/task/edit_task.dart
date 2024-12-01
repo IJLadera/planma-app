@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/task/widget/widgets.dart';
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:google_fonts/google_fonts.dart';
 
 class EditTask extends StatefulWidget {
   const EditTask({super.key});
@@ -17,12 +17,9 @@ class _EditTask extends State<EditTask> {
 
   DateTime? _scheduledDate;
   DateTime? _deadline;
-
   String? _subject;
-
   final List<String> _subjectsOptions = ['Math', 'Science', 'English'];
 
-  // Method to select date
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -30,7 +27,6 @@ class _EditTask extends State<EditTask> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-
     if (pickedDate != null) {
       setState(() {
         _scheduledDate = pickedDate;
@@ -38,7 +34,6 @@ class _EditTask extends State<EditTask> {
     }
   }
 
-  // Method to select time
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -56,10 +51,11 @@ class _EditTask extends State<EditTask> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Edit Task',
-          style: TextStyle(
+          style: GoogleFonts.openSans(
             fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
         leading: IconButton(
@@ -88,8 +84,8 @@ class _EditTask extends State<EditTask> {
                     'Scheduled Date',
                     _scheduledDate,
                     context,
-                    true, // Indicates it's the start date
-                    _selectDate, // Pass the selectDate function reference
+                    true,
+                    _selectDate,
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -119,13 +115,12 @@ class _EditTask extends State<EditTask> {
                     'Deadline',
                     _deadline,
                     context,
-                    false, // Indicates it's the deadline date
-                    _selectDate, // Pass the selectDate function reference
+                    false,
+                    _selectDate,
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
-                    label:
-                        'Choose Subject', // Updated the label for consistency
+                    label: 'Choose Subject',
                     value: _subject,
                     items: _subjectsOptions,
                     onChanged: (String? value) {
@@ -139,7 +134,7 @@ class _EditTask extends State<EditTask> {
                     borderRadius: 30.0,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                     fontSize: 14.0,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -149,7 +144,7 @@ class _EditTask extends State<EditTask> {
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             child: ElevatedButton(
               onPressed: () {
-                // Create task action
+                // Task editing action here
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
@@ -159,9 +154,12 @@ class _EditTask extends State<EditTask> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
-              child: const Text(
+              child: Text(
                 'Edit Task',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

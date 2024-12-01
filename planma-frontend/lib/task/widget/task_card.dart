@@ -55,7 +55,7 @@ class _TaskCardState extends State<TaskCard> {
           padding:
               const EdgeInsets.all(16), // Increased padding inside the card
           decoration: BoxDecoration(
-            color: Colors.blue[100],
+            color: Color(0xFFC0D7F3),
             borderRadius:
                 BorderRadius.circular(12), // Matching radius for consistency
           ),
@@ -79,7 +79,7 @@ class _TaskCardState extends State<TaskCard> {
                     child: const Icon(
                       Icons.access_time, // Time icon
                       size: 28, // Slightly larger icon size
-                      color: Colors.blue, // Icon color
+                      color: Color(0xFF173F70), // Icon color
                     ),
                   ),
                   const SizedBox(

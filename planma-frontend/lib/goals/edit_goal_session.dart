@@ -48,7 +48,7 @@ class _EditGoalSession extends State<EditGoalSession> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Add Task',
+          'Edit Goal Session',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -110,10 +110,10 @@ class _EditGoalSession extends State<EditGoalSession> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
               ),
               child: const Text(
-                'Create Task',
+                'Edit Goal Session',
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),

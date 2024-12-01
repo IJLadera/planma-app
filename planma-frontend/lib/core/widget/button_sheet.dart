@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/activities/activity_page.dart';
-import 'package:planma_app/event/event_page.dart';
-import 'package:planma_app/goals/goal_page.dart';
-import 'package:planma_app/reports/report_page.dart';
-import 'package:planma_app/subject/subject_page.dart';
-import 'package:planma_app/task/task_page.dart';
+import 'package:planma_app/activities/create_activity.dart';
+import 'package:planma_app/event/create_event.dart';
+import 'package:planma_app/goals/create_goal.dart';
+import 'package:planma_app/subject/create_subject.dart';
+import 'package:planma_app/task/create_task.dart';
 
 class BottomSheetWidget {
   static void show(BuildContext context) {
@@ -42,19 +41,7 @@ class BottomSheetWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => TasksPage()),
-                    );
-                  },
-                ),
-
-                // Event button
-                _buildBottomSheetButton(
-                  context,
-                  label: "Event",
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EventsPage()),
+                      MaterialPageRoute(builder: (context) => AddTaskScreen()),
                     );
                   },
                 ),
@@ -66,7 +53,19 @@ class BottomSheetWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ClassSchedule()),
+                      MaterialPageRoute(builder: (context) => AddClassScreen()),
+                    );
+                  },
+                ),
+
+                // Event button
+                _buildBottomSheetButton(
+                  context,
+                  label: "Event",
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddEventScreen()),
                     );
                   },
                 ),
@@ -79,34 +78,18 @@ class BottomSheetWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ActivitiesScreen()),
+                          builder: (context) => AddActivityScreen()),
                     );
                   },
                 ),
-
-                // Goal button
                 _buildBottomSheetButton(
                   context,
                   label: "Goal",
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => GoalPage()));
-                  },
-                ),
-                _buildBottomSheetButton(
-                  context,
-                  label: "Sleep",
-                  onPressed: () {
-                    // Navigator.push(context,
-                    //     MaterialPageRoute(builder: (context) => SleepPage()));
-                  },
-                ),
-                _buildBottomSheetButton(
-                  context,
-                  label: "Report",
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ReportsPage()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddGoalScreen()));
                   },
                 ),
               ],
