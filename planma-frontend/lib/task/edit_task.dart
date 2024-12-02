@@ -70,15 +70,21 @@ class _EditTask extends State<EditTask> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  _buildTitle('Task Name'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                     _taskNameController,
                     'Task Name',
                   ),
                   const SizedBox(height: 12),
+                  _buildTitle('Description'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                     _descriptionController,
                     'Description',
                   ),
+                  const SizedBox(height: 12),
+                  _buildTitle('Scheduled Date'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
                     'Scheduled Date',
@@ -87,6 +93,8 @@ class _EditTask extends State<EditTask> {
                     true,
                     _selectDate,
                   ),
+                  const SizedBox(height: 12),
+                  _buildTitle('Start and End Time'),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -111,6 +119,8 @@ class _EditTask extends State<EditTask> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  _buildTitle('Deadline'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
                     'Deadline',
                     _deadline,
@@ -118,6 +128,8 @@ class _EditTask extends State<EditTask> {
                     false,
                     _selectDate,
                   ),
+                  const SizedBox(height: 12),
+                  _buildTitle('Choose Subject'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Choose Subject',
@@ -167,4 +179,22 @@ class _EditTask extends State<EditTask> {
       ),
     );
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }

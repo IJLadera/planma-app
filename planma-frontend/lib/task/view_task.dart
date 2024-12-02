@@ -77,7 +77,7 @@ class ViewTask extends StatelessWidget {
         title: Text(
           'Task',
           style: GoogleFonts.openSans(
-            color: Colors.black,
+            color: Color(0xFF173F70),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

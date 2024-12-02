@@ -51,7 +51,12 @@ class _ClassScheduleState extends State<ClassSchedule> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Class Schedule'),
+        title: Text(
+          'Class Schedules',
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+        ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Consumer2<SemesterProvider, ClassScheduleProvider>(
         builder: (context, semesterProvider, classScheduleProvider, child) {

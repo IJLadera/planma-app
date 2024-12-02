@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/event/widget/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EditEvent extends StatefulWidget {
   const EditEvent({super.key});
@@ -51,13 +52,15 @@ class _EditEvent extends State<EditEvent> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Edit Event'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+          title: Text(
+            'Edit Event',
+            style: GoogleFonts.openSans(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF173F70),
+            ),
           ),
+          backgroundColor: Color(0xFFFFFFFF),
         ),
         body: Column(
           children: [
@@ -66,21 +69,38 @@ class _EditEvent extends State<EditEvent> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  _buildTitle(
+                    'Event Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventCodeController, 'Event Name'),
-                  SizedBox(height: 16), // Increased space
+                  SizedBox(height: 12),
+                  _buildTitle(
+                    'Description',
+                  ),
+                  const SizedBox(height: 12), // Increased space
                   CustomWidgets.buildTextField(
                       _eventTitleController, 'Description'),
-                  SizedBox(
-                      height: 16), // Space between time fields and room field
+                  SizedBox(height: 12),
+                  _buildTitle(
+                    'Location',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventLocationController, 'Location'),
-                  SizedBox(height: 20), // Added more gap below the last field
-
                   SizedBox(height: 12),
+                  _buildTitle(
+                    'Scheduled Date',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
-                  SizedBox(height: 12), // Added gap
+                  SizedBox(height: 12),
+                  _buildTitle(
+                    'Start and End Time',
+                  ),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -103,7 +123,11 @@ class _EditEvent extends State<EditEvent> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 12), SizedBox(height: 16), // Increased space
+                  SizedBox(height: 12),
+                  _buildTitle(
+                    'Choose Subject',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label:
                         'Choose Subject', // Updated the label for consistency
@@ -140,11 +164,32 @@ class _EditEvent extends State<EditEvent> {
                 ),
                 child: Text(
                   'Edit Event',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
           ],
         ));
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }

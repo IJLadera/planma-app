@@ -20,14 +20,17 @@ class TaskDetailRow extends StatelessWidget {
             flex: 3,
             child: Text(
               title,
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[800]),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF173F70),
+                  fontSize: 16),
             ),
           ),
           Expanded(
             flex: 5,
             child: Text(
               detail,
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(color: Color(0xFF173F70), fontSize: 14),
             ),
           ),
         ],

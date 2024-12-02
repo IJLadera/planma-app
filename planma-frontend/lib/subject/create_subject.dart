@@ -199,12 +199,14 @@ class _AddClassScreenState extends State<AddClassScreen> {
       appBar: AppBar(
         title: Text(
           'Add Class Schedule',
-          style: GoogleFonts.openSans(fontWeight: FontWeight.bold),
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Consumer<SemesterProvider>(
         builder: (context, semesterProvider, child) {
@@ -219,24 +221,35 @@ class _AddClassScreenState extends State<AddClassScreen> {
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildTitle(
+                        'Subject Code',
+                      ),
+                      SizedBox(height: 15),
+                      CustomWidgets.buildTextField(
+                        _subjectCodeController,
+                        'Subject Code',
+                        style: GoogleFonts.openSans(),
+                      ),
+                      SizedBox(height: 15),
+                      _buildTitle(
+                        'Subject Title',
+                      ),
+                      const SizedBox(height: 15),
                       CustomWidgets.buildTextField(
                         _subjectTitleController,
                         'Subject Title',
                         style: GoogleFonts.openSans(),
                       ),
-
-                      const SizedBox(height: 16),
-                      CustomWidgets.buildTextField(
-                        _subjectTitleController,
-                        'Subject Title',
-                        style: GoogleFonts.openSans(),
+                      SizedBox(height: 15),
+                      _buildTitle(
+                        'Select Semester',
                       ),
-                      const SizedBox(height: 16),
-                      // Dropdown for Semester
+                      const SizedBox(height: 15),
                       CustomWidgets.buildDropdownField(
                         label: 'Select Semester',
                         textStyle: GoogleFonts.openSans(
@@ -288,18 +301,15 @@ class _AddClassScreenState extends State<AddClassScreen> {
                         labelColor: Colors.black,
                         textColor: Colors.black,
                         borderRadius: 30.0,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         fontSize: 14.0,
                       ),
-
-                      const SizedBox(height: 16),
-                      Text('Day of the Week',
-                          style: GoogleFonts.openSans(
-                            fontSize: 16,
-                            color: Colors.white,
-                          )),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 15),
+                      _buildTitle(
+                        'Day of the Week',
+                      ),
+                      SizedBox(height: 15),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -322,6 +332,10 @@ class _AddClassScreenState extends State<AddClassScreen> {
                             ),
                         ],
                       ),
+                      const SizedBox(height: 15),
+                      _buildTitle(
+                        'Start and End Time',
+                      ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
@@ -334,7 +348,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                                     _startTimeController, 'Start Time',
                                     style: GoogleFonts.openSans(
                                       fontSize: 16,
-                                      color: Colors.white,
+                                      color: Colors.black,
                                     )),
                               ),
                             ),
@@ -349,18 +363,22 @@ class _AddClassScreenState extends State<AddClassScreen> {
                                     _endTimeController, 'End Time',
                                     style: GoogleFonts.openSans(
                                       fontSize: 16,
-                                      color: Colors.white,
+                                      color: Colors.black,
                                     )),
                               ),
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 15),
+                      _buildTitle(
+                        'Room',
+                      ),
                       const SizedBox(height: 16),
                       CustomWidgets.buildTextField(_roomController, 'Room',
                           style: GoogleFonts.openSans(
                             fontSize: 16,
-                            color: Colors.white,
+                            color: Colors.black,
                           )),
                     ],
                   ),
@@ -405,4 +423,22 @@ class _AddClassScreenState extends State<AddClassScreen> {
     // Always call super.dispose()
     super.dispose();
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }
