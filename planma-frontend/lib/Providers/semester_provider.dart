@@ -60,7 +60,7 @@ class SemesterProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         // If successful, parse the response body
         final semesterData = json.decode(response.body);
-        print("Semester details: $semesterData");
+        // print("Semester details: $semesterData");
 
         // Return the semester data as a Map
         return semesterData;

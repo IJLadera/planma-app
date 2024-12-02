@@ -35,15 +35,26 @@ class _ClassScheduleState extends State<ClassSchedule> {
   @override
   void initState() {
     super.initState();
-    // Initially fetch semesters when the screen loads
     final semesterProvider =
         Provider.of<SemesterProvider>(context, listen: false);
+    final classScheduleProvider =
+        Provider.of<ClassScheduleProvider>(context, listen: false);
+
+    // Fetch semesters when the screen loads
     semesterProvider.fetchSemesters().then((_) {
-      setState(() {
-        selectedSemester = semesterProvider.semesters.isNotEmpty
-            ? "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}"
-            : null;
-      });
+      if (semesterProvider.semesters.isNotEmpty) {
+        // Set the default selected semester
+        setState(() {
+          selectedSemester =
+              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+        });
+
+        // Automatically fetch class schedules for the default semester
+        final defaultSemesterId = semesterProvider.semesters[0]['semester_id'];
+        classScheduleProvider.fetchClassSchedules(
+          selectedSemesterId: defaultSemesterId,
+        );
+      }
     });
   }
 

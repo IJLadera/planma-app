@@ -74,7 +74,7 @@ class ClassScheduleProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        print(data);
+        // print(data);
 
         // Parse the response body as a list of class schedules
         _classSchedules =
