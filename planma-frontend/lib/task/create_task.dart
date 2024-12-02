@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/task/widget/widgets.dart';
 
-class CreateTask extends StatefulWidget {
-  const CreateTask({super.key});
+class AddTaskScreen extends StatefulWidget {
+  const AddTaskScreen({super.key});
 
   @override
   _CreateTaskState createState() => _CreateTaskState();
 }
 
-class _CreateTaskState extends State<CreateTask> {
+class _CreateTaskState extends State<AddTaskScreen> {
   final TextEditingController _taskNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
@@ -16,7 +17,6 @@ class _CreateTaskState extends State<CreateTask> {
 
   DateTime? _scheduledDate;
   DateTime? _deadline;
-
   String? _subject;
 
   final List<String> _subjectsOptions = ['Math', 'Science', 'English'];
@@ -29,7 +29,6 @@ class _CreateTaskState extends State<CreateTask> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-
     if (pickedDate != null) {
       setState(() {
         _scheduledDate = pickedDate;
@@ -55,16 +54,18 @@ class _CreateTaskState extends State<CreateTask> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Create Task',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Color(0xFF173F70)),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
         children: [
@@ -73,18 +74,34 @@ class _CreateTaskState extends State<CreateTask> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Text fields for Task Name and Description
-                  CustomWidgets.buildTextField(
-                      _taskNameController, 'Task Name'),
+                  _buildTitle(
+                    'Task Name',
+                  ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                      _descriptionController, 'Description'),
+                    _taskNameController,
+                    'Task Name',
+                  ),
                   const SizedBox(height: 12),
-                  // Scheduled Date Picker
-                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
-                      context, true, _selectDate),
+                  _buildTitle('Description'),
                   const SizedBox(height: 12),
-                  // Time pickers for Start Time and End Time
+                  CustomWidgets.buildTextField(
+                    _descriptionController,
+                    'Description',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTitle('Schedule Date'),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildDateTile(
+                    'Scheduled Date',
+                    _scheduledDate,
+                    context,
+                    true,
+                    _selectDate,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTitle('Start and End Time'),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -108,14 +125,20 @@ class _CreateTaskState extends State<CreateTask> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  // Deadline Date Picker
-                  CustomWidgets.buildDateTile(
-                      'Deadline', _deadline, context, false, _selectDate),
+                  _buildTitle('Deadline'),
                   const SizedBox(height: 12),
-                  // Dropdown field for choosing subject
+                  CustomWidgets.buildDateTile(
+                    'Deadline',
+                    _deadline,
+                    context,
+                    false,
+                    _selectDate,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTitle('Choose a Subject'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
-                    label:
-                        'Choose Subject', // Updated the label for consistency
+                    label: 'Choose Subject',
                     value: _subject,
                     items: _subjectsOptions,
                     onChanged: (String? value) {
@@ -129,7 +152,7 @@ class _CreateTaskState extends State<CreateTask> {
                     borderRadius: 30.0,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                     fontSize: 14.0,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -139,7 +162,7 @@ class _CreateTaskState extends State<CreateTask> {
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             child: ElevatedButton(
               onPressed: () {
-                // Action to create the task can be implemented here
+                // Action to create the task
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
@@ -149,14 +172,37 @@ class _CreateTaskState extends State<CreateTask> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
-              child: const Text(
+              child: Text(
                 'Create Task',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
         ],
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }

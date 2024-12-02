@@ -16,7 +16,9 @@ class CustomWidgets {
         decoration: InputDecoration(
           labelText: labelText,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0), // Adds padding inside the TextField
         ),
       ),
     );
@@ -66,7 +68,9 @@ class CustomWidgets {
           labelText: label,
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0), // Adds padding inside the TextField
         ),
       ),
     );
@@ -81,7 +85,7 @@ class CustomWidgets {
     Color labelColor = Colors.black,
     Color textColor = Colors.black,
     double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    EdgeInsets contentPadding = const EdgeInsets.all(12),
     double fontSize = 14.0,
   }) {
     return Container(

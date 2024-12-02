@@ -61,7 +61,6 @@ class _ReportsPageState extends State<ReportsPage> {
         formattedTimeFilter = DateFormat('MMMM').format(today);
         selectedDate = today;
       case 'Year':
-      
       case 'Semester':
         formattedTimeFilter =
             DateFormat(selectedTimeFilter == 'Semester' ? 'MMMM yyyy' : 'yyyy')
@@ -78,6 +77,8 @@ class _ReportsPageState extends State<ReportsPage> {
 
   Future<void> _fetchChartData() async {
     await Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted)
+        return; // Ensure the widget is still mounted before calling setState
       setState(() {
         // Example data for tasks
         taskTimeSpent = [
@@ -118,11 +119,7 @@ class _ReportsPageState extends State<ReportsPage> {
         ];
 
         eventAttendanceDistribution = [
-          EventAttendanceDistribution(
-            'Event 1',
-            2.0,
-            1.0,
-          ),
+          EventAttendanceDistribution('Event 1', 2.0, 1.0),
           EventAttendanceDistribution('Event 2', 6.0, 4.0),
         ];
 
@@ -135,7 +132,7 @@ class _ReportsPageState extends State<ReportsPage> {
 
         classAttendanceDistribution = [
           ClassAttendanceDistribution('IT311', 1, 1, 2),
-          ClassAttendanceDistribution('IT311', 1, 1, 2),
+          ClassAttendanceDistribution('IT312', 1, 1, 2),
           ClassAttendanceDistribution('IT313', 2, 3, 0),
           ClassAttendanceDistribution('IT314', 1, 1, 1),
           ClassAttendanceDistribution('IT315', 1, 2, 2),
@@ -164,7 +161,6 @@ class _ReportsPageState extends State<ReportsPage> {
         ];
 
         // Example data for goals
-
         goalTimeSpent = [
           GoalTimeSpent('Sun', 3),
           GoalTimeSpent('Mon', 20),
@@ -176,7 +172,6 @@ class _ReportsPageState extends State<ReportsPage> {
         ];
 
         // Example data for sleep
-
         sleepDuration = [
           SleepDuration('Sun', 0),
           SleepDuration('Mon', 4),
@@ -186,6 +181,7 @@ class _ReportsPageState extends State<ReportsPage> {
           SleepDuration('Fri', 4),
           SleepDuration('Sat', 0),
         ];
+
         isLoading = false;
       });
     });
@@ -259,10 +255,15 @@ class _ReportsPageState extends State<ReportsPage> {
                 ),
                 const SizedBox(height: 16.0),
                 // Time filter buttons
-                ToggleButtonsDemo(
-                  labels: ['Day', 'Week', 'Month', 'Semester', 'Year'],
-                  onSelected: _onTimeFilterSelected,
+                // Time filter buttons with horizontal scroll
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ToggleButtonsDemo(
+                    labels: ['Day', 'Week', 'Month', 'Semester', 'Year'],
+                    onSelected: _onTimeFilterSelected,
+                  ),
                 ),
+
                 const SizedBox(height: 8.0),
                 // Display the selected time range
                 Center(

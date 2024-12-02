@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:planma_app/Providers/user_provider.dart';
-import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/event/widget/widget.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class AddEventState extends StatefulWidget {
-  const AddEventState({super.key});
+class AddEventScreen extends StatefulWidget {
+  const AddEventScreen({super.key});
 
   @override
-  _AddEventState createState() => _AddEventState();
+  _AddEventScreen createState() => _AddEventScreen();
 }
 
-class _AddEventState extends State<AddEventState> {
+class _AddEventScreen extends State<AddEventScreen> {
   final _eventCodeController = TextEditingController();
   final _eventTitleController = TextEditingController();
   final _eventLocationController = TextEditingController();
@@ -127,13 +127,15 @@ class _AddEventState extends State<AddEventState> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Event'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+        title: Text(
+          'Create Event',
+          style: GoogleFonts.openSans(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
+          ),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
         children: [
@@ -142,17 +144,37 @@ class _AddEventState extends State<AddEventState> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  _buildTitle(
+                    'Event Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventCodeController, 'Event Name'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Description',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventTitleController, 'Description'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Location',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventLocationController, 'Location'),
                   const SizedBox(height: 12),
+                  _buildTitle(
+                    'Schedule Date',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Start and End Time',
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -176,7 +198,11 @@ class _AddEventState extends State<AddEventState> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Event Type',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Choose Event Type',
                     value: _selectedEventType,
@@ -208,11 +234,14 @@ class _AddEventState extends State<AddEventState> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
               ),
-              child: const Text(
+              child: Text(
                 'Create Event',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -220,4 +249,22 @@ class _AddEventState extends State<AddEventState> {
       ),
     );
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }

@@ -7,6 +7,7 @@ import 'package:planma_app/subject/create_subject.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class ClassSchedule extends StatefulWidget {
   const ClassSchedule({super.key});
@@ -61,7 +62,12 @@ class _ClassScheduleState extends State<ClassSchedule> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Class Schedule'),
+        title: Text(
+          'Class Schedules',
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+        ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Consumer2<SemesterProvider, ClassScheduleProvider>(
         builder: (context, semesterProvider, classScheduleProvider, child) {
@@ -181,7 +187,17 @@ class _ClassScheduleState extends State<ClassSchedule> {
                     ),
                     Expanded(
                       child: classScheduleProvider.classSchedules.isEmpty
-                          ? const Center(child: Text('No schedules available'))
+                          ? Center(
+                              child: Text(
+                                'No schedules available',
+                                style: GoogleFonts.openSans(
+                                  fontSize:
+                                      16, // Define the font size explicitly
+                                  color: Colors
+                                      .black, // Customize the color as needed
+                                ),
+                              ),
+                            )
                           : isByDate
                               ? ByDateView(
                                   days: days,
@@ -205,6 +221,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
           );
         },
         backgroundColor: const Color(0xFF173F70),
+        shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

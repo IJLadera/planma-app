@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/activities/create_activity.dart';
 import 'package:planma_app/activities/view_activity.dart';
 import 'package:planma_app/activities/widget/activity_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ActivitiesScreen extends StatelessWidget {
   ActivitiesScreen({Key? key}) : super(key: key);
@@ -26,22 +27,12 @@ class ActivitiesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Activities',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -51,8 +42,12 @@ class ActivitiesScreen extends StatelessWidget {
             const SizedBox(height: 10),
             // Search Bar
             TextField(
+              style:
+                  GoogleFonts.openSans(), // Apply Open Sans to the text input
               decoration: InputDecoration(
                 hintText: 'Search',
+                hintStyle: GoogleFonts.openSans(
+                    color: Colors.grey), // Style the hint text
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
@@ -105,7 +100,7 @@ class ActivitiesScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddActivityState()),
+            MaterialPageRoute(builder: (context) => AddActivityScreen()),
           );
         },
         backgroundColor: const Color(0xFF173F70),

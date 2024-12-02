@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/task/edit_task.dart';
 import 'package:planma_app/task/widget/task_detail_row.dart';
 
@@ -20,6 +21,32 @@ class ViewTask extends StatelessWidget {
     required this.subject,
   });
 
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Task'),
+        content: const Text('Are you sure you want to delete this task?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context); // Closes the view after deletion
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,36 +55,32 @@ class ViewTask extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.blue),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          icon: const Icon(Icons.close, color: Color(0xFF173F70)),
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blue),
+            icon: const Icon(Icons.edit, color: Color(0xFF173F70)),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EditTask()),
+                MaterialPageRoute(builder: (context) => const EditTask()),
               );
             },
           ),
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.blue),
-            onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => deleteTask()),
-              // );
-            },
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _confirmDelete(context),
           ),
         ],
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Task',
-          style: TextStyle(
-              color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+          style: GoogleFonts.openSans(
+            color: Color(0xFF173F70),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Padding(
@@ -73,10 +96,15 @@ class ViewTask extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TaskDetailRow(title: 'Name:', detail: taskName),
+                const SizedBox(height: 8),
                 TaskDetailRow(title: 'Description:', detail: description),
+                const SizedBox(height: 8),
                 TaskDetailRow(title: 'Date:', detail: date),
+                const SizedBox(height: 8),
                 TaskDetailRow(title: 'Time:', detail: time),
+                const SizedBox(height: 8),
                 TaskDetailRow(title: 'Deadline:', detail: deadline),
+                const SizedBox(height: 8),
                 TaskDetailRow(title: 'Subject:', detail: subject),
               ],
             ),

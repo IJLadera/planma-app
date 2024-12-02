@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/timer/countdown/countdown_timer.dart'; // Import TimerPage
 import 'package:planma_app/task/view_task.dart'; // Import ViewTask
+import 'package:google_fonts/google_fonts.dart';
 
 class TaskCard extends StatefulWidget {
   final String taskName;
@@ -55,7 +56,7 @@ class _TaskCardState extends State<TaskCard> {
           padding:
               const EdgeInsets.all(16), // Increased padding inside the card
           decoration: BoxDecoration(
-            color: Colors.blue[100],
+            color: Color(0xFFC0D7F3),
             borderRadius:
                 BorderRadius.circular(12), // Matching radius for consistency
           ),
@@ -79,7 +80,7 @@ class _TaskCardState extends State<TaskCard> {
                     child: const Icon(
                       Icons.access_time, // Time icon
                       size: 28, // Slightly larger icon size
-                      color: Colors.blue, // Icon color
+                      color: Color(0xFF173F70), // Icon color
                     ),
                   ),
                   const SizedBox(
@@ -89,16 +90,17 @@ class _TaskCardState extends State<TaskCard> {
                     children: [
                       Text(
                         widget.taskName,
-                        style: const TextStyle(
+                        style: GoogleFonts.openSans(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16, // Larger font size for task name
+                          fontSize: 16,
+                          color: Color(0xFF173F70),
                         ),
                       ),
                       Text(
                         '${widget.subject} (${widget.duration})',
-                        style: const TextStyle(
-                          fontSize:
-                              14, // Smaller font size for subject/duration
+                        style: GoogleFonts.openSans(
+                          fontSize: 14,
+                          color: Color(0xFF173F70),
                         ),
                       ),
                     ],
