@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 import 'package:planma_app/event/view_event.dart';
 
 class EventCard extends StatelessWidget {
@@ -9,7 +10,8 @@ class EventCard extends StatelessWidget {
   final String date;
   final String type;
 
-  const EventCard({super.key, 
+  const EventCard({
+    super.key,
     required this.eventName,
     required this.timePeriod,
     required this.description,
@@ -40,9 +42,9 @@ class EventCard extends StatelessWidget {
           );
         },
         child: Container(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: Colors.lightGreenAccent,
+            color: Color(0xFFACEFDB),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -50,12 +52,19 @@ class EventCard extends StatelessWidget {
             children: [
               Text(
                 eventName,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF173F70),
+                ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 timePeriod,
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: GoogleFonts.openSans(
+                  fontSize: 14,
+                  color: Color(0xFF173F70),
+                ),
               ),
             ],
           ),

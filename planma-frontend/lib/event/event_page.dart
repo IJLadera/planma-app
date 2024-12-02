@@ -4,6 +4,7 @@ import 'package:planma_app/event/widget/event_card.dart';
 import 'package:planma_app/event/widget/section_title.dart';
 import 'package:planma_app/Providers/events_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EventsPage extends StatelessWidget {
   const EventsPage({super.key});
@@ -14,13 +15,18 @@ class EventsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Events'),
+        title: Text(
+          'Events',
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

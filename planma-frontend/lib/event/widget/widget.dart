@@ -1,36 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-
-class DayButton extends StatelessWidget {
-  final String day;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const DayButton({
-    super.key,
-    required this.day,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: CircleAvatar(
-        radius: 16,
-        backgroundColor: isSelected ? Colors.blue : Colors.grey[200],
-        child: Text(
-          day,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-}
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class CustomWidgets {
   // Method to build a TextField with custom style
@@ -45,6 +16,10 @@ class CustomWidgets {
         controller: controller,
         decoration: InputDecoration(
           labelText: labelText,
+          labelStyle: GoogleFonts.openSans(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.all(16),
         ),
@@ -68,7 +43,10 @@ class CustomWidgets {
       child: ListTile(
         title: Text(
           '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
-          style: TextStyle(fontSize: 16),
+          style: GoogleFonts.openSans(
+            fontSize: 16,
+            color: Colors.black,
+          ),
         ),
         trailing: const Icon(Icons.calendar_today),
         onTap: () => selectDate(context, date),
@@ -90,10 +68,14 @@ class CustomWidgets {
       ),
       child: TextField(
         controller: controller,
-        readOnly: true, // Only allow input via the time picker
+        readOnly: true,
         onTap: () => selectTime(context),
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: GoogleFonts.openSans(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
@@ -120,15 +102,15 @@ class CustomWidgets {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
           hint: Text(
             label,
-            style: TextStyle(
-              color: labelColor,
+            style: GoogleFonts.openSans(
               fontSize: fontSize,
+              color: labelColor,
             ),
           ),
           value: value,
@@ -138,7 +120,10 @@ class CustomWidgets {
               value: item,
               child: Text(
                 item,
-                style: TextStyle(fontSize: fontSize, color: textColor),
+                style: GoogleFonts.openSans(
+                  fontSize: fontSize,
+                  color: textColor,
+                ),
               ),
             );
           }).toList(),
@@ -152,7 +137,7 @@ class CustomWidgets {
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white, // Background color of the dropdown menu
+              color: Colors.white,
             ),
           ),
           iconStyleData: IconStyleData(
