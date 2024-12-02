@@ -43,12 +43,12 @@ class EventsPage extends StatelessWidget {
                 children: [
                   const SectionTitle(title: 'Today'),
                   EventCard(
-                    eventName: eventsProvider.eventName ?? 'No Event Name',
-                    description: eventsProvider.eventDesc ?? 'No Description',
-                    location: eventsProvider.location ?? 'No Location',
-                    date: eventsProvider.date ?? 'No Date',
-                    timePeriod: eventsProvider.time ?? 'No Time',
-                    type: eventsProvider.eventType ?? 'No Type',
+                    eventName: 'No Event Name',
+                    description: 'No Description',
+                    location: 'No Location',
+                    date: 'No Date',
+                    timePeriod: 'No Time',
+                    type: 'No Type',
                   ),
                   // Hardcoded event
                   const EventCard(
