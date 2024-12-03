@@ -42,4 +42,6 @@ class EventsProvider with ChangeNotifier {
       rethrow;
     }
   }
+  
 }
+
