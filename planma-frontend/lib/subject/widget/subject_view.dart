@@ -9,10 +9,12 @@ import 'package:provider/provider.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
   ClassSchedule classSchedule;
+  final int classschedId;
 
   SubjectDetailScreen({
     super.key,
     required this.classSchedule,
+    required this.classschedId,
   });
 
   @override
@@ -23,7 +25,6 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   String selectedAttendance = 'Did Not Attend';
   String semesterDetails = 'Loading...';
   late SemesterProvider semesterProvider;
-  
 
   @override
   void initState() {
@@ -105,13 +106,35 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       timeOfDay.hour,
       timeOfDay.minute,
     );
-    return DateFormat.jm().format(dateTime); // Requires intl package
+    return DateFormat.jm().format(dateTime);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ClassScheduleProvider>(builder: (context, classScheduleProvider, child) {
-      final schedule = widget.classSchedule;
+    return Consumer<ClassScheduleProvider>(
+        builder: (context, classScheduleProvider, child) {
+      final schedule = classScheduleProvider.classSchedules.firstWhere(
+        (schedule) => schedule.classschedId == widget.classschedId,
+        orElse: () => ClassSchedule(
+          classschedId: -1, // Indicate an invalid or default ID
+          subjectCode: 'N/A',
+          subjectTitle: 'No Title',
+          semesterId: 0,
+          dayOfWeek: 'N/A',
+          scheduledStartTime: '00:00',
+          scheduledEndTime: '00:00',
+          room: 'No Room',
+        ),
+      );
+
+      // Check if the returned schedule is the default one
+      if (schedule.classschedId == -1) {
+        return Scaffold(
+          appBar: AppBar(title: Text('Subject Details')),
+          body: Center(child: Text('Schedule not found')),
+        );
+      }
+
       final startTime = _formatTimeForDisplay(schedule.scheduledStartTime);
       final endTime = _formatTimeForDisplay(schedule.scheduledEndTime);
 
@@ -138,16 +161,19 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                   ),
                 );
 
-                // if (updatedClass != null) {
-                //   setState(() {
-                //     classScheduleProvider.updateClassSchedule(updatedClass);
-                //   });
-                // }
+                if (updatedClass != null) {
+                  print(updatedClass);
+                  // setState(() {
+                  //   classScheduleProvider.updateClassSchedule(updatedClass);
+                  // });
+                } else {
+                  print("hatdog wala");
+                }
               },
             ),
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.blue),
-              onPressed: () =>_handleDelete(context),
+              onPressed: () => _handleDelete(context),
             ),
           ],
           title: const Text(
@@ -170,32 +196,27 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                 children: [
                   SubjectDetailRow(
                     title: 'Code:',
-                    detail:
-                        schedule.subjectCode, // Directly using widget.property
+                    detail: schedule.subjectCode,
                   ),
                   SubjectDetailRow(
                     title: 'Title:',
-                    detail:
-                        schedule.subjectTitle, // Directly using widget.property
+                    detail: schedule.subjectTitle,
                   ),
                   SubjectDetailRow(
                     title: 'Semester:',
-                    detail: semesterDetails, // Directly using widget.property
+                    detail: semesterDetails,
                   ),
                   SubjectDetailRow(
                     title: 'Day:',
-                    detail:
-                        schedule.dayOfWeek, // Directly using widget.property
+                    detail: schedule.dayOfWeek,
                   ),
                   SubjectDetailRow(
                     title: 'Time:',
-                    detail: '$startTime - $endTime', // Combining times
+                    detail: '$startTime - $endTime',
                   ),
                   SubjectDetailRow(
                     title: 'Room:',
-                    detail: schedule.room.isNotEmpty
-                        ? schedule.room
-                        : 'N/A', // Handling room
+                    detail: schedule.room.isNotEmpty ? schedule.room : 'N/A',
                   ),
                   const SizedBox(height: 20),
                   Container(
