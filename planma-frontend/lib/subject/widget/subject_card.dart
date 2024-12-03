@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planma_app/subject/widget/subject_view.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
 
@@ -13,8 +14,29 @@ class SubjectCard extends StatelessWidget {
     required this.schedule,
   });
 
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final startTime = _formatTimeForDisplay(schedule.scheduledStartTime);
+    final endTime = _formatTimeForDisplay(schedule.scheduledEndTime);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
       child: Card(
@@ -29,6 +51,7 @@ class SubjectCard extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SubjectDetailScreen(
                     classSchedule: schedule,
+                    classschedId: schedule.classschedId!,
                   ),
                 ),
               );
@@ -66,7 +89,7 @@ class SubjectCard extends StatelessWidget {
                     // Time Info
                     Row(children: [
                       Text(
-                        'Time: ${schedule.scheduledStartTime} - ${schedule.scheduledEndTime}',
+                        '$startTime - $endTime',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
