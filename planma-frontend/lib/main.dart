@@ -30,9 +30,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => EventsProvider()),
       ],
       child: MaterialApp(
-          home: Dashboard(),
+          // home: Dashboard(),
           debugShowCheckedModeBanner: false,
-          // home: SplashScreen(),
+          home: SplashScreen(),
           theme: ThemeData(
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor: Colors.white,

@@ -12,21 +12,17 @@ class EventsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final eventsProvider = context.watch<EventsProvider>();
+    final events = eventsProvider.events; // Assuming events is a List<Event>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Events',
-          style: GoogleFonts.openSans(
-              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
-        ),
+        title: const Text('Events'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -48,32 +44,14 @@ class EventsPage extends StatelessWidget {
               child: ListView(
                 children: [
                   const SectionTitle(title: 'Today'),
-                  EventCard(
-                    eventName: 'No Event Name',
-                    description: 'No Description',
-                    location: 'No Location',
-                    date: 'No Date',
-                    timePeriod: 'No Time',
-                    type: 'No Type',
-                  ),
-                  // Hardcoded event
-                  const EventCard(
-                    eventName: 'Date with GF',
-                    description: 'Monthsary Date',
-                    location: 'SM Downtown',
-                    date: '11 January 2024',
-                    timePeriod: '11:00 AM - 12:30 PM',
-                    type: 'Personal',
-                  ),
-                  const SectionTitle(title: 'December 18'),
-                  const EventCard(
-                    eventName: 'Team Meeting',
-                    description: 'Discuss project progress',
-                    location: 'Office Meeting Room',
-                    date: '18 December 2024',
-                    timePeriod: '10:00 AM - 11:30 AM',
-                    type: 'Work',
-                  ),
+                  ...events.map((event) => EventCard(
+                    eventName: event.eventName,
+                    description: event.eventDesc,
+                    location: event.location,
+                    date: event.date,
+                    timePeriod: event.time,
+                    type: event.eventType,
+                  )).toList(),
                 ],
               ),
             ),
