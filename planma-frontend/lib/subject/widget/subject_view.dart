@@ -5,6 +5,7 @@ import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/edit_subject.dart';
 import 'package:planma_app/subject/widget/subject_detail_row.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
+import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
@@ -50,20 +51,6 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     }
   }
 
-  // Function to determine color based on the selected value
-  Color getColor(String value) {
-    switch (value) {
-      case 'Did Not Attend':
-        return Colors.red;
-      case 'Excused':
-        return Colors.blue;
-      case 'Attended':
-        return Colors.green;
-      default:
-        return Colors.grey; // Default for unselected
-    }
-  }
-
   // Handle delete functionality (stub for now)
   void _handleDelete(BuildContext context) async {
     final provider = Provider.of<ClassScheduleProvider>(context, listen: false);
@@ -79,7 +66,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete',
+                style: TextStyle(color: Color(0xFFEF4738))),
           ),
         ],
       ),
@@ -198,68 +186,52 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                     title: 'Code:',
                     detail: schedule.subjectCode,
                   ),
+                  const Divider(),
                   SubjectDetailRow(
                     title: 'Title:',
                     detail: schedule.subjectTitle,
                   ),
+                  const Divider(),
                   SubjectDetailRow(
                     title: 'Semester:',
                     detail: semesterDetails,
                   ),
+                  const Divider(),
                   SubjectDetailRow(
                     title: 'Day:',
                     detail: schedule.dayOfWeek,
                   ),
+                  const Divider(),
                   SubjectDetailRow(
                     title: 'Time:',
                     detail: '$startTime - $endTime',
                   ),
+                  const Divider(),
                   SubjectDetailRow(
                     title: 'Room:',
                     detail: schedule.room.isNotEmpty ? schedule.room : 'N/A',
                   ),
+                  const Divider(),
                   const SizedBox(height: 20),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: getColor(selectedAttendance),
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: DropdownButton<String>(
-                      value: selectedAttendance,
-                      icon: const Icon(Icons.arrow_drop_down),
-                      isExpanded: true,
-                      underline: const SizedBox(), // Remove default underline
-                      onChanged: (String? newValue) {
+                  CustomWidgets.dropwDownForAttendance(
+                    label: 'Attendance',
+                    value: selectedAttendance,
+                    items: ['Did Not Attend', 'Excused', 'Attended'],
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
                         setState(() {
-                          selectedAttendance = newValue!;
+                          selectedAttendance = newValue; // Update the value
                         });
-                      },
-                      items: <String>['Did Not Attend', 'Excused', 'Attended']
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  value,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: value == selectedAttendance
-                                        ? getColor(value)
-                                        : Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                      }
+                    },
+                    backgroundColor: Color(0XFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: CustomWidgets.getColor(
+                        selectedAttendance), // Use getColor as a static method
+                    borderRadius: 8.0,
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    fontSize: 14.0,
                   ),
                 ],
               ),

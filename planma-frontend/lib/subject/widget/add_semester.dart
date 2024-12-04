@@ -4,7 +4,6 @@ import 'package:planma_app/subject/widget/widget.dart'; // Assuming this contain
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class AddSemesterScreen extends StatefulWidget {
   const AddSemesterScreen({super.key});
 
@@ -137,7 +136,13 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Semester'),
+        title: const Text(
+          'Add Semester',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -222,7 +227,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
         child: _buildContainer(
           Text(
             isStartYear ? _selectedStartYear ?? hint : _selectedEndYear ?? hint,
-            style: const TextStyle(fontSize: 16),
+            style: GoogleFonts.openSans(fontSize: 16),
           ),
         ),
       ),

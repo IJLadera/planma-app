@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/event/edit_event.dart';
 import 'package:planma_app/event/widget/event_detail_row.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 class ViewEvent extends StatefulWidget {
   final String eventName;

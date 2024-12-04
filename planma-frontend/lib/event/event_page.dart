@@ -16,22 +16,29 @@ class EventsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Events'),
+        title: Text(
+          'Events',
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             // Search bar
             TextField(
               decoration: InputDecoration(
                 hintText: 'Search',
+                hintStyle:
+                    GoogleFonts.openSans(), 
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
@@ -44,14 +51,16 @@ class EventsPage extends StatelessWidget {
               child: ListView(
                 children: [
                   const SectionTitle(title: 'Today'),
-                  ...events.map((event) => EventCard(
-                    eventName: event.eventName,
-                    description: event.eventDesc,
-                    location: event.location,
-                    date: event.date,
-                    timePeriod: event.time,
-                    type: event.eventType,
-                  )).toList(),
+                  ...events
+                      .map((event) => EventCard(
+                            eventName: event.eventName,
+                            description: event.eventDesc,
+                            location: event.location,
+                            date: event.date,
+                            timePeriod: event.time,
+                            type: event.eventType,
+                          ))
+                      .toList(),
                 ],
               ),
             ),

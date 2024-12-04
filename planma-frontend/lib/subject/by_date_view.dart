@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/subject/widget/subject_card.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ByDateView extends StatelessWidget {
   final List<String> days;
@@ -33,7 +34,7 @@ class ByDateView extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                       child: Text(
                         days[index], // The day name
-                        style: const TextStyle(
+                        style: GoogleFonts.openSans(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
