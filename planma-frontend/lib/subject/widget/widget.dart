@@ -131,7 +131,8 @@ class CustomWidgets {
           isExpanded: true,
           hint: Text(
             label,
-            style: textStyle ?? GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
+            style: textStyle ??
+                GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
           ),
           value: value,
           onChanged: onChanged,
@@ -140,7 +141,8 @@ class CustomWidgets {
               value: item,
               child: Text(
                 item,
-                style: textStyle ?? GoogleFonts.openSans(fontSize: fontSize, color: textColor),
+                style: textStyle ??
+                    GoogleFonts.openSans(fontSize: fontSize, color: textColor),
               ),
             );
           }).toList(),
@@ -164,5 +166,89 @@ class CustomWidgets {
         ),
       ),
     );
+  }
+
+  static Widget dropwDownForAttendance({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+    Color backgroundColor = const Color(0xFFF5F5F5),
+    Color labelColor = Colors.black,
+    Color textColor = Colors.black,
+    double borderRadius = 30.0,
+    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    double fontSize = 14.0,
+    TextStyle? textStyle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: getColor(value!),
+        ),
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          hint: Text(
+            label,
+            style:
+                textStyle ?? TextStyle(color: labelColor, fontSize: fontSize),
+          ),
+          value: value,
+          onChanged: onChanged,
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        color:
+                            item == value ? getColor(item) : Color(0xFF173F70),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          buttonStyleData: ButtonStyleData(
+            padding: contentPadding,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+          ),
+          dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+              color: Colors.white,
+            ),
+          ),
+          iconStyleData: IconStyleData(
+            icon: Icon(Icons.arrow_drop_down, color: labelColor),
+            iconSize: 24,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Color getColor(String value) {
+    switch (value) {
+      case 'Did Not Attend':
+        return Color(0xFFEF4738);
+      case 'Excused':
+        return Color(0xFF3654CC);
+      case 'Attended':
+        return Color(0xFF32C652);
+      default:
+        return Colors.grey; // Default for unselected
+    }
   }
 }

@@ -39,6 +39,7 @@ class BottomSheetWidget {
                   context,
                   label: "Task",
                   onPressed: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => AddTaskScreen()),
@@ -51,6 +52,7 @@ class BottomSheetWidget {
                   context,
                   label: "Class Schedule",
                   onPressed: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => AddClassScreen()),
@@ -63,6 +65,7 @@ class BottomSheetWidget {
                   context,
                   label: "Event",
                   onPressed: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => AddEventScreen()),
@@ -75,6 +78,7 @@ class BottomSheetWidget {
                   context,
                   label: "Activity",
                   onPressed: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -86,6 +90,7 @@ class BottomSheetWidget {
                   context,
                   label: "Goal",
                   onPressed: () {
+                    Navigator.pop(context);
                     Navigator.push(
                         context,
                         MaterialPageRoute(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:planma_app/subject/widget/subject_view.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SubjectCard extends StatelessWidget {
   final bool isByDate;
@@ -59,8 +60,8 @@ class SubjectCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.lightGreenAccent
-                    .withOpacity(0.6), // Slight transparency
+                color:
+                    Color(0xFFACEFDB).withOpacity(0.6), // Slight transparency
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -69,30 +70,32 @@ class SubjectCard extends StatelessWidget {
                     // Subject Code
                     Text(
                       schedule.subjectCode,
-                      style: const TextStyle(
+                      style: GoogleFonts.openSans(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
+
                     const SizedBox(height: 4),
                     // Subject Title
                     Text(
                       schedule.subjectTitle,
-                      style: const TextStyle(
+                      style: GoogleFonts.openSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Colors.black87,
+                        color: Color(0xFF173F70),
                       ),
                     ),
+
                     const SizedBox(height: 4),
                     // Time Info
                     Row(children: [
                       Text(
                         '$startTime - $endTime',
-                        style: TextStyle(
+                        style: GoogleFonts.openSans(
                           fontSize: 12,
-                          color: Colors.grey[600],
+                          color: Color(0xFF173F70),
                         ),
                       ),
                       const Spacer(),
