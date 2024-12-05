@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class CustomWidgets {
   // Method to build a TextField with custom style
@@ -7,15 +9,16 @@ class CustomWidgets {
       TextEditingController controller, String labelText) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
           labelText: labelText,
+          labelStyle: GoogleFonts.openSans(),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.all(16),
         ),
       ),
     );
@@ -26,13 +29,14 @@ class CustomWidgets {
       BuildContext context, bool isScheduledDate, Function selectDate) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: ListTile(
         title: Text(
-            '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}'),
-        trailing: Icon(Icons.calendar_today),
+            '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
+            style: GoogleFonts.openSans()),
+        trailing: const Icon(Icons.calendar_today),
         onTap: () => selectDate(context, isScheduledDate),
       ),
     );
@@ -43,7 +47,7 @@ class CustomWidgets {
       BuildContext context, bool isStartTime, Function selectTime) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
       child: GestureDetector(
@@ -52,10 +56,11 @@ class CustomWidgets {
           child: TextFormField(
             decoration: InputDecoration(
               labelText: label,
-              suffixIcon: Icon(Icons.access_time),
+              labelStyle: GoogleFonts.openSans(),
+              suffixIcon: const Icon(Icons.access_time),
               hintText: time != null ? time.format(context) : 'Select Time',
               border: InputBorder.none,
-              contentPadding: EdgeInsets.all(16),
+              contentPadding: const EdgeInsets.all(16),
             ),
           ),
         ),
@@ -63,39 +68,65 @@ class CustomWidgets {
     );
   }
 
-  static Widget buildDropdownField(
-    String label,
-    String? value,
-    List<String> items,
-    Function(String?) onChanged,
-  ) {
+  static Widget buildDropdownField({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+    Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
+    Color labelColor = Colors.black,
+    Color textColor = Colors.black,
+    double borderRadius = 30.0,
+    EdgeInsets contentPadding = const EdgeInsets.all(12),
+    double fontSize = 14.0,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 138, 172, 207),
-        borderRadius: BorderRadius.circular(30),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
-      child: SizedBox(
-        width: 400,
-        child: DropdownButtonFormField<String>(
-          value: value,
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: TextStyle(
-              color: Colors.black,
+      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          hint: Text(
+            label,
+            style: GoogleFonts.openSans(
+              color: labelColor,
+              fontSize: fontSize,
             ),
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.all(16),
           ),
+          value: value,
+          onChanged: onChanged,
           items: items.map((item) {
             return DropdownMenuItem<String>(
               value: item,
               child: Text(
                 item,
-                style: TextStyle(fontSize: 14, color: Colors.black),
-              ),
+                style: GoogleFonts.openSans(
+                  fontSize: fontSize,
+                  color: textColor,
+                ),
+             ),
             );
           }).toList(),
-          onChanged: (value) => onChanged(value),
+          buttonStyleData: ButtonStyleData(
+            padding: contentPadding,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+          ),
+          dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+              color: Colors.white, // Background color of the dropdown menu
+            ),
+          ),
+          iconStyleData: IconStyleData(
+            icon: Icon(Icons.arrow_drop_down, color: labelColor),
+            iconSize: 24,
+          ),
         ),
       ),
     );
@@ -110,19 +141,19 @@ class CustomWidgets {
         children: [
           Text(
             session['name'] ?? 'Session Name',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: GoogleFonts.openSans(),
           ),
           const SizedBox(height: 4),
           Text(
             'Date: ${session['date'] ?? 'Not Set'}',
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
+            style: GoogleFonts.openSans(),
           ),
           Text(
             'Time Period: ${session['timePeriod'] ?? 'Not Set'}',
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
+            style: GoogleFonts.openSans(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
           ),
         ],
       ),
@@ -138,17 +169,15 @@ class CustomWidgets {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: GoogleFonts.openSans(
               fontSize: 16,
-              fontWeight: FontWeight.w500,
             ),
           ),
           Flexible(
             child: Text(
               value,
-              style: const TextStyle(
+              style: GoogleFonts.openSans(
                 fontSize: 16,
-                fontWeight: FontWeight.w400,
               ),
               textAlign: TextAlign.end,
             ),
