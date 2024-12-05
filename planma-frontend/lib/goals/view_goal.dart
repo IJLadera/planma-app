@@ -3,6 +3,7 @@ import 'package:planma_app/goals/edit_goal.dart';
 import 'package:planma_app/goals/edit_goal_session.dart';
 import 'package:planma_app/goals/widget/goal_card.dart';
 import 'package:planma_app/goals/widget/goal_detail_row.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ViewGoal extends StatelessWidget {
   final Map<String, dynamic> goalDetails;
@@ -24,12 +25,12 @@ class ViewGoal extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.blue),
+          icon: const Icon(Icons.close, color: Color(0xFF173F70)),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blue),
+            icon: const Icon(Icons.edit, color: Color(0xFF173F70)),
             onPressed: () {
               Navigator.push(
                 context,
@@ -38,16 +39,16 @@ class ViewGoal extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.blue),
+            icon: const Icon(Icons.delete, color: Color(0xFF173F70)),
             onPressed: () {
               // Show confirmation dialog before deletion
             },
           ),
         ],
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Goal',
-          style: TextStyle(
+          style: GoogleFonts.openSans(
             color: Colors.black,
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -62,7 +63,7 @@ class ViewGoal extends StatelessWidget {
             color: Colors.grey[100],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(32.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -71,35 +72,40 @@ class ViewGoal extends StatelessWidget {
                   label: 'Goal Code:',
                   value: goalDetails['goalCode'] ?? 'N/A',
                 ),
+                const Divider(),
                 GoalDetailRow(
                   label: 'Description:',
                   value: goalDetails['description'] ?? 'No Description',
                 ),
+                const Divider(),
                 GoalDetailRow(
                   label: 'Timeframe:',
                   value: goalDetails['timeFrame'] ?? 'N/A',
                 ),
+                const Divider(),
                 GoalDetailRow(
                   label: 'Target Hours:',
                   value: goalDetails['targetDuration']?.toString() ?? 'N/A',
                 ),
+                const Divider(),
                 GoalDetailRow(
                   label: 'Type:',
                   value: goalDetails['goalType'] ?? 'N/A',
                 ),
+                const Divider(),
                 GoalDetailRow(
                   label: 'Semester:',
                   value: goalDetails['semester'] ?? 'N/A',
                 ),
+                const Divider(),
                 const SizedBox(height: 16),
 
                 // Sessions Section
-                const Center(
+                Center(
                   child: Text(
-                    'Sessions',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    'No goals found',
+                    style: GoogleFonts.openSans(
+                      color: Colors.grey,
                     ),
                   ),
                 ),
@@ -119,10 +125,13 @@ class ViewGoal extends StatelessWidget {
                                   );
                                 },
                               )
-                            : const Center(
+                            : Center(
                                 child: Text(
-                                  'No goals found',
-                                  style: TextStyle(color: Colors.grey),
+                                  'Add Session',
+                                  style: GoogleFonts.openSans(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                       )
@@ -140,16 +149,19 @@ class ViewGoal extends StatelessWidget {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Color(0xFFB8B8B8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.symmetric(
                                 vertical: 12, horizontal: 24),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Add Session',
-                            style: TextStyle(fontSize: 16, color: Colors.white),
+                            style: GoogleFonts.openSans(
+                              fontSize: 16,
+                              color: Color(0xFF173F70),
+                            ),
                           ),
                         ),
                       ),

@@ -3,7 +3,7 @@ import 'package:planma_app/event/edit_event.dart';
 import 'package:planma_app/event/widget/event_detail_row.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:planma_app/event/widget/widget.dart';
 
 class ViewEvent extends StatefulWidget {
   final String eventName;
@@ -77,8 +77,8 @@ class _ViewEventState extends State<ViewEvent> {
         centerTitle: true,
         title: Text(
           'Event',
-          style: TextStyle(
-            color: Colors.black,
+          style: GoogleFonts.openSans(
+            color: Color(0xFF173F70),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -92,7 +92,7 @@ class _ViewEventState extends State<ViewEvent> {
             color: Colors.grey[100],
           ),
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(32.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -100,78 +100,63 @@ class _ViewEventState extends State<ViewEvent> {
                   title: 'Title',
                   value: widget.eventName,
                 ),
+                const Divider(),
                 EventDetailRow(
                   title: 'Description',
                   value: widget.description,
                 ),
+                const Divider(),
                 EventDetailRow(
                   title: 'Location',
                   value: widget.location,
                 ),
+                const Divider(),
                 EventDetailRow(
                   title: 'Date',
                   value: widget.date,
                 ),
+                const Divider(),
                 EventDetailRow(
                   title: 'Time',
                   value: widget.timePeriod,
                 ),
+                const Divider(),
                 EventDetailRow(
                   title: 'Type',
                   value: widget.type,
                 ),
+                const Divider(),
                 SizedBox(height: 16),
                 // Dropdown for attendance
                 Text(
                   'Attendance',
-                  style: TextStyle(
+                  style: GoogleFonts.openSans(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
                 SizedBox(height: 8),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: getColor(selectedAttendance),
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: DropdownButton<String>(
+                CustomWidgets.dropwDownForAttendance(
+                    label: 'Attendance',
                     value: selectedAttendance,
-                    icon: Icon(Icons.arrow_drop_down),
-                    isExpanded: true,
-                    underline: SizedBox(), // Remove default underline
+                    items: ['Did Not Attend', 'Excused', 'Attended'],
                     onChanged: (String? newValue) {
-                      setState(() {
-                        selectedAttendance = newValue!;
-                      });
+                      if (newValue != null) {
+                        setState(() {
+                          selectedAttendance = newValue; // Update the value
+                        });
+                      }
                     },
-                    items: <String>['Did Not Attend', 'Excused', 'Attended']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                value,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: value == selectedAttendance
-                                      ? getColor(value)
-                                      : Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                    backgroundColor: Color(0XFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: CustomWidgets.getColor(
+                        selectedAttendance), // Use getColor as a static method
+                    borderRadius: 8.0,
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    fontSize: 14.0,
                   ),
-                ),
                 SizedBox(height: 16),
               ],
             ),

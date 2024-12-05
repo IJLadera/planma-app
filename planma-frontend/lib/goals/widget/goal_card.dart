@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/goals/view_goal.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GoalCard extends StatelessWidget {
   final String goalName;
@@ -19,24 +20,27 @@ class GoalCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.purple[100],
+          color: Color(0xFFD7C0F3),
           borderRadius: BorderRadius.circular(20),
         ),
         child: ListTile(
           contentPadding: const EdgeInsets.all(16.0),
           title: Text(
             goalName,
-            style: const TextStyle(
+            style: GoogleFonts.openSans(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: Color(0xFF173F70),
             ),
           ),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               'Target Hours: $targetHours',
-              style: const TextStyle(fontSize: 14, color: Colors.black54),
+              style: GoogleFonts.openSans(
+                fontSize: 14,
+                color: Color(0xFF173F70),
+              ),
             ),
           ),
           onTap: () {
@@ -64,7 +68,7 @@ class GoalCard extends StatelessWidget {
                 CircularProgressIndicator(
                   value: progress,
                   backgroundColor: Colors.grey[300],
-                  color: Colors.purple,
+                  color: Color(0xFFB480F3),
                   strokeWidth: 6,
                 ),
                 Center(
@@ -73,7 +77,7 @@ class GoalCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: progress < 0.1 ? 10 : 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Color(0xFF173F70),
                     ),
                   ),
                 ),

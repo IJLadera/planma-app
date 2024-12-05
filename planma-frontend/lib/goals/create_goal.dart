@@ -170,18 +170,38 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                   const Divider(thickness: 1, height: 16),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
-                      'Goal Type', _selectedGoalType, _goalType, (value) {
-                    setState(() {
-                      _selectedGoalType = value;
-                    });
-                  }),
+                    label: 'Goal Type',
+                    value: _selectedGoalType,
+                    items: _goalType,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedGoalType = value;
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
+                  ),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
-                      'Semester', _selectedSemester, _semesters, (value) {
-                    setState(() {
-                      _selectedSemester = value;
-                    });
-                  }),
+                    label: 'Semester',
+                    value: _selectedSemester,
+                    items: _semesters,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedSemester = value;
+                      });
+                    },
+                    backgroundColor: const Color(0xFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: Colors.black,
+                    borderRadius: 30.0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    fontSize: 14.0,
+                  ),
                 ],
               ),
             ),
