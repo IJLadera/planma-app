@@ -89,7 +89,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
                         children: [
                           Expanded(
                             child: CustomWidgets.buildDropdownField(
-                              label: 'Semester',
+                              label: '- Add Semester -',
                               value: selectedSemester,
                               items: semesters,
                               onChanged: (String? value) {

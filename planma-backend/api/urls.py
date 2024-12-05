@@ -6,21 +6,13 @@ router = DefaultRouter()
 router.register(r'class-schedules', ClassScheduleViewSet, basename='classschedule')
 router.register(r'subjects', SubjectViewSet, basename='subject')
 router.register(r'semesters', SemesterViewSet, basename='semester')
+router.register(r'tasks', TaskViewSet, basename='task')
 
 urlpatterns = [
     path ('djoser/', include ('djoser.urls')),
     path ('auth/', include ('djoser.urls.jwt')),
-    #semester
-    # path('semesters/', SemesterListView.as_view(), name='semester-list-create'),
-    # path('semesters/<int:semester_id>/', SemesterDetailView.as_view(), name='semester-detail'),
-    # path('semesters/<int:pk>/', SemesterDeleteView.as_view(), name='semester-delete'),
     #ModelViewSet
     path('', include(router.urls)),
-    #tasks
-    path('createtask/', CustomTaskListCreateView.as_view(), name='task-list-create'),
-    path('tasks/<uuid:pk>/', CustomTaskDetailView.as_view(), name='task-detail'),
-    path('deletetask/<int:pk>/', CustomTaskDeleteView.as_view(), name='task-delete'),
-    path('updatetask/<int:pk>/',CustomTaskUpdateView.as_view(), name='updatetask' ),
     #events
     path('createevents/', CustomEventListCreateView.as_view(), name='event-list-create'),
     path('events/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
@@ -46,26 +38,11 @@ urlpatterns = [
     path('userpref/<uuid:pk>/', UserPrefDetailView.as_view(), name='userpref-detail'),
     path('deleteuserpref/<int:pk>/', UserPrefDeleteView.as_view(), name='userpref-delete'),
     path('updateuserpref/<int:pk>/',UserPrefUpdateView.as_view(), name='updateuserpref' ),
-    #class
-    path('createclass/', CustomClassListCreateView.as_view(), name='class-list-create'),
-    path('classes/<uuid:pk>/', CustomClassDetailView.as_view(), name='class-detail'),
-    path('deleteclass/<int:pk>/', CustomClassDeleteView.as_view(), name='class-delete'),
-    path('updateclass/<int:pk>/',CustomClassUpdateView.as_view(), name='updateclass' ),
-    #attended class
-    path('createsub/', CustomSubjectListCreateView.as_view(), name='sub-list-create'),
-    path('sub/<uuid:pk>/', CustomSubjectDetailView.as_view(), name='sub-detail'),
-    path('deletesub/<int:pk>/', CustomSubjectDeleteView.as_view(), name='sub-delete'),
-    path('updatesub/<int:pk>/',CustomSubjectUpdateView.as_view(), name='updatesub' ),
     #attended class
     path('createclassatt/', AttClassListCreateView.as_view(), name='attclass-list-create'),
     path('classatt/<uuid:pk>/', AttClassDetailView.as_view(), name='attclass-detail'),
     path('deleteclassatt/<int:pk>/', AttClassDeleteView.as_view(), name='attclass-delete'),
     path('updateclassatt/<int:pk>/',AttClassUpdateView.as_view(), name='updateattclass' ),
-    #report
-    path('createsemester/', SemesterListCreateView.as_view(), name='semester-list-create'),
-    path('semester/<uuid:pk>/', SemesterDetailView.as_view(), name='semester-detail'),
-    path('deletesemester/<int:pk>/', SemesterDeleteView.as_view(), name='semester-delete'),
-    path('updatesemester/<int:pk>/', SemesterUpdateView.as_view(), name='updatesemester' ),
     #goals
     path('creategoals/', GoalsListCreateView.as_view(), name='goals-list-create'),
     path('goals/<uuid:pk>/', GoalsDetailView.as_view(), name='goals-detail'),
