@@ -52,7 +52,6 @@ class SubjectCard extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SubjectDetailScreen(
                     classSchedule: schedule,
-                    classschedId: schedule.classschedId!,
                   ),
                 ),
               );

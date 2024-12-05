@@ -65,36 +65,6 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
         return self.email
     
 
-class CustomTask(models.Model):
-    
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('In Progress', 'In Progress'),
-        ('Completed', 'Completed'),
-    ]
-    
-    # Primary Key
-    task_id = models.AutoField(primary_key=True)
-    
-    # Task Details
-    task_name = models.CharField(max_length=255)
-    task_desc = models.TextField()
-    scheduled_date = models.DateField()
-    scheduled_start_time = models.TimeField()
-    scheduled_end_time = models.TimeField()
-    deadline = models.DateTimeField()
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
-    subject_code = models.CharField(max_length=50)
-    
-    # Foreign Key to CustomUser model
-    student_id = models.ForeignKey(
-        CustomUser, 
-        on_delete=models.CASCADE, 
-        related_name='tasks', db_column="student_id"
-    )
-
-    def __str__(self):
-        return self.task_name
 
 class CustomEvents(models.Model):
     
@@ -284,6 +254,40 @@ class AttendedClass(models.Model):
     date = models.DateField()
     isExcused = models.BooleanField(default=False)
     hasAttended = models.BooleanField()
+
+class CustomTask(models.Model):
+    
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('In Progress', 'In Progress'),
+        ('Completed', 'Completed'),
+    ]
+    
+    # Primary Key
+    task_id = models.AutoField(primary_key=True)
+    
+    # Task Details
+    task_name = models.CharField(max_length=255)
+    task_desc = models.TextField()
+    scheduled_date = models.DateField()
+    scheduled_start_time = models.TimeField()
+    scheduled_end_time = models.TimeField()
+    deadline = models.DateTimeField()
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    subject_code = models.ForeignKey(
+        CustomSubject,  # This links to your CustomSubject model
+        on_delete=models.CASCADE,
+        related_name='subject', db_column='subject_code'
+    )
+    # Foreign Key to CustomUser model
+    student_id = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.CASCADE, 
+        related_name='tasks', db_column="student_id"
+    )
+
+    def __str__(self):
+        return self.task_name
 
 class Goals(models.Model):
 
