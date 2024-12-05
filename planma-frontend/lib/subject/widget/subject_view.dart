@@ -10,12 +10,10 @@ import 'package:provider/provider.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
   ClassSchedule classSchedule;
-  final int classschedId;
 
   SubjectDetailScreen({
     super.key,
     required this.classSchedule,
-    required this.classschedId,
   });
 
   @override
@@ -102,7 +100,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     return Consumer<ClassScheduleProvider>(
         builder: (context, classScheduleProvider, child) {
       final schedule = classScheduleProvider.classSchedules.firstWhere(
-        (schedule) => schedule.classschedId == widget.classschedId,
+        (schedule) => schedule.classschedId == widget.classSchedule.classschedId,
         orElse: () => ClassSchedule(
           classschedId: -1, // Indicate an invalid or default ID
           subjectCode: 'N/A',
@@ -141,22 +139,13 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.blue),
               onPressed: () async {
-                final updatedClass = await Navigator.push<ClassSchedule>(
+                await Navigator.push<ClassSchedule>(
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
                         EditClass(classSchedule: widget.classSchedule),
                   ),
                 );
-
-                if (updatedClass != null) {
-                  print(updatedClass);
-                  // setState(() {
-                  //   classScheduleProvider.updateClassSchedule(updatedClass);
-                  // });
-                } else {
-                  print("hatdog wala");
-                }
               },
             ),
             IconButton(

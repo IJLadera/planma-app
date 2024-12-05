@@ -16,17 +16,6 @@ class CustomUserSerializer(UserSerializer):
 
 
 
-class CustomTaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomTask
-        fields = [
-            'task_id', 'task_name', 'task_desc', 
-            'scheduled_date', 'scheduled_start_time', 
-            'scheduled_end_time', 'deadline', 
-            'status', 'subject_code', 'student_id'
-        ]
-        # read_only_fields = ['task_id', 'student_id']
-
 class CustomEventSerializer(serializers.ModelSerializer):
     class Meta: 
         model = CustomEvents
@@ -114,6 +103,20 @@ class AttendedClassSerializer(serializers.ModelSerializer):
         model = AttendedClass
         fields = ['att_class_id', 'classsched_id', 'date', 
                   'isExcused', 'hasAttended']
+        
+class CustomTaskSerializer(serializers.ModelSerializer):
+    subject_code = CustomSubjectSerializer()
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
+    class Meta:
+        model = CustomTask
+        fields = [
+            'task_id', 'task_name', 'task_desc', 
+            'scheduled_date', 'scheduled_start_time', 
+            'scheduled_end_time', 'deadline', 
+            'status', 'subject_code', 'student_id'
+        ]
+        read_only_fields = ['student_id']
                 
 class GoalsSerializer(serializers.ModelSerializer):
     class Meta:
