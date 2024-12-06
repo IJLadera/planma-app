@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,15 +19,21 @@ class CustomWidgets {
           labelText: labelText,
           labelStyle: GoogleFonts.openSans(),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         ),
       ),
     );
   }
 
   // Method to build a DateTile (with tap to select date)
-  static Widget buildDateTile(String label, DateTime? date,
-      BuildContext context, bool isScheduledDate, Function selectDate) {
+  static Widget buildDateTile(
+    String label,
+    DateTime? date,
+    BuildContext context,
+    bool isScheduledDate,
+    Function selectDate,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
@@ -34,8 +41,9 @@ class CustomWidgets {
       ),
       child: ListTile(
         title: Text(
-            '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
-            style: GoogleFonts.openSans()),
+          '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
+          style: GoogleFonts.openSans(),
+        ),
         trailing: const Icon(Icons.calendar_today),
         onTap: () => selectDate(context, isScheduledDate),
       ),
@@ -43,8 +51,13 @@ class CustomWidgets {
   }
 
   // Method to build a time field with gesture and custom design
-  static Widget buildTimeField(String label, TimeOfDay? time,
-      BuildContext context, bool isStartTime, Function selectTime) {
+  static Widget buildTimeField(
+    String label,
+    TimeOfDay? time,
+    BuildContext context,
+    bool isStartTime,
+    Function selectTime,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
@@ -68,16 +81,18 @@ class CustomWidgets {
     );
   }
 
+  // Method to build a dropdown field with custom styling
   static Widget buildDropdownField({
     required String label,
     required String? value,
     required List<String> items,
     required Function(String?) onChanged,
-    Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
+    Color backgroundColor = const Color(0xFFF5F5F5),
     Color labelColor = Colors.black,
     Color textColor = Colors.black,
     double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(12),
+    EdgeInsets contentPadding =
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
     double fontSize = 14.0,
   }) {
     return Container(
@@ -85,7 +100,7 @@ class CustomWidgets {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -107,7 +122,7 @@ class CustomWidgets {
                   fontSize: fontSize,
                   color: textColor,
                 ),
-             ),
+              ),
             );
           }).toList(),
           buttonStyleData: ButtonStyleData(
@@ -120,7 +135,7 @@ class CustomWidgets {
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white, // Background color of the dropdown menu
+              color: Colors.white,
             ),
           ),
           iconStyleData: IconStyleData(
@@ -132,7 +147,7 @@ class CustomWidgets {
     );
   }
 
-  // Adjusted to accept dynamic Map
+  // Method to build a session tile with dynamic data
   static Widget buildSessionTile(Map<String, dynamic> session) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -160,7 +175,7 @@ class CustomWidgets {
     );
   }
 
-  // Helper for a detail tile
+  // Method to build a detail tile with title and value
   static Widget buildDetailTile(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -183,6 +198,35 @@ class CustomWidgets {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  static Widget buildPicker({
+    required int max,
+    required int selectedValue,
+    required Function(int) onSelectedItemChanged,
+    double height = 100,
+    double width = 40,
+    double fontSize = 16,
+  }) {
+    return SizedBox(
+      height: height,
+      width: width,
+      child: CupertinoPicker(
+        scrollController: FixedExtentScrollController(
+          initialItem: selectedValue,
+        ),
+        itemExtent: 40,
+        onSelectedItemChanged: onSelectedItemChanged,
+        children: List<Widget>.generate(max, (int index) {
+          return Center(
+            child: Text(
+              index.toString().padLeft(2, '0'), // Zero-padding for consistency
+              style: TextStyle(fontSize: fontSize),
+            ),
+          );
+        }),
       ),
     );
   }

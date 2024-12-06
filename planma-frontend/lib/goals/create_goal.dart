@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/goals/widget/widget.dart'; // Ensure this file contains the CustomWidgets class
+import 'package:planma_app/goals/widget/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AddGoalScreen extends StatefulWidget {
   const AddGoalScreen({super.key});
@@ -33,60 +34,30 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'Select Target Duration',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'OpenSans', // Use OpenSans font
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Hours Picker
-                      Column(
-                        children: [
-                          const Text('Hours', style: TextStyle(fontSize: 16)),
-                          SizedBox(
-                            height: 150,
-                            width: 70,
-                            child: ListWheelScrollView.useDelegate(
-                              itemExtent: 40,
-                              onSelectedItemChanged: (value) {
-                                setModalState(() {
-                                  selectedHours = value;
-                                });
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                builder: (context, index) => Text('$index',
-                                    style: const TextStyle(fontSize: 18)),
-                                childCount: 24, // Maximum hours
-                              ),
-                            ),
-                          ),
-                        ],
+                      _buildPicker(
+                        'Hours',
+                        24,
+                        selectedHours,
+                        (value) => setModalState(() => selectedHours = value),
                       ),
                       const SizedBox(width: 20),
-                      // Minutes Picker
-                      Column(
-                        children: [
-                          const Text('Minutes', style: TextStyle(fontSize: 16)),
-                          SizedBox(
-                            height: 150,
-                            width: 70,
-                            child: ListWheelScrollView.useDelegate(
-                              itemExtent: 40,
-                              onSelectedItemChanged: (value) {
-                                setModalState(() {
-                                  selectedMinutes = value;
-                                });
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                builder: (context, index) => Text('$index',
-                                    style: const TextStyle(fontSize: 18)),
-                                childCount: 60, // Maximum minutes
-                              ),
-                            ),
-                          ),
-                        ],
+                      _buildPicker(
+                        'Minutes',
+                        60,
+                        selectedMinutes,
+                        (value) => setModalState(() => selectedMinutes = value),
                       ),
                     ],
                   ),
@@ -94,9 +65,10 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(
-                          context,
-                          Duration(
-                              hours: selectedHours, minutes: selectedMinutes));
+                        context,
+                        Duration(
+                            hours: selectedHours, minutes: selectedMinutes),
+                      );
                     },
                     child: const Text('Set Duration'),
                   ),
@@ -115,17 +87,46 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
     }
   }
 
+  Widget _buildPicker(String label, int itemCount, int initialValue,
+      Function(int) onSelectedItemChanged) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(fontSize: 16)),
+        SizedBox(
+          height: 150,
+          width: 70,
+          child: ListWheelScrollView.useDelegate(
+            itemExtent: 40,
+            onSelectedItemChanged: onSelectedItemChanged,
+            childDelegate: ListWheelChildBuilderDelegate(
+              builder: (context, index) => Text(
+                '$index',
+                style: const TextStyle(fontSize: 18),
+              ),
+              childCount: itemCount,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Goal Sessions'),
+        title: Text(
+          'Create Goal',
+          style: GoogleFonts.openSans(
+            color: Color(0xFF173F70),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
         children: [
@@ -145,91 +146,109 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                     'Description',
                   ),
                   const SizedBox(height: 16),
-                  // Target Duration Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Target Duration:',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                      TextButton(
-                        onPressed: () => _pickTargetDuration(context),
-                        child: Text(
-                          '${_targetDuration.inHours} hrs ${_targetDuration.inMinutes % 60} mins',
-                          style: const TextStyle(
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0), // Add desired margin
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Target Duration:',
+                          style: GoogleFonts.openSans(
                             fontSize: 16,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ),
-                    ],
+                        Row(
+                          children: [
+                            // Hour Picker
+                            CustomWidgets.buildPicker(
+                              max: 24,
+                              selectedValue: _targetDuration.inHours,
+                              onSelectedItemChanged: (value) {
+                                setState(() {
+                                  _targetDuration = Duration(
+                                    hours: value,
+                                    minutes: _targetDuration.inMinutes % 60,
+                                  );
+                                });
+                              },
+                            ),
+                            Text(
+                              ' hrs ',
+                              style: GoogleFonts.openSans(
+                                fontSize: 14,
+                              ),
+                            ),
+
+                            // Minute Picker
+                            CustomWidgets.buildPicker(
+                              max: 60,
+                              selectedValue: _targetDuration.inMinutes % 60,
+                              onSelectedItemChanged: (value) {
+                                setState(() {
+                                  _targetDuration = Duration(
+                                    hours: _targetDuration.inHours,
+                                    minutes: value,
+                                  );
+                                });
+                              },
+                            ),
+                            Text(
+                              ' mins ',
+                              style: GoogleFonts.openSans(
+                                fontSize: 14,
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  const Divider(thickness: 1, height: 16),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
                     label: 'Goal Type',
                     value: _selectedGoalType,
                     items: _goalType,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedGoalType = value;
-                      });
-                    },
-                    backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
-                    borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    fontSize: 14.0,
+                    onChanged: (String? value) =>
+                        setState(() => _selectedGoalType = value),
                   ),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
                     label: 'Semester',
                     value: _selectedSemester,
                     items: _semesters,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedSemester = value;
-                      });
-                    },
-                    backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
-                    borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    fontSize: 14.0,
+                    onChanged: (String? value) =>
+                        setState(() => _selectedSemester = value),
                   ),
                 ],
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 15.0,
-            ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
             child: ElevatedButton(
               onPressed: () {
                 // TODO: Add functionality to save the goal session
                 print(
-                    "Target Duration: ${_targetDuration.inHours} hrs ${_targetDuration.inMinutes % 60} mins");
+                  "Target Duration: ${_targetDuration.inHours} hrs ${_targetDuration.inMinutes % 60} mins",
+                );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF173F70),
+                backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 15,
-                  horizontal: 100,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
               ),
-              child: const Text(
-                'Create Goal Session',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+              child: Text(
+                'Create Goal',
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

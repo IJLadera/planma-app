@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/auth_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -89,10 +90,10 @@ class _SignUpState extends State<SignUp> {
                 // Sign Up text below AppBar
                 Text(
                   'Sign Up',
-                  style: TextStyle(
+                  style: GoogleFonts.openSans(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue[900],
+                    color: Color(0xFF173F70),
                   ),
                 ),
                 const SizedBox(height: 20), // Spacing between title and form
@@ -103,6 +104,7 @@ class _SignUpState extends State<SignUp> {
                       TextFormField(
                         controller: firstNameController,
                         decoration: InputDecoration(
+                          labelStyle: GoogleFonts.openSans(),
                           labelText: 'First Name',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -116,6 +118,7 @@ class _SignUpState extends State<SignUp> {
                       TextFormField(
                         controller: lastNameController,
                         decoration: InputDecoration(
+                          labelStyle: GoogleFonts.openSans(),
                           labelText: 'Last Name',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -129,6 +132,7 @@ class _SignUpState extends State<SignUp> {
                       TextFormField(
                         controller: userNameController,
                         decoration: InputDecoration(
+                          labelStyle: GoogleFonts.openSans(),
                           labelText: 'Username',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -142,6 +146,7 @@ class _SignUpState extends State<SignUp> {
                       TextFormField(
                         controller: emailController,
                         decoration: InputDecoration(
+                          labelStyle: GoogleFonts.openSans(),
                           labelText: 'Email',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -155,6 +160,7 @@ class _SignUpState extends State<SignUp> {
                         controller: passwordController,
                         obscureText: obscurePassword,
                         decoration: InputDecoration(
+                          labelStyle: GoogleFonts.openSans(),
                           labelText: 'Password',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -179,6 +185,7 @@ class _SignUpState extends State<SignUp> {
                         controller: confirmPasswordController,
                         obscureText: obscureConfirmPassword,
                         decoration: InputDecoration(
+                          labelStyle: GoogleFonts.openSans(),
                           labelText: 'Confirm Password',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -221,9 +228,9 @@ class _SignUpState extends State<SignUp> {
                               horizontal: 100, vertical: 15),
                           backgroundColor: const Color(0xFF173F70),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Create Account',
-                          style: TextStyle(
+                          style: GoogleFonts.openSans(
                             fontSize: 16,
                             color: Colors.white,
                           ),
@@ -233,11 +240,13 @@ class _SignUpState extends State<SignUp> {
                       RichText(
                         text: TextSpan(
                           text: 'Already have an account? ',
-                          style: const TextStyle(color: Color(0xFF173F70)),
-                          children: <TextSpan>[
+                          style: GoogleFonts.openSans(
+                            color: Color(0xFF173F70),
+                          ),
+                          children: [
                             TextSpan(
                               text: 'Login',
-                              style: TextStyle(
+                              style: GoogleFonts.openSans(
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF173F70),
                                 decoration: TextDecoration.underline,
