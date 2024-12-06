@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/goals/widget/widget.dart'; // Ensure this file contains the CustomWidgets class
+import 'package:planma_app/goals/widget/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EditGoal extends StatefulWidget {
   const EditGoal({super.key});
@@ -119,13 +120,20 @@ class _EditGoal extends State<EditGoal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Goal Sessions'),
+        title: Text(
+          'Edit Goal',
+          style: GoogleFonts.openSans(
+            color: Color(0xFF173F70),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
         children: [
@@ -146,61 +154,80 @@ class _EditGoal extends State<EditGoal> {
                   ),
                   const SizedBox(height: 16),
                   // Target Duration Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Target Duration:',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                      TextButton(
-                        onPressed: () => _pickTargetDuration(context),
-                        child: Text(
-                          '${_targetDuration.inHours} hrs ${_targetDuration.inMinutes % 60} mins',
-                          style: const TextStyle(
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0), // Add desired margin
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Target Duration:',
+                          style: GoogleFonts.openSans(
                             fontSize: 16,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ),
-                    ],
+                        Row(
+                          children: [
+                            // Hour Picker
+                            CustomWidgets.buildPicker(
+                              max: 24,
+                              selectedValue: _targetDuration.inHours,
+                              onSelectedItemChanged: (value) {
+                                setState(() {
+                                  _targetDuration = Duration(
+                                    hours: value,
+                                    minutes: _targetDuration.inMinutes % 60,
+                                  );
+                                });
+                              },
+                            ),
+                            Text(
+                              ' hrs ',
+                              style: GoogleFonts.openSans(
+                                fontSize: 14,
+                              ),
+                            ),
+
+                            // Minute Picker
+                            CustomWidgets.buildPicker(
+                              max: 60,
+                              selectedValue: _targetDuration.inMinutes % 60,
+                              onSelectedItemChanged: (value) {
+                                setState(() {
+                                  _targetDuration = Duration(
+                                    hours: _targetDuration.inHours,
+                                    minutes: value,
+                                  );
+                                });
+                              },
+                            ),
+                            Text(
+                              ' mins ',
+                              style: GoogleFonts.openSans(
+                                fontSize: 14,
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  const Divider(thickness: 1, height: 16),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
                     label: 'Goal Type',
                     value: _selectedGoalType,
                     items: _goalType,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedGoalType = value;
-                      });
-                    },
-                    backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
-                    borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    fontSize: 14.0,
+                    onChanged: (String? value) =>
+                        setState(() => _selectedGoalType = value),
                   ),
                   const SizedBox(height: 16),
                   CustomWidgets.buildDropdownField(
                     label: 'Semester',
                     value: _selectedSemester,
                     items: _semesters,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedSemester = value;
-                      });
-                    },
-                    backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
-                    borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    fontSize: 14.0,
+                    onChanged: (String? value) =>
+                        setState(() => _selectedSemester = value),
                   ),
                 ],
               ),
@@ -227,9 +254,12 @@ class _EditGoal extends State<EditGoal> {
                   horizontal: 120,
                 ),
               ),
-              child: const Text(
-                'Edit Goal Session',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+              child: Text(
+                'Edit Goal',
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
