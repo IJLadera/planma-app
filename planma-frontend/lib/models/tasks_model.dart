@@ -6,7 +6,7 @@ class Task {
   final String scheduledStartTime;
   final String scheduledEndTime;
   final DateTime deadline;
-  final String status;
+  final String? status;
   final String subjectCode;
 
   Task({
@@ -17,7 +17,7 @@ class Task {
     required this.scheduledStartTime,
     required this.scheduledEndTime,
     required this.deadline,
-    required this.status,
+    this.status,
     required this.subjectCode,
   });
 

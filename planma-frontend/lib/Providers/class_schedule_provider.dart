@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/subjects_model.dart';
@@ -11,12 +12,77 @@ class ClassScheduleProvider with ChangeNotifier {
   List<String> subjectCodes = [];
   Subject? _selectedSubject;
   String? _accessToken;
+  int? activeSemesterId;
 
   List<ClassSchedule> get classSchedules => _classSchedules;
   Subject? get selectedSubject => _selectedSubject;
   String? get accessToken => _accessToken;
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
+
+  //Fetch all subjects
+  Future<void> fetchSubjects(SemesterProvider semesterProvider) async {
+    // Fetch semesters if not already loaded
+    if (semesterProvider.semesters.isEmpty) {
+      await semesterProvider.fetchSemesters();
+    }
+
+    if (semesterProvider.semesters.isEmpty) {
+      throw Exception("No semesters available. Cannot fetch subjects.");
+    }
+
+    // Determine the current semester dynamically
+    DateTime currentDate = DateTime.now();
+    final activeSemester = semesterProvider.semesters.firstWhere(
+      (semester) {
+        DateTime startDate = DateTime.parse(semester['sem_start_date']);
+        DateTime endDate = DateTime.parse(semester['sem_end_date']);
+        return currentDate.isAfter(startDate) && currentDate.isBefore(endDate);
+      },
+      orElse: () {
+        // Proper fallback with valid default map
+        print("No active semester found!");
+        return {
+          'id': -1,
+          'start_date': '2000-01-01', // Default date to avoid parsing errors
+          'end_date': '2000-12-31',   // Default date to avoid parsing errors
+        };
+      },
+    );
+
+    activeSemesterId = activeSemester['semester_id'];
+    print("Active semester Id: $activeSemesterId");
+
+    if (activeSemesterId == -1) {
+      print("No active semester. Fallback semester ID used.");
+    }
+
+    // Fetch subjects for the active semester
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+    final url = Uri.parse("${baseUrl}subjects/?semester_id=$activeSemesterId");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        subjectCodes = data.map((item) => Subject.fromJson(item).subjectCode).toList();
+        notifyListeners();
+      } else {
+        throw Exception('Error fetching subjects');
+      }
+    } catch (error) {
+      print('Error fetching subjects: $error');
+      throw Exception('Error fetching subjects: $error');
+    }
+  }
+
 
   //Fetch existing subject details
   Future<void> fetchSubjectDetails(String subjectCode) async {
