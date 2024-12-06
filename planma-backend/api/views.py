@@ -580,9 +580,15 @@ class SubjectViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def get_queryset(self):
+        semester_id = self.request.query_params.get('semester_id', None)
         subject_code = self.kwargs.get('subject_code')
+
+        if semester_id:
+            return CustomSubject.objects.filter(semester_id=semester_id)  # Filter by semester_id
+
         if subject_code:
             return CustomSubject.objects.filter(subject_code=subject_code)  # Filter by subject_code
+        
         return CustomSubject.objects.all()
 
 # Semester

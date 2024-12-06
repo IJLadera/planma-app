@@ -39,7 +39,7 @@ class CustomWidgets {
       ),
       child: ListTile(
         title: Text(
-          '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
+          date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date',
           style: TextStyle(fontSize: 16),
         ),
         trailing: const Icon(Icons.calendar_today),

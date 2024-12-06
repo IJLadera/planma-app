@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/authentication/splash_screen.dart';
 import 'package:planma_app/core/dashboard.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => SemesterProvider()),
         ChangeNotifierProvider(create: (context) => ClassScheduleProvider()),
         ChangeNotifierProvider(create: (context) => EventsProvider()),
+        ChangeNotifierProvider(create: (context) => TaskProvider()),
       ],
       child: MaterialApp(
           // home: Dashboard(),
