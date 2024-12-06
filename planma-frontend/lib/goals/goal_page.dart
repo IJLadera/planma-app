@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/goals/create_goal.dart';
 import 'package:planma_app/goals/widget/goal_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GoalPage extends StatefulWidget {
   const GoalPage({super.key});
@@ -41,14 +42,17 @@ class _GoalPageState extends State<GoalPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF173F70)),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
+        title: Text(
           'Goals',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: GoogleFonts.openSans(
+            color: const Color(0xFF173F70),
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Padding(
@@ -84,10 +88,12 @@ class _GoalPageState extends State<GoalPage> {
                         );
                       },
                     )
-                  : const Center(
+                  : Center(
                       child: Text(
                         'No goals found',
-                        style: TextStyle(color: Colors.grey),
+                        style: GoogleFonts.openSans(
+                          color: const Color(0xFF173F70),
+                        ),
                       ),
                     ),
             ),

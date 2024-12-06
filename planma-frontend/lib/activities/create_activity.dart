@@ -160,8 +160,8 @@ class _AddActivityState extends State<AddActivityScreen> {
                     'Scheduled Date',
                   ),
                   const SizedBox(height: 12),
-                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
-                      context, true, _selectDate),
+                  CustomWidgets.buildDateTile(
+                      '', _scheduledDate, context, true, _selectDate),
                   SizedBox(height: 12),
                   _buildTitle(
                     'Start and End Time',
@@ -206,7 +206,10 @@ class _AddActivityState extends State<AddActivityScreen> {
                 ),
                 child: Text(
                   'Create Activity',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Color(0xFFFFFFFF),
+                  ),
                 ),
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/activities/view_activity.dart';
 import 'package:planma_app/timer/countdown/countdown_timer.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ActivityCard extends StatelessWidget {
   final String activityName;
@@ -51,7 +52,7 @@ class ActivityCard extends StatelessWidget {
                 IconButton(
                   icon: const Icon(
                     Icons.play_circle_fill,
-                    color: Colors.blue,
+                    color: Color(0xFF173F70),
                     size: 30,
                   ),
                   onPressed: () {
@@ -59,30 +60,31 @@ class ActivityCard extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const TimerPage(themeColor: Colors.redAccent),
+                        builder: (context) =>
+                            const TimerPage(themeColor: Color(0xFFFBA2A2)),
                       ),
                     );
                   },
                 ),
-                const SizedBox(width: 10), // Spacing between button and text
+                const SizedBox(width: 16), // Spacing between button and text
                 // Activity Details
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       activityName,
-                      style: TextStyle(
+                      style: GoogleFonts.openSans(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(255, 11, 54, 89),
+                        color: const Color(0xFF173F70),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 5),
                     Text(
                       timePeriod,
-                      style: TextStyle(
+                      style: GoogleFonts.openSans(
                         fontSize: 14,
-                        color: Colors.grey[600], // Styling the timePeriod
+                        color: Color(0xFF173F70),
                       ),
                     ),
                   ],
