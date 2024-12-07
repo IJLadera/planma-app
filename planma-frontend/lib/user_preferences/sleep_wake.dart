@@ -5,8 +5,19 @@ import 'package:planma_app/user_preferences/setting_reminder.dart';
 import 'package:planma_app/user_preferences/widget/widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// Ensure this code snippet is used alongside other fixed parts like buildTimePickerField
+
 class SleepWakeSetupScreen extends StatefulWidget {
-  const SleepWakeSetupScreen({super.key});
+  final int studentId;
+  final String usualSleepTime;
+  final String usualWakeTime;
+
+  const SleepWakeSetupScreen({
+    super.key,
+    required this.studentId,
+    required this.usualSleepTime,
+    required this.usualWakeTime,
+  });
 
   @override
   _SleepWakeSetupScreenState createState() => _SleepWakeSetupScreenState();
@@ -29,28 +40,35 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
           wakeTime = picked;
         }
       });
-      _saveTimesToDatabase();
     }
   }
 
-  Future<void> _saveTimesToDatabase() async {
-    final url = Uri.parse("http://<your-backend-url>/api/sleep-wake-times/");
+  Future<void> _saveReminderToDatabase() async {
+    final url = Uri.parse("http://example.com/api/time-reminder/");
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "user_id":
-            1, // Replace with the actual user ID from your app's auth system
-        "sleep_time": "${sleepTime.hour}:${sleepTime.minute}",
-        "wake_time": "${wakeTime.hour}:${wakeTime.minute}",
-      }),
-    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "user_id": widget.studentId,
+          "reminder_time": DateTime.now().toIso8601String(),
+          "usual_sleep_time": "${sleepTime.hour}:${sleepTime.minute}",
+          "usual_wake_time": "${wakeTime.hour}:${wakeTime.minute}",
+        }),
+      );
 
-    if (response.statusCode == 201) {
-      print("Times saved successfully");
-    } else {
-      print("Failed to save times: ${response.body}");
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Reminder saved successfully!")),
+        );
+      } else {
+        throw Exception("Failed to save reminder: ${response.body}");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error saving reminder: $e")),
+      );
     }
   }
 
@@ -108,7 +126,14 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => SleepWakeReminderScreen()),
+                        builder: (context) => SleepWakeReminderScreen(
+                              usualSleepTime:
+                                  "${sleepTime.hour}:${sleepTime.minute}",
+                              usualWakeTime:
+                                  "${wakeTime.hour}:${wakeTime.minute}",
+                              studentId:
+                                  1, // Replace with the actual student ID
+                            )),
                   );
                 },
                 style: ElevatedButton.styleFrom(
