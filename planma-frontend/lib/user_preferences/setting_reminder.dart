@@ -5,7 +5,16 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class SleepWakeReminderScreen extends StatefulWidget {
-  const SleepWakeReminderScreen({super.key});
+  final String usualSleepTime;
+  final String usualWakeTime;
+  final int studentId;
+
+  const SleepWakeReminderScreen({
+    super.key,
+    required this.usualSleepTime,
+    required this.usualWakeTime,
+    required this.studentId,
+  });
 
   @override
   _SleepWakeReminderScreenState createState() =>
@@ -23,16 +32,18 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
     "03 h : 00 m",
   ];
 
-  Future<void> _saveReminderToDatabase(String time) async {
+  Future<void> _saveReminderToDatabase(String reminderTime) async {
     final url = Uri.parse("http://<your-backend-url>/api/time-reminder/");
-    
+
     try {
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "user_id": 1, // Replace with the actual user ID from your app
-          "reminder_time": time,
+          "user_id": widget.studentId,
+          "reminder_time": reminderTime,
+          "usual_sleep_time": widget.usualSleepTime,
+          "usual_wake_time": widget.usualWakeTime,
         }),
       );
 

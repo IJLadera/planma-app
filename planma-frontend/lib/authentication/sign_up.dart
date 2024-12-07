@@ -62,10 +62,12 @@ class _SignUpState extends State<SignUp> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Account created successfully!")),
         );
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SleepWakeSetupScreen()),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => 
+        //   SleepWakeSetupScreen()
+        //   ),
+        // );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(response?["error"] ?? "Unknown error")),

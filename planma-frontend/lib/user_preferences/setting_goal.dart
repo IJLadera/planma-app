@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/core/dashboard.dart';
 import 'package:planma_app/user_preferences/widget/goal_option.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -52,7 +53,7 @@ class GoalSelectionScreen extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Add navigation or functionality here
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(), ));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
