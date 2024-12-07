@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/task/widget/widgets.dart';
 
 class EditGoalSession extends StatefulWidget {
@@ -9,7 +10,7 @@ class EditGoalSession extends StatefulWidget {
 }
 
 class _EditGoalSession extends State<EditGoalSession> {
-  final TextEditingController _taskNameController = TextEditingController();
+  final TextEditingController _goalNameController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
 
@@ -47,16 +48,18 @@ class _EditGoalSession extends State<EditGoalSession> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Edit Goal Session',
-          style: TextStyle(
+          style: GoogleFonts.openSans(
             fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
           ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
         children: [
@@ -65,11 +68,23 @@ class _EditGoalSession extends State<EditGoalSession> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  _buildTitle(
+                    'Goal Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                      _taskNameController, 'Goal Name'),
+                      _goalNameController, 'Goal Name'),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Scheduled Date',
+                  ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Start and End Time',
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -112,9 +127,12 @@ class _EditGoalSession extends State<EditGoalSession> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
               ),
-              child: const Text(
-                'Edit Goal Session',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+              child: Text(
+                'Add Goal Session',
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Color(0xFFFFFFFF),
+                ),
               ),
             ),
           ),
@@ -122,4 +140,22 @@ class _EditGoalSession extends State<EditGoalSession> {
       ),
     );
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/user_preferences/widget/goal_option.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GoalSelectionScreen extends StatelessWidget {
   const GoalSelectionScreen({super.key});
@@ -9,28 +10,30 @@ class GoalSelectionScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 50),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Center(
+              Center(
                 child: Text(
                   "Let’s make things happen!",
-                  style: TextStyle(
+                  style: GoogleFonts.openSans(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.indigo,
+                    color: Color(0xFF173F70),
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(height: 20),
-              const Center(
+
+              // Subheading Text
+              Center(
                 child: Text(
                   "What’s the first goal you’d like to work toward?",
-                  style: TextStyle(
+                  style: GoogleFonts.openSans(
                     fontSize: 16,
-                    color: Colors.black54,
+                    color: Color(0xFF173F70),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -52,7 +55,7 @@ class GoalSelectionScreen extends StatelessWidget {
                   // Add navigation or functionality here
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
+                  backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),

@@ -1,6 +1,9 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:planma_app/user_preferences/setting_reminder.dart';
 import 'package:planma_app/user_preferences/widget/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SleepWakeSetupScreen extends StatefulWidget {
   const SleepWakeSetupScreen({super.key});
@@ -26,6 +29,28 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
           wakeTime = picked;
         }
       });
+      _saveTimesToDatabase();
+    }
+  }
+
+  Future<void> _saveTimesToDatabase() async {
+    final url = Uri.parse("http://<your-backend-url>/api/sleep-wake-times/");
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "user_id":
+            1, // Replace with the actual user ID from your app's auth system
+        "sleep_time": "${sleepTime.hour}:${sleepTime.minute}",
+        "wake_time": "${wakeTime.hour}:${wakeTime.minute}",
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      print("Times saved successfully");
+    } else {
+      print("Failed to save times: ${response.body}");
     }
   }
 
@@ -41,7 +66,7 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
             children: [
               Text(
                 "Let’s set up your day!",
-                style: TextStyle(
+                style: GoogleFonts.openSans(
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -51,7 +76,10 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
               SizedBox(height: 8.0),
               Text(
                 "Share your usual sleep and wake times",
-                style: TextStyle(fontSize: 16.0, color: Colors.grey[700]),
+                style: GoogleFonts.openSans(
+                  fontSize: 16.0,
+                  color: Colors.grey[700],
+                ),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 24.0),
@@ -85,7 +113,7 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 40.0, vertical: 12.0),
+                      EdgeInsets.symmetric(horizontal: 50.0, vertical: 18.0),
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
@@ -93,7 +121,10 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
                 ),
                 child: Text(
                   "Next",
-                  style: TextStyle(fontSize: 18.0, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 18.0,
+                    color: Color(0xFFFFFFFF),
+                  ),
                 ),
               ),
             ],

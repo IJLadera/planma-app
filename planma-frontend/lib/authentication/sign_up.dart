@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/user_preferences/sleep_wake.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -63,7 +64,7 @@ class _SignUpState extends State<SignUp> {
         );
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => LogIn()),
+          MaterialPageRoute(builder: (context) => SleepWakeSetupScreen()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

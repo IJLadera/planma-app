@@ -60,23 +60,35 @@ class CustomWidgets {
 
   static Widget buildDateTile(
     String label,
-    DateTime? date,
+    TextEditingController controller,
     BuildContext context,
-    Function(BuildContext, DateTime?) selectDate, {
-    TextStyle? textStyle,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: ListTile(
-        title: Text(
-          '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
-          style: textStyle ?? GoogleFonts.openSans(fontSize: 16),
+    bool someFlag,
+    Function(BuildContext, TextEditingController) selectDate,
+  ) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => selectDate(context, controller), // Trigger the date picker
+        child: AbsorbPointer(
+          // Prevent editing directly in the text field
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: ListTile(
+              title: TextFormField(
+                controller: controller,
+                readOnly: true, // To prevent manual input
+                style: TextStyle(fontSize: 14, color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: label,
+                  hintText: 'Select Date',
+                  suffixIcon: const Icon(Icons.calendar_today),
+                ),
+              ),
+            ),
+          ),
         ),
-        trailing: const Icon(Icons.calendar_today),
-        onTap: () => selectDate(context, date),
       ),
     );
   }
@@ -117,7 +129,7 @@ class CustomWidgets {
     Color labelColor = Colors.black,
     Color textColor = Colors.black,
     double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    EdgeInsets contentPadding = const EdgeInsets.all(12),
     double fontSize = 14.0,
     TextStyle? textStyle,
   }) {
@@ -126,6 +138,7 @@ class CustomWidgets {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
+      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -164,6 +177,48 @@ class CustomWidgets {
             iconSize: 24,
           ),
         ),
+      ),
+    );
+  }
+
+  static Widget buildYearPickerButton({
+    required BuildContext context,
+    required String hint,
+    required bool isStartYear,
+    required String? selectedStartYear,
+    required String? selectedEndYear,
+    required Function(BuildContext, bool)
+        onTap, // Keeps the onTap function similar to old code
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () =>
+            onTap(context, isStartYear), // Triggers the same action as before
+        child: buildContainer(
+          Text(
+            isStartYear
+                ? selectedStartYear ?? hint
+                : selectedEndYear ?? hint, // Displays the selected year or hint
+            style: GoogleFonts.openSans(fontSize: 16),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget buildContainer(Widget child) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          child,
+          const Spacer(),
+          const Icon(Icons.calendar_today),
+        ],
       ),
     );
   }
@@ -248,7 +303,7 @@ class CustomWidgets {
       case 'Attended':
         return Color(0xFF32C652);
       default:
-        return Colors.grey; // Default for unselected
+        return Colors.grey;
     }
   }
 }
