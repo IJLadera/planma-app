@@ -5,6 +5,7 @@ import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/authentication/splash_screen.dart';
 import 'package:planma_app/core/dashboard.dart';
+import 'package:planma_app/user_preferences/sleep_wake.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/Providers/time_provider.dart';
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => TaskProvider()),
       ],
       child: MaterialApp(
-          // home: Dashboard(),
+          // home: SleepWakeSetupScreen(),
           debugShowCheckedModeBanner: false,
           home: SplashScreen(),
           theme: ThemeData(

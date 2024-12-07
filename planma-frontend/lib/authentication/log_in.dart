@@ -105,7 +105,7 @@ class _LogInState extends State<LogIn> {
                         children: [
                           _buildTextFormField(
                             controller: emailController,
-                            labelText: 'Username',
+                            labelText: 'Email',
                             icon: Icons.person,
                             validator: (value) => value!.isEmpty
                                 ? 'Please enter your username'

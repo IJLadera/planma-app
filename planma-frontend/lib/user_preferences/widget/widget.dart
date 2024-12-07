@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 Widget buildTimePickerField({
   required BuildContext context,
@@ -19,11 +20,13 @@ Widget buildTimePickerField({
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 16.0, color: Colors.black),
+            style:
+                GoogleFonts.openSans(fontSize: 16.0, color: Color(0xFF173F70)),
           ),
           Text(
             time.format(context),
-            style: TextStyle(fontSize: 16.0, color: Colors.black),
+            style:
+                GoogleFonts.openSans(fontSize: 16.0, color: Color(0xFF173F70)),
           ),
         ],
       ),

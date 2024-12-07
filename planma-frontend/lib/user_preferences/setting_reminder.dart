@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/user_preferences/setting_goal.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SleepWakeReminderScreen extends StatefulWidget {
   const SleepWakeReminderScreen({super.key});
@@ -20,6 +23,29 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
     "03 h : 00 m",
   ];
 
+  Future<void> _saveReminderToDatabase(String time) async {
+    final url = Uri.parse("http://<your-backend-url>/api/time-reminder/");
+    
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "user_id": 1, // Replace with the actual user ID from your app
+          "reminder_time": time,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        print("Reminder saved successfully!");
+      } else {
+        print("Failed to save reminder: ${response.body}");
+      }
+    } catch (e) {
+      print("Error saving reminder: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,18 +60,17 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
               Text(
                 "Let’s get you all\nset up!",
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: GoogleFonts.openSans(
                   fontSize: 30.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
-
               SizedBox(height: 16.0),
               Text(
                 "When should we give you a heads-up\nbefore each task?",
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: GoogleFonts.openSans(
                   fontSize: 16.0,
                   color: Colors.grey[700],
                 ),
@@ -85,7 +110,11 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
 
               // Next Button
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  // Save reminder to database
+                  await _saveReminderToDatabase(_selectedTime);
+
+                  // Navigate to the next screen
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -95,14 +124,17 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   padding:
-                      EdgeInsets.symmetric(horizontal: 40.0, vertical: 12.0),
+                      EdgeInsets.symmetric(horizontal: 50.0, vertical: 18.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
                 child: Text(
                   "Next",
-                  style: TextStyle(fontSize: 18.0, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 18.0,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],

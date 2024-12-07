@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/widget/widget.dart'; // Assuming this contains CustomWidgets.
 import 'package:provider/provider.dart';
@@ -77,14 +78,15 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
 
     if (picked != null) {
       setState(() {
+        final formattedDate = DateFormat('dd MMMM yyyy')
+            .format(picked); // Format date as '07 December 2024'
+
         if (isStartDate) {
           startDate = picked;
-          startDateController.text =
-              "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+          startDateController.text = formattedDate; // Set formatted start date
         } else {
           endDate = picked;
-          endDateController.text =
-              "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+          endDateController.text = formattedDate; // Set formatted end date
         }
       });
     }
@@ -136,11 +138,12 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Add Semester',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white,
+          style: GoogleFonts.openSans(
+            fontSize: 20,
+            color: Color(0xFF173F70),
+            fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
@@ -148,8 +151,6 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
       ),
       body: Padding(
         padding: const EdgeInsets.all(30.0),
@@ -161,33 +162,93 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
             const SizedBox(height: 16),
             Row(
               children: [
-                _buildYearPickerButton(context, 'Start Year', true),
-                const SizedBox(width: 16),
-                _buildYearPickerButton(context, 'End Year', false),
+                // Start Year Button
+                CustomWidgets.buildYearPickerButton(
+                  context: context,
+                  hint: "Start Year", // Hint for start year
+                  isStartYear: true, // Set to true for start year
+                  selectedStartYear:
+                      _selectedStartYear, // Selected start year (can be null if not selected)
+                  selectedEndYear:
+                      null, // Don't pass the end year here, it's only for start year
+                  onTap: (BuildContext context, bool isStartYear) {
+                    // Trigger the year picker for the start year
+                    _showYearPicker(context, isStartYear);
+                  },
+                ),
+                const SizedBox(width: 12),
+                // End Year Button
+                CustomWidgets.buildYearPickerButton(
+                  context: context,
+                  hint: "End Year", // Hint for end year
+                  isStartYear: false, // Set to false for end year
+                  selectedStartYear: null, // Don't pass the start year here
+                  selectedEndYear:
+                      _selectedEndYear, // Selected end year (can be null if not selected)
+                  onTap: (BuildContext context, bool isStartYear) {
+                    // Trigger the year picker for the end year
+                    _showYearPicker(context, isStartYear);
+                  },
+                )
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildTitle('Year Level'),
-            _buildDropdown(
-                'Choose Year Level', _selectedYearLevel, _yearLevelOptions,
-                (value) {
-              setState(() => _selectedYearLevel = value);
-            }),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            CustomWidgets.buildDropdownField(
+              label: 'Choose Year Level',
+              value: _selectedYearLevel,
+              items: _yearLevelOptions,
+              onChanged: (value) {
+                setState(() => _selectedYearLevel = value);
+              },
+              backgroundColor: const Color(0xFFF5F5F5),
+              labelColor: Colors.black,
+              textColor: Colors.black,
+              borderRadius: 30.0,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              fontSize: 14.0,
+            ),
+            const SizedBox(height: 12),
             _buildTitle('Semester'),
-            _buildDropdown(
-                'Choose Semester', _selectedSemester, _semesterOptions,
-                (value) {
-              setState(() => _selectedSemester = value);
-            }),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            CustomWidgets.buildDropdownField(
+              label: 'Choose Semester',
+              value: _selectedSemester,
+              items: _semesterOptions,
+              onChanged: (value) {
+                setState(() => _selectedSemester = value);
+              },
+              backgroundColor: const Color(0xFFF5F5F5),
+              labelColor: Colors.black,
+              textColor: Colors.black,
+              borderRadius: 30.0,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              fontSize: 14.0,
+            ),
+            const SizedBox(height: 12),
             _buildTitle('Semester Dates'),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             Row(
               children: [
-                _buildDateField('Start Date', startDateController, true),
-                const SizedBox(width: 16),
-                _buildDateField('End Date', endDateController, false),
+                CustomWidgets.buildDateTile(
+                  'Start Date',
+                  startDateController,
+                  context,
+                  true, // Pass true for start date
+                  (BuildContext context, TextEditingController controller) {
+                    _selectDate(context, true); // Pass true for start date
+                  },
+                ),
+                CustomWidgets.buildDateTile(
+                  'End Date',
+                  endDateController,
+                  context,
+                  false, // Pass false for end date
+                  (BuildContext context, TextEditingController controller) {
+                    _selectDate(context, false); // Pass false for end date
+                  },
+                )
               ],
             ),
             const Spacer(),
@@ -213,74 +274,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
     return Text(
       title,
       style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _buildYearPickerButton(
-      BuildContext context, String hint, bool isStartYear) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _showYearPicker(context, isStartYear),
-        child: _buildContainer(
-          Text(
-            isStartYear ? _selectedStartYear ?? hint : _selectedEndYear ?? hint,
-            style: GoogleFonts.openSans(fontSize: 16),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateField(
-      String hint, TextEditingController controller, bool isStartDate) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _selectDate(context, isStartDate),
-        child: AbsorbPointer(
-          child: TextFormField(
-            controller: controller,
-            style: const TextStyle(color: Colors.black),
-            decoration: InputDecoration(
-                hintText: hint, suffixIcon: const Icon(Icons.calendar_today)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdown(String hint, String? value, List<String> items,
-      ValueChanged<String?> onChanged) {
-    return CustomWidgets.buildDropdownField(
-      label: hint,
-      value: value,
-      items: items,
-      onChanged: onChanged,
-      backgroundColor: const Color(0xFFF5F5F5),
-      labelColor: Colors.black,
-      textColor: Colors.black,
-      borderRadius: 30.0,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      fontSize: 14.0,
-    );
-  }
-
-  Widget _buildContainer(Widget child) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          child,
-          const Spacer(),
-          const Icon(Icons.calendar_today),
-        ],
-      ),
+          fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
     );
   }
 }

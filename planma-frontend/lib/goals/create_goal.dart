@@ -135,17 +135,24 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  const SizedBox(height: 16),
+                  _buildTitle(
+                    'Goal Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                     _goalCodeController,
                     'Goal Name',
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Description',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                     _descriptionController,
                     'Description',
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Container(
                     margin: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8.0), // Add desired margin
@@ -156,7 +163,8 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                           'Target Duration:',
                           style: GoogleFonts.openSans(
                             fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF173F70),
                           ),
                         ),
                         Row(
@@ -205,7 +213,11 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Goal Type',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Goal Type',
                     value: _selectedGoalType,
@@ -213,7 +225,11 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                     onChanged: (String? value) =>
                         setState(() => _selectedGoalType = value),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Select Semester',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Semester',
                     value: _selectedSemester,
@@ -256,4 +272,22 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
       ),
     );
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }

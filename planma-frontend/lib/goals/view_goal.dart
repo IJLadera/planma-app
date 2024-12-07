@@ -49,7 +49,7 @@ class ViewGoal extends StatelessWidget {
         title: Text(
           'Goal',
           style: GoogleFonts.openSans(
-            color: Colors.black,
+            color: Color(0xFF173F70),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -105,7 +105,7 @@ class ViewGoal extends StatelessWidget {
                   child: Text(
                     'No goals found',
                     style: GoogleFonts.openSans(
-                      color: Colors.grey,
+                      color: Color(0xFF173F70),
                     ),
                   ),
                 ),
