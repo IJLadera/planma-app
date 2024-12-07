@@ -129,6 +129,34 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
+  // Delete a task
+  Future<void> deleteTask(int taskId) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}tasks/$taskId/");
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 204) {
+        _tasks
+            .removeWhere((schedule) => schedule.taskId == taskId);
+        notifyListeners();
+      } else {
+        throw Exception(
+            'Failed to delete task. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      rethrow;
+    }    
+  }
+
   // Utility method to format TimeOfDay to HH:mm:ss
   String _formatTimeOfDay(TimeOfDay time) {
     final now = DateTime.now();

@@ -171,35 +171,17 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SubjectDetailRow(
-                    title: 'Code:',
-                    detail: schedule.subjectCode,
-                  ),
+                  SubjectDetailRow(title: 'Code:', detail: schedule.subjectCode),
                   const Divider(),
-                  SubjectDetailRow(
-                    title: 'Title:',
-                    detail: schedule.subjectTitle,
-                  ),
+                  SubjectDetailRow(title: 'Title:', detail: schedule.subjectTitle),
                   const Divider(),
-                  SubjectDetailRow(
-                    title: 'Semester:',
-                    detail: semesterDetails,
-                  ),
+                  SubjectDetailRow(title: 'Semester:', detail: semesterDetails),
                   const Divider(),
-                  SubjectDetailRow(
-                    title: 'Day:',
-                    detail: schedule.dayOfWeek,
-                  ),
+                  SubjectDetailRow(title: 'Day:', detail: schedule.dayOfWeek),
                   const Divider(),
-                  SubjectDetailRow(
-                    title: 'Time:',
-                    detail: '$startTime - $endTime',
-                  ),
+                  SubjectDetailRow(title: 'Time:', detail: '$startTime - $endTime'),
                   const Divider(),
-                  SubjectDetailRow(
-                    title: 'Room:',
-                    detail: schedule.room.isNotEmpty ? schedule.room : 'N/A',
-                  ),
+                  SubjectDetailRow(title: 'Room:', detail: schedule.room.isNotEmpty ? schedule.room : 'N/A'),
                   const Divider(),
                   const SizedBox(height: 20),
                   CustomWidgets.dropwDownForAttendance(

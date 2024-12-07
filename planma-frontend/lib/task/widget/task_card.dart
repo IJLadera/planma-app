@@ -1,51 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:planma_app/models/tasks_model.dart';
 import 'package:planma_app/timer/countdown/countdown_timer.dart'; // Import TimerPage
 import 'package:planma_app/task/view_task.dart'; // Import ViewTask
 import 'package:google_fonts/google_fonts.dart';
 
-class TaskCard extends StatefulWidget {
-  final String taskName;
-  final String subject;
-  final String duration;
-  final String description;
-  final String date;
-  final String time;
-  final String deadline;
+class TaskCard extends StatelessWidget {
+  final bool isByDate;
+  final Task task;
 
   const TaskCard({
     super.key,
-    required this.taskName,
-    required this.subject,
-    required this.duration,
-    required this.description,
-    required this.date,
-    required this.time,
-    required this.deadline,
+    required this.isByDate,
+    required this.task,
   });
 
-  @override
-  _TaskCardState createState() => _TaskCardState();
-}
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
 
-class _TaskCardState extends State<TaskCard> {
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final startTime = _formatTimeForDisplay(task.scheduledStartTime);
+    final endTime = _formatTimeForDisplay(task.scheduledEndTime);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: 8, horizontal: 16), // Add padding around the whole list
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Add padding around the whole list
       child: InkWell(
         onTap: () {
           // Navigate to ViewTask with dynamic data
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ViewTask(
-                taskName: widget.taskName,
-                description: widget.description,
-                date: widget.date,
-                time: widget.time,
-                deadline: widget.deadline,
-                subject: widget.subject,
+              builder: (context) => TaskDetailScreen(
+                task: task
               ),
             ),
           );
@@ -89,7 +91,7 @@ class _TaskCardState extends State<TaskCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.taskName,
+                        task.taskName,
                         style: GoogleFonts.openSans(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -97,7 +99,7 @@ class _TaskCardState extends State<TaskCard> {
                         ),
                       ),
                       Text(
-                        '${widget.subject} (${widget.duration})',
+                        '${task.subjectCode} ($startTime - $endTime)',
                         style: GoogleFonts.openSans(
                           fontSize: 14,
                           color: Color(0xFF173F70),
