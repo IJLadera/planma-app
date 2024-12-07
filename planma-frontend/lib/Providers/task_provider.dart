@@ -61,6 +61,8 @@ class TaskProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
+    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedDeadline = DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
 
     bool isConflict = _tasks.any((schedule) =>
       schedule.scheduledDate == scheduledDate &&
@@ -97,16 +99,15 @@ class TaskProvider with ChangeNotifier {
         body: json.encode({
           'task_name': taskName,
           'task_desc': taskDesc,
-          'scheduled_date': scheduledDate,
+          'scheduled_date': formattedScheduledDate,
           'scheduled_start_time': formattedStartTime,
           'scheduled_end_time': formattedEndTime,
-          'deadline': deadline,
+          'deadline': formattedDeadline,
           'subject_code': subjectCode,
         }),
       );
 
       if (response.statusCode == 201) {
-        print("Task added successfully.");
         final newSchedule = Task.fromJson(json.decode(response.body));
         _tasks.add(newSchedule);
         notifyListeners();

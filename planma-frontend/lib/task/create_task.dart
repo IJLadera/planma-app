@@ -18,8 +18,6 @@ class _CreateTaskState extends State<AddTaskScreen> {
   final _descriptionController = TextEditingController();
   final _startTimeController = TextEditingController();
   final _endTimeController = TextEditingController();
-  final _scheduledDateController = TextEditingController();
-  final _deadlineController = TextEditingController();
 
   DateTime? _scheduledDate;
   DateTime? _deadline;

@@ -27,12 +27,12 @@ class Task {
     taskId: json['task_id'] as int?, // Optional
     taskName: json['task_name'] ?? 'N/A', // Default if null
     taskDescription: json['task_desc'] ?? 'N/A', // Default if null
-    scheduledDate: json['scheduled_date'] ?? 0, // Default to 0 if null
+    scheduledDate: DateTime.parse(json['scheduled_date']),
     scheduledStartTime: json['scheduled_start_time'] ?? '00:00',
     scheduledEndTime: json['scheduled_end_time'] ?? '00:00', // Default time
-    deadline: json['deadline'] ?? 0,
+    deadline: DateTime.parse(json['deadline']),
     status: json['status'] ?? 'Pending',
-    subjectCode: json['subject_code'],
+    subjectCode: json['subject_code']['subject_code'] ?? 'N/A',
   );
 }
 
@@ -43,10 +43,10 @@ class Task {
       'task_id': taskId,
       'task_name': taskName,
       'task_desc': taskDescription,
-      'scheduled_date': scheduledDate,
+      'scheduled_date': scheduledDate.toIso8601String(),
       'scheduled_start_time': scheduledStartTime,
       'scheduled_end_time': scheduledEndTime,
-      'deadline': deadline,
+      'deadline': deadline.toIso8601String(),
       'status': status,
       'subject_code': subjectCode,
     };
