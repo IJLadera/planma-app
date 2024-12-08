@@ -97,8 +97,54 @@ class _StopwatchPageState extends State<StopwatchPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 20),
+                  GestureDetector(
+                    onTap: () {
+                      timeProvider.saveFinalTime();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Time saved: ${_formatTime(timeProvider.elapsedTime)}",
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.green,
+                      ),
+                      child: const Icon(
+                        Icons.save,
+                        size: 35,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ],
-              )
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                "Recorded Times:",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: timeProvider.recordedTimes.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(
+                        _formatTime(timeProvider.recordedTimes[index]),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
