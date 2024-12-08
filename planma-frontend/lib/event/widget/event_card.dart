@@ -1,43 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
+import 'package:intl/intl.dart';
 import 'package:planma_app/event/view_event.dart';
+import 'package:planma_app/models/events_model.dart';
 
 class EventCard extends StatelessWidget {
-  final String eventName;
-  final String timePeriod;
-  final String description;
-  final String location;
-  final String date;
-  final String type;
+  final Event event;
 
   const EventCard({
     super.key,
-    required this.eventName,
-    required this.timePeriod,
-    required this.description,
-    required this.location,
-    required this.date,
-    required this.type,
+    required this.event,
   });
+
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final startTime = _formatTimeForDisplay(event.scheduledStartTime);
+    final endTime = _formatTimeForDisplay(event.scheduledEndTime);
+
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: InkWell(
         onTap: () {
           // Navigate to the ViewEvent screen when tapped
+          print("Navigating to EventDetailScreen with eventId: ${event.eventId}");
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ViewEvent(
-                eventName: eventName,
-                description: description,
-                location: location,
-                date: date,
-                timePeriod: timePeriod,
-                type: type,
-              ),
+              builder: (context) => EventDetailScreen(event: event)
             ),
           );
         },
@@ -51,7 +59,7 @@ class EventCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                eventName,
+                event.eventName,
                 style: GoogleFonts.openSans(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -60,7 +68,7 @@ class EventCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                timePeriod,
+                '$startTime - $endTime',
                 style: GoogleFonts.openSans(
                   fontSize: 14,
                   color: Color(0xFF173F70),

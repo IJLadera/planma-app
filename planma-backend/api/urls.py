@@ -7,6 +7,9 @@ router.register(r'class-schedules', ClassScheduleViewSet, basename='classschedul
 router.register(r'subjects', SubjectViewSet, basename='subject')
 router.register(r'semesters', SemesterViewSet, basename='semester')
 router.register(r'tasks', TaskViewSet, basename='task')
+router.register(r'events', EventViewSet, basename='event')
+
+
 
 urlpatterns = [
     path ('djoser/', include ('djoser.urls')),
@@ -15,10 +18,10 @@ urlpatterns = [
     path('', include(router.urls)),
     #events
     path('createevents/', CustomEventListCreateView.as_view(), name='event-list-create'),
-    path('events/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
-    path('deleteevent/<int:pk>/', CustomEventDeleteView.as_view(), name='event-delete'),
-    path('updateevent/<int:pk>/',CustomEventUpdateView.as_view(), name='updateevent' ),
-    #attended event
+    # path('events/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
+    # path('deleteevent/<int:pk>/', CustomEventDeleteView.as_view(), name='event-delete'),
+    # path('updateevent/<int:pk>/',CustomEventUpdateView.as_view(), name='updateevent' ),
+    # attended event
     path('createattevents/', AttendedEventListCreateView.as_view(), name='attevent-list-create'),
     path('attevents/<uuid:pk>/', AttendedEventDetailView.as_view(), name='attevent-detail'),
     path('deleteattevents/<int:pk>/', AttendedEventDeleteView.as_view(), name='attevent-delete'),
