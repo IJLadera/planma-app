@@ -24,7 +24,7 @@ class EventDetailRow extends StatelessWidget {
               style: GoogleFonts.openSans(
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF173F70),
-                fontSize: 16,
+                fontSize: 14,
               ),
             ),
           ),

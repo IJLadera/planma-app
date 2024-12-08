@@ -21,7 +21,7 @@ class UserPreferencesProvider with ChangeNotifier {
   // Fetch User Preferences
   Future<void> fetchUserPreferences(String userId) async {
     await _initAccessToken();
-    final url = Uri.parse("${baseUrl}userpref/$userId/");
+    final url = Uri.parse("${baseUrl}userprefs/");
 
     try {
       final response = await http.get(
@@ -47,15 +47,14 @@ class UserPreferencesProvider with ChangeNotifier {
   Future<void> saveUserPreferences({
     required String usualSleepTime,
     required String usualWakeTime,
-    required bool notificationEnabled,
     required String reminderOffsetTime,
     required String studentId,
     int? prefId,
   }) async {
     await _initAccessToken();
     final url = prefId != null
-        ? Uri.parse("${baseUrl}updateuserpref/$prefId/")
-        : Uri.parse("${baseUrl}createuserpref/");
+        ? Uri.parse("${baseUrl}userprefs/$prefId/")  // Update URL
+        : Uri.parse("${baseUrl}userprefs/");  // Create URL
 
     try {
       final response = await http.post(
@@ -67,7 +66,6 @@ class UserPreferencesProvider with ChangeNotifier {
         body: json.encode({
           'usual_sleep_time': usualSleepTime,
           'usual_wake_time': usualWakeTime,
-          'notification_enabled': notificationEnabled,
           'reminder_offset_time': reminderOffsetTime,
           'student_id': studentId,
         }),
@@ -88,7 +86,7 @@ class UserPreferencesProvider with ChangeNotifier {
   // Delete User Preferences
   Future<void> deleteUserPreferences(int prefId) async {
     await _initAccessToken();
-    final url = Uri.parse("${baseUrl}deleteuserpref/$prefId/");
+    final url = Uri.parse("${baseUrl}userprefs/$prefId/");  // Adjust URL to reflect changes
 
     try {
       final response = await http.delete(

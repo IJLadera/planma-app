@@ -155,13 +155,15 @@ class UserPref(models.Model):
     # User Pref Details
     usual_sleep_time = models.TimeField()
     usual_wake_time = models.TimeField()
-    notification_enabled = models.BooleanField() # Struggling in determining whether this should be a time field or a duration field
     reminder_offset_time = models.TimeField()
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
         related_name='userpref', db_column='student_id'
     )
+
+    def __str__(self):
+        return f"User Preferences for {self.student_id.username}"
 
 #Semester
 class CustomSemester(models.Model):

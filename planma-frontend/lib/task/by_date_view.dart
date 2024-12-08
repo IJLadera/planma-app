@@ -14,7 +14,7 @@ class ByDateView extends StatelessWidget {
       itemBuilder: (context, index) {
         final task = tasksView[index];
         return SizedBox(
-          // height: 120,
+          height: 120,
           child: TaskCard(isByDate: true, task: task),
         );
       },

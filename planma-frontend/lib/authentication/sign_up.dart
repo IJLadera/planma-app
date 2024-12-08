@@ -62,12 +62,16 @@ class _SignUpState extends State<SignUp> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Account created successfully!")),
         );
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => 
-        //   SleepWakeSetupScreen()
-        //   ),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>
+          SleepWakeSetupScreen(
+            studentId: response["studentId"],
+            usualSleepTime: '23:00',
+            usualWakeTime: '07:00',
+          )
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(response?["error"] ?? "Unknown error")),
@@ -170,8 +174,8 @@ class _SignUpState extends State<SignUp> {
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off),
+                                ? Icons.visibility_off
+                                : Icons.visibility),
                             onPressed: () {
                               setState(() {
                                 obscurePassword = !obscurePassword;
@@ -195,8 +199,8 @@ class _SignUpState extends State<SignUp> {
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(obscureConfirmPassword
-                                ? Icons.visibility
-                                : Icons.visibility_off),
+                                ? Icons.visibility_off
+                                : Icons.visibility),
                             onPressed: () {
                               setState(() {
                                 obscureConfirmPassword =
