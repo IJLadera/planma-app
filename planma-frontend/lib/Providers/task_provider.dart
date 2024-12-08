@@ -129,6 +129,104 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
+  // Edit a task
+  Future<void> updateTask({
+    required int taskId,
+    required String taskName,
+    required String taskDesc,
+    required DateTime scheduledDate,
+    required TimeOfDay startTime,
+    required TimeOfDay endTime,
+    required DateTime deadline,
+    required String subjectCode,
+  }) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    String formattedStartTime = _formatTimeOfDay(startTime);
+    String formattedEndTime = _formatTimeOfDay(endTime);
+    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedDeadline = DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+
+    bool isConflict = _tasks.any((schedule) =>
+      schedule.taskId != taskId &&
+      schedule.scheduledDate == scheduledDate &&
+      schedule.scheduledStartTime == formattedStartTime &&
+      schedule.scheduledEndTime == formattedEndTime);
+
+    if (isConflict) {
+      throw Exception(
+          'Task schedule conflict detected. Please modify your entry.');
+    }
+
+    bool isDuplicate = _tasks.any((schedule) =>
+      schedule.taskName == taskName &&
+      schedule.taskDescription == taskDesc &&
+      schedule.scheduledDate == scheduledDate &&
+      schedule.scheduledStartTime == formattedStartTime &&
+      schedule.scheduledEndTime == formattedEndTime &&
+      schedule.deadline == deadline &&
+      schedule.subjectCode == subjectCode);
+
+    if (isDuplicate) {
+      throw Exception(
+          'Duplicate task entry detected locally. Please modify your entry.');
+    }
+
+    final url = Uri.parse("${baseUrl}tasks/$taskId/");
+
+    print('FROM PROVIDER:');
+    print('Task Name: $taskName');
+    print('Task Description: $taskDesc');
+    print('Scheduled Date: $formattedScheduledDate');
+    print('Start Time: $formattedStartTime');
+    print('End Time: $formattedEndTime');
+    print('Deadline: $formattedDeadline');
+    print('Subject: $subjectCode');
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'task_name': taskName,
+          'task_desc': taskDesc,
+          'scheduled_date': formattedScheduledDate,
+          'scheduled_start_time': formattedStartTime,
+          'scheduled_end_time': formattedEndTime,
+          'deadline': formattedDeadline,
+          'subject_code': subjectCode,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final updatedSchedule = Task.fromJson(json.decode(response.body));
+        final index = _tasks
+            .indexWhere((schedule) => schedule.taskId == taskId);
+        if (index != -1) {
+          _tasks[index] = updatedSchedule;
+          notifyListeners();
+        }
+      } else if (response.statusCode == 400) {
+        // Handle duplicate check from the backend
+        final responseBody = json.decode(response.body);
+        if (responseBody['error'] == 'Duplicate task entry detected.') {
+          throw Exception('Duplicate task entry detected on the server.');
+        } else {
+          throw Exception('Error updating task: ${response.body}');
+        }
+      } else {
+        throw Exception('Failed to update task: ${response.body}');
+      }
+    } catch (error) {
+      print('Update task error: $error');
+      throw Exception('Error updating task: $error');
+    }
+  }
+
   // Delete a task
   Future<void> deleteTask(int taskId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();

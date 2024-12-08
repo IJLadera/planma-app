@@ -1,50 +1,216 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
+import 'package:planma_app/models/tasks_model.dart';
 import 'package:planma_app/task/widget/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class EditTask extends StatefulWidget {
-  const EditTask({super.key});
+  final Task task;
+  
+  const EditTask({super.key, required this.task});
 
   @override
   _EditTask createState() => _EditTask();
 }
 
 class _EditTask extends State<EditTask> {
-  final TextEditingController _taskNameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final _startTimeController = TextEditingController();
-  final _endTimeController = TextEditingController();
+  late TextEditingController _taskNameController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _startTimeController;
+  late TextEditingController _endTimeController;
 
   DateTime? _scheduledDate;
   DateTime? _deadline;
   String? _subject;
-  final List<String> _subjectsOptions = ['Math', 'Science', 'English'];
 
-  void _selectDate(BuildContext context, DateTime? initialDate) async {
-    final pickedDate = await showDatePicker(
+  // Method to select date
+  Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
+    final picked = await showDatePicker(
       context: context,
-      initialDate: initialDate ?? DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (pickedDate != null) {
+    if (picked != null) {
       setState(() {
-        _scheduledDate = pickedDate;
+        if (isScheduledDate) {
+          _scheduledDate = picked;
+        } else {
+          _deadline = picked;
+        }
       });
     }
   }
 
+  // Method to select time
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: TimeOfDay(hour: 12, minute: 0),
     );
     if (picked != null) {
       setState(() {
         controller.text = picked.format(context);
       });
     }
+  }
+
+  TimeOfDay? _stringToTimeOfDay(String timeString) {
+    try {
+      final format = RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
+      final match = format.firstMatch(timeString.trim());
+
+      if (match == null) {
+        throw FormatException('Invalid time format: $timeString');
+      }
+
+      final hour = int.parse(match.group(1)!);
+      final minute = int.parse(match.group(2)!);
+      final period = match.group(3)!.toLowerCase();
+
+      final adjustedHour = (period == 'pm' && hour != 12) ? hour + 12 : (hour == 12 && period == 'am' ? 0 : hour);
+
+      return TimeOfDay(hour: adjustedHour, minute: minute);
+    } catch (e) {
+      print('Error parsing time: $e');
+      return null;
+    }
+  }
+
+  /// Converts a string like "HH:mm:ss" to "h:mm a" (for display)
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime); // Requires intl package
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Pre-fill fields with current task details
+    _taskNameController = TextEditingController(text: widget.task.taskName);
+    _descriptionController = TextEditingController(text: widget.task.taskDescription);
+    _startTimeController = TextEditingController(text: _formatTimeForDisplay(widget.task.scheduledStartTime));
+    _endTimeController = TextEditingController(text: _formatTimeForDisplay(widget.task.scheduledEndTime));
+
+    print(_formatTimeForDisplay(widget.task.scheduledStartTime));
+    print(_formatTimeForDisplay(widget.task.scheduledEndTime));
+
+    _scheduledDate = widget.task.scheduledDate;
+    _deadline = widget.task.deadline;
+    _subject = widget.task.subjectCode;
+
+    // Fetch semesters and subjects when the screen loads
+    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+    final classScheduleProvider = Provider.of<ClassScheduleProvider>(context, listen: false);
+
+    semesterProvider.fetchSemesters().then((_) {
+      // Fetch subjects based on the active semester (determined in ClassScheduleProvider)
+      classScheduleProvider.fetchSubjects(semesterProvider).then((_) {
+        print("Subjects successfully fetched for the active semester.");
+      }).catchError((error) {
+        print("Error fetching subjects 1: $error");
+      });
+    }).catchError((error) {
+      print("Error fetching semesters: $error");
+    });
+  }
+
+  void _editTask(BuildContext context) async {
+    final provider = Provider.of<TaskProvider>(context, listen: false);
+
+    String taskName = _taskNameController.text.trim();
+    String taskDescription = _descriptionController.text.trim();
+    String startTimeString = _startTimeController.text.trim();
+    String endTimeString = _endTimeController.text.trim();
+
+    print(startTimeString);
+    print(endTimeString);
+
+    // Convert String  to TimeOfDay
+    final startTime = _stringToTimeOfDay(startTimeString);
+    final endTime = _stringToTimeOfDay(endTimeString);
+
+    print('formatted: $startTime');
+    print('formatted: $endTime');
+
+    if (taskName.isEmpty || 
+        taskDescription.isEmpty ||
+        _scheduledDate == null ||
+        startTimeString.isEmpty ||
+        endTimeString.isEmpty ||
+        _deadline == null ||
+        _subject == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields!')),
+      );
+      return;
+    }
+
+    if (!_isValidTimeRange(startTime!, endTime!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Start Time must be before End Time.')),
+      );
+      return;
+    }
+
+    print('FROM UI:');
+    print('Task Name: $taskName');
+    print('Task Description: $taskDescription');
+    print('Scheduled Date: $_scheduledDate');
+    print('Start Time: $startTime');
+    print('End Time: $endTime');
+    print('Deadline: $_deadline');
+    print('Subject: $_subject');
+
+    try {
+      print('Starting to update task...');
+      await provider.updateTask(
+        taskId: widget.task.taskId!, 
+        taskName: taskName, 
+        taskDesc: taskDescription, 
+        scheduledDate: _scheduledDate!, 
+        startTime: startTime, 
+        endTime: endTime, 
+        deadline: _deadline!, 
+        subjectCode: _subject!
+      );
+      print('Task updated successfully!');
+
+      // After validation and adding logic
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Task updated successfully!')),
+      );
+
+      Navigator.pop(context);      
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update task: $error')),
+      );
+    }
+  }
+
+  bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
+  return startTime.hour < endTime.hour ||
+      (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
 
   @override
@@ -91,7 +257,7 @@ class _EditTask extends State<EditTask> {
                     _scheduledDate,
                     context,
                     true,
-                    _selectDate,
+                    (context, date) => _selectDate(context, true),
                   ),
                   const SizedBox(height: 12),
                   _buildTitle('Start and End Time'),
@@ -126,7 +292,7 @@ class _EditTask extends State<EditTask> {
                     _deadline,
                     context,
                     false,
-                    _selectDate,
+                    (context, date) => _selectDate(context, false),
                   ),
                   const SizedBox(height: 12),
                   _buildTitle('Choose Subject'),
@@ -134,7 +300,7 @@ class _EditTask extends State<EditTask> {
                   CustomWidgets.buildDropdownField(
                     label: 'Choose Subject',
                     value: _subject,
-                    items: _subjectsOptions,
+                    items: Provider.of<ClassScheduleProvider>(context).subjectCodes,
                     onChanged: (String? value) {
                       setState(() {
                         _subject = value;
@@ -155,9 +321,7 @@ class _EditTask extends State<EditTask> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             child: ElevatedButton(
-              onPressed: () {
-                // Task editing action here
-              },
+              onPressed: () => _editTask(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
@@ -178,6 +342,18 @@ class _EditTask extends State<EditTask> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers and clean up listeners
+    _taskNameController.dispose();
+    _descriptionController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+
+    // Always call super.dispose()
+    super.dispose();
   }
 }
 
