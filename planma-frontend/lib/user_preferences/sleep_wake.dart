@@ -1,9 +1,9 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/user_preferences/setting_reminder.dart';
 import 'package:planma_app/user_preferences/widget/widget.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 // Ensure this code snippet is used alongside other fixed parts like buildTimePickerField
 
@@ -27,6 +27,14 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
   TimeOfDay sleepTime = TimeOfDay(hour: 23, minute: 0);
   TimeOfDay wakeTime = TimeOfDay(hour: 7, minute: 0);
 
+  String timeToString(TimeOfDay time) {
+    final hours =
+        time.hour.toString().padLeft(2, '0'); // Ensures two-digit hour
+    final minutes =
+        time.minute.toString().padLeft(2, '0'); // Ensures two-digit minute
+    return '$hours:$minutes'; // Combine to "HH:mm"
+  }
+
   Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -43,31 +51,25 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
     }
   }
 
-  Future<void> _saveReminderToDatabase() async {
-    final url = Uri.parse("http://example.com/api/time-reminder/");
+  // Save user preferences via the UserPreferencesProvider
+  Future<void> _savePreferences() async {
+    final userPreferencesProvider =
+        Provider.of<UserPreferencesProvider>(context, listen: false);
 
+    // Use the provider's save method
     try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "user_id": widget.studentId,
-          "reminder_time": DateTime.now().toIso8601String(),
-          "usual_sleep_time": "${sleepTime.hour}:${sleepTime.minute}",
-          "usual_wake_time": "${wakeTime.hour}:${wakeTime.minute}",
-        }),
+      await userPreferencesProvider.saveUserPreferences(
+        usualSleepTime: "${sleepTime.hour}:${sleepTime.minute}",
+        usualWakeTime: "${wakeTime.hour}:${wakeTime.minute}",
+        reminderOffsetTime: "", 
+        studentId: widget.studentId.toString(), 
       );
-
-      if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Reminder saved successfully!")),
-        );
-      } else {
-        throw Exception("Failed to save reminder: ${response.body}");
-      }
-    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error saving reminder: $e")),
+        SnackBar(content: Text("Preferences saved successfully!")),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error saving preferences: $error")),
       );
     }
   }

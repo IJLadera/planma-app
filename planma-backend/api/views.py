@@ -343,19 +343,63 @@ class LogActivityUpdateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #User Preferences
-class UserPrefListCreateView(APIView):
+class UserPrefListCreateView(viewsets.ModelViewSet):
+    queryset = UserPref.objects.all()
+    serializer_class = UserPrefSerializer  
+    permission_classes = [permissions.IsAuthenticated]
     
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = UserPrefSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
+    def perform_create(self, serializer):
+        serializer.save(student_id=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create to ensure a custom response structure.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Override update to ensure the user can only edit their own preferences.
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        # Ensure the logged-in user is the owner of the preference
+        if instance.student_id != request.user:
+            return Response(
+                {"detail": "You do not have permission to edit this preference."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy to ensure the user can only delete their own preferences.
+        """
+        instance = self.get_object()
+
+        # Ensure the logged-in user is the owner of the preference
+        if instance.student_id != request.user:
+            return Response(
+                {"detail": "You do not have permission to delete this preference."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        self.perform_destroy(instance)
+        return Response(
+            {"detail": "Preference deleted successfully."}, 
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
 class UserPrefDetailView(APIView):
    
     permission_classes = [permissions.AllowAny]
