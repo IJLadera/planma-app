@@ -19,7 +19,7 @@ class Timetable extends StatelessWidget {
               details.appointments!.isNotEmpty) {
             final Appointment appointment = details.appointments![0];
             _showClassDetails(context, appointment);
-          }
+          } 
         },
       ),
     );

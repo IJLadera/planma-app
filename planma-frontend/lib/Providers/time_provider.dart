@@ -13,6 +13,9 @@ class TimeProvider with ChangeNotifier {
   bool isStopwatchRunning = false;
   Timer? _stopwatchTimer;
 
+  // List to store recorded times
+  List<int> recordedTimes = [];
+
   // Timer Methods
   void setTime(int seconds) {
     remainingTime = seconds;
@@ -69,6 +72,12 @@ class TimeProvider with ChangeNotifier {
     _stopwatchTimer?.cancel();
     elapsedTime = 0;
     isStopwatchRunning = false;
+    notifyListeners();
+  }
+
+  // Save final stopwatch time
+  void saveFinalTime() {
+    recordedTimes.add(elapsedTime);
     notifyListeners();
   }
 }
