@@ -1,34 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/events_provider.dart';
 import 'package:planma_app/event/edit_event.dart';
 import 'package:planma_app/event/widget/event_detail_row.dart';
-import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/event/widget/widget.dart';
+import 'package:planma_app/models/events_model.dart';
+import 'package:provider/provider.dart';
 
-class ViewEvent extends StatefulWidget {
-  final String eventName;
-  final String timePeriod;
-  final String description;
-  final String location;
-  final String date;
-  final String type;
+class EventDetailScreen extends StatefulWidget {
+  final Event event;
 
-  const ViewEvent({
+  const EventDetailScreen({
     super.key,
-    required this.eventName,
-    required this.timePeriod,
-    required this.description,
-    required this.location,
-    required this.date,
-    required this.type,
+    required this.event,
   });
 
   @override
-  _ViewEventState createState() => _ViewEventState();
+  _EventDetailScreenState createState() => _EventDetailScreenState();
 }
 
-class _ViewEventState extends State<ViewEvent> {
+class _EventDetailScreenState extends State<EventDetailScreen> {
   String selectedAttendance = 'Did Not Attend';
+  late EventsProvider eventProvider;
 
   // Function to determine color based on the selected value
   Color getColor(String value) {
@@ -44,9 +38,86 @@ class _ViewEventState extends State<ViewEvent> {
     }
   }
 
+  void _handleDelete(BuildContext context) async {
+    final provider = Provider.of<EventsProvider>(context, listen: false);
+    final isConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Event'),
+        content: const Text('Are you sure you want to delete this event?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (isConfirmed == true) {
+      provider.deleteEvent(widget.event.eventId!);
+      Navigator.pop(context);
+    }
+  }
+
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime);
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer<EventsProvider>(builder: (context, eventProvider, child){
+      final event = eventProvider.events.firstWhere(
+        (event) => event.eventId == widget.event.eventId,
+        orElse: () => Event(
+          eventId: -1,
+          eventName: 'N/A',
+          eventDesc: 'N/A',
+          location: 'N/A',
+          scheduledDate: DateTime(2020, 1, 1),
+          scheduledStartTime: '00:00',
+          scheduledEndTime: '00:00',
+          eventType: 'N/A',
+        ),
+      );
+      print ("event.eventId: ${event.eventId}");
+      print ("widget.eventId: ${widget.event.eventId}");
+      print ("widget.event: ${widget.event}");
+
+      if (event.eventId == -1) {
+        return Scaffold(
+          appBar: AppBar(title: Text('Event Details')),
+          body: Center(child: Text('Event not found')),
+        );
+      }
+
+      final startTime = _formatTimeForDisplay(event.scheduledStartTime);
+      final endTime = _formatTimeForDisplay(event.scheduledEndTime);
+      final formattedScheduledDate = DateFormat('dd MMMM yyyy').format(event.scheduledDate);
+
+      return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -69,9 +140,7 @@ class _ViewEventState extends State<ViewEvent> {
           ),
           IconButton(
             icon: Icon(Icons.delete, color: Colors.blue),
-            onPressed: () {
-              // Add delete functionality
-            },
+            onPressed: () => _handleDelete(context),
           ),
         ],
         centerTitle: true,
@@ -98,32 +167,32 @@ class _ViewEventState extends State<ViewEvent> {
               children: [
                 EventDetailRow(
                   title: 'Title',
-                  value: widget.eventName,
+                  value: event.eventName,
                 ),
                 const Divider(),
                 EventDetailRow(
                   title: 'Description',
-                  value: widget.description,
+                  value: event.eventDesc,
                 ),
                 const Divider(),
                 EventDetailRow(
                   title: 'Location',
-                  value: widget.location,
+                  value: event.location,
                 ),
                 const Divider(),
                 EventDetailRow(
                   title: 'Date',
-                  value: widget.date,
+                  value: formattedScheduledDate.toString(),
                 ),
                 const Divider(),
                 EventDetailRow(
                   title: 'Time',
-                  value: widget.timePeriod,
+                  value: '$startTime - $endTime',
                 ),
                 const Divider(),
                 EventDetailRow(
                   title: 'Type',
-                  value: widget.type,
+                  value: event.eventType,
                 ),
                 const Divider(),
                 SizedBox(height: 16),
@@ -164,5 +233,9 @@ class _ViewEventState extends State<ViewEvent> {
         ),
       ),
     );
+
+
+
+    });
   }
 }
