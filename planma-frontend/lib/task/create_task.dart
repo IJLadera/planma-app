@@ -22,8 +22,6 @@ class _CreateTaskState extends State<AddTaskScreen> {
   DateTime? _scheduledDate;
   DateTime? _deadline;
   String? _subject;
-  String? selectedSemester;
-  int? selectedSemesterId;
 
   // Method to select date
   Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
@@ -196,9 +194,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  _buildTitle(
-                    'Task Name',
-                  ),
+                  _buildTitle('Task Name',),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                     _taskNameController,

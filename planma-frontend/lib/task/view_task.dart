@@ -123,7 +123,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               onPressed: () async {
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const EditTask()),
+                  MaterialPageRoute(
+                    builder: (context) => 
+                      EditTask(task: task)
+                  ),
                 );
               },
             ),
