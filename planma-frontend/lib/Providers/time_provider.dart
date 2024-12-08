@@ -14,7 +14,7 @@ class TimeProvider with ChangeNotifier {
   Timer? _stopwatchTimer;
 
   // List to store recorded times
-  List<int> recordedTimes = [];
+  List<String> recordedTimes = [];
 
   // Timer Methods
   void setTime(int seconds) {
@@ -39,9 +39,11 @@ class TimeProvider with ChangeNotifier {
   }
 
   void pauseTimer() {
-    _timer?.cancel();
-    isRunning = false;
-    notifyListeners();
+    if (isRunning) {
+      _timer?.cancel();
+      isRunning = false;
+      notifyListeners();
+    }
   }
 
   void resetTimer() {
@@ -63,9 +65,11 @@ class TimeProvider with ChangeNotifier {
   }
 
   void pauseStopwatch() {
-    _stopwatchTimer?.cancel();
-    isStopwatchRunning = false;
-    notifyListeners();
+    if (isStopwatchRunning) {
+      _stopwatchTimer?.cancel();
+      isStopwatchRunning = false;
+      notifyListeners();
+    }
   }
 
   void resetStopwatch() {
@@ -76,8 +80,17 @@ class TimeProvider with ChangeNotifier {
   }
 
   // Save final stopwatch time
-  void saveFinalTime() {
-    recordedTimes.add(elapsedTime);
+  void saveStopwatchTime() {
+    final formattedTime = _formatTime(elapsedTime);
+    recordedTimes.add(formattedTime);
     notifyListeners();
+  }
+
+  // Helper: Format time for display
+  String _formatTime(int totalSeconds) {
+    int hours = totalSeconds ~/ 3600;
+    int minutes = (totalSeconds % 3600) ~/ 60;
+    int seconds = totalSeconds % 60;
+    return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
   }
 }

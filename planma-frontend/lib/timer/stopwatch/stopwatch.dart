@@ -100,7 +100,7 @@ class _StopwatchPageState extends State<StopwatchPage> {
                   const SizedBox(width: 20),
                   GestureDetector(
                     onTap: () {
-                      timeProvider.saveFinalTime();
+                      timeProvider.saveStopwatchTime(); // Corrected method call
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -139,7 +139,7 @@ class _StopwatchPageState extends State<StopwatchPage> {
                   itemBuilder: (context, index) {
                     return ListTile(
                       title: Text(
-                        _formatTime(timeProvider.recordedTimes[index]),
+                        timeProvider.recordedTimes[index],
                       ),
                     );
                   },
