@@ -8,7 +8,7 @@ import 'package:planma_app/task/widget/task_detail_row.dart';
 import 'package:provider/provider.dart';
 
 class TaskDetailScreen extends StatefulWidget {
-  Task task;
+  final Task task;
 
   TaskDetailScreen({
     super.key,
