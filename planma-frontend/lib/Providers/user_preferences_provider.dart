@@ -48,7 +48,6 @@ class UserPreferencesProvider with ChangeNotifier {
     required String usualSleepTime,
     required String usualWakeTime,
     required String reminderOffsetTime,
-    required String studentId,
     int? prefId,
   }) async {
     await _initAccessToken();
@@ -67,7 +66,6 @@ class UserPreferencesProvider with ChangeNotifier {
           'usual_sleep_time': usualSleepTime,
           'usual_wake_time': usualWakeTime,
           'reminder_offset_time': reminderOffsetTime,
-          'student_id': studentId,
         }),
       );
 
