@@ -28,49 +28,145 @@ class CustomEventListCreateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         # Set the student field to the authenticated user on creation
-        
-class CustomEventDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
 
-    def get(self,request,pk):
-        
-        user = CustomUser.objects.get(student_id = pk)
-        event = CustomEvents.objects.filter(student_id = user)
-        serializer = CustomEventSerializer(event, many = True)
-        
-        return Response(serializer.data)
-    
-class CustomEventDeleteView(APIView):
 
+
+class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
+    queryset = CustomEvents.objects.all()
+    serializer_class = CustomEventSerializer
+
+    @action(detail=False, methods=['post'])
+    def add_event(self, request):
+        data = request.data
+
+        # Extract data from request
+        event_name = data.get('event_name')
+        event_desc = data.get('event_desc')
+        location = data.get('location')
+        scheduled_date = data.get('scheduled_date')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        event_type = data.get('event_type')
+        student_id = request.user.student_id  # Authenticated user
+
+        # print(f"Authenticated User: {request.user}")
+        # print(f"Student ID: {student_id}")
+
+        # Validate input
+        if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
         try:
-            
-            deleteevent = CustomEvents.objects.get(event_id = pk)
-            
-            deleteevent.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except CustomEvents.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
 
-class CustomEventUpdateView(APIView):
+            # Check for conflicting task schedule
+            duplicate = CustomEvents.objects.filter(
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(student_id=student)
+            ).exists()
 
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        eventid= CustomEvents.objects.get(event_id = pk)
-        
-        serializer = CustomTaskSerializer(instance=eventid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            if duplicate:
+                return Response(
+                    {'error': 'Conflicting event schedule detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Events
+            event = CustomEvents.objects.create(
+                event_name=event_name,
+                event_desc=event_desc,
+                location=location,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time,
+                event_type=event_type,
+                student_id=student,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(event)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the task
+        event_name = data.get('event_name')
+        event_desc = data.get('event_desc')
+        location = data.get('location')
+        scheduled_date = data.get('scheduled_date')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        event_type = data.get('event_type')
+
+        if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        try:
+
+            # Check for conflicting task schedule (excluding current task)
+            duplicate = CustomEvents.objects.filter(
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(student_id=instance.student_id) &
+                ~Q(event_id=instance.event_id)  # Exclude the current event from duplicate check
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Conflicting task schedule detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the task instance
+            instance.event_name = event_name
+            instance.event_desc = event_desc
+            instance.location = location
+            instance.scheduled_date = scheduled_date
+            instance.scheduled_start_time = start_time
+            instance.scheduled_end_time = end_time
+            instance.event_type = event_type
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         
 #below is the Attended Event Table
 
@@ -247,19 +343,63 @@ class LogActivityUpdateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #User Preferences
-class UserPrefListCreateView(APIView):
+class UserPrefListCreateView(viewsets.ModelViewSet):
+    queryset = UserPref.objects.all()
+    serializer_class = UserPrefSerializer  
+    permission_classes = [permissions.IsAuthenticated]
     
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = UserPrefSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
+    def perform_create(self, serializer):
+        serializer.save(student_id=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create to ensure a custom response structure.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Override update to ensure the user can only edit their own preferences.
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        # Ensure the logged-in user is the owner of the preference
+        if instance.student_id != request.user:
+            return Response(
+                {"detail": "You do not have permission to edit this preference."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy to ensure the user can only delete their own preferences.
+        """
+        instance = self.get_object()
+
+        # Ensure the logged-in user is the owner of the preference
+        if instance.student_id != request.user:
+            return Response(
+                {"detail": "You do not have permission to delete this preference."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        self.perform_destroy(instance)
+        return Response(
+            {"detail": "Preference deleted successfully."}, 
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
 class UserPrefDetailView(APIView):
    
     permission_classes = [permissions.AllowAny]

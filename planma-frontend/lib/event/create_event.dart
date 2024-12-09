@@ -5,6 +5,7 @@ import 'package:planma_app/event/widget/widget.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/Providers/events_provider.dart';
 
 class AddEventScreen extends StatefulWidget {
   const AddEventScreen({super.key});
@@ -94,34 +95,40 @@ class _AddEventScreen extends State<AddEventScreen> {
     final String eventName = _eventCodeController.text;
     final String eventDesc = _eventTitleController.text;
     final String location = _eventLocationController.text;
-    final String scheduledDate =
-        _scheduledDate!.toIso8601String().split("T").first;
+    final String scheduledDate = _scheduledDate!.toIso8601String().split("T").first;
     final String startTime = _startTimeController.text;
     final String endTime = _endTimeController.text;
     final String eventType = _selectedEventType!;
 
     final result = await eventService.eventCT(
-        eventname: eventName,
-        eventdesc: eventDesc,
-        location: location,
-        scheduledate: scheduledDate,
-        starttime: to24HourFormat(startTime),
-        endtime: to24HourFormat(endTime),
-        eventtype: eventType,
-        studentID:
-            Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']);
+      eventname: eventName,
+      eventdesc: eventDesc,
+      location: location,
+      scheduledate: scheduledDate,
+      starttime: to24HourFormat(startTime),
+      endtime: to24HourFormat(endTime),
+      eventtype: eventType,
+      studentID: Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id'],
+    );
 
     if (result != null && result.containsKey('error')) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['error'])),
       );
     } else {
+      // Event created successfully
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Event created successfully!')),
       );
-      Navigator.of(context).pop(); // Navigate back on success
+
+      // Trigger refresh of the events list
+      // await context.read<EventsProvider>().fetchEvents();
+
+      // Navigate back to the previous screen
+      Navigator.of(context).pop();
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

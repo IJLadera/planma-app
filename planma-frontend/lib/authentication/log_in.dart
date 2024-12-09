@@ -120,8 +120,8 @@ class _LogInState extends State<LogIn> {
                             suffixIcon: IconButton(
                               icon: Icon(
                                 obscurePassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                                 color: const Color(0xFF173F70),
                               ),
                               onPressed: () {

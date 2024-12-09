@@ -7,6 +7,11 @@ router.register(r'class-schedules', ClassScheduleViewSet, basename='classschedul
 router.register(r'subjects', SubjectViewSet, basename='subject')
 router.register(r'semesters', SemesterViewSet, basename='semester')
 router.register(r'tasks', TaskViewSet, basename='task')
+router.register(r'events', EventViewSet, basename='event')
+
+
+router.register(r'userprefs', UserPrefListCreateView, basename='userpref')
+
 
 urlpatterns = [
     path ('djoser/', include ('djoser.urls')),
@@ -15,10 +20,10 @@ urlpatterns = [
     path('', include(router.urls)),
     #events
     path('createevents/', CustomEventListCreateView.as_view(), name='event-list-create'),
-    path('events/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
-    path('deleteevent/<int:pk>/', CustomEventDeleteView.as_view(), name='event-delete'),
-    path('updateevent/<int:pk>/',CustomEventUpdateView.as_view(), name='updateevent' ),
-    #attended event
+    # path('events/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
+    # path('deleteevent/<int:pk>/', CustomEventDeleteView.as_view(), name='event-delete'),
+    # path('updateevent/<int:pk>/',CustomEventUpdateView.as_view(), name='updateevent' ),
+    # attended event
     path('createattevents/', AttendedEventListCreateView.as_view(), name='attevent-list-create'),
     path('attevents/<uuid:pk>/', AttendedEventDetailView.as_view(), name='attevent-detail'),
     path('deleteattevents/<int:pk>/', AttendedEventDeleteView.as_view(), name='attevent-delete'),
@@ -33,11 +38,6 @@ urlpatterns = [
     path('actlog/<uuid:pk>/', LogActivityDetailView.as_view(), name='actlog-detail'),
     path('deleteactlog/<int:pk>/', LogActivityDeleteView.as_view(), name='actlog-delete'),
     path('updateactlog/<int:pk>/',LogActivityUpdateView.as_view(), name='updateactlog' ),
-    #userpref
-    path('createuserpref/', UserPrefListCreateView.as_view(), name='userpref-list-create'),
-    path('userpref/<uuid:pk>/', UserPrefDetailView.as_view(), name='userpref-detail'),
-    path('deleteuserpref/<int:pk>/', UserPrefDeleteView.as_view(), name='userpref-delete'),
-    path('updateuserpref/<int:pk>/',UserPrefUpdateView.as_view(), name='updateuserpref' ),
     #attended class
     path('createclassatt/', AttClassListCreateView.as_view(), name='attclass-list-create'),
     path('classatt/<uuid:pk>/', AttClassDetailView.as_view(), name='attclass-detail'),
