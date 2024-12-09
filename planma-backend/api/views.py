@@ -29,8 +29,6 @@ class CustomEventListCreateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         # Set the student field to the authenticated user on creation
 
-
-
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     queryset = CustomEvents.objects.all()
@@ -56,7 +54,6 @@ class EventViewSet(viewsets.ModelViewSet):
         # Validate input
         if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
-
 
         try:
             # Fetch the CustomUser instance
@@ -110,7 +107,6 @@ class EventViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         data = request.data
@@ -126,7 +122,6 @@ class EventViewSet(viewsets.ModelViewSet):
 
         if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
-
 
         try:
 
@@ -501,64 +496,6 @@ class AttClassUpdateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-
-# Goals
-
-class GoalsListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = GoalsSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class GoalsDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        user = CustomUser.objects.get(student_id = pk)
-        goals = Goals.objects.filter(student_id = user)
-        serializer = GoalsSerializer(goals, many = True)
-        
-        return Response(serializer.data)
-    
-class GoalsDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deletegoals = Goals.objects.get(goal_id = pk)
-            
-            deletegoals.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except Goals.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class GoalsUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        goalid= Goals.objects.get(goal_id = pk)
-        
-        serializer = GoalsSerializer(instance=goalid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 # OLANGO VIEWS
 # Class Schedule & Subject
 class ClassScheduleViewSet(viewsets.ModelViewSet):
@@ -770,9 +707,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         subject_code = data.get('subject_code')
         student_id = request.user.student_id  # Authenticated user
 
-        # print(f"Authenticated User: {request.user}")
-        # print(f"Student ID: {student_id}")
-
         # Validate input
         if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_code]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -842,7 +776,6 @@ class TaskViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         data = request.data
@@ -896,6 +829,277 @@ class TaskViewSet(viewsets.ModelViewSet):
             instance.scheduled_end_time = end_time
             instance.deadline = deadline
             instance.subject_code = subject
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+# Goals
+class GoalViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = Goals.objects.all()
+    serializer_class = GoalsSerializer
+
+    @action(detail=False, methods=['post'])
+    def add_goal(self, request):
+        data = request.data
+
+        # Extract data from request
+        goal_name = data.get('goal_name')
+        goal_desc = data.get('goal_desc')
+        timeframe = data.get('timeframe')
+        target_hours = data.get('target_hours')
+        goal_type = data.get('goal_type')
+        semester_id = data.get('semester_id')
+        student_id = request.user.student_id  # Authenticated user
+
+        # print(f"Authenticated User: {request.user}")
+        # print(f"Student ID: {student_id}")
+
+        # Validate input
+        if not all([goal_name, goal_desc, timeframe, target_hours, goal_type]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Additional validation for `semester_id` based on `goal_type`
+        if goal_type == 'Academic' and not semester_id:
+            return Response({'error': 'semester_id is required for Academic goals.'}, status=status.HTTP_400_BAD_REQUEST)
+        elif goal_type == 'Personal' and semester_id:
+            return Response({'error': 'semester_id must be null for Personal goals.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
+
+            semester = None
+            if goal_type == 'Academic':
+                semester = get_object_or_404(CustomSemester, semester_id=semester_id)
+
+            # Check for duplicate goal instance
+            duplicate = Goals.objects.filter(
+                Q(goal_name=goal_name) &
+                Q(timeframe=timeframe) &
+                Q(target_hours=target_hours) &
+                (Q(semester_id=semester) if semester else Q(semester_id__isnull=True)) &
+                Q(student_id=student)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate goal instance detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Goal
+            goal = Goals.objects.create(
+                goal_name=goal_name,
+                goal_desc=goal_desc,
+                timeframe=timeframe,
+                target_hours=target_hours,
+                goal_type=goal_type,
+                semester_id=semester,
+                student_id=student,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(goal)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the task
+        goal_name = data.get('goal_name')
+        goal_desc = data.get('goal_desc')
+        timeframe = data.get('timeframe')
+        target_hours = data.get('target_hours')
+        goal_type = data.get('goal_type')
+        semester_id = data.get('semester_id')
+
+        # Validate input
+        if not all([goal_name, goal_desc, timeframe, target_hours, goal_type]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Additional validation for `semester_id` based on `goal_type`
+        if goal_type == 'Academic' and not semester_id:
+            return Response({'error': 'semester_id is required for Academic goals.'}, status=status.HTTP_400_BAD_REQUEST)
+        elif goal_type == 'Personal' and semester_id:
+            return Response({'error': 'semester_id must be null for Personal goals.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            semester = None
+            if goal_type == 'Academic':
+                semester = get_object_or_404(CustomSemester, semester_id=semester_id)
+
+            # Check for duplicate goal instance
+            duplicate = Goals.objects.filter(
+                Q(goal_name=goal_name) &
+                Q(timeframe=timeframe) &
+                Q(target_hours=target_hours) &
+                (Q(semester_id=semester) if semester else Q(semester_id__isnull=True)) &
+                Q(student_id=instance.student_id) &
+                ~Q(goal_id=instance.goal_id)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate goal instance detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the goal instance
+            instance.goal_name = goal_name
+            instance.goal_desc = goal_desc
+            instance.timeframe = timeframe
+            instance.target_hours = target_hours
+            instance.goal_type = goal_type
+            instance.semester_id = semester
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+# Goal Schedule
+class GoalScheduleViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = GoalSchedule.objects.all()
+    serializer_class = GoalScheduleSerializer
+
+    @action(detail=False, methods=['post'])
+    def add_schedule(self, request):
+        data = request.data
+
+        # Extract data from request
+        goal_id = data.get('goal_id')
+        scheduled_date = data.get('scheduled_date')
+        scheduled_start_time = data.get('scheduled_start_time')
+        scheduled_end_time = data.get('scheduled_end_time')
+
+        # Validate input
+        if not all([scheduled_date, scheduled_start_time, scheduled_end_time]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Fetch the CustomUser instance
+            goal = get_object_or_404(Goals, goal_id=goal_id)
+
+            # Check for duplicate goal instance
+            duplicate = GoalSchedule.objects.filter(
+                Q(goal_id=goal) &
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=scheduled_start_time) &
+                Q(scheduled_end_time=scheduled_end_time)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate goal instance detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Goal Schedule
+            goalSchedule = GoalSchedule.objects.create(
+                goal_id=goal,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=scheduled_start_time,
+                scheduled_end_time=scheduled_end_time,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(goalSchedule)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the goal schedule
+        goal_id = data.get('goal_id')
+        scheduled_date = data.get('scheduled_date')
+        scheduled_start_time = data.get('scheduled_start_time')
+        scheduled_end_time = data.get('scheduled_end_time')
+
+        # Validate input
+        if not all([scheduled_date, scheduled_start_time, scheduled_end_time]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Fetch the CustomUser instance
+            goal = get_object_or_404(Goals, goal_id=goal_id)
+
+            # Check for duplicate goal instance
+            duplicate = GoalSchedule.objects.filter(
+                Q(goal_id=goal) &
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=scheduled_start_time) &
+                Q(scheduled_end_time=scheduled_end_time) &
+                ~Q(goalschedule_id=instance.goalschedule_id)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate goal instance detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the task instance
+            instance.goal_id = goal
+            instance.scheduled_date = scheduled_date
+            instance.scheduled_start_time = scheduled_start_time
+            instance.scheduled_end_time = scheduled_end_time
             instance.save()
 
             # Serialize and return the updated data
@@ -969,77 +1173,11 @@ class GoalProgressUpdateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-# Goal Progress
 
-class GoalScheduleListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = GoalScheduleSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class GoalScheduleDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
 
-    def get(self,request,pk):
-        
-        goal = Goals.objects.get(goal_id = pk)
-        goalsched = GoalSchedule.objects.filter(student_id = goal)
-        serializer = GoalProgressSerializer(goalsched, many = True)
-        
-        return Response(serializer.data)
-    
-class GoalScheduleDeleteView(APIView):
 
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deletegoals = GoalSchedule.objects.get(goalschedule_id = pk)
-            
-            deletegoals.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except GoalProgress.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class GoalScheduleUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        goalid= GoalSchedule.objects.get(goalprogress_id = pk)
-        
-        serializer = GoalScheduleSerializer(instance=goalid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #Sleep
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        repid= SleepLog.objects.get(report_id = pk)
-        serializer = SleepLogSerializer(instance=repid, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 class SleepLogListCreateView(APIView):
     
     permission_classes = [permissions.AllowAny]

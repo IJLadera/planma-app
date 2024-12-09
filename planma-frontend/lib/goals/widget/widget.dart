@@ -53,29 +53,26 @@ class CustomWidgets {
   // Method to build a time field with gesture and custom design
   static Widget buildTimeField(
     String label,
-    TimeOfDay? time,
+    TextEditingController controller,
     BuildContext context,
-    bool isStartTime,
-    Function selectTime,
+    Function(BuildContext) selectTime,
   ) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(30),
       ),
-      child: GestureDetector(
-        onTap: () => selectTime(context, isStartTime),
-        child: AbsorbPointer(
-          child: TextFormField(
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: GoogleFonts.openSans(),
-              suffixIcon: const Icon(Icons.access_time),
-              hintText: time != null ? time.format(context) : 'Select Time',
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.all(16),
-            ),
-          ),
+      child: TextField(
+        controller: controller,
+        readOnly: true, // Only allow input via the time picker
+        onTap: () => selectTime(context),
+        decoration: InputDecoration(
+          labelText: label,
+          suffixIcon: const Icon(Icons.access_time),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0), // Adds padding inside the TextField
         ),
       ),
     );
@@ -147,67 +144,12 @@ class CustomWidgets {
     );
   }
 
-  // Method to build a session tile with dynamic data
-  static Widget buildSessionTile(Map<String, dynamic> session) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            session['name'] ?? 'Session Name',
-            style: GoogleFonts.openSans(),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Date: ${session['date'] ?? 'Not Set'}',
-            style: GoogleFonts.openSans(),
-          ),
-          Text(
-            'Time Period: ${session['timePeriod'] ?? 'Not Set'}',
-            style: GoogleFonts.openSans(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Method to build a detail tile with title and value
-  static Widget buildDetailTile(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.openSans(
-              fontSize: 16,
-            ),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              style: GoogleFonts.openSans(
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.end,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   static Widget buildPicker({
     required int max,
     required int selectedValue,
     required Function(int) onSelectedItemChanged,
     double height = 100,
-    double width = 40,
+    double width = 60,
     double fontSize = 16,
   }) {
     return SizedBox(
@@ -219,15 +161,63 @@ class CustomWidgets {
         ),
         itemExtent: 40,
         onSelectedItemChanged: onSelectedItemChanged,
-        children: List<Widget>.generate(max, (int index) {
+        children: List<Widget>.generate(max + 1, (int index) {
           return Center(
             child: Text(
-              index.toString().padLeft(2, '0'), // Zero-padding for consistency
+              index
+                  .toString()
+                  .padLeft(3, '0'), // Adjust padding for large numbers
               style: TextStyle(fontSize: fontSize),
             ),
           );
         }),
       ),
+    );
+  }
+
+  static Widget buildScheduleDatePicker({
+    required BuildContext context,
+    required String displayText, // The initial or current duration to display
+    required Future<void> Function()
+        onPickerTap, // Callback for showing the picker
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: onPickerTap, // Trigger the picker when tapped
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+                vertical: 12, horizontal: 16), // Outer padding
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5), // Light gray background
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  // Adds inner padding for the Text widget
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    displayText,
+                    style: GoogleFonts.openSans(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.timer_outlined, // Timer icon for duration
+                  color: Color(0xFF173F70),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

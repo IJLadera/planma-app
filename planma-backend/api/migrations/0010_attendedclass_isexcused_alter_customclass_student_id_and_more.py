@@ -41,8 +41,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('goal_id', models.AutoField(primary_key=True, serialize=False)),
                 ('goal_name', models.CharField(max_length=100)),
-                ('target_hours', models.TimeField()),
-                ('timeframe', models.TimeField()),
+                ('target_hours', models.IntegerField()),
+                ('timeframe', models.CharField()),
                 ('goal_desc', models.TextField()),
                 ('goal_type', models.CharField(max_length=30)),
                 ('semester_id', models.TextField()),

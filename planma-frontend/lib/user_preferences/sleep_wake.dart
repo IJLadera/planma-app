@@ -8,16 +8,6 @@ import 'package:provider/provider.dart';
 // Ensure this code snippet is used alongside other fixed parts like buildTimePickerField
 
 class SleepWakeSetupScreen extends StatefulWidget {
-  final int studentId;
-  final String usualSleepTime;
-  final String usualWakeTime;
-
-  const SleepWakeSetupScreen({
-    super.key,
-    required this.studentId,
-    required this.usualSleepTime,
-    required this.usualWakeTime,
-  });
 
   @override
   _SleepWakeSetupScreenState createState() => _SleepWakeSetupScreenState();
@@ -28,12 +18,11 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
   TimeOfDay wakeTime = TimeOfDay(hour: 7, minute: 0);
 
   String timeToString(TimeOfDay time) {
-    final hours =
-        time.hour.toString().padLeft(2, '0'); // Ensures two-digit hour
-    final minutes =
-        time.minute.toString().padLeft(2, '0'); // Ensures two-digit minute
+    final hours = time.hour.toString().padLeft(2, '0');
+    final minutes = time.minute.toString().padLeft(2, '0');
     return '$hours:$minutes'; // Combine to "HH:mm"
   }
+
 
   Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -53,25 +42,10 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
 
   // Save user preferences via the UserPreferencesProvider
   Future<void> _savePreferences() async {
-    final userPreferencesProvider =
+    final provider =
         Provider.of<UserPreferencesProvider>(context, listen: false);
 
-    // Use the provider's save method
-    try {
-      await userPreferencesProvider.saveUserPreferences(
-        usualSleepTime: "${sleepTime.hour}:${sleepTime.minute}",
-        usualWakeTime: "${wakeTime.hour}:${wakeTime.minute}",
-        reminderOffsetTime: "", 
-        studentId: widget.studentId.toString(), 
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Preferences saved successfully!")),
-      );
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error saving preferences: $error")),
-      );
-    }
+    
   }
 
   @override
