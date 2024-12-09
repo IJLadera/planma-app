@@ -42,7 +42,7 @@ class EventsProvider with ChangeNotifier {
       rethrow;
     }
   }
-    // Delete a task
+    // Delete a Event
   Future<void> deleteEvent(int eventId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -81,6 +81,102 @@ class EventsProvider with ChangeNotifier {
       time.minute,
     );
     return DateFormat('HH:mm:ss').format(dateTime);
+  }
+
+
+   // Edit a event
+  Future<void> updateEvent({
+    required int eventId,
+    required String eventName,
+    required String eventDesc,
+    required String location,
+    required DateTime scheduledDate,
+    required TimeOfDay startTime,
+    required TimeOfDay endTime,
+    required String eventType,
+  }) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    String formattedStartTime = _formatTimeOfDay(startTime);
+    String formattedEndTime = _formatTimeOfDay(endTime);
+    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+
+    bool isConflict = _events.any((schedule) =>
+      schedule.eventId != eventId &&
+      schedule.scheduledDate == scheduledDate &&
+      schedule.scheduledStartTime == formattedStartTime &&
+      schedule.scheduledEndTime == formattedEndTime);
+
+    if (isConflict) {
+      throw Exception(
+          'Event schedule conflict detected. Please modify your entry.');
+    }
+
+    bool isDuplicate = _events.any((schedule) =>
+      schedule.eventName == eventName &&
+      schedule.eventDesc == eventDesc &&
+      schedule.scheduledDate == scheduledDate &&
+      schedule.scheduledStartTime == formattedStartTime &&
+      schedule.scheduledEndTime == formattedEndTime);
+
+    if (isDuplicate) {
+      throw Exception(
+          'Duplicate event entry detected locally. Please modify your entry.');
+    }
+
+    final url = Uri.parse("${baseUrl}events/$eventId/");
+
+    print('FROM PROVIDER:');
+    print('Event Name: $eventName');
+    print('Event Description: $eventDesc');
+    print ('Location: $location');
+    print('Scheduled Date: $formattedScheduledDate');
+    print('Start Time: $formattedStartTime');
+    print('End Time: $formattedEndTime');
+    print ('EventType: $eventType');
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'event_name': eventName,
+          'event_desc': eventDesc,
+          'location': location,
+          'scheduled_date': formattedScheduledDate,
+          'scheduled_start_time': formattedStartTime,
+          'scheduled_end_time': formattedEndTime,
+          'event_type': eventType,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final updatedSchedule = Event.fromJson(json.decode(response.body));
+        final index = _events
+            .indexWhere((schedule) => schedule.eventId == eventId);
+        if (index != -1) {
+          _events[index] = updatedSchedule;
+          notifyListeners();
+        }
+      } else if (response.statusCode == 400) {
+        // Handle duplicate check from the backend
+        final responseBody = json.decode(response.body);
+        if (responseBody['error'] == 'Duplicate event entry detected.') {
+          throw Exception('Duplicate Event entry detected on the server.');
+        } else {
+          throw Exception('Error updating Event: ${response.body}');
+        }
+      } else {
+        throw Exception('Failed to update Event: ${response.body}');
+      }
+    } catch (error) {
+      print('Update event error: $error');
+      throw Exception('Error updating Event: $error');
+    }
   }
 
   
