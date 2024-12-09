@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/core/dashboard.dart';
 import 'package:planma_app/user_preferences/setting_goal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -7,13 +8,11 @@ import 'dart:convert';
 class SleepWakeReminderScreen extends StatefulWidget {
   final String usualSleepTime;
   final String usualWakeTime;
-  final int studentId;
 
   const SleepWakeReminderScreen({
     super.key,
     required this.usualSleepTime,
     required this.usualWakeTime,
-    required this.studentId,
   });
 
   @override
@@ -33,14 +32,14 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
   ];
 
   Future<void> _saveReminderToDatabase(String reminderTime) async {
-    final url = Uri.parse("http://<your-backend-url>/api/time-reminder/");
+    final url = Uri.parse(
+        "http://your-backend-url/api/time-reminder/"); // Replace with actual URL
 
     try {
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "user_id": widget.studentId,
           "reminder_time": reminderTime,
           "usual_sleep_time": widget.usualSleepTime,
           "usual_wake_time": widget.usualWakeTime,
@@ -48,12 +47,16 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
       );
 
       if (response.statusCode == 201) {
-        print("Reminder saved successfully!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Reminder saved successfully!")),
+        );
       } else {
-        print("Failed to save reminder: ${response.body}");
+        throw Exception("Failed to save reminder: ${response.body}");
       }
     } catch (e) {
-      print("Error saving reminder: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error saving reminder: $e")),
+      );
     }
   }
 
@@ -61,6 +64,10 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("Set Sleep/Wake Reminder"),
+        backgroundColor: Color(0xFF173F70),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -91,7 +98,6 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
                 'lib/user_preferences/assets/alarm.png',
                 height: 120.0,
               ),
-
               SizedBox(height: 40.0),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -116,9 +122,7 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
                   },
                 ),
               ),
-
               SizedBox(height: 40.0),
-
               // Next Button
               ElevatedButton(
                 onPressed: () async {
@@ -129,7 +133,8 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => GoalSelectionScreen()),
+                      builder: (context) => Dashboard(),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
