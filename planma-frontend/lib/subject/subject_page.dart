@@ -26,7 +26,8 @@ class _ClassScheduleState extends State<ClassSchedule> {
     'Wednesday',
     'Thursday',
     'Friday',
-    'Saturday'
+    'Saturday',
+    'Sunday'
   ];
 
   // Selected semester

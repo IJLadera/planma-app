@@ -9,7 +9,7 @@ import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
-  ClassSchedule classSchedule;
+  final ClassSchedule classSchedule;
 
   SubjectDetailScreen({
     super.key,
