@@ -134,7 +134,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EditEvent()),
+                MaterialPageRoute(builder: (context) => EditEvent(event: event,)),
               );
             },
           ),
