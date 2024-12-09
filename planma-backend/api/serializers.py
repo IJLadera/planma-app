@@ -26,12 +26,6 @@ class CustomEventSerializer(serializers.ModelSerializer):
             'student_id': {'required': True},
         }
         
-class ListEventSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = CustomEvents
-        fields = ['event_id', 'event_name', 'scheduled_start_time', 
-                  'scheduled_end_time']
-        
 class AttendedEventSerializer(serializers.ModelSerializer):
     class Meta: 
         model = AttendedEvents
@@ -46,12 +40,6 @@ class CustomActivitySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'student_id': {'required': True},
         }
-        
-class ListActivitySerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = CustomEvents
-        fields = ['activity_id', 'activity_name', 'scheduled_start_time', 
-                  'scheduled_end_time']
         
 class ActivityLogSerializer(serializers.ModelSerializer):
     class Meta: 
@@ -121,11 +109,15 @@ class CustomTaskSerializer(serializers.ModelSerializer):
         read_only_fields = ['student_id']
                 
 class GoalsSerializer(serializers.ModelSerializer):
+    semester_id = CustomSemesterSerializer()
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
     class Meta:
         model = Goals
         fields = ['goal_id', 'goal_name', 'target_hours', 
                   'timeframe', 'goal_desc', 'goal_type',
                   'student_id', 'semester_id']
+        read_only_fields = ['student_id']
         
 class GoalProgressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -134,10 +126,13 @@ class GoalProgressSerializer(serializers.ModelSerializer):
                   'scheduled_end_time', 'session_duration']
         
 class GoalScheduleSerializer(serializers.ModelSerializer):
+    goal_id = GoalsSerializer()
+
     class Meta:
-        model = Goals
-        fields = ['goalschedule_id', 'goal_id', 'scheduled_start_time',
+        model = GoalSchedule
+        fields = ['goalschedule_id', 'goal_id', 'scheduled_date','scheduled_start_time',
                   'scheduled_end_time']
+        read_only_fields = ['goal_id']
 
 class SleepLogSerializer(serializers.ModelSerializer):
     class Meta:
