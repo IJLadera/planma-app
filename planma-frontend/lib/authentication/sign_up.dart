@@ -65,11 +65,7 @@ class _SignUpState extends State<SignUp> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) =>
-          SleepWakeSetupScreen(
-            studentId: response["studentId"],
-            usualSleepTime: '23:00',
-            usualWakeTime: '07:00',
-          )
+          SleepWakeSetupScreen()
           ),
         );
       } else {
