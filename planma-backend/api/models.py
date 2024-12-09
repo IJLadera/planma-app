@@ -293,15 +293,26 @@ class CustomTask(models.Model):
 
 class Goals(models.Model):
 
+    TYPE_CHOICES = [
+        ('Academic', 'Academic'),
+        ('Personal', 'Personal'),
+    ]
+
+    TIMEFRAME_CHOICES = [
+        ('Daily', 'Daily'),
+        ('Weekly', 'Weekly'),
+        ('Monthly', 'Monthly'),
+    ]
+
     # Primary Key
     goal_id = models.AutoField(primary_key=True)
 
     # Goal Details
     goal_name = models.CharField(max_length=100)
-    target_hours = models.TimeField() #if this is merely target hours, then Time Field might not work since it is at max 23 hours
-    timeframe = models.TimeField()
+    target_hours = models.IntegerField()
+    timeframe = models.CharField(max_length=20, choices=TIMEFRAME_CHOICES)
     goal_desc = models.TextField()
-    goal_type = models.CharField(max_length=30)
+    goal_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom class model
         on_delete=models.CASCADE,
@@ -310,7 +321,9 @@ class Goals(models.Model):
     semester_id = models.ForeignKey(
         CustomSemester,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='goalsems', db_column='semester_id'
+        related_name='goalsems', db_column='semester_id',
+        null=True,
+        blank=True
     ) 
 
     def __str__(self):
@@ -343,6 +356,7 @@ class GoalSchedule(models.Model):
         on_delete=models.CASCADE,
         related_name='goalsched', db_column='goal_id'
     )
+    scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
 
