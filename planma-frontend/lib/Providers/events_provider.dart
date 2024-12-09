@@ -84,6 +84,88 @@ class EventsProvider with ChangeNotifier {
   }
 
 
+  //add a event
+  Future<void> addEvent({
+    required String eventName,
+    required String eventDesc,
+    required String location,
+    required DateTime scheduledDate,
+    required TimeOfDay startTime,
+    required TimeOfDay endTime,
+    required String eventType,
+  }) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    String formattedStartTime = _formatTimeOfDay(startTime);
+    String formattedEndTime = _formatTimeOfDay(endTime);
+    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+
+    bool isConflict = _events.any((schedule) =>
+      schedule.scheduledDate == scheduledDate &&
+      schedule.scheduledStartTime == formattedStartTime &&
+      schedule.scheduledEndTime == formattedEndTime);
+
+    if (isConflict) {
+      throw Exception(
+          'event schedule conflict detected. Please modify your entry.');
+    }
+
+    bool isDuplicate = _events.any((schedule) =>
+      schedule.eventName == eventName &&
+      schedule.eventDesc == eventDesc &&
+      schedule.scheduledDate == scheduledDate &&
+      schedule.scheduledStartTime == formattedStartTime &&
+      schedule.scheduledEndTime == formattedEndTime);
+
+    if (isDuplicate) {
+      throw Exception(
+          'Duplicate event entry detected locally. Please modify your entry.');
+    }
+
+    final url = Uri.parse("${baseUrl}events/add_event/");
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'event_name': eventName,
+          'event_desc': eventDesc,
+          'location': location,
+          'scheduled_date': formattedScheduledDate,
+          'scheduled_start_time': formattedStartTime,
+          'scheduled_end_time': formattedEndTime,
+          'event_type': eventType,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final newSchedule = Event.fromJson(json.decode(response.body));
+        _events.add(newSchedule);
+        notifyListeners();
+      } else if (response.statusCode == 400) {
+        // Handle duplicate check from the backend
+        final responseBody = json.decode(response.body);
+        if (responseBody['error'] == 'Duplicate event entry detected.') {
+          throw Exception('Duplicate event entry detected on the server.');
+        } else {
+          throw Exception('Error adding event: ${response.body}');
+        }
+      } else {
+        throw Exception('Failed to add event: ${response.body}');
+      }
+
+    } catch (error) {
+      print('Add event error: $error');
+      throw Exception('Error adding event: $error');
+    }
+
+  }
+
+
    // Edit a event
   Future<void> updateEvent({
     required int eventId,

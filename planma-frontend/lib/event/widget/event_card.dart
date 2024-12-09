@@ -9,7 +9,7 @@ class EventCard extends StatelessWidget {
 
   const EventCard({
     super.key,
-    required this.event,
+    required this.event, required bool isByDate,
   });
 
   String _formatTimeForDisplay(String time24) {
