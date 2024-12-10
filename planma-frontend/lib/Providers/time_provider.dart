@@ -7,6 +7,7 @@ class TimeProvider with ChangeNotifier {
   int initialTime = 0; // Original timer duration
   bool isRunning = false;
   Timer? _timer;
+  int elapsedTimeTimer = 0; // Elapsed time for countdown timer
 
   // Stopwatch Logic
   int elapsedTime = 0; // Time in seconds
@@ -20,6 +21,7 @@ class TimeProvider with ChangeNotifier {
   void setTime(int seconds) {
     remainingTime = seconds;
     initialTime = seconds;
+    elapsedTimeTimer = 0; // Reset elapsed time when setting new time
     notifyListeners();
   }
 
@@ -29,6 +31,7 @@ class TimeProvider with ChangeNotifier {
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (remainingTime > 0) {
           remainingTime--;
+          elapsedTimeTimer++; // Increment elapsed time
         } else {
           timer.cancel();
           isRunning = false;
@@ -49,6 +52,7 @@ class TimeProvider with ChangeNotifier {
   void resetTimer() {
     _timer?.cancel();
     remainingTime = initialTime;
+    elapsedTimeTimer = 0; // Reset elapsed time
     isRunning = false;
     notifyListeners();
   }
@@ -92,5 +96,10 @@ class TimeProvider with ChangeNotifier {
     int minutes = (totalSeconds % 3600) ~/ 60;
     int seconds = totalSeconds % 60;
     return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
+  }
+
+  // Return elapsed time of the countdown timer
+  int getElapsedTime() {
+    return elapsedTimeTimer; // Return the elapsed time for the countdown timer
   }
 }

@@ -184,13 +184,15 @@ class _TimerPageState extends State<TimerPage> {
           ElevatedButton(
             onPressed: () {
               if (!timeProvider.isRunning && timeProvider.remainingTime > 0) {
-                _saveRecordedTime(_formatTime(timeProvider.initialTime));
+                final elapsed = timeProvider
+                    .getElapsedTime(); // Get elapsed time from TimeProvider
+                _saveRecordedTime("Elapsed: ${_formatTime(elapsed)}");
               }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: widget.themeColor,
             ),
-            child: const Text("Save Timer Duration"),
+            child: const Text("Save Elapsed Time"),
           ),
         ],
       ),
@@ -303,7 +305,8 @@ class _TimerPageState extends State<TimerPage> {
           height: 300,
           child: CupertinoTimerPicker(
             mode: CupertinoTimerPickerMode.hms,
-            initialTimerDuration: Duration(seconds: timerProvider.remainingTime),
+            initialTimerDuration:
+                Duration(seconds: timerProvider.remainingTime),
             onTimerDurationChanged: (Duration newDuration) {
               if (newDuration.inSeconds > 0) {
                 timerProvider.setTime(newDuration.inSeconds);
@@ -332,18 +335,18 @@ class _TimerPageState extends State<TimerPage> {
         });
       });
     }
+
     setState(() {
       _isStopwatchRunning = !_isStopwatchRunning;
-      disableBackButton = _isStopwatchRunning;
     });
   }
 
   void _resetStopwatch() {
-    _stopwatchTimer?.cancel();
     setState(() {
       _stopwatchElapsed = 0;
       _isStopwatchRunning = false;
-      disableBackButton = false;
     });
+
+    _stopwatchTimer?.cancel();
   }
 }
