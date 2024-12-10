@@ -32,18 +32,26 @@ class CustomWidgets {
     bool someFlag, // Add this parameter to accept the 'true' value
     Function(BuildContext, DateTime?) selectDate,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: ListTile(
-        title: Text(
-          date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date',
-          style: TextStyle(fontSize: 16),
+    return GestureDetector(
+      onTap: () => selectDate(context, date),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(30),
         ),
-        trailing: const Icon(Icons.calendar_today),
-        onTap: () => selectDate(context, date),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              date != null
+                  ? DateFormat('dd MMMM yyyy').format(date)
+                  : 'Select Date',
+              style: TextStyle(fontSize: 16),
+            ),
+            const Icon(Icons.calendar_today),
+          ],
+        ),
       ),
     );
   }

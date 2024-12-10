@@ -9,7 +9,8 @@ class EventCard extends StatelessWidget {
 
   const EventCard({
     super.key,
-    required this.event, required bool isByDate,
+    required this.event,
+    required bool isByDate,
   });
 
   String _formatTimeForDisplay(String time24) {
@@ -35,46 +36,75 @@ class EventCard extends StatelessWidget {
     final startTime = _formatTimeForDisplay(event.scheduledStartTime);
     final endTime = _formatTimeForDisplay(event.scheduledEndTime);
 
-
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: InkWell(
-        onTap: () {
-          // Navigate to the ViewEvent screen when tapped
-          print("Navigating to EventDetailScreen with eventId: ${event.eventId}");
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => EventDetailScreen(event: event)
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0), // Rounded corners
+        ),
+        elevation: 5,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12.0),
+          onTap: () {
+            // Navigate to the ViewEvent screen when tapped
+            print(
+                "Navigating to EventDetailScreen with eventId: ${event.eventId}");
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EventDetailScreen(event: event),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFACEFDB)
+                  .withOpacity(0.6), // Slight transparency
+              borderRadius: BorderRadius.circular(12),
             ),
-          );
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Color(0xFFACEFDB),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                event.eventName,
-                style: GoogleFonts.openSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF173F70),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(width: 3, height: 10),
+                // Divider
+                Container(
+                  height: 60, // Height of the divider
+                  width: 2, // Thickness of the divider
+                  color: const Color(0xFF30BB90), // Divider color
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$startTime - $endTime',
-                style: GoogleFonts.openSans(
-                  fontSize: 14,
-                  color: Color(0xFF173F70),
+                const SizedBox(
+                  width: 12,
+                  height: 5,
+                ), // Event Details
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Event Name
+                    Text(
+                      event.eventName,
+                      style: GoogleFonts.openSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF173F70),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 12,
+                      height: 5,
+                    ),
+                    // Event Time
+                    Text(
+                      '$startTime - $endTime',
+                      style: GoogleFonts.openSans(
+                        fontSize: 14,
+                        color: const Color(0xFF173F70),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

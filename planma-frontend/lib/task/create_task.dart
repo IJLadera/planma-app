@@ -87,7 +87,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
 
-    if (taskName.isEmpty || 
+    if (taskName.isEmpty ||
         taskDescription.isEmpty ||
         _scheduledDate == null ||
         startTimeString.isEmpty ||
@@ -109,22 +109,22 @@ class _CreateTaskState extends State<AddTaskScreen> {
 
     try {
       await provider.addTask(
-        taskName: taskName, 
-        taskDesc: taskDescription, 
-        scheduledDate: _scheduledDate!, 
-        startTime: startTime, 
-        endTime: endTime, 
-        deadline: _deadline!, 
-        subjectCode: _subject!);
-      
+          taskName: taskName,
+          taskDesc: taskDescription,
+          scheduledDate: _scheduledDate!,
+          startTime: startTime,
+          endTime: endTime,
+          deadline: _deadline!,
+          subjectCode: _subject!);
+
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Task added successfully!')),
-      ); 
+      );
 
       Navigator.pop(context);
       // Clear fields after adding
-      _clearFields();     
+      _clearFields();
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add task (1): $error')),
@@ -155,8 +155,10 @@ class _CreateTaskState extends State<AddTaskScreen> {
     super.initState();
 
     // Fetch semesters and subjects when the screen loads
-    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
-    final classScheduleProvider = Provider.of<ClassScheduleProvider>(context, listen: false);
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
+    final classScheduleProvider =
+        Provider.of<ClassScheduleProvider>(context, listen: false);
 
     semesterProvider.fetchSemesters().then((_) {
       // Fetch subjects based on the active semester (determined in ClassScheduleProvider)
@@ -194,7 +196,9 @@ class _CreateTaskState extends State<AddTaskScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  _buildTitle('Task Name',),
+                  _buildTitle(
+                    'Task Name',
+                  ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                     _taskNameController,
@@ -258,7 +262,8 @@ class _CreateTaskState extends State<AddTaskScreen> {
                   CustomWidgets.buildDropdownField(
                     label: 'Choose Subject',
                     value: _subject,
-                    items: Provider.of<ClassScheduleProvider>(context).subjectCodes,
+                    items: Provider.of<ClassScheduleProvider>(context)
+                        .subjectCodes,
                     onChanged: (String? value) {
                       setState(() {
                         _subject = value;
@@ -292,7 +297,6 @@ class _CreateTaskState extends State<AddTaskScreen> {
                 'Create Task',
                 style: GoogleFonts.openSans(
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),

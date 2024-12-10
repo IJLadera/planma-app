@@ -17,32 +17,14 @@ class GoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color(0xFFD7C0F3),
-          borderRadius: BorderRadius.circular(20),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
         ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(16.0),
-          title: Text(
-            goalName,
-            style: GoogleFonts.openSans(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF173F70),
-            ),
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(
-              'Target Hours: $targetHours',
-              style: GoogleFonts.openSans(
-                fontSize: 14,
-                color: Color(0xFF173F70),
-              ),
-            ),
-          ),
+        elevation: 5,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
           onTap: () {
             Navigator.push(
               context,
@@ -59,26 +41,72 @@ class GoalCard extends StatelessWidget {
               ),
             );
           },
-          trailing: SizedBox(
-            width: 50,
-            height: 50,
-            child: Stack(
-              fit: StackFit.expand,
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD7C0F3).withOpacity(0.7),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CircularProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.grey[300],
-                  color: Color(0xFFB480F3),
-                  strokeWidth: 6,
+                // Vertical Divider
+                Container(
+                  height: 60,
+                  width: 2,
+                  color: const Color(0xFFB480F3),
                 ),
-                Center(
-                  child: Text(
-                    '${(progress * 100).toInt()}%',
-                    style: TextStyle(
-                      fontSize: progress < 0.1 ? 10 : 12,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF173F70),
-                    ),
+                const SizedBox(width: 12),
+
+                // Goal Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        goalName,
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF173F70),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Target Hours: $targetHours',
+                        style: GoogleFonts.openSans(
+                          fontSize: 14,
+                          color: const Color(0xFF173F70),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Circular Progress Indicator
+                SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CircularProgressIndicator(
+                        value: progress,
+                        backgroundColor: Colors.grey[300],
+                        color: const Color(0xFFB480F3),
+                        strokeWidth: 6,
+                      ),
+                      Center(
+                        child: Text(
+                          '${(progress * 100).toInt()}%',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF173F70),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -7,6 +7,7 @@ import 'package:planma_app/subject/widget/subject_detail_row.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
   final ClassSchedule classSchedule;
@@ -100,7 +101,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     return Consumer<ClassScheduleProvider>(
         builder: (context, classScheduleProvider, child) {
       final schedule = classScheduleProvider.classSchedules.firstWhere(
-        (schedule) => schedule.classschedId == widget.classSchedule.classschedId,
+        (schedule) =>
+            schedule.classschedId == widget.classSchedule.classschedId,
         orElse: () => ClassSchedule(
           classschedId: -1, // Indicate an invalid or default ID
           subjectCode: 'N/A',
@@ -137,7 +139,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
+              icon: const Icon(Icons.edit, color: Color(0xFF173F70)),
               onPressed: () async {
                 await Navigator.push<ClassSchedule>(
                   context,
@@ -149,14 +151,18 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.blue),
+              icon: const Icon(Icons.delete, color: Color(0xFF173F70)),
               onPressed: () => _handleDelete(context),
             ),
           ],
-          title: const Text(
+          centerTitle: true,
+          title: Text(
             'Subject',
-            style: TextStyle(
-                color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            style: GoogleFonts.openSans(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF173F70),
+            ),
           ),
         ),
         body: Padding(
@@ -171,17 +177,22 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SubjectDetailRow(title: 'Code:', detail: schedule.subjectCode),
+                  SubjectDetailRow(
+                      title: 'Code:', detail: schedule.subjectCode),
                   const Divider(),
-                  SubjectDetailRow(title: 'Title:', detail: schedule.subjectTitle),
+                  SubjectDetailRow(
+                      title: 'Title:', detail: schedule.subjectTitle),
                   const Divider(),
                   SubjectDetailRow(title: 'Semester:', detail: semesterDetails),
                   const Divider(),
                   SubjectDetailRow(title: 'Day:', detail: schedule.dayOfWeek),
                   const Divider(),
-                  SubjectDetailRow(title: 'Time:', detail: '$startTime - $endTime'),
+                  SubjectDetailRow(
+                      title: 'Time:', detail: '$startTime - $endTime'),
                   const Divider(),
-                  SubjectDetailRow(title: 'Room:', detail: schedule.room.isNotEmpty ? schedule.room : 'N/A'),
+                  SubjectDetailRow(
+                      title: 'Room:',
+                      detail: schedule.room.isNotEmpty ? schedule.room : 'N/A'),
                   const Divider(),
                   const SizedBox(height: 20),
                   CustomWidgets.dropwDownForAttendance(
