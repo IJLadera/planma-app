@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:planma_app/event/widget/event_card.dart';
 import 'package:planma_app/models/events_model.dart';
@@ -15,19 +14,26 @@ class ByDateView extends StatelessWidget {
 
     // Categorize events
     final Map<String, List<Event>> groupedevents = {
-      "Past": eventsView.where((event) => event.scheduledDate.isBefore(today)).toList(),
-      "Today": eventsView.where((event) => event.scheduledDate.isAtSameMomentAs(today)).toList(),
+      "Past": eventsView
+          .where((event) => event.scheduledDate.isBefore(today))
+          .toList(),
+      "Today": eventsView
+          .where((event) => event.scheduledDate.isAtSameMomentAs(today))
+          .toList(),
       "Tomorrow": eventsView
-          .where((event) => event.scheduledDate.isAtSameMomentAs(today.add(const Duration(days: 1))))
+          .where((event) => event.scheduledDate
+              .isAtSameMomentAs(today.add(const Duration(days: 1))))
           .toList(),
       "This Week": eventsView.where((event) {
         final weekEnd = today.add(Duration(days: 7 - today.weekday));
         return event.scheduledDate.isAfter(today) &&
             event.scheduledDate.isBefore(weekEnd) &&
-            !event.scheduledDate.isAtSameMomentAs(today.add(const Duration(days: 1)));
+            !event.scheduledDate
+                .isAtSameMomentAs(today.add(const Duration(days: 1)));
       }).toList(),
       "Future": eventsView
-          .where((event) => event.scheduledDate.isAfter(today.add(Duration(days: 7 - today.weekday))))
+          .where((event) => event.scheduledDate
+              .isAfter(today.add(Duration(days: 7 - today.weekday))))
           .toList(),
     };
 
@@ -38,18 +44,18 @@ class ByDateView extends StatelessWidget {
 
         return events.isNotEmpty
             ? Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(2),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
+                      padding: const EdgeInsets.all(8),
                       child: Text(
                         category,
                         style: GoogleFonts.openSans(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF173F70)),
                       ),
                     ),
                     ListView.builder(

@@ -7,6 +7,7 @@ import 'package:planma_app/reports/widget/class.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EditClass extends StatefulWidget {
   final ClassSchedule classSchedule;
@@ -29,13 +30,13 @@ class _EditClassState extends State<EditClass> {
   String? selectedDay;
 
   final Map<String, String> dayAbbreviationToFull = {
-  'S': 'Sunday',
-  'M': 'Monday',
-  'T': 'Tuesday',
-  'W': 'Wednesday',
-  'Th': 'Thursday',
-  'F': 'Friday',
-  'Sa': 'Saturday',
+    'S': 'Sunday',
+    'M': 'Monday',
+    'T': 'Tuesday',
+    'W': 'Wednesday',
+    'Th': 'Thursday',
+    'F': 'Friday',
+    'Sa': 'Saturday',
   };
 
   Future<void> _selectTime(
@@ -53,7 +54,8 @@ class _EditClassState extends State<EditClass> {
 
   TimeOfDay? _stringToTimeOfDay(String timeString) {
     try {
-      final format = RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
+      final format =
+          RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
       final match = format.firstMatch(timeString.trim());
 
       if (match == null) {
@@ -64,7 +66,9 @@ class _EditClassState extends State<EditClass> {
       final minute = int.parse(match.group(2)!);
       final period = match.group(3)!.toLowerCase();
 
-      final adjustedHour = (period == 'pm' && hour != 12) ? hour + 12 : (hour == 12 && period == 'am' ? 0 : hour);
+      final adjustedHour = (period == 'pm' && hour != 12)
+          ? hour + 12
+          : (hour == 12 && period == 'am' ? 0 : hour);
 
       return TimeOfDay(hour: adjustedHour, minute: minute);
     } catch (e) {
@@ -97,11 +101,15 @@ class _EditClassState extends State<EditClass> {
     super.initState();
 
     // Pre-fill fields with current class details
-    _subjectCodeController = TextEditingController(text: widget.classSchedule.subjectCode);
-    _subjectTitleController = TextEditingController(text: widget.classSchedule.subjectTitle);
+    _subjectCodeController =
+        TextEditingController(text: widget.classSchedule.subjectCode);
+    _subjectTitleController =
+        TextEditingController(text: widget.classSchedule.subjectTitle);
     _roomController = TextEditingController(text: widget.classSchedule.room);
-    _startTimeController = TextEditingController(text: _formatTimeForDisplay(widget.classSchedule.scheduledStartTime));
-    _endTimeController = TextEditingController(text: _formatTimeForDisplay(widget.classSchedule.scheduledEndTime));
+    _startTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.classSchedule.scheduledStartTime));
+    _endTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.classSchedule.scheduledEndTime));
 
     print(_formatTimeForDisplay(widget.classSchedule.scheduledStartTime));
     print(_formatTimeForDisplay(widget.classSchedule.scheduledEndTime));
@@ -109,7 +117,8 @@ class _EditClassState extends State<EditClass> {
     selectedSemesterId = widget.classSchedule.semesterId;
     selectedDay = widget.classSchedule.dayOfWeek;
 
-    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
 
     // Fetch semesters and set the selected semester
     semesterProvider.fetchSemesters().then((_) {
@@ -122,29 +131,33 @@ class _EditClassState extends State<EditClass> {
           );
 
           if (matchedSemester != null) {
-            selectedSemester = "${matchedSemester['acad_year_start']} - ${matchedSemester['acad_year_end']} ${matchedSemester['semester']}";
+            selectedSemester =
+                "${matchedSemester['acad_year_start']} - ${matchedSemester['acad_year_end']} ${matchedSemester['semester']}";
             print("Pre-selected semester: $selectedSemester");
           } else {
             // Fallback to the first semester if no match is found
             final defaultSemester = semesterProvider.semesters.first;
-            selectedSemester = "${defaultSemester['acad_year_start']} - ${defaultSemester['acad_year_end']} ${defaultSemester['semester']}";
+            selectedSemester =
+                "${defaultSemester['acad_year_start']} - ${defaultSemester['acad_year_end']} ${defaultSemester['semester']}";
             selectedSemesterId = defaultSemester['semester_id'];
             print("Default selected semester: $selectedSemester");
           }
-        } 
+        }
       });
     });
 
     // Add listener for subject code controller to auto-fill subject title
     _subjectCodeController.addListener(() {
-      final subjectProvider = Provider.of<ClassScheduleProvider>(context, listen: false);
+      final subjectProvider =
+          Provider.of<ClassScheduleProvider>(context, listen: false);
       String subjectCode = _subjectCodeController.text.trim();
 
       if (subjectCode.isNotEmpty) {
         subjectProvider.fetchSubjectDetails(subjectCode).then((_) {
           setState(() {
             if (subjectProvider.selectedSubject != null) {
-              _subjectTitleController.text = subjectProvider.selectedSubject!.subjectTitle;
+              _subjectTitleController.text =
+                  subjectProvider.selectedSubject!.subjectTitle;
             } else {
               _subjectTitleController.clear(); // Clear if no subject is found
             }
@@ -195,7 +208,6 @@ class _EditClassState extends State<EditClass> {
       return;
     }
 
-
     if (subjectCode.isEmpty ||
         subjectTitle.isEmpty ||
         room.isEmpty ||
@@ -225,15 +237,14 @@ class _EditClassState extends State<EditClass> {
     try {
       print('Starting to update schedule...');
       await provider.updateClassSchedule(
-        classschedId: widget.classSchedule.classschedId!, 
-        subjectCode: subjectCode, 
-        subjectTitle: subjectTitle, 
-        semesterId: selectedSemesterId!, 
-        dayOfWeek: selectedDay!, 
-        startTime: startTime, 
-        endTime: endTime, 
-        room: room
-      );
+          classschedId: widget.classSchedule.classschedId!,
+          subjectCode: subjectCode,
+          subjectTitle: subjectTitle,
+          semesterId: selectedSemesterId!,
+          dayOfWeek: selectedDay!,
+          startTime: startTime,
+          endTime: endTime,
+          room: room);
       print('Schedule updated successfully!');
 
       // After validation and adding logic
@@ -250,21 +261,26 @@ class _EditClassState extends State<EditClass> {
   }
 
   bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
-  return startTime.hour < endTime.hour ||
-      (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Class Schedule'),
+        title: Text(
+          'Edit Class Schedule',
+          style: GoogleFonts.openSans(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF173F70)),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Consumer<SemesterProvider>(
         builder: (context, semesterProvider, child) {
@@ -285,13 +301,18 @@ class _EditClassState extends State<EditClass> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildTitle('Subject Code'),
+                      const SizedBox(height: 12),
                       CustomWidgets.buildTextField(
                           _subjectCodeController, 'Subject Code'),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
+                      _buildTitle('Subject Title'),
+                      const SizedBox(height: 12),
                       CustomWidgets.buildTextField(
                           _subjectTitleController, 'Subject Title'),
-                      const SizedBox(height: 16),
-                      // Dropdown for Semester
+                      const SizedBox(height: 12),
+                      _buildTitle('Semester'),
+                      const SizedBox(height: 12),
                       CustomWidgets.buildDropdownField(
                         label: 'Select Semester',
                         value: selectedSemester,
@@ -301,28 +322,38 @@ class _EditClassState extends State<EditClass> {
                             if (value == '- Add Semester -') {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => AddSemesterScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => AddSemesterScreen()),
                               ).then((_) => semesterProvider.fetchSemesters());
                             } else {
                               selectedSemester = value;
 
                               // Split data from value for firstWhere comparison
-                              List<String> semesterParts = selectedSemester!.split(' ');
+                              List<String> semesterParts =
+                                  selectedSemester!.split(' ');
                               int acadYearStart = int.parse(semesterParts[0]);
                               int acadYearEnd = int.parse(semesterParts[2]);
-                              String semesterType = "${semesterParts[3]} ${semesterParts[4]}";
-                              
-                              final selectedSemesterMap = semesterProvider.semesters.firstWhere(
+                              String semesterType =
+                                  "${semesterParts[3]} ${semesterParts[4]}";
+
+                              final selectedSemesterMap =
+                                  semesterProvider.semesters.firstWhere(
                                 (semester) {
-                                  return semester['acad_year_start'] == acadYearStart &&
-                                  semester['acad_year_end'] == acadYearEnd &&
-                                  semester['semester'] == semesterType;
-                                }, orElse: () => {},  // Return null if no match is found
+                                  return semester['acad_year_start'] ==
+                                          acadYearStart &&
+                                      semester['acad_year_end'] ==
+                                          acadYearEnd &&
+                                      semester['semester'] == semesterType;
+                                },
+                                orElse: () =>
+                                    {}, // Return null if no match is found
                               );
 
                               if (selectedSemesterMap != null) {
-                                selectedSemesterId = selectedSemesterMap['semester_id'];
-                                print("Found semester ID: ${selectedSemesterMap['semester_id']}");
+                                selectedSemesterId =
+                                    selectedSemesterMap['semester_id'];
+                                print(
+                                    "Found semester ID: ${selectedSemesterMap['semester_id']}");
                               } else {
                                 print("No matching semester found");
                               }
@@ -337,13 +368,14 @@ class _EditClassState extends State<EditClass> {
                             const EdgeInsets.symmetric(horizontal: 16),
                         fontSize: 14.0,
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
+                      const SizedBox(height: 12),
+                      Text(
                         'Day of the Week',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF173F70),
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -352,10 +384,13 @@ class _EditClassState extends State<EditClass> {
                           for (var day in ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'])
                             DayButton(
                               day: day,
-                              isSelected: selectedDay == dayAbbreviationToFull[day], // Match full day name
+                              isSelected: selectedDay ==
+                                  dayAbbreviationToFull[
+                                      day], // Match full day name
                               onTap: () {
                                 setState(() {
-                                  if (selectedDay == dayAbbreviationToFull[day]) {
+                                  if (selectedDay ==
+                                      dayAbbreviationToFull[day]) {
                                     selectedDay = null;
                                   } else {
                                     selectedDay = dayAbbreviationToFull[day];
@@ -365,7 +400,9 @@ class _EditClassState extends State<EditClass> {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
+                      _buildTitle('Start and End Time'),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
@@ -391,7 +428,9 @@ class _EditClassState extends State<EditClass> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
+                      _buildTitle('Room'),
+                      const SizedBox(height: 12),
                       CustomWidgets.buildTextField(_roomController, 'Room'),
                     ],
                   ),
@@ -410,9 +449,12 @@ class _EditClassState extends State<EditClass> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 120),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Edit Class Schedule',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -432,4 +474,22 @@ class _EditClassState extends State<EditClass> {
     _endTimeController.dispose();
     super.dispose();
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }

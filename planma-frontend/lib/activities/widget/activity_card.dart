@@ -22,41 +22,40 @@ class ActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: InkWell(
-        onTap: () {
-          // Navigate to ViewActivity screen and pass dynamic data
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ViewActivity(
-                activityName: activityName,
-                description: description, // Passing real description data
-                date: date, // Passing real date data
-                time: timePeriod, // Passing real time data
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+              12.0), // Rounded corners for a smoother look
+        ),
+        elevation: 5, // Adds shadow for visual appeal
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ViewActivity(
+                  activityName: activityName,
+                  description: description,
+                  date: date,
+                  time: timePeriod,
+                ),
               ),
-            ),
-          );
-        },
-        child: SizedBox(
-          width: double.infinity, // Make the card fill the available width
+            );
+          },
           child: Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(20),
+              color: backgroundColor
+                  .withOpacity(0.6), // Slight transparency for the background
+              borderRadius: BorderRadius.circular(12), // Rounded corners
             ),
             child: Row(
               children: [
-                // Play Button at Start
-                IconButton(
-                  icon: const Icon(
-                    Icons.play_circle_fill,
-                    color: Color(0xFF173F70),
-                    size: 30,
-                  ),
-                  onPressed: () {
-                    // Navigate to TimerPage
+                // Play Button at the start
+                GestureDetector(
+                  onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -65,8 +64,19 @@ class ActivityCard extends StatelessWidget {
                       ),
                     );
                   },
+                  child: const Icon(
+                    Icons.play_circle_fill,
+                    color: Color(0xFF173F70),
+                    size: 28,
+                  ),
                 ),
-                const SizedBox(width: 16), // Spacing between button and text
+                const SizedBox(width: 12),
+                Container(
+                  height: 50, // The height of the divider, adjust as needed
+                  width: 2, // The thickness of the divider
+                  color: Color(0xFFFF5656), // Divider color
+                ),
+                const SizedBox(width: 12),
                 // Activity Details
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

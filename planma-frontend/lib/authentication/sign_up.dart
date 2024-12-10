@@ -64,8 +64,9 @@ class _SignUpState extends State<SignUp> {
         );
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>
-          SleepWakeSetupScreen()
+          MaterialPageRoute(
+            builder: (context) => LogIn(),
+            // SleepWakeSetupScreen(),
           ),
         );
       } else {

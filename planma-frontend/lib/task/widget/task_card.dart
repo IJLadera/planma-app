@@ -39,35 +39,33 @@ class TaskCard extends StatelessWidget {
     final endTime = _formatTimeForDisplay(task.scheduledEndTime);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Add padding around the whole list
-      child: InkWell(
-        onTap: () {
-          // Navigate to ViewTask with dynamic data
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TaskDetailScreen(
-                task: task
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0), // Rounded corners
+        ),
+        elevation: 5, // Adds shadow effect for better UX
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12.0),
+          onTap: () {
+            // Navigate to ViewTask with dynamic data
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TaskDetailScreen(task: task),
               ),
-            ),
-          );
-        },
-        borderRadius:
-            BorderRadius.circular(12), // Slightly larger border radius
-        child: Container(
-          padding:
-              const EdgeInsets.all(16), // Increased padding inside the card
-          decoration: BoxDecoration(
-            color: Color(0xFFC0D7F3),
-            borderRadius:
-                BorderRadius.circular(12), // Matching radius for consistency
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+            );
+          },
+          child: Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color:
+                    Color(0xFFC0D7F3).withOpacity(0.6), // Slight transparency
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
                 children: [
-                  // Separate GestureDetector for the time icon
+                  // GestureDetector for the time icon (same as original position)
                   GestureDetector(
                     onTap: () {
                       // Navigate to TimerPage when the time icon is tapped
@@ -80,37 +78,47 @@ class TaskCard extends StatelessWidget {
                       );
                     },
                     child: const Icon(
-                      Icons.access_time, // Time icon
+                      Icons.play_circle_fill, // Time icon
                       size: 28, // Slightly larger icon size
                       color: Color(0xFF173F70), // Icon color
                     ),
                   ),
-                  const SizedBox(
-                      width: 12), // Increased space between icon and text
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        task.taskName,
-                        style: GoogleFonts.openSans(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Color(0xFF173F70),
+                  const SizedBox(width: 12), // Space between icon and divider
+                  Container(
+                    height: 50, // The height of the divider, adjust as needed
+                    width: 2, // The thickness of the divider
+                    color: Color(0xFF0095FF), // Divider color
+                  ),
+                  const SizedBox(width: 12), // Space between divider and text
+                  Expanded(
+                    // Ensure the text takes up remaining space
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Task Name
+                        Text(
+                          task.taskName,
+                          style: GoogleFonts.openSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF173F70),
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${task.subjectCode} ($startTime - $endTime)',
-                        style: GoogleFonts.openSans(
-                          fontSize: 14,
-                          color: Color(0xFF173F70),
+                        const SizedBox(height: 4),
+                        // Subject Code with time range
+                        Text(
+                          '${task.subjectCode} ($startTime - $endTime)',
+                          style: GoogleFonts.openSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF173F70),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
-              ),
-            ],
-          ),
+              )),
         ),
       ),
     );

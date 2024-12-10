@@ -46,61 +46,88 @@ class SubjectCard extends StatelessWidget {
         ),
         elevation: 5, // Adds shadow effect for better UX
         child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SubjectDetailScreen(
-                    classSchedule: schedule,
-                  ),
+          borderRadius: BorderRadius.circular(12.0),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SubjectDetailScreen(
+                  classSchedule: schedule,
                 ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color:
-                    Color(0xFFACEFDB).withOpacity(0.6), // Slight transparency
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFE1BF)
+                  .withOpacity(0.6), // Slight transparency
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Row for Divider and Subject Details
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Subject Code
-                    Text(
-                      schedule.subjectCode,
-                      style: GoogleFonts.openSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
+                    const SizedBox(width: 3, height: 10),
 
-                    const SizedBox(height: 4),
-                    // Subject Title
-                    Text(
-                      schedule.subjectTitle,
-                      style: GoogleFonts.openSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF173F70),
-                      ),
+                    // Divider
+                    Container(
+                      height: 70, // Height of the divider
+                      width: 2, // Thickness of the divider
+                      color: const Color(0xFFFFBB70), // Divider color
                     ),
-
-                    const SizedBox(height: 4),
-                    // Time Info
-                    Row(children: [
-                      Text(
-                        '$startTime - $endTime',
-                        style: GoogleFonts.openSans(
-                          fontSize: 12,
-                          color: Color(0xFF173F70),
+                    const SizedBox(
+                      width: 12,
+                      height: 5,
+                    ),
+                    // Subject Details
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Subject Code
+                        Text(
+                          schedule.subjectCode,
+                          style: GoogleFonts.openSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF173F70),
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                    ]),
-                  ]),
-            )),
+                        const SizedBox(
+                          width: 12,
+                          height: 5,
+                        ),
+                        // Subject Title
+                        Text(
+                          schedule.subjectTitle,
+                          style: GoogleFonts.openSans(
+                            fontSize: 12,
+                            color: const Color(0xFF173F70),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 12,
+                          height: 5,
+                        ),
+                        // Time Info
+                        Text(
+                          '$startTime - $endTime',
+                          style: GoogleFonts.openSans(
+                            fontSize: 12,
+                            color: const Color(0xFF173F70),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

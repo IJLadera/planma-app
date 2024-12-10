@@ -79,7 +79,7 @@ class CustomWidgets {
               title: TextFormField(
                 controller: controller,
                 readOnly: true, // To prevent manual input
-                style: TextStyle(fontSize: 14, color: Colors.black),
+                style: GoogleFonts.openSans(fontSize: 14, color: Colors.black),
                 decoration: InputDecoration(
                   labelText: label,
                   hintText: 'Select Date',

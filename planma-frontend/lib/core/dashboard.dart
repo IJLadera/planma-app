@@ -81,7 +81,7 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Color(0xFF7DCFB6),
+                    color: Color(0xFFFFE1BF),
                     icon: Icons.description,
                     title: 'Class Schedule',
                     subtitle: '11 classes',
@@ -95,7 +95,7 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Color(0xFFFBD1A2),
+                    color: Color(0xFF7DCFB6),
                     icon: Icons.event,
                     title: 'Events',
                     subtitle: '1 event',
