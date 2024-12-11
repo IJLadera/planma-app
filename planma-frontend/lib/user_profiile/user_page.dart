@@ -59,11 +59,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(
-              'Set Sleep & Wake Time',
+              'Sleep & Wake Time',
+              textAlign: TextAlign.center,
               style: GoogleFonts.openSans(
-                fontSize: 24, // Increased font size for the title
-                color: Color(0xFF173F70),
-              ),
+                  fontSize: 24, // Increased font size for the title
+                  color: Color(0xFF173F70),
+                  fontWeight: FontWeight.bold),
             ),
             content: Container(
               height: 200, // Increased height for better space

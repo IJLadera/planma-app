@@ -62,11 +62,11 @@ class _SignUpState extends State<SignUp> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Account created successfully!")),
         );
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => LogIn(),
-            // SleepWakeSetupScreen(),
+            builder: (context) => SleepWakeSetupScreen(),
           ),
         );
       } else {

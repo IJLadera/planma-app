@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/core/dashboard.dart';
 import 'package:planma_app/user_preferences/setting_goal.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:planma_app/Providers/user_preferences_provider.dart';
 
 class SleepWakeReminderScreen extends StatefulWidget {
   final String usualSleepTime;
@@ -32,28 +32,30 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
   ];
 
   Future<void> _saveReminderToDatabase(String reminderTime) async {
-    final url = Uri.parse(
-        "http://your-backend-url/api/time-reminder/"); // Replace with actual URL
-
+    final provider =
+        Provider.of<UserPreferencesProvider>(context, listen: false);
     try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "reminder_time": reminderTime,
-          "usual_sleep_time": widget.usualSleepTime,
-          "usual_wake_time": widget.usualWakeTime,
-        }),
+      // Save the reminder time using the provider
+      await provider.saveUserPreferences(
+        usualSleepTime: widget.usualSleepTime,
+        usualWakeTime: widget.usualWakeTime,
+        reminderOffsetTime: reminderTime,
       );
 
-      if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Reminder saved successfully!")),
-        );
-      } else {
-        throw Exception("Failed to save reminder: ${response.body}");
-      }
+      // If successful, show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Reminder saved successfully!")),
+      );
+
+      // Navigate to the next screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Dashboard(),
+        ),
+      );
     } catch (e) {
+      // Handle error while saving reminder
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error saving reminder: $e")),
       );
@@ -126,16 +128,8 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
               // Next Button
               ElevatedButton(
                 onPressed: () async {
-                  // Save reminder to database
+                  // Save reminder to database using the provider
                   await _saveReminderToDatabase(_selectedTime);
-
-                  // Navigate to the next screen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Dashboard(),
-                    ),
-                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
