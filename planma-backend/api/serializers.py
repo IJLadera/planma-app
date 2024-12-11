@@ -49,13 +49,12 @@ class ActivityLogSerializer(serializers.ModelSerializer):
 
 
 class UserPrefSerializer(serializers.ModelSerializer):
-    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-
     class Meta: 
         model = UserPref
         fields = ['pref_id', 'usual_sleep_time', 'usual_wake_time', 
-                  'reminder_offset_time', 
-                  'student_id']
+                  'reminder_offset_time', 'student_id']
+        read_only_fields = ['student_id']
+
         
 class CustomSemesterSerializer(serializers.ModelSerializer):
     class Meta:

@@ -16,10 +16,23 @@ class UserPreferencesProvider with ChangeNotifier {
   Future<void> _initAccessToken() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
+    // If token is null or expired, navigate to login
+    print("Access Token: $_accessToken");
+    if (_accessToken == null) {
+      throw Exception('Access token is missing or invalid');
+    }
+  }
+
+  // Save access token after successful login
+  Future<void> saveAccessToken(String token) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setString("access", token);
+    _accessToken = token; // Save token in memory
+    notifyListeners();
   }
 
   // Fetch User Preferences
-  Future<void> fetchUserPreferences(String userId) async {
+  Future<void> fetchUserPreferences() async {
     await _initAccessToken();
     final url = Uri.parse("${baseUrl}userprefs/");
 
@@ -52,11 +65,11 @@ class UserPreferencesProvider with ChangeNotifier {
   }) async {
     await _initAccessToken();
     final url = prefId != null
-        ? Uri.parse("${baseUrl}userprefs/$prefId/")  // Update URL
-        : Uri.parse("${baseUrl}userprefs/");  // Create URL
+        ? Uri.parse("${baseUrl}userprefs/$prefId/") // Update URL
+        : Uri.parse("${baseUrl}userprefs/"); // Create URL
 
     try {
-      final response = await http.post(
+      final response = await (prefId != null ? http.put : http.post)(
         url,
         headers: {
           'Authorization': 'Bearer $_accessToken',
@@ -68,6 +81,9 @@ class UserPreferencesProvider with ChangeNotifier {
           'reminder_offset_time': reminderOffsetTime,
         }),
       );
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         _userPreferences = json.decode(response.body);
@@ -84,7 +100,8 @@ class UserPreferencesProvider with ChangeNotifier {
   // Delete User Preferences
   Future<void> deleteUserPreferences(int prefId) async {
     await _initAccessToken();
-    final url = Uri.parse("${baseUrl}userprefs/$prefId/");  // Adjust URL to reflect changes
+    final url = Uri.parse(
+        "${baseUrl}userprefs/$prefId/"); // Adjust URL to reflect changes
 
     try {
       final response = await http.delete(

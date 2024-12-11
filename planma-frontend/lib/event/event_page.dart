@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/event/create_event.dart';
 import 'package:planma_app/event/widget/by_date_view.dart';
-import 'package:planma_app/event/widget/event_card.dart';
 import 'package:planma_app/Providers/events_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';

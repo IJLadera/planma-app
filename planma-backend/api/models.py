@@ -148,22 +148,31 @@ class ActivityLog(models.Model):
     date_logged = models.DateField()
 
 class UserPref(models.Model):
-    
-     # Primary Key
+    # Primary Key
     pref_id = models.AutoField(primary_key=True)
     
     # User Pref Details
-    usual_sleep_time = models.TimeField()
-    usual_wake_time = models.TimeField()
+    usual_sleep_time = models.TimeField(default="23:00")
+    usual_wake_time = models.TimeField(default="07:00")
     reminder_offset_time = models.TimeField()
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='userpref', db_column='student_id'
+        related_name='userpref',
+        db_column='student_id',
+        db_index=True
     )
 
     def __str__(self):
         return f"User Preferences for {self.student_id.username}"
+
+    def clean(self):
+        if self.usual_sleep_time >= self.usual_wake_time:
+            raise ValidationError("Sleep time must be before wake time.")
+
+    class Meta:
+        verbose_name = "User Preference"
+        verbose_name_plural = "User Preferences"
 
 #Semester
 class CustomSemester(models.Model):
