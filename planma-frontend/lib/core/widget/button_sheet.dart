@@ -4,6 +4,7 @@ import 'package:planma_app/event/create_event.dart';
 import 'package:planma_app/goals/create_goal.dart';
 import 'package:planma_app/subject/create_subject.dart';
 import 'package:planma_app/task/create_task.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class BottomSheetWidget {
   static void show(BuildContext context) {
@@ -26,14 +27,13 @@ class BottomSheetWidget {
                 Center(
                   child: Text(
                     "Add",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: GoogleFonts.openSans(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF173F70)),
                   ),
                 ),
                 SizedBox(height: 16),
-
                 // Task button
                 _buildBottomSheetButton(
                   context,
@@ -117,15 +117,16 @@ class BottomSheetWidget {
           title: Center(
             child: Text(
               label,
-              style: TextStyle(fontSize: 18),
+              style:
+                  GoogleFonts.openSans(fontSize: 18, color: Color(0xFF173F70)),
             ),
           ),
           onTap: onPressed,
         ),
         if (label != "Add") // Exclude divider below "Add"
           Divider(
-            thickness: 1,
-            color: Colors.grey.shade300,
+            thickness: 0.5,
+            color: Color(0xFF173F70),
           ),
       ],
     );

@@ -38,6 +38,7 @@ class MyApp extends StatelessWidget {
           // home: SleepWakeSetupScreen(),
           debugShowCheckedModeBanner: false,
           home: SplashScreen(),
+          // home: Dashboard(),
           theme: ThemeData(
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor: Colors.white,

@@ -98,73 +98,129 @@ class ViewGoal extends StatelessWidget {
                   value: goalDetails['semester'] ?? 'N/A',
                 ),
                 const Divider(),
-                const SizedBox(height: 16),
-
-                // Sessions Section
-                Center(
-                  child: Text(
-                    'No goals found',
-                    style: GoogleFonts.openSans(
-                      color: Color(0xFF173F70),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 8),
 
                 sessions.isNotEmpty
-                    ? Expanded(
-                        child: filteredGoals.isNotEmpty
-                            ? ListView.builder(
-                                itemCount: filteredGoals.length,
-                                itemBuilder: (context, index) {
-                                  final goal = filteredGoals[index];
-                                  return GoalCard(
-                                    goalName: goal['name'],
-                                    targetHours: goal['targetHours'],
-                                    progress: goal['progress'],
-                                  );
-                                },
-                              )
-                            : Center(
-                                child: Text(
-                                  'Add Session',
-                                  style: GoogleFonts.openSans(
-                                    fontSize: 16,
-                                    color: Colors.white,
+                    ? ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: sessions.length,
+                        itemBuilder: (context, index) {
+                          final session = sessions[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                    0xFFE0E0E0), // Background color (light gray)
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                children: [
+                                  // Play Icon
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: const Color(
+                                          0xFF173F70), // Icon background color
+                                    ),
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: const Icon(
+                                      Icons.play_arrow,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(width: 12),
+                                  // Vertical Divider
+                                  Container(
+                                    width: 1.5,
+                                    height: 30,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // Session Details
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          session['sessionName'],
+                                          style: GoogleFonts.openSans(
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF173F70),
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              session['date'] ?? 'Date',
+                                              style: GoogleFonts.openSans(
+                                                color: const Color(0xFF173F70),
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Text(
+                                              session['timePeriod'] ??
+                                                  '(Time Period)',
+                                              style: GoogleFonts.openSans(
+                                                color: const Color(0xFF173F70),
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
+                            ),
+                          );
+                        },
                       )
-                    :
-                    // Add Session Button
-                    Align(
-                        alignment: Alignment.center,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditGoalSession(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFB8B8B8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 24),
-                          ),
-                          child: Text(
-                            'Add Session',
-                            style: GoogleFonts.openSans(
-                              fontSize: 16,
-                              color: Color(0xFF173F70),
-                            ),
-                          ),
+                    : Center(
+                        child: Text(
+                          'No sessions added yet.',
+                          style: GoogleFonts.openSans(
+                              color: const Color(0xFF173F70)),
                         ),
                       ),
+                SizedBox(height: 12),
+                // Add Session Button
+                Align(
+                  alignment: Alignment.center,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditGoalSession(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFB8B8B8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 24),
+                    ),
+                    child: Text(
+                      'Add Session',
+                      style: GoogleFonts.openSans(
+                        fontSize: 16,
+                        color: Color(0xFF173F70),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

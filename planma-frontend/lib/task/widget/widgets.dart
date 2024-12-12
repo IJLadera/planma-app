@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomWidgets {
   // Method to build a TextField with custom style
   static Widget buildTextField(
-      TextEditingController controller, String labelText) {
+    TextEditingController controller,
+    String labelText, {
+    TextStyle? style,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
@@ -13,12 +17,12 @@ class CustomWidgets {
       ),
       child: TextField(
         controller: controller,
+        style: style ?? GoogleFonts.openSans(fontSize: 14),
         decoration: InputDecoration(
           labelText: labelText,
+          labelStyle: GoogleFonts.openSans(fontSize: 14),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0), // Adds padding inside the TextField
+          contentPadding: const EdgeInsets.all(16),
         ),
       ),
     );
@@ -57,12 +61,14 @@ class CustomWidgets {
   }
 
   // Method to build a time field with gesture and custom design
+
   static Widget buildTimeField(
     String label,
     TextEditingController controller,
     BuildContext context,
-    Function(BuildContext) selectTime,
-  ) {
+    Function(BuildContext) selectTime, {
+    TextStyle? textStyle,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
@@ -70,15 +76,14 @@ class CustomWidgets {
       ),
       child: TextField(
         controller: controller,
-        readOnly: true, // Only allow input via the time picker
+        readOnly: true,
         onTap: () => selectTime(context),
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: textStyle ?? GoogleFonts.openSans(fontSize: 16),
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0), // Adds padding inside the TextField
+          contentPadding: const EdgeInsets.all(16),
         ),
       ),
     );
@@ -89,12 +94,13 @@ class CustomWidgets {
     required String? value,
     required List<String> items,
     required Function(String?) onChanged,
-    Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
+    Color backgroundColor = const Color(0xFFF5F5F5),
     Color labelColor = Colors.black,
     Color textColor = Colors.black,
     double borderRadius = 30.0,
     EdgeInsets contentPadding = const EdgeInsets.all(12),
     double fontSize = 14.0,
+    TextStyle? textStyle,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -107,10 +113,8 @@ class CustomWidgets {
           isExpanded: true,
           hint: Text(
             label,
-            style: TextStyle(
-              color: labelColor,
-              fontSize: fontSize,
-            ),
+            style: textStyle ??
+                GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
           ),
           value: value,
           onChanged: onChanged,
@@ -119,7 +123,8 @@ class CustomWidgets {
               value: item,
               child: Text(
                 item,
-                style: TextStyle(fontSize: fontSize, color: textColor),
+                style: textStyle ??
+                    GoogleFonts.openSans(fontSize: fontSize, color: textColor),
               ),
             );
           }).toList(),
@@ -133,7 +138,7 @@ class CustomWidgets {
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white, // Background color of the dropdown menu
+              color: Colors.white,
             ),
           ),
           iconStyleData: IconStyleData(

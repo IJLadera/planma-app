@@ -6,12 +6,14 @@ class GoalCard extends StatelessWidget {
   final String goalName;
   final int targetHours;
   final double progress;
+  final Map<String, dynamic> goalDetails;
 
   const GoalCard({
     super.key,
     required this.goalName,
     required this.targetHours,
     required this.progress,
+    required this.goalDetails,
   });
 
   @override
@@ -30,13 +32,23 @@ class GoalCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => ViewGoal(
-                  goalDetails: {
-                    "Name": goalName,
-                    "Target Hours": targetHours.toString(),
-                    "Progress": "${(progress * 100).toInt()}%"
-                  },
-                  sessions: [],
-                  filteredGoals: [],
+                  goalDetails: goalDetails,
+                  sessions: [
+                    {"sessionName": "UI Design", "hoursSpent": 5},
+                    {"sessionName": "Backend Setup", "hoursSpent": 8},
+                  ],
+                  filteredGoals: [
+                    {
+                      "name": "Subtask 1",
+                      "targetHours": 5,
+                      "progress": 0.5,
+                    },
+                    {
+                      "name": "Subtask 2",
+                      "targetHours": 3,
+                      "progress": 0.8,
+                    },
+                  ],
                 ),
               ),
             );
@@ -50,15 +62,12 @@ class GoalCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Vertical Divider
                 Container(
                   height: 60,
                   width: 2,
                   color: const Color(0xFFB480F3),
                 ),
                 const SizedBox(width: 12),
-
-                // Goal Details
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,8 +91,6 @@ class GoalCard extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                // Circular Progress Indicator
                 SizedBox(
                   width: 50,
                   height: 50,
@@ -99,10 +106,10 @@ class GoalCard extends StatelessWidget {
                       Center(
                         child: Text(
                           '${(progress * 100).toInt()}%',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF173F70),
+                            color: Color(0xFF173F70),
                           ),
                         ),
                       ),

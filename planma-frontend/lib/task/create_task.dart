@@ -203,6 +203,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
                   CustomWidgets.buildTextField(
                     _taskNameController,
                     'Task Name',
+                    style: GoogleFonts.openSans(),
                   ),
                   const SizedBox(height: 12),
                   _buildTitle('Description'),
@@ -210,6 +211,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
                   CustomWidgets.buildTextField(
                     _descriptionController,
                     'Description',
+                    style: GoogleFonts.openSans(),
                   ),
                   const SizedBox(height: 12),
                   _buildTitle('Schedule Date'),
@@ -288,7 +290,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),

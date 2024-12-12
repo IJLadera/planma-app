@@ -304,6 +304,28 @@ class _EditGoal extends State<EditGoal> {
               ),
             ),
           ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: ElevatedButton(
+              onPressed: () {
+                // Placeholder for goal submission logic
+                print("Goal created with target duration: $_targetDuration");
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF173F70),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text('Edit Goal',
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Colors.white,
+                  )),
+            ),
+          ),
         ],
       ),
     );
