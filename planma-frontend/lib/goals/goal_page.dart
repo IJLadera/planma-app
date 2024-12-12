@@ -11,12 +11,29 @@ class GoalPage extends StatefulWidget {
 }
 
 class _GoalPageState extends State<GoalPage> {
-  // Simulated list of goals. Replace this with database or API data.
   final List<Map<String, dynamic>> goals = [
-    {"name": "Goal Name", "targetHours": 20, "progress": 0.25},
+    {
+      "name": "Complete Flutter Project",
+      "targetHours": 20,
+      "progress": 0.5,
+      "goalCode": "FLUTTER101",
+      "description": "Build a complete app",
+      "timeFrame": "2 Weeks",
+      "goalType": "Project",
+      "semester": "N/A",
+    },
+    {
+      "name": "Study for Math Exam",
+      "targetHours": 15,
+      "progress": 0.3,
+      "goalCode": "MATH101",
+      "description": "Prepare for the upcoming exam",
+      "timeFrame": "1 Week",
+      "goalType": "Study",
+      "semester": "Semester 1",
+    },
   ];
 
-  // Filtered goals list for search functionality
   late List<Map<String, dynamic>> filteredGoals;
 
   @override
@@ -85,6 +102,7 @@ class _GoalPageState extends State<GoalPage> {
                           goalName: goal['name'],
                           targetHours: goal['targetHours'],
                           progress: goal['progress'],
+                          goalDetails: goal,
                         );
                       },
                     )
@@ -107,7 +125,7 @@ class _GoalPageState extends State<GoalPage> {
             MaterialPageRoute(builder: (context) => AddGoalScreen()),
           );
         },
-        backgroundColor: Color(0xFF173F70),
+        backgroundColor: const Color(0xFF173F70),
         shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white),
       ),

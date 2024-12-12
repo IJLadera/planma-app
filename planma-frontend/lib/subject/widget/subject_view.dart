@@ -211,8 +211,6 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                     textColor: CustomWidgets.getColor(
                         selectedAttendance), // Use getColor as a static method
                     borderRadius: 8.0,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     fontSize: 14.0,
                   ),
                 ],

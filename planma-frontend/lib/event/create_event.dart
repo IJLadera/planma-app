@@ -52,7 +52,6 @@ class _AddEventScreen extends State<AddEventScreen> {
     }
   }
 
-  
   TimeOfDay? _stringToTimeOfDay(String timeString) {
     try {
       final timeParts = timeString.split(':');
@@ -86,7 +85,7 @@ class _AddEventScreen extends State<AddEventScreen> {
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
 
-    if (eventName.isEmpty || 
+    if (eventName.isEmpty ||
         eventDescription.isEmpty ||
         location.isEmpty ||
         _scheduledDate == null ||
@@ -108,23 +107,23 @@ class _AddEventScreen extends State<AddEventScreen> {
 
     try {
       await provider.addEvent(
-        eventName: eventName, 
-        eventDesc: eventDescription, 
+        eventName: eventName,
+        eventDesc: eventDescription,
         location: location,
-        scheduledDate: _scheduledDate!, 
-        startTime: startTime, 
+        scheduledDate: _scheduledDate!,
+        startTime: startTime,
         endTime: endTime,
-        eventType: _selectedEventType!, 
-        );
-      
+        eventType: _selectedEventType!,
+      );
+
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('event added successfully!')),
-      ); 
+      );
 
       Navigator.pop(context);
       // Clear fields after adding
-      _clearFields();     
+      _clearFields();
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add event (1): $error')),
@@ -137,6 +136,7 @@ class _AddEventScreen extends State<AddEventScreen> {
     return startTime.hour < endTime.hour ||
         (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
+
   void _clearFields() {
     _eventNameController.clear();
     _eventDescController.clear();
@@ -146,7 +146,6 @@ class _AddEventScreen extends State<AddEventScreen> {
     _selectedEventType = null;
     setState(() {});
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +238,7 @@ class _AddEventScreen extends State<AddEventScreen> {
                     },
                     backgroundColor: const Color(0xFFF5F5F5),
                     labelColor: Colors.black,
-                    textColor: Colors.black,
+                    textColor: Color(0xFF757575),
                     borderRadius: 30.0,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                     fontSize: 14.0,
@@ -256,10 +255,10 @@ class _AddEventScreen extends State<AddEventScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
               child: Text(
                 'Create Event',

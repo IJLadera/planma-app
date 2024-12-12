@@ -47,11 +47,11 @@ class CustomWidgets {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              date != null
-                  ? DateFormat('dd MMMM yyyy').format(date)
-                  : 'Select Date',
-              style: TextStyle(fontSize: 16),
-            ),
+                date != null
+                    ? DateFormat('dd MMMM yyyy').format(date)
+                    : 'Select Date',
+                style: GoogleFonts.openSans(
+                    fontSize: 14, color: Colors.grey[600])),
             const Icon(Icons.calendar_today),
           ],
         ),
@@ -96,8 +96,8 @@ class CustomWidgets {
     required List<String> items,
     required Function(String?) onChanged,
     Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
-    Color labelColor = Colors.black,
-    Color textColor = Colors.black,
+    Color labelColor = const Color(0xFF173F70),
+    Color textColor = const Color(0xFF173F70),
     double borderRadius = 30.0,
     EdgeInsets contentPadding = const EdgeInsets.all(16),
     double fontSize = 14.0,
@@ -127,7 +127,7 @@ class CustomWidgets {
                 item,
                 style: GoogleFonts.openSans(
                   fontSize: fontSize,
-                  color: textColor,
+                  color: labelColor,
                 ),
               ),
             );
@@ -160,28 +160,33 @@ class CustomWidgets {
     required List<String> items,
     required Function(String?) onChanged,
     Color backgroundColor = const Color(0xFFF5F5F5),
-    Color labelColor = Colors.black,
-    Color textColor = Colors.black,
-    double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    Color labelColor = Colors.red,
+    Color textColor = const Color(0xFF173F70),
+    double borderRadius = 70.0,
     double fontSize = 14.0,
     TextStyle? textStyle,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      margin: EdgeInsets.symmetric(
+          horizontal: 20.0, vertical: 10.0), // Margin around the dropdown
       decoration: BoxDecoration(
+        color: backgroundColor, // Light background color
         border: Border.all(
-          color: getColor(value!),
+          color: value != null ? getColor(value) : Colors.blue, // Border color
+          width: 2.0, // Border width
         ),
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(borderRadius), // Rounded corners
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton2(
+        child: DropdownButton2<String>(
           isExpanded: true,
           hint: Text(
             label,
-            style:
-                textStyle ?? TextStyle(color: labelColor, fontSize: fontSize),
+            style: textStyle ??
+                GoogleFonts.openSans(
+                  color: labelColor,
+                  fontSize: fontSize,
+                ),
           ),
           value: value,
           onChanged: onChanged,
@@ -193,9 +198,11 @@ class CustomWidgets {
                   Expanded(
                     child: Text(
                       item,
-                      style: TextStyle(
-                        color:
-                            item == value ? getColor(item) : Color(0xFF173F70),
+                      style: GoogleFonts.openSans(
+                        color: item == value
+                            ? getColor(item) // Highlight selected item
+                            : const Color(0xFF173F70), // Default text color
+                        fontWeight: FontWeight.w500, // Medium weight for items
                       ),
                     ),
                   ),
@@ -203,22 +210,21 @@ class CustomWidgets {
               ),
             );
           }).toList(),
-          buttonStyleData: ButtonStyleData(
-            padding: contentPadding,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(borderRadius),
-            ),
+          style: GoogleFonts.openSans(
+            color: textColor,
+            fontWeight: FontWeight.w500,
+          ),
+          iconStyleData: IconStyleData(
+            icon: Icon(Icons.arrow_drop_down,
+                color: labelColor), // Custom arrow icon
+            iconSize: 24, // Adjust the arrow size
           ),
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white,
+              borderRadius: BorderRadius.circular(
+                  borderRadius), // Rounded corners for dropdown
+              color: Colors.white, // Background color for the dropdown
             ),
-          ),
-          iconStyleData: IconStyleData(
-            icon: Icon(Icons.arrow_drop_down, color: labelColor),
-            iconSize: 24,
           ),
         ),
       ),

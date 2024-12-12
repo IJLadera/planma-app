@@ -229,8 +229,12 @@ class _SignUpState extends State<SignUp> {
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 15),
+                              horizontal: 120, vertical: 15),
                           backgroundColor: const Color(0xFF173F70),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                12), // Match TextFormField's border radius
+                          ),
                         ),
                         child: Text(
                           'Create Account',

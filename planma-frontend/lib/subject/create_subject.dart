@@ -392,7 +392,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 120),

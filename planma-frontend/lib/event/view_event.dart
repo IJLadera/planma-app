@@ -86,9 +86,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
     return DateFormat.jm().format(dateTime);
   }
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<EventsProvider>(builder: (context, eventProvider, child){
+    return Consumer<EventsProvider>(builder: (context, eventProvider, child) {
       final event = eventProvider.events.firstWhere(
         (event) => event.eventId == widget.event.eventId,
         orElse: () => Event(
@@ -102,9 +103,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           eventType: 'N/A',
         ),
       );
-      print ("event.eventId: ${event.eventId}");
-      print ("widget.eventId: ${widget.event.eventId}");
-      print ("widget.event: ${widget.event}");
+      print("event.eventId: ${event.eventId}");
+      print("widget.eventId: ${widget.event.eventId}");
+      print("widget.event: ${widget.event}");
 
       if (event.eventId == -1) {
         return Scaffold(
@@ -115,98 +116,102 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
       final startTime = _formatTimeForDisplay(event.scheduledStartTime);
       final endTime = _formatTimeForDisplay(event.scheduledEndTime);
-      final formattedScheduledDate = DateFormat('dd MMMM yyyy').format(event.scheduledDate);
+      final formattedScheduledDate =
+          DateFormat('dd MMMM yyyy').format(event.scheduledDate);
 
       return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.blue),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit, color: Colors.blue),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.close, color: Colors.blue),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => EditEvent(event: event,)),
-              );
+              Navigator.pop(context);
             },
           ),
-          IconButton(
-            icon: Icon(Icons.delete, color: Colors.blue),
-            onPressed: () => _handleDelete(context),
-          ),
-        ],
-        centerTitle: true,
-        title: Text(
-          'Event',
-          style: GoogleFonts.openSans(
-            color: Color(0xFF173F70),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.edit, color: Colors.blue),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => EditEvent(
+                            event: event,
+                          )),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.blue),
+              onPressed: () => _handleDelete(context),
+            ),
+          ],
+          centerTitle: true,
+          title: Text(
+            'Event',
+            style: GoogleFonts.openSans(
+              color: Color(0xFF173F70),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9),
-            color: Colors.grey[100],
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(32.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                EventDetailRow(
-                  title: 'Title',
-                  value: event.eventName,
-                ),
-                const Divider(),
-                EventDetailRow(
-                  title: 'Description',
-                  value: event.eventDesc,
-                ),
-                const Divider(),
-                EventDetailRow(
-                  title: 'Location',
-                  value: event.location,
-                ),
-                const Divider(),
-                EventDetailRow(
-                  title: 'Date',
-                  value: formattedScheduledDate.toString(),
-                ),
-                const Divider(),
-                EventDetailRow(
-                  title: 'Time',
-                  value: '$startTime - $endTime',
-                ),
-                const Divider(),
-                EventDetailRow(
-                  title: 'Type',
-                  value: event.eventType,
-                ),
-                const Divider(),
-                SizedBox(height: 16),
-                // Dropdown for attendance
-                Text(
-                  'Attendance',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9),
+              color: Colors.grey[100],
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  EventDetailRow(
+                    title: 'Title',
+                    value: event.eventName,
                   ),
-                ),
-                SizedBox(height: 8),
-                CustomWidgets.dropwDownForAttendance(
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Description',
+                    value: event.eventDesc,
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Location',
+                    value: event.location,
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Date',
+                    value: formattedScheduledDate.toString(),
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Time',
+                    value: '$startTime - $endTime',
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Type',
+                    value: event.eventType,
+                  ),
+                  const Divider(),
+                  SizedBox(height: 16),
+                  // Dropdown for attendance
+                  Text(
+                    'Attendance',
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  CustomWidgets.dropwDownForAttendance(
                     label: 'Attendance',
                     value: selectedAttendance,
                     items: ['Did Not Attend', 'Excused', 'Attended'],
@@ -222,20 +227,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     textColor: CustomWidgets.getColor(
                         selectedAttendance), // Use getColor as a static method
                     borderRadius: 8.0,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     fontSize: 14.0,
                   ),
-                SizedBox(height: 16),
-              ],
+                  SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-
-
-
+      );
     });
   }
 }
