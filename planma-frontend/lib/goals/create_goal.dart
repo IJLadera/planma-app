@@ -29,10 +29,11 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
 
   /// Shows a custom duration picker dialog
   Future<void> showDurationPicker(BuildContext context) async {
+    // Initial selected hours and minutes from the target duration
     int selectedHours = _targetDuration.inHours;
     int selectedMinutes = _targetDuration.inMinutes % 60;
-    int selectedSeconds = _targetDuration.inSeconds % 60;
 
+    // Show duration picker dialog
     final newDuration = await showDialog<Duration>(
       context: context,
       builder: (BuildContext context) {
@@ -50,8 +51,8 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                   color: Color(0xFF173F70),
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20.0, vertical: 20.0), // Add padding to content
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
               content: SizedBox(
                 width: 200,
                 height: 200,
@@ -63,7 +64,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                       children: [
                         // Hours Picker
                         buildPicker(
-                          max: 999,
+                          max: 99, // Maximum hours limit
                           selectedValue: selectedHours,
                           onSelectedItemChanged: (value) {
                             setModalState(() {
@@ -74,35 +75,32 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                         const Text(':',
                             style:
                                 TextStyle(fontSize: 18, color: Colors.black)),
-                        // Minutes Picker
+                        // Minutes Picker (0 or 30)
                         buildPicker(
-                          max: 59,
-                          selectedValue: selectedMinutes,
+                          max: 1, // Restrict to two values: 0 or 30
+                          selectedValue:
+                              selectedMinutes ~/ 30, // Map 0 -> 0, 30 -> 1
                           onSelectedItemChanged: (value) {
                             setModalState(() {
-                              selectedMinutes = value;
+                              selectedMinutes =
+                                  value * 30; // Map back to 0 or 30
                             });
                           },
-                        ),
-                        const Text(':',
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.black)), // Seconds Picker
-                        buildPicker(
-                          max: 59,
-                          selectedValue: selectedSeconds,
-                          onSelectedItemChanged: (value) {
-                            setModalState(() {
-                              selectedSeconds = value;
-                            });
-                          },
+                          // List of minutes options (00 or 30)
+                          children: List<Widget>.generate(2, (index) {
+                            return Center(
+                              child: Text(index == 0 ? '00' : '30'),
+                            );
+                          }),
                         ),
                       ],
-                    ),
+                    )
                   ],
                 ),
               ),
               actions: [
+                SizedBox(height: 30),
+                // Cancel button
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
@@ -111,17 +109,17 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                         GoogleFonts.openSans(fontSize: 16, color: Colors.black),
                   ),
                 ),
+                // Set Duration button
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(
-                      context,
-                      Duration(
-                        hours: selectedHours,
-                        minutes: selectedMinutes,
-                        seconds: selectedSeconds,
-                      ),
-                    );
-                  },
+                  onPressed: (selectedHours == 0 && selectedMinutes == 0)
+                      ? null
+                      : () {
+                          Navigator.pop(
+                            context,
+                            Duration(
+                                hours: selectedHours, minutes: selectedMinutes),
+                          );
+                        },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20.0, vertical: 12.0),
@@ -143,6 +141,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
       },
     );
 
+    // Update the target duration if a new value is selected
     if (newDuration != null) {
       setState(() {
         _targetDuration = newDuration;
@@ -155,6 +154,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
     required int max,
     required int selectedValue,
     required Function(int) onSelectedItemChanged,
+    List<Widget>? children, // Optional children parameter
   }) {
     return SizedBox(
       height: 200,
@@ -164,12 +164,15 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
             FixedExtentScrollController(initialItem: selectedValue),
         itemExtent: 50,
         onSelectedItemChanged: onSelectedItemChanged,
-        children: List<Widget>.generate(max + 1, (int index) {
-          return Center(
-            child: Text(index.toString().padLeft(2, '0'),
-                style: const TextStyle(fontSize: 16)),
-          );
-        }),
+        children: children ??
+            List<Widget>.generate(max + 1, (int index) {
+              // This will hide numbers outside the desired range for hours
+              if (index > max) return SizedBox.shrink(); // Hide numbers
+              return Center(
+                child: Text(index.toString().padLeft(2, '0'),
+                    style: const TextStyle(fontSize: 16)),
+              );
+            }),
       ),
     );
   }
@@ -187,29 +190,6 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
           color: const Color(0xFF173F70),
         ),
       ),
-    );
-  }
-
-  /// Builds an input field widget
-  Widget buildTextField(
-    TextEditingController controller,
-    String hintText,
-  ) {
-    return CustomWidgets.buildTextField(controller, hintText);
-  }
-
-  /// Builds a dropdown field
-  Widget buildDropdownField({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required Function(String?) onChanged,
-  }) {
-    return CustomWidgets.buildDropdownField(
-      label: label,
-      value: value,
-      items: items,
-      onChanged: onChanged,
     );
   }
 
@@ -237,17 +217,19 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  buildTitle('Goal Name'),
+                  CustomWidgets.buildTitle('Goal Name'),
                   const SizedBox(height: 12),
-                  buildTextField(_goalCodeController, 'Enter Goal Name'),
+                  CustomWidgets.buildTextField(
+                      _goalCodeController, 'Enter Goal Name'),
                   const SizedBox(height: 12),
-                  buildTitle('Description'),
+                  CustomWidgets.buildTitle('Description'),
                   const SizedBox(height: 12),
-                  buildTextField(_descriptionController, 'Enter Description'),
+                  CustomWidgets.buildTextField(
+                      _descriptionController, 'Enter Description'),
                   const SizedBox(height: 12),
-                  buildTitle('Timeframe'),
+                  CustomWidgets.buildTitle('Timeframe'),
                   const SizedBox(height: 12),
-                  buildDropdownField(
+                  CustomWidgets.buildDropdownField(
                     label: 'Timeframe',
                     value: _selectedTimeframe,
                     items: _timeframe,
@@ -255,7 +237,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                         setState(() => _selectedTimeframe = value),
                   ),
                   const SizedBox(height: 12),
-                  buildTitle('Target Hours'),
+                  CustomWidgets.buildTitle('Target Hours'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildScheduleDatePicker(
                     context: context,
@@ -269,22 +251,20 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  buildTitle('Goal Type'),
+                  CustomWidgets.buildTitle('Goal Type'),
                   const SizedBox(height: 12),
-                  buildDropdownField(
+                  CustomWidgets.buildDropdownField(
                     label: 'Goal Type',
                     value: _selectedGoalType,
                     items: _goalTypes,
                     onChanged: (value) =>
                         setState(() => _selectedGoalType = value),
                   ),
-
-
                   const SizedBox(height: 12),
                   if (_selectedGoalType == 'Academic') ...[
-                    buildTitle('Select Semester'),
+                    CustomWidgets.buildTitle('Select Semester'),
                     const SizedBox(height: 12),
-                    buildDropdownField(
+                    CustomWidgets.buildDropdownField(
                       label: 'Semester',
                       value: _selectedSemester,
                       items: _semesters,
@@ -312,10 +292,10 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                     borderRadius: BorderRadius.circular(12)),
               ),
               child: Text('Add Goal',
-                      style: GoogleFonts.openSans(
-                        fontSize: 16,
-                        color: Colors.white,
-                      )),
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Colors.white,
+                  )),
             ),
           ),
         ],
@@ -323,6 +303,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
       resizeToAvoidBottomInset: false,
     );
   }
+
   @override
   void dispose() {
     _goalCodeController.dispose();
