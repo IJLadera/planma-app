@@ -255,7 +255,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                         setState(() => _selectedTimeframe = value),
                   ),
                   const SizedBox(height: 12),
-                  buildTitle('Target Duration'),
+                  buildTitle('Target Hours'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildScheduleDatePicker(
                     context: context,
@@ -278,16 +278,20 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                     onChanged: (value) =>
                         setState(() => _selectedGoalType = value),
                   ),
+
+
                   const SizedBox(height: 12),
-                  buildTitle('Select Semester'),
-                  const SizedBox(height: 12),
-                  buildDropdownField(
-                    label: 'Semester',
-                    value: _selectedSemester,
-                    items: _semesters,
-                    onChanged: (value) =>
-                        setState(() => _selectedSemester = value),
-                  ),
+                  if (_selectedGoalType == 'Academic') ...[
+                    buildTitle('Select Semester'),
+                    const SizedBox(height: 12),
+                    buildDropdownField(
+                      label: 'Semester',
+                      value: _selectedSemester,
+                      items: _semesters,
+                      onChanged: (value) =>
+                          setState(() => _selectedSemester = value),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -318,5 +322,11 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
       ),
       resizeToAvoidBottomInset: false,
     );
+  }
+  @override
+  void dispose() {
+    _goalCodeController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 }
