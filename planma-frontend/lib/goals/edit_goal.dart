@@ -24,163 +24,6 @@ class _EditGoal extends State<EditGoal> {
   final List<String> _semesters = ['First Semester', 'Second Semester'];
   final List<String> _timeframe = ['Daily', 'Weekly', 'Monthly'];
 
-  Future<void> showDurationPicker(BuildContext context) async {
-    // Initial selected hours and minutes from the target duration
-    int selectedHours = _targetDuration.inHours;
-    int selectedMinutes = _targetDuration.inMinutes % 60;
-
-    // Show duration picker dialog
-    final newDuration = await showDialog<Duration>(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              title: Text(
-                'Set Target Duration',
-                style: GoogleFonts.openSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF173F70),
-                ),
-              ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-              content: SizedBox(
-                width: 200,
-                height: 200,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Hours Picker
-                        buildPicker(
-                          max: 99, // Maximum hours limit
-                          selectedValue: selectedHours,
-                          onSelectedItemChanged: (value) {
-                            setModalState(() {
-                              selectedHours = value;
-                            });
-                          },
-                        ),
-                        const Text(':',
-                            style:
-                                TextStyle(fontSize: 18, color: Colors.black)),
-                        // Minutes Picker (0 or 30)
-                        buildPicker(
-                          max: 1, // Restrict to two values: 0 or 30
-                          selectedValue:
-                              selectedMinutes ~/ 30, // Map 0 -> 0, 30 -> 1
-                          onSelectedItemChanged: (value) {
-                            setModalState(() {
-                              selectedMinutes =
-                                  value * 30; // Map back to 0 or 30
-                            });
-                          },
-                          // List of minutes options (00 or 30)
-                          children: List<Widget>.generate(2, (index) {
-                            return Center(
-                              child: Text(index == 0 ? '00' : '30'),
-                            );
-                          }),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              actions: [
-                SizedBox(height: 30),
-                // Cancel button
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'Cancel',
-                    style:
-                        GoogleFonts.openSans(fontSize: 16, color: Colors.black),
-                  ),
-                ),
-                // Set Duration button
-                ElevatedButton(
-                  onPressed: (selectedHours == 0 && selectedMinutes == 0)
-                      ? null
-                      : () {
-                          Navigator.pop(
-                            context,
-                            Duration(
-                                hours: selectedHours, minutes: selectedMinutes),
-                          );
-                        },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0, vertical: 12.0),
-                    backgroundColor: Color(0xFF173F70),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'Set Duration',
-                    style: GoogleFonts.openSans(
-                        fontSize: 16, color: Color(0xFFFFFFFF)),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    // Update the target duration if a new value is selected
-    if (newDuration != null) {
-      setState(() {
-        _targetDuration = newDuration;
-      });
-    }
-  }
-
-  /// Builds a Cupertino picker for the time fields
-  Widget buildPicker({
-    required int max,
-    required int selectedValue,
-    required Function(int) onSelectedItemChanged,
-    List<Widget>? children, // Optional children parameter
-  }) {
-    return SizedBox(
-      height: 200,
-      width: 70,
-      child: CupertinoPicker(
-        scrollController:
-            FixedExtentScrollController(initialItem: selectedValue),
-        itemExtent: 50,
-        onSelectedItemChanged: onSelectedItemChanged,
-        children: children ??
-            List<Widget>.generate(max + 1, (int index) {
-              // This will hide numbers outside the desired range for hours
-              if (index > max) return SizedBox.shrink(); // Hide numbers
-              return Center(
-                child: Text(index.toString().padLeft(2, '0'),
-                    style: const TextStyle(fontSize: 16)),
-              );
-            }),
-      ),
-    );
-  }
-
-  /// Builds an input field widget
-  Widget buildTextField(
-    TextEditingController controller,
-    String hintText,
-  ) {
-    return CustomWidgets.buildTextField(controller, hintText);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -239,13 +82,17 @@ class _EditGoal extends State<EditGoal> {
                   const SizedBox(height: 12),
                   CustomWidgets.buildScheduleDatePicker(
                     context: context,
-                    displayText:
-                        '${_targetDuration.inHours.toString().padLeft(2, '0')}:'
-                        '${(_targetDuration.inMinutes % 60).toString().padLeft(2, '0')}:'
-                        '${(_targetDuration.inSeconds % 60).toString().padLeft(2, '0')}',
+                    displayText: CustomWidgets.formatDurationText(
+                        _targetDuration), // Correct call
                     onPickerTap: () async {
-                      await showDurationPicker(context);
-                      setState(() {}); // Update the UI after duration changes
+                      // Pass the required arguments: context, initialDuration, and the callback function
+                      await CustomWidgets.showDurationPicker(
+                          context, _targetDuration, (newDuration) {
+                        setState(() {
+                          _targetDuration =
+                              newDuration; // Update target duration
+                        });
+                      });
                     },
                   ),
                   const SizedBox(height: 12),
