@@ -24,12 +24,12 @@ class _EditGoal extends State<EditGoal> {
   final List<String> _semesters = ['First Semester', 'Second Semester'];
   final List<String> _timeframe = ['Daily', 'Weekly', 'Monthly'];
 
-  /// Shows a custom duration picker dialog
   Future<void> showDurationPicker(BuildContext context) async {
+    // Initial selected hours and minutes from the target duration
     int selectedHours = _targetDuration.inHours;
     int selectedMinutes = _targetDuration.inMinutes % 60;
-    int selectedSeconds = _targetDuration.inSeconds % 60;
 
+    // Show duration picker dialog
     final newDuration = await showDialog<Duration>(
       context: context,
       builder: (BuildContext context) {
@@ -47,8 +47,8 @@ class _EditGoal extends State<EditGoal> {
                   color: Color(0xFF173F70),
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20.0, vertical: 20.0), // Add padding to content
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
               content: SizedBox(
                 width: 200,
                 height: 200,
@@ -60,7 +60,7 @@ class _EditGoal extends State<EditGoal> {
                       children: [
                         // Hours Picker
                         buildPicker(
-                          max: 999,
+                          max: 99, // Maximum hours limit
                           selectedValue: selectedHours,
                           onSelectedItemChanged: (value) {
                             setModalState(() {
@@ -71,35 +71,32 @@ class _EditGoal extends State<EditGoal> {
                         const Text(':',
                             style:
                                 TextStyle(fontSize: 18, color: Colors.black)),
-                        // Minutes Picker
+                        // Minutes Picker (0 or 30)
                         buildPicker(
-                          max: 59,
-                          selectedValue: selectedMinutes,
+                          max: 1, // Restrict to two values: 0 or 30
+                          selectedValue:
+                              selectedMinutes ~/ 30, // Map 0 -> 0, 30 -> 1
                           onSelectedItemChanged: (value) {
                             setModalState(() {
-                              selectedMinutes = value;
+                              selectedMinutes =
+                                  value * 30; // Map back to 0 or 30
                             });
                           },
-                        ),
-                        const Text(':',
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.black)), // Seconds Picker
-                        buildPicker(
-                          max: 59,
-                          selectedValue: selectedSeconds,
-                          onSelectedItemChanged: (value) {
-                            setModalState(() {
-                              selectedSeconds = value;
-                            });
-                          },
+                          // List of minutes options (00 or 30)
+                          children: List<Widget>.generate(2, (index) {
+                            return Center(
+                              child: Text(index == 0 ? '00' : '30'),
+                            );
+                          }),
                         ),
                       ],
-                    ),
+                    )
                   ],
                 ),
               ),
               actions: [
+                SizedBox(height: 30),
+                // Cancel button
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
@@ -108,17 +105,17 @@ class _EditGoal extends State<EditGoal> {
                         GoogleFonts.openSans(fontSize: 16, color: Colors.black),
                   ),
                 ),
+                // Set Duration button
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(
-                      context,
-                      Duration(
-                        hours: selectedHours,
-                        minutes: selectedMinutes,
-                        seconds: selectedSeconds,
-                      ),
-                    );
-                  },
+                  onPressed: (selectedHours == 0 && selectedMinutes == 0)
+                      ? null
+                      : () {
+                          Navigator.pop(
+                            context,
+                            Duration(
+                                hours: selectedHours, minutes: selectedMinutes),
+                          );
+                        },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20.0, vertical: 12.0),
@@ -140,6 +137,7 @@ class _EditGoal extends State<EditGoal> {
       },
     );
 
+    // Update the target duration if a new value is selected
     if (newDuration != null) {
       setState(() {
         _targetDuration = newDuration;
@@ -152,6 +150,7 @@ class _EditGoal extends State<EditGoal> {
     required int max,
     required int selectedValue,
     required Function(int) onSelectedItemChanged,
+    List<Widget>? children, // Optional children parameter
   }) {
     return SizedBox(
       height: 200,
@@ -161,27 +160,15 @@ class _EditGoal extends State<EditGoal> {
             FixedExtentScrollController(initialItem: selectedValue),
         itemExtent: 50,
         onSelectedItemChanged: onSelectedItemChanged,
-        children: List<Widget>.generate(max + 1, (int index) {
-          return Center(
-            child: Text(index.toString().padLeft(2, '0'),
-                style: const TextStyle(fontSize: 16)),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget buildTitle(String title) {
-    return Container(
-      alignment: Alignment.centerLeft,
-      margin: const EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
-      child: Text(
-        title,
-        style: GoogleFonts.openSans(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: const Color(0xFF173F70),
-        ),
+        children: children ??
+            List<Widget>.generate(max + 1, (int index) {
+              // This will hide numbers outside the desired range for hours
+              if (index > max) return SizedBox.shrink(); // Hide numbers
+              return Center(
+                child: Text(index.toString().padLeft(2, '0'),
+                    style: const TextStyle(fontSize: 16)),
+              );
+            }),
       ),
     );
   }
@@ -192,21 +179,6 @@ class _EditGoal extends State<EditGoal> {
     String hintText,
   ) {
     return CustomWidgets.buildTextField(controller, hintText);
-  }
-
-  /// Builds a dropdown field
-  Widget buildDropdownField({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required Function(String?) onChanged,
-  }) {
-    return CustomWidgets.buildDropdownField(
-      label: label,
-      value: value,
-      items: items,
-      onChanged: onChanged,
-    );
   }
 
   @override
@@ -235,7 +207,7 @@ class _EditGoal extends State<EditGoal> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  buildTitle(
+                  CustomWidgets.buildTitle(
                     'Goal Name',
                   ),
                   const SizedBox(height: 12),
@@ -244,7 +216,7 @@ class _EditGoal extends State<EditGoal> {
                     'Goal Name',
                   ),
                   const SizedBox(height: 12),
-                  buildTitle(
+                  CustomWidgets.buildTitle(
                     'Description',
                   ),
                   const SizedBox(height: 12),
@@ -253,9 +225,9 @@ class _EditGoal extends State<EditGoal> {
                     'Description',
                   ),
                   const SizedBox(height: 12),
-                  buildTitle('Timeframe'),
+                  CustomWidgets.buildTitle('Timeframe'),
                   const SizedBox(height: 12),
-                  buildDropdownField(
+                  CustomWidgets.buildDropdownField(
                     label: 'Timeframe',
                     value: _selectedTimeframe,
                     items: _timeframe,
@@ -263,7 +235,7 @@ class _EditGoal extends State<EditGoal> {
                         setState(() => _selectedTimeframe = value),
                   ),
                   const SizedBox(height: 12),
-                  buildTitle('Target Duration'),
+                  CustomWidgets.buildTitle('Target Duration'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildScheduleDatePicker(
                     context: context,
@@ -277,7 +249,7 @@ class _EditGoal extends State<EditGoal> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  buildTitle(
+                  CustomWidgets.buildTitle(
                     'Goal Type',
                   ),
                   const SizedBox(height: 12),
@@ -289,7 +261,7 @@ class _EditGoal extends State<EditGoal> {
                         setState(() => _selectedGoalType = value),
                   ),
                   const SizedBox(height: 12),
-                  buildTitle(
+                  CustomWidgets.buildTitle(
                     'Select Semester',
                   ),
                   const SizedBox(height: 12),

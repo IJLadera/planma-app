@@ -5,6 +5,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class CustomWidgets {
+
+  static Widget buildTitle(String title) {
+    return Container(
+      alignment: Alignment.centerLeft,
+      margin: const EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
+      child: Text(
+        title,
+        style: GoogleFonts.openSans(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF173F70),
+        ),
+      ),
+    );
+  }
+
   // Method to build a TextField with custom style
   static Widget buildTextField(
       TextEditingController controller, String labelText) {
