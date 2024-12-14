@@ -50,28 +50,13 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
         throw Exception("Please set both sleep and wake times.");
       }
 
-      // Convert TimeOfDay to string
-      final usualSleepTime = timeToString(sleepTime ?? TimeOfDay(hour: 23, minute: 0));
-      final usualWakeTime = timeToString(wakeTime ?? TimeOfDay(hour: 7, minute: 0));
-
-      // Save the user preferences using the provider
-      await provider.saveUserPreferences(
-        usualSleepTime: usualSleepTime,
-        usualWakeTime: usualWakeTime,
-        reminderOffsetTime: "", // Assuming this is optional or empty
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Preferences saved successfully!")),
-      );
-
       // Navigate to the next screen
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => SleepWakeReminderScreen(
-            usualSleepTime: usualSleepTime,
-            usualWakeTime: usualWakeTime,
+          builder: (context) => ReminderOffsetSetupScreen(
+            usualSleepTime: sleepTime!,
+            usualWakeTime: wakeTime!,
           ),
         ),
       );

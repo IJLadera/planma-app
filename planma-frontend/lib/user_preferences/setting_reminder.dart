@@ -5,22 +5,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/Providers/user_preferences_provider.dart';
 
-class SleepWakeReminderScreen extends StatefulWidget {
-  final String usualSleepTime;
-  final String usualWakeTime;
+class ReminderOffsetSetupScreen extends StatefulWidget {
+  final TimeOfDay usualSleepTime;
+  final TimeOfDay usualWakeTime;
 
-  const SleepWakeReminderScreen({
+  const ReminderOffsetSetupScreen({
     super.key,
     required this.usualSleepTime,
     required this.usualWakeTime,
   });
 
   @override
-  _SleepWakeReminderScreenState createState() =>
-      _SleepWakeReminderScreenState();
+  _ReminderOffsetSetupScreenState createState() =>
+      _ReminderOffsetSetupScreenState();
 }
 
-class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
+class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
   String _selectedTime = "01 h : 00 m"; // Default value for the dropdown
 
   // List of time options
@@ -28,18 +28,20 @@ class _SleepWakeReminderScreenState extends State<SleepWakeReminderScreen> {
     "00 h : 30 m",
     "01 h : 00 m",
     "02 h : 00 m",
-    "03 h : 00 m",
   ];
 
   Future<void> _saveReminderToDatabase(String reminderTime) async {
-    final provider =
-        Provider.of<UserPreferencesProvider>(context, listen: false);
+    final provider = Provider.of<UserPreferencesProvider>(context, listen: false);
+
+    final reminderOffsetDuration = provider.parseReminderOffset(reminderTime);
+    final reminderOffsetTimeString = reminderOffsetDuration.inSeconds.toString(); // Convert to seconds for storage
+
     try {
       // Save the reminder time using the provider
       await provider.saveUserPreferences(
         usualSleepTime: widget.usualSleepTime,
         usualWakeTime: widget.usualWakeTime,
-        reminderOffsetTime: reminderTime,
+        reminderOffsetTime: reminderOffsetTimeString,
       );
 
       // If successful, show a success message

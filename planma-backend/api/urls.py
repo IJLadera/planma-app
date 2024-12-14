@@ -13,6 +13,7 @@ router.register(r'goal-schedules', GoalScheduleViewSet, basename='goalschedule')
 
 
 router.register(r'userprefs', UserPrefListCreateView, basename='userpref')
+router.register(r'users', CustomUserViewSet, basename='user')
 
 
 urlpatterns = [
