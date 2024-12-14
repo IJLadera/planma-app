@@ -116,7 +116,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                const EdgeInsets.all(16),
             child: ElevatedButton(
               onPressed: () {
                 // Placeholder for goal submission logic
@@ -125,7 +125,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),

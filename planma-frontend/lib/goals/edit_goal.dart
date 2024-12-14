@@ -134,7 +134,7 @@ class _EditGoal extends State<EditGoal> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),

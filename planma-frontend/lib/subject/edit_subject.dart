@@ -300,17 +300,17 @@ class _EditClassState extends State<EditClass> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle('Subject Code'),
+                      CustomWidgets.buildTitle('Subject Code'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildTextField(
                           _subjectCodeController, 'Subject Code'),
                       const SizedBox(height: 12),
-                      _buildTitle('Subject Title'),
+                      CustomWidgets.buildTitle('Subject Title'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildTextField(
                           _subjectTitleController, 'Subject Title'),
                       const SizedBox(height: 12),
-                      _buildTitle('Semester'),
+                      CustomWidgets.buildTitle('Semester'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildDropdownField(
                         label: 'Select Semester',
@@ -400,7 +400,7 @@ class _EditClassState extends State<EditClass> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      _buildTitle('Start and End Time'),
+                      CustomWidgets.buildTitle('Start and End Time'),
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -428,7 +428,7 @@ class _EditClassState extends State<EditClass> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      _buildTitle('Room'),
+                      CustomWidgets.buildTitle('Room'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildTextField(_roomController, 'Room'),
                     ],
@@ -437,7 +437,7 @@ class _EditClassState extends State<EditClass> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 20.0),
+                    horizontal: 14.0, vertical: 20.0),
                 child: ElevatedButton(
                   onPressed: () => _editClassSchedule(context),
                   style: ElevatedButton.styleFrom(
@@ -446,7 +446,7 @@ class _EditClassState extends State<EditClass> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 120),
+                        vertical: 15, horizontal: 100),
                   ),
                   child: Text(
                     'Edit Class Schedule',
@@ -461,6 +461,7 @@ class _EditClassState extends State<EditClass> {
           );
         },
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 
@@ -473,22 +474,4 @@ class _EditClassState extends State<EditClass> {
     _endTimeController.dispose();
     super.dispose();
   }
-}
-
-Widget _buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
-      ),
-    ),
-  );
 }

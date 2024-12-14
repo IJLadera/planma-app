@@ -226,7 +226,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle(
+                      CustomWidgets.buildTitle(
                         'Subject Code',
                       ),
                       SizedBox(height: 15),
@@ -236,7 +236,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                         style: GoogleFonts.openSans(),
                       ),
                       SizedBox(height: 15),
-                      _buildTitle(
+                      CustomWidgets.buildTitle(
                         'Subject Title',
                       ),
                       const SizedBox(height: 15),
@@ -246,16 +246,14 @@ class _AddClassScreenState extends State<AddClassScreen> {
                         style: GoogleFonts.openSans(),
                       ),
                       SizedBox(height: 15),
-                      _buildTitle(
+                      CustomWidgets.buildTitle(
                         'Select Semester',
                       ),
                       const SizedBox(height: 15),
                       CustomWidgets.buildDropdownField(
                         label: 'Select Semester',
                         textStyle: GoogleFonts.openSans(
-                          fontSize: 16,
-                          color:
-                              Colors.black, // Adjust the text color as needed
+                          fontSize: 14,
                         ),
                         value: selectedSemester,
                         items: semesterItems,
@@ -302,11 +300,11 @@ class _AddClassScreenState extends State<AddClassScreen> {
                         textColor: Colors.black,
                         borderRadius: 30.0,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                            horizontal: 16, vertical: 6),
                         fontSize: 14.0,
                       ),
                       const SizedBox(height: 15),
-                      _buildTitle(
+                      CustomWidgets.buildTitle(
                         'Day of the Week',
                       ),
                       SizedBox(height: 15),
@@ -333,45 +331,35 @@ class _AddClassScreenState extends State<AddClassScreen> {
                         ],
                       ),
                       const SizedBox(height: 15),
-                      _buildTitle(
+                      CustomWidgets.buildTitle(
                         'Start and End Time',
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
+                            child: CustomWidgets.buildTimeField(
+                              'Start Time',
+                              _startTimeController,
+                              context,
+                              (context) =>
                                   _selectTime(context, _startTimeController),
-                              child: AbsorbPointer(
-                                child: CustomWidgets.buildTextField(
-                                    _startTimeController, 'Start Time',
-                                    style: GoogleFonts.openSans(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                    )),
-                              ),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 12),
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
+                            child: CustomWidgets.buildTimeField(
+                              'End Time',
+                              _endTimeController,
+                              context,
+                              (context) =>
                                   _selectTime(context, _endTimeController),
-                              child: AbsorbPointer(
-                                child: CustomWidgets.buildTextField(
-                                    _endTimeController, 'End Time',
-                                    style: GoogleFonts.openSans(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                    )),
-                              ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 15),
-                      _buildTitle(
+                      CustomWidgets.buildTitle(
                         'Room',
                       ),
                       const SizedBox(height: 16),
@@ -408,6 +396,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
           );
         },
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 
@@ -423,22 +412,4 @@ class _AddClassScreenState extends State<AddClassScreen> {
     // Always call super.dispose()
     super.dispose();
   }
-}
-
-Widget _buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
-      ),
-    ),
-  );
 }

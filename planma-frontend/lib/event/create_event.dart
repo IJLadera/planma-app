@@ -237,10 +237,9 @@ class _AddEventScreen extends State<AddEventScreen> {
                       });
                     },
                     backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Color(0xFF757575),
                     borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
                     fontSize: 14.0,
                   ),
                 ],
