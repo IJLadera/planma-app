@@ -230,19 +230,18 @@ class _SignUpState extends State<SignUp> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             _signUp(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => LogIn()),
-                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 120, vertical: 15),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: MediaQuery.of(context).size.width *
+                                0.25, // 25% of screen width
+                            vertical: MediaQuery.of(context).size.height *
+                                0.02, // 2% of screen height
+                          ),
                           backgroundColor: const Color(0xFF173F70),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                12), // Match TextFormField's border radius
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: Text(

@@ -19,12 +19,12 @@ class DayButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: CircleAvatar(
-        radius: 16,
-        backgroundColor: isSelected ? Colors.blue : Colors.grey[200],
+        radius: 20,
+        backgroundColor: isSelected ? Color(0xFF173F70) : Colors.grey[200],
         child: Text(
           day,
           style: GoogleFonts.openSans(
-            fontSize: 16,
+            fontSize: 14,
             color: isSelected ? Colors.white : Colors.black,
           ),
         ),
@@ -34,6 +34,24 @@ class DayButton extends StatelessWidget {
 }
 
 class CustomWidgets {
+  static Widget buildTitle(String title) {
+    return Container(
+      margin: const EdgeInsets.only(
+          left: 16.0,
+          top: 8.0,
+          right: 16.0), // Adjust the margin values as needed
+      alignment: Alignment.centerLeft, // Ensures the text starts from the left
+      child: Text(
+        title,
+        style: GoogleFonts.openSans(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF173F70),
+        ),
+      ),
+    );
+  }
+
   static Widget buildTextField(
     TextEditingController controller,
     String labelText, {
@@ -110,7 +128,7 @@ class CustomWidgets {
         onTap: () => selectTime(context),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: textStyle ?? GoogleFonts.openSans(fontSize: 16),
+          labelStyle: textStyle ?? GoogleFonts.openSans(fontSize: 14),
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
@@ -137,7 +155,6 @@ class CustomWidgets {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,

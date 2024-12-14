@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/core/dashboard.dart';
 import 'package:planma_app/user_preferences/setting_goal.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/user_preferences/widget/widget.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/Providers/user_preferences_provider.dart';
 
@@ -31,10 +32,12 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
   ];
 
   Future<void> _saveReminderToDatabase(String reminderTime) async {
-    final provider = Provider.of<UserPreferencesProvider>(context, listen: false);
+    final provider =
+        Provider.of<UserPreferencesProvider>(context, listen: false);
 
     final reminderOffsetDuration = provider.parseReminderOffset(reminderTime);
-    final reminderOffsetTimeString = reminderOffsetDuration.inSeconds.toString(); // Convert to seconds for storage
+    final reminderOffsetTimeString = reminderOffsetDuration.inSeconds
+        .toString(); // Convert to seconds for storage
 
     try {
       // Save the reminder time using the provider
@@ -46,7 +49,7 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
 
       // If successful, show a success message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Reminder saved successfully!")),
+        const SnackBar(content: Text("Reminder saved successfully!")),
       );
 
       // Navigate to the next screen
@@ -67,10 +70,15 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Set Sleep/Wake Reminder"),
-        backgroundColor: Color(0xFF173F70),
+        title: Text(
+          "Set Sleep/Wake Reminder",
+          style: GoogleFonts.openSans(
+              fontSize: 20,
+              color: Color(0xFF173F70),
+              fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color(0xFFFFFFFF),
       ),
       body: Center(
         child: Padding(
@@ -88,7 +96,7 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
                   color: Colors.black,
                 ),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Text(
                 "When should we give you a heads-up\nbefore each task?",
                 textAlign: TextAlign.center,
@@ -97,36 +105,33 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
                   color: Colors.grey[700],
                 ),
               ),
-              SizedBox(height: 40.0),
+              const SizedBox(height: 30.0),
               Image.asset(
                 'lib/user_preferences/assets/alarm.png',
                 height: 120.0,
               ),
-              SizedBox(height: 40.0),
+              const SizedBox(height: 30.0),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: DropdownButton<String>(
-                  value: _selectedTime,
-                  isExpanded: true,
-                  underline: SizedBox(),
-                  items: _timeOptions
-                      .map((time) => DropdownMenuItem<String>(
-                            value: time,
-                            child: Text(time),
-                          ))
-                      .toList(),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 8.0), // Reduced padding
+                child: CustomWidget.buildDropdownField(
+                  value: _selectedTime, // Current selected value
+                  items: _timeOptions,
                   onChanged: (value) {
                     setState(() {
                       _selectedTime = value!;
                     });
                   },
+                  borderRadius: 8.0,
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 2.0, horizontal: 10.0),
+                  fontSize: 16.0,
+                  textStyle:
+                      GoogleFonts.openSans(color: const Color(0xFF173F70)),
                 ),
               ),
-              SizedBox(height: 40.0),
+
+              const SizedBox(height: 40.0),
               // Next Button
               ElevatedButton(
                 onPressed: () async {
@@ -134,9 +139,9 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
                   await _saveReminderToDatabase(_selectedTime);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF173F70),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 50.0, vertical: 18.0),
+                  backgroundColor: const Color(0xFF173F70),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 130.0, vertical: 15.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),

@@ -12,7 +12,7 @@ class CustomWidgets {
       child: Text(
         title,
         style: GoogleFonts.openSans(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
           color: const Color(0xFF173F70),
         ),
@@ -32,10 +32,9 @@ class CustomWidgets {
         controller: controller,
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: GoogleFonts.openSans(),
+          labelStyle: GoogleFonts.openSans(fontSize: 14),
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+          contentPadding: const EdgeInsets.all(16),
         ),
       ),
     );
@@ -120,8 +119,7 @@ class CustomWidgets {
         GestureDetector(
           onTap: onPickerTap, // Trigger the picker when tapped
           child: Container(
-            padding: const EdgeInsets.symmetric(
-                vertical: 12, horizontal: 16), // Outer padding
+            padding: const EdgeInsets.all(16), // Outer padding
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5), // Light gray background
               borderRadius: BorderRadius.circular(30),
@@ -132,7 +130,7 @@ class CustomWidgets {
                 Padding(
                   // Adds inner padding for the Text widget
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
+                      horizontal: 16.0, vertical: 5.0),
                   child: Text(
                     displayText,
                     style: GoogleFonts.openSans(
@@ -157,11 +155,23 @@ class CustomWidgets {
     int hours = duration.inHours;
     int minutes = duration.inMinutes % 60;
 
-    // Option 1: "4 hours and 30 minutes"
-    if (minutes == 0) {
-      return '$hours hours'; // If no minutes, just display hours
+    // Display only "30 mins" if 30 minutes is selected
+    if (hours == 0 && minutes == 30) {
+      return '$minutes mins';
+    }
+
+    // Display "1 hour" instead of "1 hours"
+    if (hours == 1 && minutes == 0) {
+      return '$hours hour';
+    }
+
+    // General case for other durations
+    if (hours > 0 && minutes > 0) {
+      return '$hours hrs and $minutes mins';
+    } else if (hours > 0) {
+      return '$hours hrs';
     } else {
-      return '$hours hours and $minutes minutes';
+      return '$minutes mins';
     }
   }
 
@@ -308,7 +318,7 @@ class CustomWidgets {
               if (index > max) return SizedBox.shrink(); // Hide numbers
               return Center(
                 child: Text(index.toString().padLeft(2, '0'),
-                    style: const TextStyle(fontSize: 16)),
+                    style: const TextStyle(fontSize: 14)),
               );
             }),
       ),

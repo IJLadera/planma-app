@@ -43,7 +43,7 @@ class CustomWidgets {
           color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(30),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.all(16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -51,7 +51,7 @@ class CustomWidgets {
               date != null
                   ? DateFormat('dd MMMM yyyy').format(date)
                   : 'Select Date',
-              style: TextStyle(fontSize: 16),
+              style: GoogleFonts.openSans(fontSize: 14),
             ),
             const Icon(Icons.calendar_today),
           ],
@@ -60,7 +60,23 @@ class CustomWidgets {
     );
   }
 
-  // Method to build a time field with gesture and custom design
+  static Widget buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
+}
 
   static Widget buildTimeField(
     String label,
@@ -80,7 +96,7 @@ class CustomWidgets {
         onTap: () => selectTime(context),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: textStyle ?? GoogleFonts.openSans(fontSize: 16),
+          labelStyle: textStyle ?? GoogleFonts.openSans(fontSize: 14),
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
@@ -107,7 +123,6 @@ class CustomWidgets {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,

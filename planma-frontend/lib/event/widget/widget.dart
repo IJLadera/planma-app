@@ -4,7 +4,24 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class CustomWidgets {
-  // Method to build a TextField with custom style
+  static Widget buildTitle(String title) {
+    return Container(
+      margin: const EdgeInsets.only(
+          left: 16.0,
+          top: 8.0,
+          right: 16.0), // Adjust the margin values as needed
+      alignment: Alignment.centerLeft, // Ensures the text starts from the left
+      child: Text(
+        title,
+        style: GoogleFonts.openSans(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF173F70),
+        ),
+      ),
+    );
+  }
+
   static Widget buildTextField(
       TextEditingController controller, String labelText) {
     return Container(
@@ -42,7 +59,7 @@ class CustomWidgets {
           color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(30),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.all(18),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
