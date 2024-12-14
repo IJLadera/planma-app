@@ -1,39 +1,28 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:planma_app/models/user_preferences_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPreferencesProvider with ChangeNotifier {
-  final String baseUrl = "http://127.0.0.1:8000/api/";
   String? _accessToken;
+  List<UserPreferences> _userPreferences = [];
 
-  // Store User Preferences
-  Map<String, dynamic>? _userPreferences;
+  List<UserPreferences> get userPreferences => _userPreferences;
+  String? get accessToken => _accessToken;
 
-  Map<String, dynamic>? get userPreferences => _userPreferences;
-
-  // Initialize access token
-  Future<void> _initAccessToken() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    _accessToken = sharedPreferences.getString("access");
-    // If token is null or expired, navigate to login
-    print("Access Token: $_accessToken");
-    if (_accessToken == null) {
-      throw Exception('Access token is missing or invalid');
-    }
-  }
-
-  // Save access token after successful login
-  Future<void> saveAccessToken(String token) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.setString("access", token);
-    _accessToken = token; // Save token in memory
-    notifyListeners();
-  }
+  final String baseUrl = "http://127.0.0.1:8000/api/";
 
   // Fetch User Preferences
   Future<void> fetchUserPreferences() async {
-    await _initAccessToken();
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    if (_accessToken == null) {
+      throw Exception('Access token is missing or invalid');
+    }
+
     final url = Uri.parse("${baseUrl}userprefs/");
 
     try {
@@ -45,7 +34,8 @@ class UserPreferencesProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        _userPreferences = json.decode(response.body);
+        final List<dynamic> data = json.decode(response.body);
+        _userPreferences = data.map((item) => UserPreferences.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception('Failed to fetch user preferences');
@@ -58,12 +48,21 @@ class UserPreferencesProvider with ChangeNotifier {
 
   // Create or Update User Preferences
   Future<void> saveUserPreferences({
-    required String usualSleepTime,
-    required String usualWakeTime,
+    required TimeOfDay usualSleepTime,
+    required TimeOfDay usualWakeTime,
     required String reminderOffsetTime,
     int? prefId,
   }) async {
-    await _initAccessToken();
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    String formattedUsualSleepTime = _formatTimeOfDay(usualSleepTime);
+    String formattedUsualWakeTime = _formatTimeOfDay(usualWakeTime);
+
+    if (_accessToken == null) {
+      throw Exception('Access token is missing or invalid');
+    }
+
     final url = prefId != null
         ? Uri.parse("${baseUrl}userprefs/$prefId/") // Update URL
         : Uri.parse("${baseUrl}userprefs/"); // Create URL
@@ -76,18 +75,17 @@ class UserPreferencesProvider with ChangeNotifier {
           'Content-Type': 'application/json',
         },
         body: json.encode({
-          'usual_sleep_time': usualSleepTime,
-          'usual_wake_time': usualWakeTime,
+          'usual_sleep_time': formattedUsualSleepTime,
+          'usual_wake_time': formattedUsualWakeTime,
           'reminder_offset_time': reminderOffsetTime,
         }),
       );
 
-      print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}");
+      print("Preferences saved: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        _userPreferences = json.decode(response.body);
-        notifyListeners();
+        final newUserPreferences = UserPreferences.fromJson(json.decode(response.body));
+        _userPreferences.add(newUserPreferences);
       } else {
         throw Exception('Failed to save user preferences');
       }
@@ -97,29 +95,30 @@ class UserPreferencesProvider with ChangeNotifier {
     }
   }
 
-  // Delete User Preferences
-  Future<void> deleteUserPreferences(int prefId) async {
-    await _initAccessToken();
-    final url = Uri.parse(
-        "${baseUrl}userprefs/$prefId/"); // Adjust URL to reflect changes
+  // Utility method to format TimeOfDay to HH:mm:ss
+  String _formatTimeOfDay(TimeOfDay time) {
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
+    return DateFormat('HH:mm:ss').format(dateTime);
+  }
 
-    try {
-      final response = await http.delete(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-        },
-      );
+  Duration parseReminderOffset(String reminderOffset) {
+    final regex = RegExp(r"(\d+)\s*h\s*:\s*(\d+)\s*m");
+    final match = regex.firstMatch(reminderOffset);
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        _userPreferences = null;
-        notifyListeners();
-      } else {
-        throw Exception('Failed to delete user preferences');
-      }
-    } catch (error) {
-      print("Error deleting user preferences: $error");
-      throw Exception("Error: $error");
+    if (match != null) {
+      final int hours = int.parse(match.group(1)!);
+      final int minutes = int.parse(match.group(2)!);
+
+      return Duration(hours: hours, minutes: minutes);
+    } else {
+      throw FormatException("Invalid reminder offset format: $reminderOffset");
     }
   }
 }

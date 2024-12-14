@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
@@ -154,7 +155,7 @@ class UserPref(models.Model):
     # User Pref Details
     usual_sleep_time = models.TimeField(default="23:00")
     usual_wake_time = models.TimeField(default="07:00")
-    reminder_offset_time = models.TimeField()
+    reminder_offset_time = models.DurationField()
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
@@ -169,6 +170,12 @@ class UserPref(models.Model):
     def clean(self):
         if self.usual_sleep_time >= self.usual_wake_time:
             raise ValidationError("Sleep time must be before wake time.")
+        
+    def save(self, *args, **kwargs):
+        # Ensure `reminder_offset_time` is stored as a timedelta
+        if isinstance(self.reminder_offset_time, (int, float, str)):
+            self.reminder_offset_time = timedelta(seconds=int(self.reminder_offset_time))
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "User Preference"
