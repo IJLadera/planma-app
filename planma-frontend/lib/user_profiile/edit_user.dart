@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
-import 'package:planma_app/activities/create_activity.dart';
 import 'package:provider/provider.dart';
 
 class EditProfileScreen extends StatelessWidget {

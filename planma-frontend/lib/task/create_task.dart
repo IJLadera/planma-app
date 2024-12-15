@@ -1,38 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/task/widget/widgets.dart';
+import 'package:provider/provider.dart';
 
-class CreateTask extends StatefulWidget {
-  const CreateTask({super.key});
+class AddTaskScreen extends StatefulWidget {
+  const AddTaskScreen({super.key});
 
   @override
   _CreateTaskState createState() => _CreateTaskState();
 }
 
-class _CreateTaskState extends State<CreateTask> {
-  final TextEditingController _taskNameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _startTimeController = TextEditingController();
-  final TextEditingController _endTimeController = TextEditingController();
+class _CreateTaskState extends State<AddTaskScreen> {
+  final _taskNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _startTimeController = TextEditingController();
+  final _endTimeController = TextEditingController();
 
   DateTime? _scheduledDate;
   DateTime? _deadline;
-
   String? _subject;
 
-  final List<String> _subjectsOptions = ['Math', 'Science', 'English'];
-
   // Method to select date
-  void _selectDate(BuildContext context, DateTime? initialDate) async {
-    final pickedDate = await showDatePicker(
+  Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
+    final picked = await showDatePicker(
       context: context,
-      initialDate: initialDate ?? DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-
-    if (pickedDate != null) {
+    if (picked != null) {
       setState(() {
-        _scheduledDate = pickedDate;
+        if (isScheduledDate) {
+          _scheduledDate = picked;
+        } else {
+          _deadline = picked;
+        }
       });
     }
   }
@@ -42,7 +47,7 @@ class _CreateTaskState extends State<CreateTask> {
       BuildContext context, TextEditingController controller) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: TimeOfDay(hour: 12, minute: 0),
     );
     if (picked != null) {
       setState(() {
@@ -51,20 +56,138 @@ class _CreateTaskState extends State<CreateTask> {
     }
   }
 
+  TimeOfDay? _stringToTimeOfDay(String timeString) {
+    try {
+      final timeParts = timeString.split(':');
+      final hour = int.parse(timeParts[0].trim());
+      final minuteParts = timeParts[1].split(' ');
+      final minute = int.parse(minuteParts[0].trim());
+      final period = minuteParts[1].toLowerCase();
+
+      // Adjust for AM/PM
+      final isPM = period == 'pm';
+      final adjustedHour =
+          (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
+
+      return TimeOfDay(hour: adjustedHour, minute: minute);
+    } catch (e) {
+      return null; // Return null if parsing fails
+    }
+  }
+
+  void _submitTask(BuildContext context) async {
+    final provider = Provider.of<TaskProvider>(context, listen: false);
+
+    String taskName = _taskNameController.text.trim();
+    String taskDescription = _descriptionController.text.trim();
+    String startTimeString = _startTimeController.text.trim();
+    String endTimeString = _endTimeController.text.trim();
+
+    // Convert String to TimeOfDay
+    final startTime = _stringToTimeOfDay(startTimeString);
+    final endTime = _stringToTimeOfDay(endTimeString);
+
+    if (taskName.isEmpty ||
+        taskDescription.isEmpty ||
+        _scheduledDate == null ||
+        startTimeString.isEmpty ||
+        endTimeString.isEmpty ||
+        _deadline == null ||
+        _subject == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields!')),
+      );
+      return;
+    }
+
+    if (!_isValidTimeRange(startTime!, endTime!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Start Time must be before End Time.')),
+      );
+      return;
+    }
+
+    try {
+      await provider.addTask(
+          taskName: taskName,
+          taskDesc: taskDescription,
+          scheduledDate: _scheduledDate!,
+          startTime: startTime,
+          endTime: endTime,
+          deadline: _deadline!,
+          subjectCode: _subject!);
+
+      // After validation and adding logic
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Task added successfully!')),
+      );
+
+      Navigator.pop(context);
+      // Clear fields after adding
+      _clearFields();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add task (1): $error')),
+      );
+    }
+  }
+
+  // Valid Time Range Check
+  bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+  }
+
+  // Clear fields after submit
+  void _clearFields() {
+    _taskNameController.clear();
+    _descriptionController.clear();
+    _startTimeController.clear();
+    _endTimeController.clear();
+    _scheduledDate = null;
+    _deadline = null;
+    _subject = null;
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Fetch semesters and subjects when the screen loads
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
+    final classScheduleProvider =
+        Provider.of<ClassScheduleProvider>(context, listen: false);
+
+    semesterProvider.fetchSemesters().then((_) {
+      // Fetch subjects based on the active semester (determined in ClassScheduleProvider)
+      classScheduleProvider.fetchSubjects(semesterProvider).then((_) {
+        print("Subjects successfully fetched for the active semester.");
+      }).catchError((error) {
+        print("Error fetching subjects 1: $error");
+      });
+    }).catchError((error) {
+      print("Error fetching semesters: $error");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Create Task',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Color(0xFF173F70)),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
         children: [
@@ -73,18 +196,36 @@ class _CreateTaskState extends State<CreateTask> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Text fields for Task Name and Description
-                  CustomWidgets.buildTextField(
-                      _taskNameController, 'Task Name'),
+                  CustomWidgets.buildTitle(
+                    'Task Name',
+                  ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                      _descriptionController, 'Description'),
+                    _taskNameController,
+                    'Task Name',
+                    style: GoogleFonts.openSans(),
+                  ),
                   const SizedBox(height: 12),
-                  // Scheduled Date Picker
-                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
-                      context, true, _selectDate),
+                  CustomWidgets.buildTitle('Description'),
                   const SizedBox(height: 12),
-                  // Time pickers for Start Time and End Time
+                  CustomWidgets.buildTextField(
+                    _descriptionController,
+                    'Description',
+                    style: GoogleFonts.openSans(),
+                  ),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildTitle('Schedule Date'),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildDateTile(
+                    'Scheduled Date',
+                    _scheduledDate,
+                    context,
+                    true,
+                    (context, date) => _selectDate(context, true),
+                  ),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildTitle('Start and End Time'),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -108,16 +249,23 @@ class _CreateTaskState extends State<CreateTask> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  // Deadline Date Picker
-                  CustomWidgets.buildDateTile(
-                      'Deadline', _deadline, context, false, _selectDate),
+                  CustomWidgets.buildTitle('Deadline'),
                   const SizedBox(height: 12),
-                  // Dropdown field for choosing subject
+                  CustomWidgets.buildDateTile(
+                    'Deadline',
+                    _deadline,
+                    context,
+                    false,
+                    (context, date) => _selectDate(context, false),
+                  ),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildTitle('Choose a Subject'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
-                    label:
-                        'Choose Subject', // Updated the label for consistency
+                    label: 'Choose Subject',
                     value: _subject,
-                    items: _subjectsOptions,
+                    items: Provider.of<ClassScheduleProvider>(context)
+                        .subjectCodes,
                     onChanged: (String? value) {
                       setState(() {
                         _subject = value;
@@ -127,9 +275,10 @@ class _CreateTaskState extends State<CreateTask> {
                     labelColor: Colors.black,
                     textColor: Colors.black,
                     borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     fontSize: 14.0,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -138,25 +287,39 @@ class _CreateTaskState extends State<CreateTask> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             child: ElevatedButton(
-              onPressed: () {
-                // Action to create the task can be implemented here
-              },
+              onPressed: () => _submitTask(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
-              child: const Text(
+              child: Text(
                 'Create Task',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
         ],
       ),
+      resizeToAvoidBottomInset: false,
     );
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers and clean up listeners
+    _taskNameController.dispose();
+    _descriptionController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+
+    // Always call super.dispose()
+    super.dispose();
   }
 }

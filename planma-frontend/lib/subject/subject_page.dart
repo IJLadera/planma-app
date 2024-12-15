@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/subject/by_date_view.dart';
+import 'package:planma_app/subject/by_subject_view.dart';
 import 'package:planma_app/subject/create_subject.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
-import 'package:planma_app/subject/widget/day_schedule.dart';
 import 'package:planma_app/subject/widget/widget.dart';
-import 'package:provider/provider.dart'; // Assuming this contains `CustomWidgets`
+import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class ClassSchedule extends StatefulWidget {
   const ClassSchedule({super.key});
@@ -23,14 +26,8 @@ class _ClassScheduleState extends State<ClassSchedule> {
     'Wednesday',
     'Thursday',
     'Friday',
-    'Saturday'
-  ];
-
-  // Dummy data for subjects
-  final List<Map<String, String>> subjects = [
-    {'name': 'Math 101', 'schedule': 'Monday 10:00 AM - 12:00 PM'},
-    {'name': 'Physics 202', 'schedule': 'Wednesday 1:00 PM - 3:00 PM'},
-    {'name': 'English 303', 'schedule': 'Friday 8:00 AM - 10:00 AM'},
+    'Saturday',
+    'Sunday'
   ];
 
   // Selected semester
@@ -39,16 +36,26 @@ class _ClassScheduleState extends State<ClassSchedule> {
   @override
   void initState() {
     super.initState();
-    // Fetch semesters when the screen loads
     final semesterProvider =
         Provider.of<SemesterProvider>(context, listen: false);
+    final classScheduleProvider =
+        Provider.of<ClassScheduleProvider>(context, listen: false);
+
+    // Fetch semesters when the screen loads
     semesterProvider.fetchSemesters().then((_) {
-      setState(() {
-        // Access the updated semesters from the provider
-        selectedSemester = semesterProvider.semesters.isNotEmpty
-            ? "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}"
-            : null;
-      });
+      if (semesterProvider.semesters.isNotEmpty) {
+        // Set the default selected semester
+        setState(() {
+          selectedSemester =
+              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+        });
+
+        // Automatically fetch class schedules for the default semester
+        final defaultSemesterId = semesterProvider.semesters[0]['semester_id'];
+        classScheduleProvider.fetchClassSchedules(
+          selectedSemesterId: defaultSemesterId,
+        );
+      }
     });
   }
 
@@ -56,11 +63,16 @@ class _ClassScheduleState extends State<ClassSchedule> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Class Schedule'),
+        title: Text(
+          'Class Schedules',
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+        ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
-      body: Consumer<SemesterProvider>(
-        builder: (context, semesterProvider, child) {
-          // Update semesters list every time it changes
+      body: Consumer2<SemesterProvider, ClassScheduleProvider>(
+        builder: (context, semesterProvider, classScheduleProvider, child) {
+          // Update semesters list
           List<String> semesters = semesterProvider.semesters
               .map((semester) =>
                   "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
@@ -78,21 +90,65 @@ class _ClassScheduleState extends State<ClassSchedule> {
                         children: [
                           Expanded(
                             child: CustomWidgets.buildDropdownField(
-                              label: 'Semester',
+                              label: '- Add Semester -',
                               value: selectedSemester,
                               items: semesters,
                               onChanged: (String? value) {
                                 setState(() {
                                   if (value == '- Add Semester -') {
+                                    // Navigate to Add Semester screen
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
                                             AddSemesterScreen(),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      // Refresh semesters after returning
+                                      semesterProvider.fetchSemesters();
+                                    });
                                   } else if (value != null) {
+                                    // Update the selected semester
                                     selectedSemester = value;
+
+                                    // Parse selectedSemester to extract its components
+                                    List<String> semesterParts =
+                                        selectedSemester!.split(' ');
+                                    int acadYearStart =
+                                        int.parse(semesterParts[0]);
+                                    int acadYearEnd =
+                                        int.parse(semesterParts[2]);
+                                    String semesterType =
+                                        "${semesterParts[3]} ${semesterParts[4]}";
+
+                                    // Find the corresponding semester_id
+                                    final selectedSemesterMap =
+                                        semesterProvider.semesters.firstWhere(
+                                      (semester) {
+                                        return semester['acad_year_start'] ==
+                                                acadYearStart &&
+                                            semester['acad_year_end'] ==
+                                                acadYearEnd &&
+                                            semester['semester'] ==
+                                                semesterType;
+                                      },
+                                      orElse: () =>
+                                          {}, // Return empty map if no match is found
+                                    );
+
+                                    if (selectedSemesterMap.isNotEmpty) {
+                                      final selectedSemesterId =
+                                          selectedSemesterMap['semester_id'];
+                                      print(
+                                          "Found semester ID: $selectedSemesterId");
+
+                                      // Trigger fetching of class schedules using semester_id
+                                      classScheduleProvider.fetchClassSchedules(
+                                        selectedSemesterId: selectedSemesterId,
+                                      );
+                                    } else {
+                                      print("No matching semester found!");
+                                    }
                                   }
                                 });
                               },
@@ -131,30 +187,28 @@ class _ClassScheduleState extends State<ClassSchedule> {
                       ),
                     ),
                     Expanded(
-                      child: isByDate
-                          ? ListView.builder(
-                              itemCount: days.length,
-                              itemBuilder: (context, index) {
-                                return DaySchedule(
-                                  day: days[index],
-                                  isByDate: isByDate,
-                                );
-                              },
+                      child: classScheduleProvider.classSchedules.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No schedules available',
+                                style: GoogleFonts.openSans(
+                                  fontSize:
+                                      16, // Define the font size explicitly
+                                  color: Colors
+                                      .black, // Customize the color as needed
+                                ),
+                              ),
                             )
-                          : ListView.builder(
-                              itemCount: subjects.length,
-                              itemBuilder: (context, index) {
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  child: ListTile(
-                                    title: Text(subjects[index]['name']!),
-                                    subtitle:
-                                        Text(subjects[index]['schedule']!),
-                                  ),
-                                );
-                              },
-                            ),
+                          : isByDate
+                              ? ByDateView(
+                                  days: days,
+                                  subjectsView:
+                                      classScheduleProvider.classSchedules,
+                                )
+                              : BySubjectView(
+                                  subjectsView:
+                                      classScheduleProvider.classSchedules,
+                                ),
                     ),
                   ],
                 );
@@ -168,6 +222,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
           );
         },
         backgroundColor: const Color(0xFF173F70),
+        shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

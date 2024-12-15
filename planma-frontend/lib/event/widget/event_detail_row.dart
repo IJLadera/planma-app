@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class EventDetailRow extends StatelessWidget {
   final String title;
@@ -20,15 +21,21 @@ class EventDetailRow extends StatelessWidget {
             flex: 3,
             child: Text(
               title,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.grey[800]),
+              style: GoogleFonts.openSans(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF173F70),
+                fontSize: 14,
+              ),
             ),
           ),
           Expanded(
             flex: 5,
             child: Text(
               value,
-              style: const TextStyle(color: Colors.black),
+              style: GoogleFonts.openSans(
+                color: Color(0xFF173F70),
+                fontSize: 14,
+              ),
             ),
           ),
         ],

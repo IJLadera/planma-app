@@ -1,67 +1,18 @@
+from django.db import IntegrityError, transaction
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status, viewsets
 from .models import *
 from .serializers import *
 from rest_framework.views import APIView
+from djoser.views import UserViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
+from datetime import datetime
+from django.core.exceptions import ValidationError
+from django.utils.timezone import make_aware
 
-#Tasks
-class CustomTaskListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        data = request.data
-        serializer = CustomTaskSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student field to the authenticated user on creation
-        
-
-class CustomTaskDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        user = CustomUser.objects.get(student_id = pk)
-        task = CustomTask.objects.filter(student_id = user)
-        serializer = CustomTaskSerializer(task, many = True)
-        
-        return Response(serializer.data)
-    
-class CustomTaskDeleteView(APIView):
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deletetask = CustomTask.objects.get(task_id = pk)
-            
-            deletetask.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except CustomTask.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-
-class CustomTaskUpdateView(APIView):
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        taskid= CustomTask.objects.get(task_id = pk)
-        
-        serializer = CustomTaskSerializer(instance=taskid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #Below is the Events tables
 
@@ -79,49 +30,140 @@ class CustomEventListCreateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         # Set the student field to the authenticated user on creation
-        
-class CustomEventDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
 
-    def get(self,request,pk):
-        
-        user = CustomUser.objects.get(student_id = pk)
-        event = CustomEvents.objects.filter(student_id = user)
-        serializer = CustomEventSerializer(event, many = True)
-        
-        return Response(serializer.data)
-    
-class CustomEventDeleteView(APIView):
-
+class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
+    queryset = CustomEvents.objects.all()
+    serializer_class = CustomEventSerializer
+
+    @action(detail=False, methods=['post'])
+    def add_event(self, request):
+        data = request.data
+
+        # Extract data from request
+        event_name = data.get('event_name')
+        event_desc = data.get('event_desc')
+        location = data.get('location')
+        scheduled_date = data.get('scheduled_date')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        event_type = data.get('event_type')
+        student_id = request.user.student_id  # Authenticated user
+
+        # print(f"Authenticated User: {request.user}")
+        # print(f"Student ID: {student_id}")
+
+        # Validate input
+        if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            
-            deleteevent = CustomEvents.objects.get(event_id = pk)
-            
-            deleteevent.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except CustomEvents.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
 
-class CustomEventUpdateView(APIView):
+            # Check for conflicting task schedule
+            duplicate = CustomEvents.objects.filter(
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(student_id=student)
+            ).exists()
 
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        eventid= CustomEvents.objects.get(event_id = pk)
-        
-        serializer = CustomTaskSerializer(instance=eventid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            if duplicate:
+                return Response(
+                    {'error': 'Conflicting event schedule detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Events
+            event = CustomEvents.objects.create(
+                event_name=event_name,
+                event_desc=event_desc,
+                location=location,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time,
+                event_type=event_type,
+                student_id=student,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(event)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the task
+        event_name = data.get('event_name')
+        event_desc = data.get('event_desc')
+        location = data.get('location')
+        scheduled_date = data.get('scheduled_date')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        event_type = data.get('event_type')
+
+        if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+
+            # Check for conflicting task schedule (excluding current task)
+            duplicate = CustomEvents.objects.filter(
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(student_id=instance.student_id) &
+                ~Q(event_id=instance.event_id)  # Exclude the current event from duplicate check
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Conflicting task schedule detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the task instance
+            instance.event_name = event_name
+            instance.event_desc = event_desc
+            instance.location = location
+            instance.scheduled_date = scheduled_date
+            instance.scheduled_start_time = start_time
+            instance.scheduled_end_time = end_time
+            instance.event_type = event_type
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         
 #below is the Attended Event Table
 
@@ -298,19 +340,66 @@ class LogActivityUpdateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #User Preferences
-class UserPrefListCreateView(APIView):
+class UserPrefListCreateView(viewsets.ModelViewSet):
+    queryset = UserPref.objects.all()
+    serializer_class = UserPrefSerializer  
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return UserPref.objects.filter(studdent_id=self.request.user)
     
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = UserPrefSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
+    def perform_create(self, serializer):
+        serializer.save(student_id=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create to ensure a custom response structure.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Override update to ensure the user can only edit their own preferences.
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        # Ensure the logged-in user is the owner of the preference
+        if instance.student_id != request.user:
+            return Response(
+                {"detail": "You do not have permission to edit this preference."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy to ensure the user can only delete their own preferences.
+        """
+        instance = self.get_object()
+
+        # Ensure the logged-in user is the owner of the preference
+        if instance.student_id != request.user:
+            return Response(
+                {"detail": "You do not have permission to delete this preference."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        self.perform_destroy(instance)
+        return Response(
+            {"detail": "Preference deleted successfully."}, 
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
 class UserPrefDetailView(APIView):
    
     permission_classes = [permissions.AllowAny]
@@ -347,126 +436,6 @@ class UserPrefUpdateView(APIView):
         userprefid= UserPref.objects.get(pref_id = pk)
         
         serializer = UserPrefSerializer(instance=userprefid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
-
-# Class
-
-class CustomClassListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = CustomClassSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class CustomClassDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        #Student ID
-        user = CustomUser.objects.get(student_id = pk)
-        cusclass = CustomClass.objects.filter(student_id = user)
-        serializer = CustomClassSerializer(cusclass, many = True)
-        
-        return Response(serializer.data)
-    
-class CustomClassDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deletecusclass = CustomClass.objects.get(classsched_id = pk)
-            
-            deletecusclass.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except CustomClass.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class CustomClassUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        classid= CustomClass.objects.get(classsched_id = pk)
-        
-        serializer = CustomClassSerializer(instance=classid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        
-# Subject
-
-
-
-class CustomSubjectListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = CustomSubSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class CustomSubjectDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        user = CustomUser.objects.get(student_id = pk)
-        subject = CustomClass.objects.filter(student_id = user)
-        serializer = CustomSubSerializer(subject, many = True)
-        
-        return Response(serializer.data)
-    
-class CustomSubjectDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deletesub = CustomSub.objects.get(subject_code = pk)
-            
-            deletesub.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except CustomSub.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class CustomSubjectUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        subid= CustomSub.objects.get(subject_code = pk)
-        
-        serializer = CustomSubSerializer(instance=subid, data=data)
         if serializer.is_valid():
             
             serializer.save()
@@ -532,65 +501,23 @@ class AttClassUpdateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-
-# Goals
-
-class GoalsListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = GoalsSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class GoalsDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        user = CustomUser.objects.get(student_id = pk)
-        goals = Goals.objects.filter(student_id = user)
-        serializer = GoalsSerializer(goals, many = True)
-        
-        return Response(serializer.data)
-    
-class GoalsDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deletegoals = Goals.objects.get(goal_id = pk)
-            
-            deletegoals.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except Goals.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class GoalsUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        goalid= Goals.objects.get(goal_id = pk)
-        
-        serializer = GoalsSerializer(instance=goalid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 # OLANGO VIEWS
+# User/Student
+class CustomUserViewSet(UserViewSet):
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        if response.status_code == 201:  # Account successfully created
+            user = self.get_user_from_request(request.data)  # Custom method
+            refresh = RefreshToken.for_user(user)  # Generate tokens
+            response.data['refresh'] = str(refresh)
+            response.data['access'] = str(refresh.access_token)
+        return response
+
+    def get_user_from_request(self, data):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        return User.objects.get(email=data.get("email"))
+    
 # Class Schedule & Subject
 class ClassScheduleViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
@@ -609,47 +536,171 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
         start_time = data.get('scheduled_start_time')
         end_time = data.get('scheduled_end_time')
         room = data.get('room')
-
-        # Use the authenticated user's student_id
-        student_id = request.user.student_id
+        student_id = request.user.student_id  # Authenticated user
 
         # Validate input
         if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Create or get the Subject
-        subject, created = CustomSubject.objects.get_or_create(
-            subject_code=subject_code,
-            defaults={
-                'subject_title': subject_title,
-                'semester_id_id': semester_id,
-                'student_id_id': student_id,
-            }
-        )
+        try:
+            # Check for duplicate schedule
+            duplicate = CustomClassSchedule.objects.filter(
+                Q(day_of_week=day_of_week) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(room=room) &
+                Q(student_id=student_id) 
+            ).exists()
 
-        # Create the Class Schedule
-        class_schedule = CustomClassSchedule.objects.create(
-            subject_code=subject,  # Pass the subject object
-            day_of_week=day_of_week,
-            scheduled_start_time=start_time,
-            scheduled_end_time=end_time,
-            room=room,
-            student_id_id=student_id,
-        )
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate schedule entry detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        # Serialize and return the created data
-        serializer = self.get_serializer(class_schedule)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Create or get the Subject
+            subject, created = CustomSubject.objects.get_or_create(
+                subject_code=subject_code,
+                defaults={
+                    'subject_title': subject_title,
+                    'semester_id_id': semester_id,
+                    'student_id_id': student_id,
+                }
+            )
+
+            # Create the Class Schedule
+            class_schedule = CustomClassSchedule.objects.create(
+                subject_code=subject,
+                day_of_week=day_of_week,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time,
+                room=room,
+                student_id_id=student_id,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(class_schedule)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        semester_id = self.request.query_params.get('semester_id')
+        if semester_id:
+            # Validate if the semester_id exists
+            get_object_or_404(CustomSemester, pk=semester_id)
+            queryset = queryset.filter(subject_code__semester_id=semester_id)
+        return queryset
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the class schedule
+        subject_code = data.get('subject_code')
+        subject_title = data.get('subject_title')
+        semester_id = data.get('semester_id')
+        day_of_week = data.get('day_of_week')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        room = data.get('room')
+
+        # Validate input
+        if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Check if the subject needs updating or creation
+            subject, created = CustomSubject.objects.get_or_create(
+                subject_code=subject_code,
+                defaults={
+                    'subject_title': subject_title,
+                    'semester_id_id': semester_id,
+                    'student_id_id': request.user.student_id,
+                },
+            )
+            if not created:  # If the subject already exists, update its details
+                subject.subject_title = subject_title
+                subject.semester_id_id = semester_id
+                subject.save()
+
+            # Update the class schedule instance
+            instance.subject_code = subject
+            instance.day_of_week = day_of_week
+            instance.scheduled_start_time = start_time
+            instance.scheduled_end_time = end_time
+            instance.room = room
+            instance.save()
+
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        subject_code = instance.subject_code
+
+        with transaction.atomic():
+            self.perform_destroy(instance)
+            if not CustomClassSchedule.objects.filter(subject_code=subject_code).exists():
+                subject_code.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# Subject
+class SubjectViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = CustomSubject.objects.all()
+    serializer_class = CustomSubjectSerializer
+
+    @action(detail=False, methods=['get'], url_path='(?P<subject_code>[^/.]+)')
+    def get_subject_by_code(self, request, subject_code):
+        try:
+            subject = CustomSubject.objects.get(subject_code=subject_code)
+            serializer = self.get_serializer(subject)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except CustomSubject.DoesNotExist:
+            return Response({'error': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def get_queryset(self):
+        semester_id = self.request.query_params.get('semester_id', None)
+        subject_code = self.kwargs.get('subject_code')
+
+        if semester_id:
+            return CustomSubject.objects.filter(semester_id=semester_id)  # Filter by semester_id
+
+        if subject_code:
+            return CustomSubject.objects.filter(subject_code=subject_code)  # Filter by subject_code
+        
+        return CustomSubject.objects.all()
 
 # Semester
-class SemesterListView(APIView):
+class SemesterViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
+    queryset = CustomSemester.objects.all()
+    serializer_class = CustomSemesterSerializer
 
-    def get(self, request):
-        semesters = CustomSemester.objects.all()
-        serializer = CustomSemesterSerializer(semesters, many=True)
-        return Response(serializer.data)
+    # def get(self, request):
+    #     semesters = CustomSemester.objects.all()
+    #     serializer = CustomSemesterSerializer(semesters, many=True)
+    #     return Response(serializer.data)
 
+    @action(detail=False, methods=['post'])
     def post(self, request):
         serializer = CustomSemesterSerializer(data=request.data)
         if serializer.is_valid():
@@ -657,63 +708,434 @@ class SemesterListView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# Task
+class TaskViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = CustomTask.objects.all()
+    serializer_class = CustomTaskSerializer
+
+    @action(detail=False, methods=['post'])
+    def add_task(self, request):
+        data = request.data
+
+        # Extract data from request
+        task_name = data.get('task_name')
+        task_desc = data.get('task_desc')
+        scheduled_date = data.get('scheduled_date')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        deadline_str = data.get('deadline')
+        subject_code = data.get('subject_code')
+        student_id = request.user.student_id  # Authenticated user
+
+        # Validate input
+        if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_code]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Convert deadline to timezone-aware datetime
+            deadline = make_aware(datetime.strptime(deadline_str, "%Y-%m-%dT%H:%M"))
+        except ValueError:
+            return Response(
+                {'error': 'Invalid deadline format. Use "YYYY-MM-DDTHH:MM".'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Fetch or raise error if subject doesn't exist
+            subject = get_object_or_404(CustomSubject, subject_code=subject_code)
+
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
+
+            # Check for conflicting task schedule
+            duplicate = CustomTask.objects.filter(
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(student_id=student)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Conflicting task schedule detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Task
+            task = CustomTask.objects.create(
+                task_name=task_name,
+                task_desc=task_desc,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time,
+                deadline=deadline,
+                status='Pending',
+                subject_code=subject,
+                student_id=student,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(task)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the task
+        task_name = data.get('task_name')
+        task_desc = data.get('task_desc')
+        scheduled_date = data.get('scheduled_date')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        deadline_str = data.get('deadline')
+        subject_code = data.get('subject_code')
+
+        # Validate input
+        if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_code]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Convert deadline to timezone-aware datetime
+            deadline = make_aware(datetime.strptime(deadline_str, "%Y-%m-%dT%H:%M"))
+        except ValueError:
+            return Response(
+                {'error': 'Invalid deadline format. Use "YYYY-MM-DDTHH:MM".'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Fetch or raise error if subject doesn't exist
+            subject = get_object_or_404(CustomSubject, subject_code=subject_code)
+
+            # Check for conflicting task schedule (excluding current task)
+            duplicate = CustomTask.objects.filter(
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(student_id=instance.student_id) &
+                ~Q(task_id=instance.task_id)  # Exclude the current task from duplicate check
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Conflicting task schedule detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the task instance
+            instance.task_name = task_name
+            instance.task_desc = task_desc
+            instance.scheduled_date = scheduled_date
+            instance.scheduled_start_time = start_time
+            instance.scheduled_end_time = end_time
+            instance.deadline = deadline
+            instance.subject_code = subject
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+# Goals
+class GoalViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = Goals.objects.all()
+    serializer_class = GoalsSerializer
+
+    @action(detail=False, methods=['post'])
+    def add_goal(self, request):
+        data = request.data
+
+        # Extract data from request
+        goal_name = data.get('goal_name')
+        goal_desc = data.get('goal_desc')
+        timeframe = data.get('timeframe')
+        target_hours = data.get('target_hours')
+        goal_type = data.get('goal_type')
+        semester_id = data.get('semester_id')
+        student_id = request.user.student_id  # Authenticated user
+
+        # print(f"Authenticated User: {request.user}")
+        # print(f"Student ID: {student_id}")
+
+        # Validate input
+        if not all([goal_name, goal_desc, timeframe, target_hours, goal_type]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Additional validation for `semester_id` based on `goal_type`
+        if goal_type == 'Academic' and not semester_id:
+            return Response({'error': 'semester_id is required for Academic goals.'}, status=status.HTTP_400_BAD_REQUEST)
+        elif goal_type == 'Personal' and semester_id:
+            return Response({'error': 'semester_id must be null for Personal goals.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
+
+            semester = None
+            if goal_type == 'Academic':
+                semester = get_object_or_404(CustomSemester, semester_id=semester_id)
+
+            # Check for duplicate goal instance
+            duplicate = Goals.objects.filter(
+                Q(goal_name=goal_name) &
+                Q(timeframe=timeframe) &
+                Q(target_hours=target_hours) &
+                (Q(semester_id=semester) if semester else Q(semester_id__isnull=True)) &
+                Q(student_id=student)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate goal instance detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Goal
+            goal = Goals.objects.create(
+                goal_name=goal_name,
+                goal_desc=goal_desc,
+                timeframe=timeframe,
+                target_hours=target_hours,
+                goal_type=goal_type,
+                semester_id=semester,
+                student_id=student,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(goal)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the task
+        goal_name = data.get('goal_name')
+        goal_desc = data.get('goal_desc')
+        timeframe = data.get('timeframe')
+        target_hours = data.get('target_hours')
+        goal_type = data.get('goal_type')
+        semester_id = data.get('semester_id')
+
+        # Validate input
+        if not all([goal_name, goal_desc, timeframe, target_hours, goal_type]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Additional validation for `semester_id` based on `goal_type`
+        if goal_type == 'Academic' and not semester_id:
+            return Response({'error': 'semester_id is required for Academic goals.'}, status=status.HTTP_400_BAD_REQUEST)
+        elif goal_type == 'Personal' and semester_id:
+            return Response({'error': 'semester_id must be null for Personal goals.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            semester = None
+            if goal_type == 'Academic':
+                semester = get_object_or_404(CustomSemester, semester_id=semester_id)
+
+            # Check for duplicate goal instance
+            duplicate = Goals.objects.filter(
+                Q(goal_name=goal_name) &
+                Q(timeframe=timeframe) &
+                Q(target_hours=target_hours) &
+                (Q(semester_id=semester) if semester else Q(semester_id__isnull=True)) &
+                Q(student_id=instance.student_id) &
+                ~Q(goal_id=instance.goal_id)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate goal instance detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the goal instance
+            instance.goal_name = goal_name
+            instance.goal_desc = goal_desc
+            instance.timeframe = timeframe
+            instance.target_hours = target_hours
+            instance.goal_type = goal_type
+            instance.semester_id = semester
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+# Goal Schedule
+class GoalScheduleViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = GoalSchedule.objects.all()
+    serializer_class = GoalScheduleSerializer
+
+    @action(detail=False, methods=['post'])
+    def add_schedule(self, request):
+        data = request.data
+
+        # Extract data from request
+        goal_id = data.get('goal_id')
+        scheduled_date = data.get('scheduled_date')
+        scheduled_start_time = data.get('scheduled_start_time')
+        scheduled_end_time = data.get('scheduled_end_time')
+
+        # Validate input
+        if not all([scheduled_date, scheduled_start_time, scheduled_end_time]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Fetch the CustomUser instance
+            goal = get_object_or_404(Goals, goal_id=goal_id)
+
+            # Check for duplicate goal instance
+            duplicate = GoalSchedule.objects.filter(
+                Q(goal_id=goal) &
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=scheduled_start_time) &
+                Q(scheduled_end_time=scheduled_end_time)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate goal instance detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Goal Schedule
+            goalSchedule = GoalSchedule.objects.create(
+                goal_id=goal,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=scheduled_start_time,
+                scheduled_end_time=scheduled_end_time,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(goalSchedule)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the goal schedule
+        goal_id = data.get('goal_id')
+        scheduled_date = data.get('scheduled_date')
+        scheduled_start_time = data.get('scheduled_start_time')
+        scheduled_end_time = data.get('scheduled_end_time')
+
+        # Validate input
+        if not all([scheduled_date, scheduled_start_time, scheduled_end_time]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Fetch the CustomUser instance
+            goal = get_object_or_404(Goals, goal_id=goal_id)
+
+            # Check for duplicate goal instance
+            duplicate = GoalSchedule.objects.filter(
+                Q(goal_id=goal) &
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=scheduled_start_time) &
+                Q(scheduled_end_time=scheduled_end_time) &
+                ~Q(goalschedule_id=instance.goalschedule_id)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate goal instance detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the task instance
+            instance.goal_id = goal
+            instance.scheduled_date = scheduled_date
+            instance.scheduled_start_time = scheduled_start_time
+            instance.scheduled_end_time = scheduled_end_time
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 #Might delete
-class SemesterListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = CustomSemesterSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class SemesterDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        goal = CustomSemester.objects.get(semester_id = pk)
-        sem = CustomSemester.objects.filter(semester_id = goal)
-        serializer = CustomSemesterSerializer(sem, many = True)
-        
-        return Response(serializer.data)
-    
-class SemesterDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deletesem = CustomSemester.objects.get(semester_id = pk)
-            
-            deletesem.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except CustomSemester.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class SemesterUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        semid= CustomSemester.objects.get(semester_id = pk)
-        
-        serializer = CustomSemesterSerializer(instance=semid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
 # Goal Progress
 
 class GoalProgressListCreateView(APIView):
@@ -772,77 +1194,11 @@ class GoalProgressUpdateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-# Goal Progress
 
-class GoalScheduleListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = GoalScheduleSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class GoalScheduleDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
 
-    def get(self,request,pk):
-        
-        goal = Goals.objects.get(goal_id = pk)
-        goalsched = GoalSchedule.objects.filter(student_id = goal)
-        serializer = GoalProgressSerializer(goalsched, many = True)
-        
-        return Response(serializer.data)
-    
-class GoalScheduleDeleteView(APIView):
 
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deletegoals = GoalSchedule.objects.get(goalschedule_id = pk)
-            
-            deletegoals.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except GoalProgress.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class GoalScheduleUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        goalid= GoalSchedule.objects.get(goalprogress_id = pk)
-        
-        serializer = GoalScheduleSerializer(instance=goalid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #Sleep
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        repid= SleepLog.objects.get(report_id = pk)
-        serializer = SleepLogSerializer(instance=repid, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 class SleepLogListCreateView(APIView):
     
     permission_classes = [permissions.AllowAny]

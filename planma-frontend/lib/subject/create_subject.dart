@@ -4,6 +4,7 @@ import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/widget/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class AddClassScreen extends StatefulWidget {
   const AddClassScreen({super.key});
@@ -25,13 +26,13 @@ class _AddClassScreenState extends State<AddClassScreen> {
   String? _selectedDay;
 
   final Map<String, String> dayAbbreviationToFull = {
-  'S': 'Sunday',
-  'M': 'Monday',
-  'T': 'Tuesday',
-  'W': 'Wednesday',
-  'Th': 'Thursday',
-  'F': 'Friday',
-  'Sa': 'Saturday',
+    'S': 'Sunday',
+    'M': 'Monday',
+    'T': 'Tuesday',
+    'W': 'Wednesday',
+    'Th': 'Thursday',
+    'F': 'Friday',
+    'Sa': 'Saturday',
   };
 
   Future<void> _selectTime(
@@ -57,7 +58,8 @@ class _AddClassScreenState extends State<AddClassScreen> {
 
       // Adjust for AM/PM
       final isPM = period == 'pm';
-      final adjustedHour = (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
+      final adjustedHour =
+          (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
 
       return TimeOfDay(hour: adjustedHour, minute: minute);
     } catch (e) {
@@ -97,38 +99,24 @@ class _AddClassScreenState extends State<AddClassScreen> {
       return;
     }
 
-    // Log for now (you can replace with API/database calls)
-    print("Subject Code: $subjectCode");
-    print("Subject Title: $subjectTitle");
-    print("Semester: $selectedSemesterId");
-    print("Days: $_selectedDay");
-    print("Start Time: $startTime");
-    print("End Time: $endTime");
-    print("Room: $room");
-
     try {
       await provider.addClassScheduleWithSubject(
-        subjectCode: subjectCode,
-        subjectTitle: subjectTitle,
-        semesterId: selectedSemesterId!,
-        dayOfWeek: _selectedDay!,
-        startTime: startTime,
-        endTime: endTime,
-        room: room
-      );
-
-      
+          subjectCode: subjectCode,
+          subjectTitle: subjectTitle,
+          semesterId: selectedSemesterId!,
+          dayOfWeek: _selectedDay!,
+          startTime: startTime,
+          endTime: endTime,
+          room: room);
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Class Schedule added successfully!')),
       );
 
+      Navigator.pop(context);
       // Clear fields after adding
       _clearFields();
-
-      Navigator.pop(context);
-
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add class schedule 1: $error')),
@@ -138,8 +126,8 @@ class _AddClassScreenState extends State<AddClassScreen> {
 
   // Valid Time Range Check
   bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
-  return startTime.hour < endTime.hour ||
-      (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
 
   // Clear fields after submit
@@ -157,14 +145,16 @@ class _AddClassScreenState extends State<AddClassScreen> {
   void initState() {
     super.initState();
     // Fetch semesters when the screen loads
-    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
     semesterProvider.fetchSemesters().then((_) {
       setState(() {
         // Set default value if there are semesters available
         if (semesterProvider.semesters.isNotEmpty) {
           // Select the first semester
-          selectedSemester = "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
-        
+          selectedSemester =
+              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+
           final defaultSemester = semesterProvider.semesters.first;
           selectedSemesterId = defaultSemester['semester_id'];
 
@@ -174,17 +164,49 @@ class _AddClassScreenState extends State<AddClassScreen> {
         }
       });
     });
+
+    // Add listener for subject code controller to auto-fill subject title
+    _subjectCodeController.addListener(() {
+      final subjectProvider =
+          Provider.of<ClassScheduleProvider>(context, listen: false);
+      String subjectCode = _subjectCodeController.text.trim();
+
+      if (subjectCode.isNotEmpty) {
+        subjectProvider.fetchSubjectDetails(subjectCode).then((_) {
+          setState(() {
+            if (subjectProvider.selectedSubject != null) {
+              _subjectTitleController.text =
+                  subjectProvider.selectedSubject!.subjectTitle;
+            } else {
+              _subjectTitleController.clear(); // Clear if no subject is found
+            }
+          });
+        }).catchError((error) {
+          print("Error fetching subject details: $error");
+          _subjectTitleController.clear();
+        });
+      } else {
+        setState(() {
+          _subjectTitleController.clear();
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Class Schedule'),
+        title: Text(
+          'Add Class Schedule',
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Consumer<SemesterProvider>(
         builder: (context, semesterProvider, child) {
@@ -199,19 +221,40 @@ class _AddClassScreenState extends State<AddClassScreen> {
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      CustomWidgets.buildTitle(
+                        'Subject Code',
+                      ),
+                      SizedBox(height: 15),
                       CustomWidgets.buildTextField(
-                          _subjectCodeController, 'Subject Code'),
-                      const SizedBox(height: 16),
+                        _subjectCodeController,
+                        'Subject Code',
+                        style: GoogleFonts.openSans(),
+                      ),
+                      SizedBox(height: 15),
+                      CustomWidgets.buildTitle(
+                        'Subject Title',
+                      ),
+                      const SizedBox(height: 15),
                       CustomWidgets.buildTextField(
-                          _subjectTitleController, 'Subject Title'),
-                      const SizedBox(height: 16),
-                      // Dropdown for Semester
+                        _subjectTitleController,
+                        'Subject Title',
+                        style: GoogleFonts.openSans(),
+                      ),
+                      SizedBox(height: 15),
+                      CustomWidgets.buildTitle(
+                        'Select Semester',
+                      ),
+                      const SizedBox(height: 15),
                       CustomWidgets.buildDropdownField(
                         label: 'Select Semester',
+                        textStyle: GoogleFonts.openSans(
+                          fontSize: 14,
+                        ),
                         value: selectedSemester,
                         items: semesterItems,
                         onChanged: (value) {
@@ -219,56 +262,65 @@ class _AddClassScreenState extends State<AddClassScreen> {
                             if (value == '- Add Semester -') {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => AddSemesterScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => AddSemesterScreen()),
                               ).then((_) => semesterProvider.fetchSemesters());
                             } else {
                               selectedSemester = value;
 
                               // Split data from value for firstWhere comparison
-                              List<String> semesterParts = selectedSemester!.split(' ');
+                              List<String> semesterParts =
+                                  selectedSemester!.split(' ');
                               int acadYearStart = int.parse(semesterParts[0]);
                               int acadYearEnd = int.parse(semesterParts[2]);
-                              String semesterType = "${semesterParts[3]} ${semesterParts[4]}";
-                              
-                              final selectedSemesterMap = semesterProvider.semesters.firstWhere(
+                              String semesterType =
+                                  "${semesterParts[3]} ${semesterParts[4]}";
+
+                              final selectedSemesterMap =
+                                  semesterProvider.semesters.firstWhere(
                                 (semester) {
-                                  return semester['acad_year_start'] == acadYearStart &&
-                                  semester['acad_year_end'] == acadYearEnd &&
-                                  semester['semester'] == semesterType;
-                                }, orElse: () => {},  // Return null if no match is found
+                                  return semester['acad_year_start'] ==
+                                          acadYearStart &&
+                                      semester['acad_year_end'] ==
+                                          acadYearEnd &&
+                                      semester['semester'] == semesterType;
+                                },
+                                orElse: () =>
+                                    {}, // Return null if no match is found
                               );
-                              selectedSemesterId = selectedSemesterMap['semester_id'];
-                              print("Found semester ID: ${selectedSemesterMap['semester_id']}");
-                                                        }
+                              selectedSemesterId =
+                                  selectedSemesterMap['semester_id'];
+                              print(
+                                  "Found semester ID: ${selectedSemesterMap['semester_id']}");
+                            }
                           });
                         },
                         backgroundColor: const Color(0xFFF5F5F5),
                         labelColor: Colors.black,
                         textColor: Colors.black,
                         borderRadius: 30.0,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 6),
                         fontSize: 14.0,
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
+                      const SizedBox(height: 15),
+                      CustomWidgets.buildTitle(
                         'Day of the Week',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 15),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           for (var day in ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'])
                             DayButton(
                               day: day,
-                              isSelected: _selectedDay == dayAbbreviationToFull[day], // Match full day name
+                              isSelected: _selectedDay ==
+                                  dayAbbreviationToFull[
+                                      day], // Match full day name
                               onTap: () {
                                 setState(() {
-                                  if (_selectedDay == dayAbbreviationToFull[day]) {
+                                  if (_selectedDay ==
+                                      dayAbbreviationToFull[day]) {
                                     _selectedDay = null;
                                   } else {
                                     _selectedDay = dayAbbreviationToFull[day];
@@ -278,34 +330,44 @@ class _AddClassScreenState extends State<AddClassScreen> {
                             ),
                         ],
                       ),
+                      const SizedBox(height: 15),
+                      CustomWidgets.buildTitle(
+                        'Start and End Time',
+                      ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
+                            child: CustomWidgets.buildTimeField(
+                              'Start Time',
+                              _startTimeController,
+                              context,
+                              (context) =>
                                   _selectTime(context, _startTimeController),
-                              child: AbsorbPointer(
-                                child: CustomWidgets.buildTextField(
-                                    _startTimeController, 'Start Time'),
-                              ),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 12),
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
+                            child: CustomWidgets.buildTimeField(
+                              'End Time',
+                              _endTimeController,
+                              context,
+                              (context) =>
                                   _selectTime(context, _endTimeController),
-                              child: AbsorbPointer(
-                                child: CustomWidgets.buildTextField(
-                                    _endTimeController, 'End Time'),
-                              ),
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 15),
+                      CustomWidgets.buildTitle(
+                        'Room',
+                      ),
                       const SizedBox(height: 16),
-                      CustomWidgets.buildTextField(_roomController, 'Room'),
+                      CustomWidgets.buildTextField(_roomController, 'Room',
+                          style: GoogleFonts.openSans(
+                            fontSize: 16,
+                            color: Colors.black,
+                          )),
                     ],
                   ),
                 ),
@@ -318,21 +380,36 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 120),
                   ),
-                  child: const Text(
-                    'Add Schedule',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                  child: Text('Add Schedule',
+                      style: GoogleFonts.openSans(
+                        fontSize: 16,
+                        color: Colors.white,
+                      )),
                 ),
               ),
             ],
           );
         },
       ),
+      resizeToAvoidBottomInset: false,
     );
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers and clean up listeners
+    _subjectCodeController.dispose();
+    _subjectTitleController.dispose();
+    _roomController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+
+    // Always call super.dispose()
+    super.dispose();
   }
 }

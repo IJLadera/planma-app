@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planma_app/event/widget/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/models/events_model.dart';
+import 'package:provider/provider.dart';
+import 'package:planma_app/Providers/events_provider.dart';
 
 class EditEvent extends StatefulWidget {
-  const EditEvent({super.key});
+  final Event event;
+  const EditEvent({super.key, required this.event});
 
   @override
   _EditEvent createState() => _EditEvent();
 }
 
 class _EditEvent extends State<EditEvent> {
-  final _eventCodeController = TextEditingController();
-  final _eventTitleController = TextEditingController();
-  final _eventLocationController = TextEditingController();
-  final TextEditingController _startTimeController = TextEditingController();
-  final TextEditingController _endTimeController = TextEditingController();
+  late TextEditingController _eventNameController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _eventLocationController;
+  late TextEditingController _startTimeController;
+  late TextEditingController _endTimeController;
 
   DateTime? _scheduledDate;
   String? _selectedEventType;
@@ -47,17 +53,166 @@ class _EditEvent extends State<EditEvent> {
     }
   }
 
+  TimeOfDay? _stringToTimeOfDay(String timeString) {
+    try {
+      final format =
+          RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
+      final match = format.firstMatch(timeString.trim());
+
+      if (match == null) {
+        throw FormatException('Invalid time format: $timeString');
+      }
+
+      final hour = int.parse(match.group(1)!);
+      final minute = int.parse(match.group(2)!);
+      final period = match.group(3)!.toLowerCase();
+
+      final adjustedHour = (period == 'pm' && hour != 12)
+          ? hour + 12
+          : (hour == 12 && period == 'am' ? 0 : hour);
+
+      return TimeOfDay(hour: adjustedHour, minute: minute);
+    } catch (e) {
+      print('Error parsing time: $e');
+      return null;
+    }
+  }
+
+  /// Converts a string like "HH:mm:ss" to "h:mm a" (for display)
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime); // Requires intl package
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Pre-fill fields with current task details
+    _eventNameController = TextEditingController(text: widget.event.eventName);
+    _descriptionController =
+        TextEditingController(text: widget.event.eventDesc);
+    _eventLocationController =
+        TextEditingController(text: widget.event.location);
+    _startTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.event.scheduledStartTime));
+    _endTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.event.scheduledEndTime));
+
+    print(_formatTimeForDisplay(widget.event.scheduledStartTime));
+    print(_formatTimeForDisplay(widget.event.scheduledEndTime));
+
+    _scheduledDate = widget.event.scheduledDate;
+    _selectedEventType = widget.event.eventType;
+  }
+
+  void _editEvent(BuildContext context) async {
+    final provider = Provider.of<EventsProvider>(context, listen: false);
+
+    String eventName = _eventNameController.text.trim();
+    String eventDesc = _descriptionController.text.trim();
+    String location = _eventLocationController.text.trim();
+    String startTimeString = _startTimeController.text.trim();
+    String endTimeString = _endTimeController.text.trim();
+
+    print(startTimeString);
+    print(endTimeString);
+
+    // Convert String  to TimeOfDay
+    final startTime = _stringToTimeOfDay(startTimeString);
+    final endTime = _stringToTimeOfDay(endTimeString);
+
+    print('formatted: $startTime');
+    print('formatted: $endTime');
+
+    if (eventName.isEmpty ||
+        eventDesc.isEmpty ||
+        location.isEmpty ||
+        _scheduledDate == null ||
+        startTimeString.isEmpty ||
+        endTimeString.isEmpty ||
+        endTimeString.isEmpty ||
+        _selectedEventType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields!')),
+      );
+      return;
+    }
+
+    if (!_isValidTimeRange(startTime!, endTime!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Start Time must be before End Time.')),
+      );
+      return;
+    }
+
+    print('FROM UI:');
+    print('Event Name: $eventName');
+    print('event Description: $eventDesc');
+    print('location: $location');
+    print('Scheduled Date: $_scheduledDate');
+    print('Start Time: $startTime');
+    print('End Time: $endTime');
+    print('eventType: $_selectedEventType');
+
+    try {
+      print('Starting to update task...');
+      await provider.updateEvent(
+        eventId: widget.event.eventId!,
+        eventName: eventName,
+        eventDesc: eventDesc,
+        location: location,
+        scheduledDate: _scheduledDate!,
+        startTime: startTime,
+        endTime: endTime,
+        eventType: _selectedEventType!,
+      );
+      print('Event updated successfully!');
+
+      // After validation and adding logic
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Event updated successfully!')),
+      );
+
+      Navigator.pop(context);
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update event: $error')),
+      );
+    }
+  }
+
+  bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Edit Event'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+          title: Text(
+            'Edit Event',
+            style: GoogleFonts.openSans(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF173F70),
+            ),
           ),
+          backgroundColor: Color(0xFFFFFFFF),
         ),
         body: Column(
           children: [
@@ -66,21 +221,38 @@ class _EditEvent extends State<EditEvent> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  CustomWidgets.buildTitle(
+                    'Event Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                      _eventCodeController, 'Event Name'),
-                  SizedBox(height: 16), // Increased space
+                      _eventNameController, 'Event Name'),
+                  SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Description',
+                  ),
+                  const SizedBox(height: 12), // Increased space
                   CustomWidgets.buildTextField(
-                      _eventTitleController, 'Description'),
-                  SizedBox(
-                      height: 16), // Space between time fields and room field
+                      _descriptionController, 'Description'),
+                  SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Location',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventLocationController, 'Location'),
-                  SizedBox(height: 20), // Added more gap below the last field
-
                   SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Scheduled Date',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
-                  SizedBox(height: 12), // Added gap
+                  SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Start and End Time',
+                  ),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -103,7 +275,11 @@ class _EditEvent extends State<EditEvent> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 12), SizedBox(height: 16), // Increased space
+                  SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Choose Subject',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label:
                         'Choose Subject', // Updated the label for consistency
@@ -115,10 +291,9 @@ class _EditEvent extends State<EditEvent> {
                       });
                     },
                     backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
                     borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     fontSize: 14.0,
                   )
                 ],
@@ -128,19 +303,20 @@ class _EditEvent extends State<EditEvent> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
-                  // Create task action
-                },
+                onPressed: () => _editEvent(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
                 ),
                 child: Text(
                   'Edit Event',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),

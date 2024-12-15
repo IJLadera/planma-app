@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
+import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
+import 'package:planma_app/authentication/splash_screen.dart';
 import 'package:planma_app/core/dashboard.dart';
+import 'package:planma_app/user_preferences/sleep_wake.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/Providers/time_provider.dart';
@@ -27,11 +31,14 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => SemesterProvider()),
         ChangeNotifierProvider(create: (context) => ClassScheduleProvider()),
         ChangeNotifierProvider(create: (context) => EventsProvider()),
+        ChangeNotifierProvider(create: (context) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
       ],
       child: MaterialApp(
-          home: Dashboard(),
+          // home: SleepWakeSetupScreen(),
           debugShowCheckedModeBanner: false,
-          // home: AuthGate(),
+          home: SplashScreen(),
+          // home: Dashboard(),
           theme: ThemeData(
             primarySwatch: Colors.blue,
             scaffoldBackgroundColor: Colors.white,

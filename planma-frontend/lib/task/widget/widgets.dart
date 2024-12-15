@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomWidgets {
   // Method to build a TextField with custom style
   static Widget buildTextField(
-      TextEditingController controller, String labelText) {
+    TextEditingController controller,
+    String labelText, {
+    TextStyle? style,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
@@ -13,8 +17,10 @@ class CustomWidgets {
       ),
       child: TextField(
         controller: controller,
+        style: style ?? GoogleFonts.openSans(fontSize: 14),
         decoration: InputDecoration(
           labelText: labelText,
+          labelStyle: GoogleFonts.openSans(fontSize: 14),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
         ),
@@ -30,29 +36,55 @@ class CustomWidgets {
     bool someFlag, // Add this parameter to accept the 'true' value
     Function(BuildContext, DateTime?) selectDate,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: ListTile(
-        title: Text(
-          '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
-          style: TextStyle(fontSize: 16),
+    return GestureDetector(
+      onTap: () => selectDate(context, date),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(30),
         ),
-        trailing: const Icon(Icons.calendar_today),
-        onTap: () => selectDate(context, date),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              date != null
+                  ? DateFormat('dd MMMM yyyy').format(date)
+                  : 'Select Date',
+              style: GoogleFonts.openSans(fontSize: 14),
+            ),
+            const Icon(Icons.calendar_today),
+          ],
+        ),
       ),
     );
   }
 
-  // Method to build a time field with gesture and custom design
+  static Widget buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
+}
+
   static Widget buildTimeField(
     String label,
     TextEditingController controller,
     BuildContext context,
-    Function(BuildContext) selectTime,
-  ) {
+    Function(BuildContext) selectTime, {
+    TextStyle? textStyle,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
@@ -60,10 +92,11 @@ class CustomWidgets {
       ),
       child: TextField(
         controller: controller,
-        readOnly: true, // Only allow input via the time picker
+        readOnly: true,
         onTap: () => selectTime(context),
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: textStyle ?? GoogleFonts.openSans(fontSize: 14),
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
@@ -77,28 +110,26 @@ class CustomWidgets {
     required String? value,
     required List<String> items,
     required Function(String?) onChanged,
-    Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
+    Color backgroundColor = const Color(0xFFF5F5F5),
     Color labelColor = Colors.black,
     Color textColor = Colors.black,
     double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    EdgeInsets contentPadding = const EdgeInsets.all(12),
     double fontSize = 14.0,
+    TextStyle? textStyle,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
           hint: Text(
             label,
-            style: TextStyle(
-              color: labelColor,
-              fontSize: fontSize,
-            ),
+            style: textStyle ??
+                GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
           ),
           value: value,
           onChanged: onChanged,
@@ -107,7 +138,8 @@ class CustomWidgets {
               value: item,
               child: Text(
                 item,
-                style: TextStyle(fontSize: fontSize, color: textColor),
+                style: textStyle ??
+                    GoogleFonts.openSans(fontSize: fontSize, color: textColor),
               ),
             );
           }).toList(),
@@ -121,7 +153,7 @@ class CustomWidgets {
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white, // Background color of the dropdown menu
+              color: Colors.white,
             ),
           ),
           iconStyleData: IconStyleData(

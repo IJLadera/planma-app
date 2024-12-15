@@ -1,32 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/events_provider.dart';
 import 'package:planma_app/event/edit_event.dart';
 import 'package:planma_app/event/widget/event_detail_row.dart';
-import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/event/widget/widget.dart';
+import 'package:planma_app/models/events_model.dart';
+import 'package:provider/provider.dart';
 
-class ViewEvent extends StatefulWidget {
-  final String eventName;
-  final String timePeriod;
-  final String description;
-  final String location;
-  final String date;
-  final String type;
+class EventDetailScreen extends StatefulWidget {
+  final Event event;
 
-  const ViewEvent({
+  const EventDetailScreen({
     super.key,
-    required this.eventName,
-    required this.timePeriod,
-    required this.description,
-    required this.location,
-    required this.date,
-    required this.type,
+    required this.event,
   });
 
   @override
-  _ViewEventState createState() => _ViewEventState();
+  _EventDetailScreenState createState() => _EventDetailScreenState();
 }
 
-class _ViewEventState extends State<ViewEvent> {
+class _EventDetailScreenState extends State<EventDetailScreen> {
   String selectedAttendance = 'Did Not Attend';
+  late EventsProvider eventProvider;
 
   // Function to determine color based on the selected value
   Color getColor(String value) {
@@ -42,140 +38,204 @@ class _ViewEventState extends State<ViewEvent> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.blue),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+  void _handleDelete(BuildContext context) async {
+    final provider = Provider.of<EventsProvider>(context, listen: false);
+    final isConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Event'),
+        content: const Text('Are you sure you want to delete this event?'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.edit, color: Colors.blue),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => EditEvent()),
-              );
-            },
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
-          IconButton(
-            icon: Icon(Icons.delete, color: Colors.blue),
+          ElevatedButton(
             onPressed: () {
-              // Add delete functionality
+              Navigator.pop(context, true);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Delete'),
           ),
         ],
-        centerTitle: true,
-        title: Text(
-          'Event',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9),
-            color: Colors.grey[100],
+    );
+
+    if (isConfirmed == true) {
+      provider.deleteEvent(widget.event.eventId!);
+      Navigator.pop(context);
+    }
+  }
+
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<EventsProvider>(builder: (context, eventProvider, child) {
+      final event = eventProvider.events.firstWhere(
+        (event) => event.eventId == widget.event.eventId,
+        orElse: () => Event(
+          eventId: -1,
+          eventName: 'N/A',
+          eventDesc: 'N/A',
+          location: 'N/A',
+          scheduledDate: DateTime(2020, 1, 1),
+          scheduledStartTime: '00:00',
+          scheduledEndTime: '00:00',
+          eventType: 'N/A',
+        ),
+      );
+      print("event.eventId: ${event.eventId}");
+      print("widget.eventId: ${widget.event.eventId}");
+      print("widget.event: ${widget.event}");
+
+      if (event.eventId == -1) {
+        return Scaffold(
+          appBar: AppBar(title: Text('Event Details')),
+          body: Center(child: Text('Event not found')),
+        );
+      }
+
+      final startTime = _formatTimeForDisplay(event.scheduledStartTime);
+      final endTime = _formatTimeForDisplay(event.scheduledEndTime);
+      final formattedScheduledDate =
+          DateFormat('dd MMMM yyyy').format(event.scheduledDate);
+
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.close, color: Colors.blue),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                EventDetailRow(
-                  title: 'Title',
-                  value: widget.eventName,
-                ),
-                EventDetailRow(
-                  title: 'Description',
-                  value: widget.description,
-                ),
-                EventDetailRow(
-                  title: 'Location',
-                  value: widget.location,
-                ),
-                EventDetailRow(
-                  title: 'Date',
-                  value: widget.date,
-                ),
-                EventDetailRow(
-                  title: 'Time',
-                  value: widget.timePeriod,
-                ),
-                EventDetailRow(
-                  title: 'Type',
-                  value: widget.type,
-                ),
-                SizedBox(height: 16),
-                // Dropdown for attendance
-                Text(
-                  'Attendance',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: getColor(selectedAttendance),
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: DropdownButton<String>(
-                    value: selectedAttendance,
-                    icon: Icon(Icons.arrow_drop_down),
-                    isExpanded: true,
-                    underline: SizedBox(), // Remove default underline
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedAttendance = newValue!;
-                      });
-                    },
-                    items: <String>['Did Not Attend', 'Excused', 'Attended']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                value,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: value == selectedAttendance
-                                      ? getColor(value)
-                                      : Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                SizedBox(height: 16),
-              ],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.edit, color: Colors.blue),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => EditEvent(
+                            event: event,
+                          )),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.blue),
+              onPressed: () => _handleDelete(context),
+            ),
+          ],
+          centerTitle: true,
+          title: Text(
+            'Event',
+            style: GoogleFonts.openSans(
+              color: Color(0xFF173F70),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
-      ),
-    );
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9),
+              color: Colors.grey[100],
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  EventDetailRow(
+                    title: 'Title',
+                    value: event.eventName,
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Description',
+                    value: event.eventDesc,
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Location',
+                    value: event.location,
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Date',
+                    value: formattedScheduledDate.toString(),
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Time',
+                    value: '$startTime - $endTime',
+                  ),
+                  const Divider(),
+                  EventDetailRow(
+                    title: 'Type',
+                    value: event.eventType,
+                  ),
+                  const Divider(),
+                  SizedBox(height: 16),
+                  // Dropdown for attendance
+                  Text(
+                    'Attendance',
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  CustomWidgets.dropwDownForAttendance(
+                    label: 'Attendance',
+                    value: selectedAttendance,
+                    items: ['Did Not Attend', 'Excused', 'Attended'],
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          selectedAttendance = newValue; // Update the value
+                        });
+                      }
+                    },
+                    backgroundColor: Color(0XFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: CustomWidgets.getColor(
+                        selectedAttendance), // Use getColor as a static method
+                    borderRadius: 8.0,
+                    fontSize: 14.0,
+                  ),
+                  SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

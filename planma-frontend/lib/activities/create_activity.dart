@@ -4,15 +4,16 @@ import 'package:provider/provider.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/activity_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class AddActivityState extends StatefulWidget {
-  const AddActivityState({super.key});
+class AddActivityScreen extends StatefulWidget {
+  const AddActivityScreen({super.key});
 
   @override
   _AddActivityState createState() => _AddActivityState();
 }
 
-class _AddActivityState extends State<AddActivityState> {
+class _AddActivityState extends State<AddActivityScreen> {
   final _activityNameController = TextEditingController();
   final _activityDescriptionController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
@@ -121,13 +122,18 @@ class _AddActivityState extends State<AddActivityState> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Activities'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+          title: Text(
+            'Create Activities',
+            style: GoogleFonts.openSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Color(0xFF173F70)),
           ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+          backgroundColor: Color(0xFFFFFFFF),
         ),
         body: Column(
           children: [
@@ -136,17 +142,31 @@ class _AddActivityState extends State<AddActivityState> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  CustomWidgets.buildTitle(
+                    'Activity Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _activityNameController, 'Activity Name'),
-                  SizedBox(height: 16), // Increased space
+                  SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Description',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _activityDescriptionController, 'Description'),
-                  SizedBox(
-                      height: 16), // Space between time fields and room field
                   SizedBox(height: 12),
-                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
-                      context, true, _selectDate),
-                  SizedBox(height: 12), // Added gap
+                  CustomWidgets.buildTitle(
+                    'Scheduled Date',
+                  ),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildDateTile(
+                      '', _scheduledDate, context, true, _selectDate),
+                  SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Start and End Time',
+                  ),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -173,20 +193,22 @@ class _AddActivityState extends State<AddActivityState> {
               ),
             )),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+              padding: const EdgeInsets.all(16),
               child: ElevatedButton(
                 onPressed: _createActivity,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
                 child: Text(
                   'Create Activity',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Color(0xFFFFFFFF),
+                  ),
                 ),
               ),
             ),

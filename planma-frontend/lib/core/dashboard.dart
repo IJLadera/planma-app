@@ -12,7 +12,7 @@ import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timetable/calendar.dart';
 import 'package:planma_app/user_profiile/user_page.dart';
 import 'package:provider/provider.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -23,13 +23,12 @@ class Dashboard extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Hello, ${context.watch<UserProfileProvider>().username}',
-          style: const TextStyle(
-            fontSize: 20,
+          style: GoogleFonts.openSans(
+            fontSize: 25,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Color(0xFFFFFFFF),
-        foregroundColor: Colors.black,
+        foregroundColor: Color(0xFF173F70),
         elevation: 2,
         actions: [
           IconButton(
@@ -45,20 +44,24 @@ class Dashboard extends StatelessWidget {
             },
           ),
         ],
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Let's make a productive plan together",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: GoogleFonts.openSans(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Menu',
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: GoogleFonts.openSans(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -78,7 +81,7 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Color(0xFF7DCFB6),
+                    color: Color(0xFFFFE1BF),
                     icon: Icons.description,
                     title: 'Class Schedule',
                     subtitle: '11 classes',
@@ -92,7 +95,7 @@ class Dashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                    color: Color(0xFFFBD1A2),
+                    color: Color(0xFF7DCFB6),
                     icon: Icons.event,
                     title: 'Events',
                     subtitle: '1 event',
@@ -136,12 +139,7 @@ class Dashboard extends StatelessWidget {
                       icon: FontAwesomeIcons.moon,
                       title: 'Sleep',
                       subtitle: '',
-                      onPressed: () {
-                        //   Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => SleepPage()),
-                        // );
-                      }),
+                      onPressed: () {}),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
                       color: Color(0xFF537488),
@@ -155,6 +153,7 @@ class Dashboard extends StatelessWidget {
                               builder: (context) => ReportsPage()),
                         );
                       }),
+                  SizedBox(height: 50),
                 ],
               ),
             ),
@@ -179,9 +178,7 @@ class Dashboard extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.home),
                   color: Color(0xFF173F70),
-                  onPressed: () {
-                    // Navigate to Home page
-                  },
+                  onPressed: () {},
                 ),
                 IconButton(
                   icon: const Icon(Icons.calendar_today),

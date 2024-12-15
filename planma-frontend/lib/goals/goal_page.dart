@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/goals/create_goal.dart';
 import 'package:planma_app/goals/widget/goal_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GoalPage extends StatefulWidget {
   const GoalPage({super.key});
@@ -10,12 +11,29 @@ class GoalPage extends StatefulWidget {
 }
 
 class _GoalPageState extends State<GoalPage> {
-  // Simulated list of goals. Replace this with database or API data.
   final List<Map<String, dynamic>> goals = [
-    {"name": "Goal Name", "targetHours": 20, "progress": 0.25},
+    {
+      "name": "Complete Flutter Project",
+      "targetHours": 20,
+      "progress": 0.5,
+      "goalCode": "FLUTTER101",
+      "description": "Build a complete app",
+      "timeFrame": "2 Weeks",
+      "goalType": "Project",
+      "semester": "N/A",
+    },
+    {
+      "name": "Study for Math Exam",
+      "targetHours": 15,
+      "progress": 0.3,
+      "goalCode": "MATH101",
+      "description": "Prepare for the upcoming exam",
+      "timeFrame": "1 Week",
+      "goalType": "Study",
+      "semester": "Semester 1",
+    },
   ];
 
-  // Filtered goals list for search functionality
   late List<Map<String, dynamic>> filteredGoals;
 
   @override
@@ -26,8 +44,8 @@ class _GoalPageState extends State<GoalPage> {
 
   void _filterGoals(String query) {
     final results = goals
-        .where((goal) =>
-            goal['name'].toLowerCase().contains(query.toLowerCase()))
+        .where(
+            (goal) => goal['name'].toLowerCase().contains(query.toLowerCase()))
         .toList();
     setState(() {
       filteredGoals = results;
@@ -41,14 +59,17 @@ class _GoalPageState extends State<GoalPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF173F70)),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
+        title: Text(
           'Goals',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: GoogleFonts.openSans(
+            color: const Color(0xFF173F70),
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Padding(
@@ -81,13 +102,16 @@ class _GoalPageState extends State<GoalPage> {
                           goalName: goal['name'],
                           targetHours: goal['targetHours'],
                           progress: goal['progress'],
+                          goalDetails: goal,
                         );
                       },
                     )
-                  : const Center(
+                  : Center(
                       child: Text(
                         'No goals found',
-                        style: TextStyle(color: Colors.grey),
+                        style: GoogleFonts.openSans(
+                          color: const Color(0xFF173F70),
+                        ),
                       ),
                     ),
             ),
@@ -101,8 +125,9 @@ class _GoalPageState extends State<GoalPage> {
             MaterialPageRoute(builder: (context) => AddGoalScreen()),
           );
         },
-        backgroundColor: Color(0xFF173F70),
-        child: Icon(Icons.add),
+        backgroundColor: const Color(0xFF173F70),
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:planma_app/goals/widget/widget.dart'; // Ensure this file contains the CustomWidgets class
+import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/goals/widget/widget.dart';
 
 class AddGoalScreen extends StatefulWidget {
   const AddGoalScreen({super.key});
@@ -9,123 +11,38 @@ class AddGoalScreen extends StatefulWidget {
 }
 
 class _AddGoalScreenState extends State<AddGoalScreen> {
+  // Controllers for input fields
   final _goalCodeController = TextEditingController();
   final _descriptionController = TextEditingController();
 
+  // Dropdown selections
   String? _selectedGoalType;
   String? _selectedSemester;
+  String? _selectedTimeframe;
+  // Duration variables
   Duration _targetDuration = const Duration(hours: 0, minutes: 30);
 
-  final List<String> _goalType = ['Academic', 'Personal'];
+  // Dropdown options
+  final List<String> _goalTypes = ['Academic', 'Personal'];
   final List<String> _semesters = ['First Semester', 'Second Semester'];
-
-  Future<void> _pickTargetDuration(BuildContext context) async {
-    final Duration? pickedDuration = await showModalBottomSheet<Duration>(
-      context: context,
-      builder: (BuildContext context) {
-        int selectedHours = _targetDuration.inHours;
-        int selectedMinutes = _targetDuration.inMinutes % 60;
-
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Select Target Duration',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Hours Picker
-                      Column(
-                        children: [
-                          const Text('Hours', style: TextStyle(fontSize: 16)),
-                          SizedBox(
-                            height: 150,
-                            width: 70,
-                            child: ListWheelScrollView.useDelegate(
-                              itemExtent: 40,
-                              onSelectedItemChanged: (value) {
-                                setModalState(() {
-                                  selectedHours = value;
-                                });
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                builder: (context, index) => Text('$index',
-                                    style: const TextStyle(fontSize: 18)),
-                                childCount: 24, // Maximum hours
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 20),
-                      // Minutes Picker
-                      Column(
-                        children: [
-                          const Text('Minutes', style: TextStyle(fontSize: 16)),
-                          SizedBox(
-                            height: 150,
-                            width: 70,
-                            child: ListWheelScrollView.useDelegate(
-                              itemExtent: 40,
-                              onSelectedItemChanged: (value) {
-                                setModalState(() {
-                                  selectedMinutes = value;
-                                });
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                builder: (context, index) => Text('$index',
-                                    style: const TextStyle(fontSize: 18)),
-                                childCount: 60, // Maximum minutes
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(
-                          context,
-                          Duration(
-                              hours: selectedHours, minutes: selectedMinutes));
-                    },
-                    child: const Text('Set Duration'),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    if (pickedDuration != null) {
-      setState(() {
-        _targetDuration = pickedDuration;
-      });
-    }
-  }
+  final List<String> _timeframe = ['Daily', 'Weekly', 'Monthly'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Goal Sessions'),
+        title: Text(
+          'Create Goal',
+          style: GoogleFonts.openSans(
+            color: const Color(0xFF173F70),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.white,
       ),
       body: Column(
         children: [
@@ -134,88 +51,101 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  const SizedBox(height: 16),
+                  CustomWidgets.buildTitle('Goal Name'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                    _goalCodeController,
-                    'Goal Name',
-                  ),
-                  const SizedBox(height: 16),
+                      _goalCodeController, 'Enter Goal Name'),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildTitle('Description'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                    _descriptionController,
-                    'Description',
-                  ),
-                  const SizedBox(height: 16),
-                  // Target Duration Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Target Duration:',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                      TextButton(
-                        onPressed: () => _pickTargetDuration(context),
-                        child: Text(
-                          '${_targetDuration.inHours} hrs ${_targetDuration.inMinutes % 60} mins',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(
-                      thickness: 1, height: 16),
-                  const SizedBox(height: 16),
+                      _descriptionController, 'Enter Description'),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildTitle('Timeframe'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
-                      'Goal Type', _selectedGoalType, _goalType, (value) {
-                    setState(() {
-                      _selectedGoalType = value;
-                    });
-                  }),
-                  const SizedBox(height: 16),
+                    label: 'Timeframe',
+                    value: _selectedTimeframe,
+                    items: _timeframe,
+                    onChanged: (value) =>
+                        setState(() => _selectedTimeframe = value),
+                  ),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildTitle('Target Hours'),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildScheduleDatePicker(
+                    context: context,
+                    displayText: CustomWidgets.formatDurationText(
+                        _targetDuration), // Correct call
+                    onPickerTap: () async {
+                      // Pass the required arguments: context, initialDuration, and the callback function
+                      await CustomWidgets.showDurationPicker(
+                          context, _targetDuration, (newDuration) {
+                        setState(() {
+                          _targetDuration =
+                              newDuration; // Update target duration
+                        });
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildTitle('Goal Type'),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
-                      'Semester', _selectedSemester, _semesters, (value) {
-                    setState(() {
-                      _selectedSemester = value;
-                    });
-                  }),
+                    label: 'Goal Type',
+                    value: _selectedGoalType,
+                    items: _goalTypes,
+                    onChanged: (value) =>
+                        setState(() => _selectedGoalType = value),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_selectedGoalType == 'Academic') ...[
+                    CustomWidgets.buildTitle('Select Semester'),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildDropdownField(
+                      label: 'Semester',
+                      value: _selectedSemester,
+                      items: _semesters,
+                      onChanged: (value) =>
+                          setState(() => _selectedSemester = value),
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 20.0,
-            ),
+            padding:
+                const EdgeInsets.all(16),
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Add functionality to save the goal session
-                print(
-                    "Target Duration: ${_targetDuration.inHours} hrs ${_targetDuration.inMinutes % 60} mins");
+                // Placeholder for goal submission logic
+                print("Goal created with target duration: $_targetDuration");
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF173F70),
+                backgroundColor: const Color(0xFF173F70),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 15,
-                  horizontal: 120,
-                ),
+                    borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text(
-                'Create Goal Session',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
+              child: Text('Add Goal',
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Colors.white,
+                  )),
             ),
           ),
         ],
       ),
+      resizeToAvoidBottomInset: false,
     );
+  }
+
+  @override
+  void dispose() {
+    _goalCodeController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 }

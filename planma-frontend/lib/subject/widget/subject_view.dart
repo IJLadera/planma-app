@@ -1,25 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/edit_subject.dart';
 import 'package:planma_app/subject/widget/subject_detail_row.dart';
+import 'package:planma_app/models/class_schedules_model.dart';
+import 'package:planma_app/subject/widget/widget.dart';
+import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
-  final String subject_code;
-  final String subject_title;
-  final String semester;
-  final String start_time;
-  final String end_time;
-  final String room;
-  final String selected_days;
+  final ClassSchedule classSchedule;
 
-  const SubjectDetailScreen({
+  SubjectDetailScreen({
     super.key,
-    required this.subject_code,
-    required this.subject_title,
-    required this.semester,
-    required this.start_time,
-    required this.end_time,
-    required this.room,
-    required this.selected_days,
+    required this.classSchedule,
   });
 
   @override
@@ -28,173 +23,202 @@ class SubjectDetailScreen extends StatefulWidget {
 
 class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   String selectedAttendance = 'Did Not Attend';
+  String semesterDetails = 'Loading...';
+  late SemesterProvider semesterProvider;
 
-  // Function to determine color based on the selected value
-  Color getColor(String value) {
-    switch (value) {
-      case 'Did Not Attend':
-        return Colors.red;
-      case 'Excused':
-        return Colors.blue;
-      case 'Attended':
-        return Colors.green;
-      default:
-        return Colors.grey; // Default for unselected
+  @override
+  void initState() {
+    super.initState();
+    semesterProvider = SemesterProvider();
+    _fetchSemesterDetails();
+  }
+
+  Future<void> _fetchSemesterDetails() async {
+    print('Fetching semester with ID: ${widget.classSchedule.semesterId}');
+    try {
+      final semester = await semesterProvider
+          .getSemesterDetails(widget.classSchedule.semesterId);
+      print(semester);
+      setState(() {
+        semesterDetails =
+            "${semester?['acad_year_start']} - ${semester?['acad_year_end']} ${semester?['semester']}";
+      });
+    } catch (e) {
+      setState(() {
+        semesterDetails = 'Error fetching semester details';
+      });
     }
   }
 
   // Handle delete functionality (stub for now)
-  void _handleDelete() {
-    showDialog(
+  void _handleDelete(BuildContext context) async {
+    final provider = Provider.of<ClassScheduleProvider>(context, listen: false);
+    final isConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Subject'),
-        content: Text('Are you sure you want to delete this subject?'),
+        title: const Text('Delete Subject'),
+        content: const Text('Are you sure you want to delete this subject?'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text('Cancel'),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              // Add delete functionality here
-              Navigator.pop(context);
-              Navigator.pop(context); // Go back after deletion
-            },
-            child: Text('Delete'),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete',
+                style: TextStyle(color: Color(0xFFEF4738))),
           ),
         ],
       ),
     );
+
+    if (isConfirmed == true) {
+      provider.deleteClassSchedule(widget.classSchedule.classschedId!);
+      Navigator.pop(context); // Go back after deletion
+    }
+  }
+
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.blue),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+    return Consumer<ClassScheduleProvider>(
+        builder: (context, classScheduleProvider, child) {
+      final schedule = classScheduleProvider.classSchedules.firstWhere(
+        (schedule) =>
+            schedule.classschedId == widget.classSchedule.classschedId,
+        orElse: () => ClassSchedule(
+          classschedId: -1, // Indicate an invalid or default ID
+          subjectCode: 'N/A',
+          subjectTitle: 'No Title',
+          semesterId: 0,
+          dayOfWeek: 'N/A',
+          scheduledStartTime: '00:00',
+          scheduledEndTime: '00:00',
+          room: 'No Room',
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blue),
+      );
+
+      // Check if the returned schedule is the default one
+      if (schedule.classschedId == -1) {
+        return Scaffold(
+          appBar: AppBar(title: Text('Subject Details')),
+          body: Center(child: Text('Schedule not found')),
+        );
+      }
+
+      final startTime = _formatTimeForDisplay(schedule.scheduledStartTime);
+      final endTime = _formatTimeForDisplay(schedule.scheduledEndTime);
+
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.blue),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditClass(),
-                ),
-              );
+              Navigator.pop(context);
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.blue),
-            onPressed: _handleDelete,
-          ),
-        ],
-        title: const Text(
-          'Subject',
-          style: TextStyle(
-              color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9),
-            color: Colors.grey[100],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SubjectDetailRow(
-                  title: 'Code:',
-                  detail: widget.subject_code, // Directly using widget.property
-                ),
-                SubjectDetailRow(
-                  title: 'Title:',
-                  detail:
-                      widget.subject_title, // Directly using widget.property
-                ),
-                SubjectDetailRow(
-                  title: 'Semester:',
-                  detail: widget.semester, // Directly using widget.property
-                ),
-                SubjectDetailRow(
-                  title: 'Day:',
-                  detail:
-                      widget.selected_days, // Directly using widget.property
-                ),
-                SubjectDetailRow(
-                  title: 'Time:',
-                  detail:
-                      '${widget.start_time} - ${widget.end_time}', // Combining times
-                ),
-                SubjectDetailRow(
-                  title: 'Room:',
-                  detail: widget.room.isNotEmpty
-                      ? widget.room
-                      : 'N/A', // Handling room
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: getColor(selectedAttendance),
-                    ),
-                    borderRadius: BorderRadius.circular(8),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit, color: Color(0xFF173F70)),
+              onPressed: () async {
+                await Navigator.push<ClassSchedule>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        EditClass(classSchedule: widget.classSchedule),
                   ),
-                  child: DropdownButton<String>(
-                    value: selectedAttendance,
-                    icon: const Icon(Icons.arrow_drop_down),
-                    isExpanded: true,
-                    underline: const SizedBox(), // Remove default underline
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedAttendance = newValue!;
-                      });
-                    },
-                    items: <String>['Did Not Attend', 'Excused', 'Attended']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                value,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: value == selectedAttendance
-                                      ? getColor(value)
-                                      : Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Color(0xFF173F70)),
+              onPressed: () => _handleDelete(context),
+            ),
+          ],
+          centerTitle: true,
+          title: Text(
+            'Subject',
+            style: GoogleFonts.openSans(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF173F70),
             ),
           ),
         ),
-      ),
-    );
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9),
+              color: Colors.grey[100],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SubjectDetailRow(
+                      title: 'Code:', detail: schedule.subjectCode),
+                  const Divider(),
+                  SubjectDetailRow(
+                      title: 'Title:', detail: schedule.subjectTitle),
+                  const Divider(),
+                  SubjectDetailRow(title: 'Semester:', detail: semesterDetails),
+                  const Divider(),
+                  SubjectDetailRow(title: 'Day:', detail: schedule.dayOfWeek),
+                  const Divider(),
+                  SubjectDetailRow(
+                      title: 'Time:', detail: '$startTime - $endTime'),
+                  const Divider(),
+                  SubjectDetailRow(
+                      title: 'Room:',
+                      detail: schedule.room.isNotEmpty ? schedule.room : 'N/A'),
+                  const Divider(),
+                  const SizedBox(height: 20),
+                  CustomWidgets.dropwDownForAttendance(
+                    label: 'Attendance',
+                    value: selectedAttendance,
+                    items: ['Did Not Attend', 'Excused', 'Attended'],
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          selectedAttendance = newValue; // Update the value
+                        });
+                      }
+                    },
+                    backgroundColor: Color(0XFFF5F5F5),
+                    labelColor: Colors.black,
+                    textColor: CustomWidgets.getColor(
+                        selectedAttendance), // Use getColor as a static method
+                    borderRadius: 8.0,
+                    fontSize: 14.0,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   }
 }
