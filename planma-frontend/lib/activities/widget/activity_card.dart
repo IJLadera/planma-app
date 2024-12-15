@@ -1,26 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planma_app/activities/view_activity.dart';
 import 'package:planma_app/timer/countdown/countdown_timer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/models/activity_model.dart';
 
 class ActivityCard extends StatelessWidget {
-  final String activityName;
-  final String timePeriod;
-  final String description;
-  final String date;
-  final Color backgroundColor;
+  final Activity activity;
+  final bool isByDate;
+ 
 
   const ActivityCard({
-    Key? key,
-    required this.activityName,
-    required this.timePeriod,
-    required this.description,
-    required this.date,
-    required this.backgroundColor,
+    super.key,
+    required this.isByDate,
+    required this.activity,
+    
   });
+
+  String _formatTimeForDisplay(String time24) {
+    final timeParts = time24.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
+
+    // Format to "H:mm a"
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat.jm().format(dateTime);
+  }
 
   @override
   Widget build(BuildContext context) {
+
+    final startTime = _formatTimeForDisplay(activity.scheduledStartTime);
+    final endTime = _formatTimeForDisplay(activity.scheduledEndTime);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
       child: Card(
@@ -35,20 +55,15 @@ class ActivityCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ViewActivity(
-                  activityName: activityName,
-                  description: description,
-                  date: date,
-                  time: timePeriod,
-                ),
+                builder: (context) => ActivityDetailScreen(activity: activity),
               ),
             );
           },
           child: Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: backgroundColor
-                  .withOpacity(0.6), // Slight transparency for the background
+              color: 
+                  Color(0xFFC0D7F3).withOpacity(0.6), // Slight transparency for the background
               borderRadius: BorderRadius.circular(12), // Rounded corners
             ),
             child: Row(
@@ -82,7 +97,7 @@ class ActivityCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      activityName,
+                      activity.activityName,
                       style: GoogleFonts.openSans(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -91,7 +106,7 @@ class ActivityCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      timePeriod,
+                      '$startTime - $endTime',
                       style: GoogleFonts.openSans(
                         fontSize: 14,
                         color: Color(0xFF173F70),

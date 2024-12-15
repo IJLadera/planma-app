@@ -16,20 +16,146 @@ from django.utils.timezone import make_aware
 
 #Below is the Events tables
 
-class CustomEventListCreateView(APIView):
+# class CustomEventListCreateView(APIView):
     
-    permission_classes = [permissions.IsAuthenticated]
-    def post(self, request):
-        data = request.data
-        # data['student_id'] = request.data.student_id
+#     permission_classes = [permissions.IsAuthenticated]
+#     def post(self, request):
+#         data = request.data
+#         # data['student_id'] = request.data.student_id
         
-        serializer = CustomEventSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student field to the authenticated user on creation
+#         serializer = CustomEventSerializer(data=data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({**serializer.data}, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+#         # Set the student field to the authenticated user on creation
+
+class ActivityViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = CustomActivity.objects.all()
+    serializer_class = CustomActivitySerializer
+
+    @action(detail=False, methods=['post'])
+    def add_activity(self, request):
+        data = request.data
+
+        # Extract data from request
+        activity_name = data.get('activity_name')
+        activity_desc = data.get('activity_desc')
+        scheduled_date = data.get('scheduled_date')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+        student_id = request.user.student_id  # Authenticated user
+
+        # Validate input
+        if not all([activity_name, activity_desc, scheduled_date, start_time, end_time]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        try:
+
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
+
+            # Check for conflicting activity schedule
+            duplicate = CustomActivity.objects.filter(
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(student_id=student)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Conflicting activity schedule detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Activity
+            activity = CustomActivity.objects.create(
+                activity_name=activity_name,
+                activity_desc=activity_desc,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time,
+                status='Pending',
+                student_id=student,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(activity)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomActivity.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomActivity table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Update fields for the activity
+        activity_name = data.get('activity_name')
+        activity_desc = data.get('activity_desc')
+        scheduled_date = data.get('scheduled_date')
+        start_time = data.get('scheduled_start_time')
+        end_time = data.get('scheduled_end_time')
+
+        # Validate input
+        if not all([activity_name, activity_desc, scheduled_date, start_time, end_time]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+
+            # Check for conflicting activity schedule (excluding current activity)
+            duplicate = CustomActivity.objects.filter(
+                Q(scheduled_date=scheduled_date) &
+                Q(scheduled_start_time=start_time) &
+                Q(scheduled_end_time=end_time) &
+                Q(student_id=instance.student_id) &
+                ~Q(activity_id=instance.activity_id)  # Exclude the current activity from duplicate check
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Conflicting activity schedule detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the activity instance
+            instance.activity_name = activity_name
+            instance.activity_desc = activity_desc
+            instance.scheduled_date = scheduled_date
+            instance.scheduled_start_time = start_time
+            instance.scheduled_end_time = end_time
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
@@ -225,61 +351,7 @@ class AttendedEventUpdateView(APIView):
 
 #below is the activity tables
 
-class CustomActivityListCreateView(APIView):
-    
-    permission_classes = [permissions.IsAuthenticated]
-    def post(self, request):
-        data = request.data
-        serializer = CustomActivitySerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class CustomActivityDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
 
-    def get(self,request,pk):
-        
-        user = CustomUser.objects.get(student_id = pk)
-        act = CustomActivity.objects.filter(student_id = user)
-        serializer = CustomActivitySerializer(act, many = True)
-        
-        return Response(serializer.data)
-
-class CustomActivityDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deleteact = CustomActivity.objects.get(activity_id = pk)
-            
-            deleteact.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except CustomActivity.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class CustomActivityUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        actid= CustomActivity.objects.get(activity_id = pk)
-        
-        serializer = CustomActivitySerializer(instance=actid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #below is the Activity Log view
 
