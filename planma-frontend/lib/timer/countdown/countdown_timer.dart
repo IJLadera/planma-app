@@ -183,16 +183,28 @@ class _TimerPageState extends State<TimerPage> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              if (!timeProvider.isRunning && timeProvider.remainingTime > 0) {
-                final elapsed = timeProvider
-                    .getElapsedTime(); // Get elapsed time from TimeProvider
-                _saveRecordedTime("Elapsed: ${_formatTime(elapsed)}");
+              if (!_isStopwatchRunning && _stopwatchElapsed > 0) {
+                _saveRecordedTime(_formatTime(_stopwatchElapsed));
               }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: widget.themeColor,
+              shape: const CircleBorder(), // Makes the button round
+              padding:
+                  const EdgeInsets.all(20), // Adjusts the size of the button
             ),
-            child: const Text("Save Elapsed Time"),
+            child: Column(
+              // Includes both the icon and text
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save, color: Colors.white), // Save icon
+                const SizedBox(height: 4), // Spacer between icon and text
+                Text(
+                  "Save",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -261,8 +273,22 @@ class _TimerPageState extends State<TimerPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: widget.themeColor,
+              shape: const CircleBorder(), // Makes the button round
+              padding:
+                  const EdgeInsets.all(20), // Adjusts the size of the button
             ),
-            child: const Text("Save Stopwatch Time"),
+            child: Column(
+              // Includes both the icon and text
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save, color: Colors.white), // Save icon
+                const SizedBox(height: 4), // Spacer between icon and text
+                Text(
+                  "Save",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
           ),
         ],
       ),
