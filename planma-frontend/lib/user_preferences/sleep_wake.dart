@@ -1,31 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/user_preferences/setting_reminder.dart';
 import 'package:planma_app/user_preferences/widget/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class SleepWakeSetupScreen extends StatefulWidget {
-  const SleepWakeSetupScreen({super.key});
-
   @override
   _SleepWakeSetupScreenState createState() => _SleepWakeSetupScreenState();
 }
 
 class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
-  TimeOfDay sleepTime = TimeOfDay(hour: 23, minute: 0);
-  TimeOfDay wakeTime = TimeOfDay(hour: 7, minute: 0);
+  TimeOfDay? sleepTime;
+  TimeOfDay? wakeTime;
+
+  String timeToString(TimeOfDay time) {
+    final hours = time.hour.toString().padLeft(2, '0');
+    final minutes = time.minute.toString().padLeft(2, '0');
+    return '$hours:$minutes'; // Combine to "HH:mm"
+  }
 
   Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
+    final TimeOfDay initialTime = isSleepTime
+        ? sleepTime ??
+            TimeOfDay(hour: 23, minute: 0) // Default to 11:00 PM if null
+        : wakeTime ??
+            TimeOfDay(hour: 7, minute: 0); // Default to 7:00 AM if null
+
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: isSleepTime ? sleepTime : wakeTime,
+      initialTime: initialTime,
     );
+
     if (picked != null) {
       setState(() {
         if (isSleepTime) {
-          sleepTime = picked;
+          sleepTime = picked; // Update the sleep time
         } else {
-          wakeTime = picked;
+          wakeTime = picked; // Update the wake time
         }
       });
+    }
+  }
+
+  Future<void> _savePreferences() async {
+    final provider =
+        Provider.of<UserPreferencesProvider>(context, listen: false);
+
+    try {
+      // Ensure both times are selected before proceeding
+      if (sleepTime == null || wakeTime == null) {
+        throw Exception("Please set both sleep and wake times.");
+      }
+
+      // Navigate to the next screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReminderOffsetSetupScreen(
+            usualSleepTime: sleepTime!,
+            usualWakeTime: wakeTime!,
+          ),
+        ),
+      );
+    } catch (error) {
+      // Handle error while saving preferences
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error saving preferences: $error")),
+      );
     }
   }
 
@@ -41,7 +83,7 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
             children: [
               Text(
                 "Let’s set up your day!",
-                style: TextStyle(
+                style: GoogleFonts.openSans(
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -51,7 +93,10 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
               SizedBox(height: 8.0),
               Text(
                 "Share your usual sleep and wake times",
-                style: TextStyle(fontSize: 16.0, color: Colors.grey[700]),
+                style: GoogleFonts.openSans(
+                  fontSize: 16.0,
+                  color: Colors.grey[700],
+                ),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 24.0),
@@ -60,32 +105,26 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
                 height: 120.0,
               ),
               SizedBox(height: 24.0),
-              buildTimePickerField(
+              CustomWidget.buildTimePickerField(
                 context: context,
                 label: "Usual Sleep Time",
-                time: sleepTime,
+                time: sleepTime ??
+                    TimeOfDay(hour: 23, minute: 0), // Default value if null
                 onTap: () => _selectTime(context, true),
               ),
               SizedBox(height: 16.0),
-              buildTimePickerField(
+              CustomWidget.buildTimePickerField(
                 context: context,
                 label: "Usual Wake Time",
-                time: wakeTime,
+                time: wakeTime ??
+                    TimeOfDay(hour: 7, minute: 0), // Default value if null
                 onTap: () => _selectTime(context, false),
               ),
               SizedBox(height: 24.0),
               ElevatedButton(
-                onPressed: () {
-                  // Handle next button action here
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SleepWakeReminderScreen()),
-                  );
-                },
+                onPressed: _savePreferences, // Trigger saving preferences
                 style: ElevatedButton.styleFrom(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 40.0, vertical: 12.0),
+                  padding: EdgeInsets.symmetric(horizontal: 130, vertical: 15),
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
@@ -93,7 +132,10 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
                 ),
                 child: Text(
                   "Next",
-                  style: TextStyle(fontSize: 18.0, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 18.0,
+                    color: Color(0xFFFFFFFF),
+                  ),
                 ),
               ),
             ],

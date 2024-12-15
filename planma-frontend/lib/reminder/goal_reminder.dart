@@ -19,7 +19,7 @@ class GoalReminder extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
-            'lib/reminder/assests/achievement.png',
+            'lib/reminder/assets/achievement.png',
             width: 48,
             height: 48,
           ),

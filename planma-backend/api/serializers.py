@@ -16,17 +16,6 @@ class CustomUserSerializer(UserSerializer):
 
 
 
-class CustomTaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomTask
-        fields = [
-            'task_id', 'task_name', 'task_desc', 
-            'scheduled_date', 'scheduled_start_time', 
-            'scheduled_end_time', 'deadline', 
-            'status', 'subject_code', 'student_id'
-        ]
-        # read_only_fields = ['task_id', 'student_id']
-
 class CustomEventSerializer(serializers.ModelSerializer):
     class Meta: 
         model = CustomEvents
@@ -36,12 +25,6 @@ class CustomEventSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'student_id': {'required': True},
         }
-        
-class ListEventSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = CustomEvents
-        fields = ['event_id', 'event_name', 'scheduled_start_time', 
-                  'scheduled_end_time']
         
 class AttendedEventSerializer(serializers.ModelSerializer):
     class Meta: 
@@ -58,12 +41,6 @@ class CustomActivitySerializer(serializers.ModelSerializer):
             'student_id': {'required': True},
         }
         
-class ListActivitySerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = CustomEvents
-        fields = ['activity_id', 'activity_name', 'scheduled_start_time', 
-                  'scheduled_end_time']
-        
 class ActivityLogSerializer(serializers.ModelSerializer):
     class Meta: 
         model = ActivityLog
@@ -75,29 +52,10 @@ class UserPrefSerializer(serializers.ModelSerializer):
     class Meta: 
         model = UserPref
         fields = ['pref_id', 'usual_sleep_time', 'usual_wake_time', 
-                  'notification_enabled', 'reminder_offset_time', 
-                  'student_id']
+                  'reminder_offset_time', 'student_id']
+        read_only_fields = ['student_id']
+
         
-
-class CustomClassScheduleSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = CustomClassSchedule
-        fields = ['classsched_id', 'subject_code', 'day_of_week',
-                  'scheduled_start_time', 'scheduled_end_time',
-                  'room', 'student_id']
-
-class CustomSubjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomSubject
-        fields = ['subject_code', 'subject_title',
-                  'student_id', 'semester_id']
-
-class AttendedClassSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = AttendedClass
-        fields = ['att_class_id', 'classsched_id', 'date', 
-                  'isExcused', 'hasAttended']
-
 class CustomSemesterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomSemester
@@ -110,13 +68,55 @@ class CustomSemesterSerializer(serializers.ModelSerializer):
         if data['sem_start_date'] >= data['sem_end_date']:
             raise serializers.ValidationError("Start date must be before end date.")
         return data
+
+class CustomSubjectSerializer(serializers.ModelSerializer):
+    semester_id = CustomSemesterSerializer()
+
+    class Meta:
+        model = CustomSubject
+        fields = ['subject_code', 'subject_title',
+                  'student_id', 'semester_id']
+
+class CustomClassScheduleSerializer(serializers.ModelSerializer):
+    subject_code = CustomSubjectSerializer()
+
+    class Meta: 
+        model = CustomClassSchedule
+        fields = ['classsched_id', 'subject_code', 'day_of_week',
+                  'scheduled_start_time', 'scheduled_end_time',
+                  'room', 'student_id']
+        read_only_fields = ['classsched_id']
+
+class AttendedClassSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = AttendedClass
+        fields = ['att_class_id', 'classsched_id', 'date', 
+                  'isExcused', 'hasAttended']
+        
+class CustomTaskSerializer(serializers.ModelSerializer):
+    subject_code = CustomSubjectSerializer()
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
+    class Meta:
+        model = CustomTask
+        fields = [
+            'task_id', 'task_name', 'task_desc', 
+            'scheduled_date', 'scheduled_start_time', 
+            'scheduled_end_time', 'deadline', 
+            'status', 'subject_code', 'student_id'
+        ]
+        read_only_fields = ['student_id']
                 
 class GoalsSerializer(serializers.ModelSerializer):
+    semester_id = CustomSemesterSerializer()
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
     class Meta:
         model = Goals
         fields = ['goal_id', 'goal_name', 'target_hours', 
                   'timeframe', 'goal_desc', 'goal_type',
                   'student_id', 'semester_id']
+        read_only_fields = ['student_id']
         
 class GoalProgressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -125,10 +125,13 @@ class GoalProgressSerializer(serializers.ModelSerializer):
                   'scheduled_end_time', 'session_duration']
         
 class GoalScheduleSerializer(serializers.ModelSerializer):
+    goal_id = GoalsSerializer()
+
     class Meta:
-        model = Goals
-        fields = ['goalschedule_id', 'goal_id', 'scheduled_start_time',
+        model = GoalSchedule
+        fields = ['goalschedule_id', 'goal_id', 'scheduled_date','scheduled_start_time',
                   'scheduled_end_time']
+        read_only_fields = ['goal_id']
 
 class SleepLogSerializer(serializers.ModelSerializer):
     class Meta:

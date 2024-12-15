@@ -1,39 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
-class DayButton extends StatelessWidget {
-  final String day;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const DayButton({
-    super.key,
-    required this.day,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: CircleAvatar(
-        radius: 16,
-        backgroundColor: isSelected ? Colors.blue : Colors.grey[200],
-        child: Text(
-          day,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-          ),
+class CustomWidgets {
+  static Widget buildTitle(String title) {
+    return Container(
+      margin: const EdgeInsets.only(
+          left: 16.0,
+          top: 8.0,
+          right: 16.0), // Adjust the margin values as needed
+      alignment: Alignment.centerLeft, // Ensures the text starts from the left
+      child: Text(
+        title,
+        style: GoogleFonts.openSans(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF173F70),
         ),
       ),
     );
   }
-}
 
-class CustomWidgets {
-  // Method to build a TextField with custom style
   static Widget buildTextField(
       TextEditingController controller, String labelText) {
     return Container(
@@ -45,6 +33,10 @@ class CustomWidgets {
         controller: controller,
         decoration: InputDecoration(
           labelText: labelText,
+          labelStyle: GoogleFonts.openSans(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.all(16),
         ),
@@ -57,21 +49,29 @@ class CustomWidgets {
     String label,
     DateTime? date,
     BuildContext context,
-    bool someFlag,
+    bool someFlag, // Add this parameter to accept the 'true' value
     Function(BuildContext, DateTime?) selectDate,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: ListTile(
-        title: Text(
-          '$label: ${date != null ? DateFormat('dd MMMM yyyy').format(date) : 'Select Date'}',
-          style: TextStyle(fontSize: 16),
+    return GestureDetector(
+      onTap: () => selectDate(context, date),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(30),
         ),
-        trailing: const Icon(Icons.calendar_today),
-        onTap: () => selectDate(context, date),
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+                date != null
+                    ? DateFormat('dd MMMM yyyy').format(date)
+                    : 'Select Date',
+                style: GoogleFonts.openSans(
+                    fontSize: 14, color: Colors.grey[600])),
+            const Icon(Icons.calendar_today),
+          ],
+        ),
       ),
     );
   }
@@ -90,10 +90,14 @@ class CustomWidgets {
       ),
       child: TextField(
         controller: controller,
-        readOnly: true, // Only allow input via the time picker
+        readOnly: true,
         onTap: () => selectTime(context),
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: GoogleFonts.openSans(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
@@ -109,8 +113,8 @@ class CustomWidgets {
     required List<String> items,
     required Function(String?) onChanged,
     Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
-    Color labelColor = Colors.black,
-    Color textColor = Colors.black,
+    Color labelColor = const Color(0xFF173F70),
+    Color textColor = const Color(0xFF173F70),
     double borderRadius = 30.0,
     EdgeInsets contentPadding = const EdgeInsets.all(16),
     double fontSize = 14.0,
@@ -120,15 +124,15 @@ class CustomWidgets {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
           hint: Text(
             label,
-            style: TextStyle(
-              color: labelColor,
+            style: GoogleFonts.openSans(
               fontSize: fontSize,
+              color: labelColor,
             ),
           ),
           value: value,
@@ -138,7 +142,10 @@ class CustomWidgets {
               value: item,
               child: Text(
                 item,
-                style: TextStyle(fontSize: fontSize, color: textColor),
+                style: GoogleFonts.openSans(
+                  fontSize: fontSize,
+                  color: labelColor,
+                ),
               ),
             );
           }).toList(),
@@ -152,7 +159,7 @@ class CustomWidgets {
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white, // Background color of the dropdown menu
+              color: Colors.white,
             ),
           ),
           iconStyleData: IconStyleData(
@@ -162,5 +169,95 @@ class CustomWidgets {
         ),
       ),
     );
+  }
+
+  static Widget dropwDownForAttendance({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+    Color backgroundColor = const Color(0xFFF5F5F5),
+    Color labelColor = Colors.red,
+    Color textColor = const Color(0xFF173F70),
+    double borderRadius = 70.0,
+    double fontSize = 14.0,
+    TextStyle? textStyle,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+          horizontal: 20.0, vertical: 10.0), // Margin around the dropdown
+      decoration: BoxDecoration(
+        color: backgroundColor, // Light background color
+        border: Border.all(
+          color: value != null ? getColor(value) : Colors.blue, // Border color
+          width: 2.0, // Border width
+        ),
+        borderRadius: BorderRadius.circular(borderRadius), // Rounded corners
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2<String>(
+          isExpanded: true,
+          hint: Text(
+            label,
+            style: textStyle ??
+                GoogleFonts.openSans(
+                  color: labelColor,
+                  fontSize: fontSize,
+                ),
+          ),
+          value: value,
+          onChanged: onChanged,
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: GoogleFonts.openSans(
+                        color: item == value
+                            ? getColor(item) // Highlight selected item
+                            : const Color(0xFF173F70), // Default text color
+                        fontWeight: FontWeight.w500, // Medium weight for items
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          style: GoogleFonts.openSans(
+            color: textColor,
+            fontWeight: FontWeight.w500,
+          ),
+          iconStyleData: IconStyleData(
+            icon: Icon(Icons.arrow_drop_down,
+                color: labelColor), // Custom arrow icon
+            iconSize: 24, // Adjust the arrow size
+          ),
+          dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                  borderRadius), // Rounded corners for dropdown
+              color: Colors.white, // Background color for the dropdown
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Color getColor(String value) {
+    switch (value) {
+      case 'Did Not Attend':
+        return Color(0xFFEF4738);
+      case 'Excused':
+        return Color(0xFF3654CC);
+      case 'Attended':
+        return Color(0xFF32C652);
+      default:
+        return Colors.grey; // Default for unselected
+    }
   }
 }

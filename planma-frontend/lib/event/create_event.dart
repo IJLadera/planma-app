@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:jwt_decode/jwt_decode.dart';
-import 'package:planma_app/Providers/user_provider.dart';
-import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/event/widget/widget.dart';
-import 'package:planma_app/Front%20&%20back%20end%20connections/events_service.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/Providers/events_provider.dart';
 
-class AddEventState extends StatefulWidget {
-  const AddEventState({super.key});
+class AddEventScreen extends StatefulWidget {
+  const AddEventScreen({super.key});
 
   @override
-  _AddEventState createState() => _AddEventState();
+  _AddEventScreen createState() => _AddEventScreen();
 }
 
-class _AddEventState extends State<AddEventState> {
-  final _eventCodeController = TextEditingController();
-  final _eventTitleController = TextEditingController();
+class _AddEventScreen extends State<AddEventScreen> {
+  final _eventNameController = TextEditingController();
+  final _eventDescController = TextEditingController();
   final _eventLocationController = TextEditingController();
   final _startTimeController = TextEditingController();
   final _endTimeController = TextEditingController();
@@ -54,86 +52,114 @@ class _AddEventState extends State<AddEventState> {
     }
   }
 
-  // Convert time to 24-hour format
-  String to24HourFormat(String time) {
-    String finalStrTime = "";
-    List<String> timeSplit = time.split(":");
-    timeSplit[1] = timeSplit[1].split(" ").first;
-    if (time.split(" ")[1] == "PM") {
-      if (time.split(":").first == "12") {
-        finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
-      } else {
-        finalStrTime =
-            "${(int.parse(timeSplit[0]) + 12).toString()}:${timeSplit[1]}";
-      }
-    } else if (time.split(" ")[1] == "AM" && time.split(":").first == "12") {
-      finalStrTime =
-          "${(int.parse(timeSplit[0]) - 12).toString()}:${timeSplit[1]}";
-    } else {
-      finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+  TimeOfDay? _stringToTimeOfDay(String timeString) {
+    try {
+      final timeParts = timeString.split(':');
+      final hour = int.parse(timeParts[0].trim());
+      final minuteParts = timeParts[1].split(' ');
+      final minute = int.parse(minuteParts[0].trim());
+      final period = minuteParts[1].toLowerCase();
+
+      // Adjust for AM/PM
+      final isPM = period == 'pm';
+      final adjustedHour =
+          (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
+
+      return TimeOfDay(hour: adjustedHour, minute: minute);
+    } catch (e) {
+      return null; // Return null if parsing fails
     }
-    return finalStrTime;
   }
 
   // Create event function
   Future<void> _createEvent() async {
-    if (_eventCodeController.text.isEmpty ||
-        _eventTitleController.text.isEmpty ||
-        _eventLocationController.text.isEmpty ||
+    final provider = Provider.of<EventsProvider>(context, listen: false);
+
+    String eventName = _eventNameController.text.trim();
+    String location = _eventLocationController.text.trim();
+    String eventDescription = _eventDescController.text.trim();
+    String startTimeString = _startTimeController.text.trim();
+    String endTimeString = _endTimeController.text.trim();
+
+    // Convert String to TimeOfDay
+    final startTime = _stringToTimeOfDay(startTimeString);
+    final endTime = _stringToTimeOfDay(endTimeString);
+
+    if (eventName.isEmpty ||
+        eventDescription.isEmpty ||
+        location.isEmpty ||
         _scheduledDate == null ||
-        _startTimeController.text.isEmpty ||
-        _endTimeController.text.isEmpty ||
+        startTimeString.isEmpty ||
+        endTimeString.isEmpty ||
         _selectedEventType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill out all fields')),
+        const SnackBar(content: Text('Please fill in all fields!')),
       );
       return;
     }
 
-    final eventService = EventsCreate();
-    final String eventName = _eventCodeController.text;
-    final String eventDesc = _eventTitleController.text;
-    final String location = _eventLocationController.text;
-    final String scheduledDate =
-        _scheduledDate!.toIso8601String().split("T").first;
-    final String startTime = _startTimeController.text;
-    final String endTime = _endTimeController.text;
-    final String eventType = _selectedEventType!;
-
-    final result = await eventService.eventCT(
-        eventname: eventName,
-        eventdesc: eventDesc,
-        location: location,
-        scheduledate: scheduledDate,
-        starttime: to24HourFormat(startTime),
-        endtime: to24HourFormat(endTime),
-        eventtype: eventType,
-        studentID:
-            Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']);
-
-    if (result != null && result.containsKey('error')) {
+    if (!_isValidTimeRange(startTime!, endTime!)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['error'])),
+        const SnackBar(content: Text('Start Time must be before End Time.')),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Event created successfully!')),
-      );
-      Navigator.of(context).pop(); // Navigate back on success
+      return;
     }
+
+    try {
+      await provider.addEvent(
+        eventName: eventName,
+        eventDesc: eventDescription,
+        location: location,
+        scheduledDate: _scheduledDate!,
+        startTime: startTime,
+        endTime: endTime,
+        eventType: _selectedEventType!,
+      );
+
+      // After validation and adding logic
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('event added successfully!')),
+      );
+
+      Navigator.pop(context);
+      // Clear fields after adding
+      _clearFields();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add event (1): $error')),
+      );
+    }
+  }
+
+  // Valid Time Range Check
+  bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+  }
+
+  void _clearFields() {
+    _eventNameController.clear();
+    _eventDescController.clear();
+    _startTimeController.clear();
+    _endTimeController.clear();
+    _scheduledDate = null;
+    _selectedEventType = null;
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Event'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+        title: Text(
+          'Create Event',
+          style: GoogleFonts.openSans(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
+          ),
         ),
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
         children: [
@@ -142,17 +168,37 @@ class _AddEventState extends State<AddEventState> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  _buildTitle(
+                    'Event Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                      _eventCodeController, 'Event Name'),
-                  const SizedBox(height: 16),
+                      _eventNameController, 'Event Name'),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Description',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                      _eventTitleController, 'Description'),
-                  const SizedBox(height: 16),
+                      _eventDescController, 'Description'),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Location',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventLocationController, 'Location'),
                   const SizedBox(height: 12),
+                  _buildTitle(
+                    'Schedule Date',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Start and End Time',
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -176,7 +222,11 @@ class _AddEventState extends State<AddEventState> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  _buildTitle(
+                    'Event Type',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Choose Event Type',
                     value: _selectedEventType,
@@ -187,10 +237,9 @@ class _AddEventState extends State<AddEventState> {
                       });
                     },
                     backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
                     borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
                     fontSize: 14.0,
                   ),
                 ],
@@ -205,14 +254,17 @@ class _AddEventState extends State<AddEventState> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
-              child: const Text(
+              child: Text(
                 'Create Event',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -220,4 +272,22 @@ class _AddEventState extends State<AddEventState> {
       ),
     );
   }
+}
+
+Widget _buildTitle(String title) {
+  return Container(
+    margin: const EdgeInsets.only(
+        left: 16.0,
+        top: 8.0,
+        right: 16.0), // Adjust the margin values as needed
+    alignment: Alignment.centerLeft, // Ensures the text starts from the left
+    child: Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF173F70),
+      ),
+    ),
+  );
 }

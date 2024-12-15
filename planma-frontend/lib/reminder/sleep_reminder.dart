@@ -19,7 +19,7 @@ class SleepReminder extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
-            'lib/reminder/assests/sleep.png',
+            'lib/reminder/assets/sleep.png',
             width: 48,
             height: 48,
           ),

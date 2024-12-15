@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
@@ -65,36 +66,6 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
         return self.email
     
 
-class CustomTask(models.Model):
-    
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('In Progress', 'In Progress'),
-        ('Completed', 'Completed'),
-    ]
-    
-    # Primary Key
-    task_id = models.AutoField(primary_key=True)
-    
-    # Task Details
-    task_name = models.CharField(max_length=255)
-    task_desc = models.TextField()
-    scheduled_date = models.DateField()
-    scheduled_start_time = models.TimeField()
-    scheduled_end_time = models.TimeField()
-    deadline = models.DateTimeField()
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
-    subject_code = models.CharField(max_length=50)
-    
-    # Foreign Key to CustomUser model
-    student_id = models.ForeignKey(
-        CustomUser, 
-        on_delete=models.CASCADE, 
-        related_name='tasks', db_column="student_id"
-    )
-
-    def __str__(self):
-        return self.task_name
 
 class CustomEvents(models.Model):
     
@@ -178,20 +149,37 @@ class ActivityLog(models.Model):
     date_logged = models.DateField()
 
 class UserPref(models.Model):
-    
-     # Primary Key
+    # Primary Key
     pref_id = models.AutoField(primary_key=True)
     
     # User Pref Details
-    usual_sleep_time = models.TimeField()
-    usual_wake_time = models.TimeField()
-    notification_enabled = models.BooleanField() # Struggling in determining whether this should be a time field or a duration field
-    reminder_offset_time = models.TimeField()
+    usual_sleep_time = models.TimeField(default="23:00")
+    usual_wake_time = models.TimeField(default="07:00")
+    reminder_offset_time = models.DurationField()
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='userpref', db_column='student_id'
+        related_name='userpref',
+        db_column='student_id',
+        db_index=True
     )
+
+    def __str__(self):
+        return f"User Preferences for {self.student_id.username}"
+
+    def clean(self):
+        if self.usual_sleep_time >= self.usual_wake_time:
+            raise ValidationError("Sleep time must be before wake time.")
+        
+    def save(self, *args, **kwargs):
+        # Ensure `reminder_offset_time` is stored as a timedelta
+        if isinstance(self.reminder_offset_time, (int, float, str)):
+            self.reminder_offset_time = timedelta(seconds=int(self.reminder_offset_time))
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "User Preference"
+        verbose_name_plural = "User Preferences"
 
 #Semester
 class CustomSemester(models.Model):
@@ -262,6 +250,9 @@ class CustomClassSchedule(models.Model):
         related_name='scheduled_classes', db_column='student_id'
     )
 
+    class Meta:
+        unique_together = ('day_of_week', 'scheduled_start_time', 'scheduled_end_time', 'room', 'student_id')
+
     def __str__(self):
         # Access the related CustomSubject's title
         subject_title = self.subject_code.subject_title
@@ -282,17 +273,62 @@ class AttendedClass(models.Model):
     isExcused = models.BooleanField(default=False)
     hasAttended = models.BooleanField()
 
+class CustomTask(models.Model):
+    
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('In Progress', 'In Progress'),
+        ('Completed', 'Completed'),
+    ]
+    
+    # Primary Key
+    task_id = models.AutoField(primary_key=True)
+    
+    # Task Details
+    task_name = models.CharField(max_length=255)
+    task_desc = models.TextField()
+    scheduled_date = models.DateField()
+    scheduled_start_time = models.TimeField()
+    scheduled_end_time = models.TimeField()
+    deadline = models.DateTimeField()
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    subject_code = models.ForeignKey(
+        CustomSubject,  # This links to your CustomSubject model
+        on_delete=models.CASCADE,
+        related_name='subject', db_column='subject_code'
+    )
+    # Foreign Key to CustomUser model
+    student_id = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.CASCADE, 
+        related_name='tasks', db_column="student_id"
+    )
+
+    def __str__(self):
+        return self.task_name
+
 class Goals(models.Model):
+
+    TYPE_CHOICES = [
+        ('Academic', 'Academic'),
+        ('Personal', 'Personal'),
+    ]
+
+    TIMEFRAME_CHOICES = [
+        ('Daily', 'Daily'),
+        ('Weekly', 'Weekly'),
+        ('Monthly', 'Monthly'),
+    ]
 
     # Primary Key
     goal_id = models.AutoField(primary_key=True)
 
     # Goal Details
     goal_name = models.CharField(max_length=100)
-    target_hours = models.TimeField() #if this is merely target hours, then Time Field might not work since it is at max 23 hours
-    timeframe = models.TimeField()
+    target_hours = models.IntegerField()
+    timeframe = models.CharField(max_length=20, choices=TIMEFRAME_CHOICES)
     goal_desc = models.TextField()
-    goal_type = models.CharField(max_length=30)
+    goal_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom class model
         on_delete=models.CASCADE,
@@ -301,7 +337,9 @@ class Goals(models.Model):
     semester_id = models.ForeignKey(
         CustomSemester,  # This links to your custom user model
         on_delete=models.CASCADE,
-        related_name='goalsems', db_column='semester_id'
+        related_name='goalsems', db_column='semester_id',
+        null=True,
+        blank=True
     ) 
 
     def __str__(self):
@@ -334,6 +372,7 @@ class GoalSchedule(models.Model):
         on_delete=models.CASCADE,
         related_name='goalsched', db_column='goal_id'
     )
+    scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
 

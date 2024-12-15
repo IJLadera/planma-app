@@ -2,22 +2,65 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/models/class_schedules_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/subjects_model.dart';
 
 class ClassScheduleProvider with ChangeNotifier {
-  List<Map<String, dynamic>> _classSchedules = [];
+  List<ClassSchedule> _classSchedules = [];
+  List<String> subjectCodes = [];
+  Subject? _selectedSubject;
   String? _accessToken;
+  int? activeSemesterId;
 
-  List<Map<String, dynamic>> get classSchedules => _classSchedules;
+  List<ClassSchedule> get classSchedules => _classSchedules;
+  Subject? get selectedSubject => _selectedSubject;
   String? get accessToken => _accessToken;
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  //Fetch all class schedules
-  Future<void> fetchClassSchedules() async {
+  //Fetch all subjects
+  Future<void> fetchSubjects(SemesterProvider semesterProvider) async {
+    // Fetch semesters if not already loaded
+    if (semesterProvider.semesters.isEmpty) {
+      await semesterProvider.fetchSemesters();
+    }
+
+    if (semesterProvider.semesters.isEmpty) {
+      throw Exception("No semesters available. Cannot fetch subjects.");
+    }
+
+    // Determine the current semester dynamically
+    DateTime currentDate = DateTime.now();
+    final activeSemester = semesterProvider.semesters.firstWhere(
+      (semester) {
+        DateTime startDate = DateTime.parse(semester['sem_start_date']);
+        DateTime endDate = DateTime.parse(semester['sem_end_date']);
+        return currentDate.isAfter(startDate) && currentDate.isBefore(endDate);
+      },
+      orElse: () {
+        // Proper fallback with valid default map
+        print("No active semester found!");
+        return {
+          'id': -1,
+          'start_date': '2000-01-01', // Default date to avoid parsing errors
+          'end_date': '2000-12-31',   // Default date to avoid parsing errors
+        };
+      },
+    );
+
+    activeSemesterId = activeSemester['semester_id'];
+    print("Active semester Id: $activeSemesterId");
+
+    if (activeSemesterId == -1) {
+      print("No active semester. Fallback semester ID used.");
+    }
+
+    // Fetch subjects for the active semester
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${baseUrl}class-schedules/");
+    final url = Uri.parse("${baseUrl}subjects/?semester_id=$activeSemesterId");
 
     try {
       final response = await http.get(
@@ -28,16 +71,87 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
+        final List<dynamic> data = json.decode(response.body);
+        subjectCodes = data.map((item) => Subject.fromJson(item).subjectCode).toList();
+        notifyListeners();
+      } else {
+        throw Exception('Error fetching subjects');
+      }
+    } catch (error) {
+      print('Error fetching subjects: $error');
+      throw Exception('Error fetching subjects: $error');
+    }
+  }
+
+
+  //Fetch existing subject details
+  Future<void> fetchSubjectDetails(String subjectCode) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+    final url = Uri.parse("${baseUrl}subjects/$subjectCode/");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        _selectedSubject = Subject.fromJson(data);
+        notifyListeners();
+      } else if (response.statusCode == 404) {
+        _selectedSubject = null;
+        notifyListeners();
+        print('Subject not found');
+      } else {
+        throw Exception('Error fetching subject details');
+      }
+    } catch (error) {
+      print('Error fetching subject: $error');
+      throw Exception('Error fetching subject details: $error');
+    }
+  }
+
+  //Fetch all class schedules
+  Future<void> fetchClassSchedules({int? selectedSemesterId}) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    // Ensure semester_id is provided
+    if (selectedSemesterId == null) {
+      print("Error: Semester ID is required.");
+      return;
+    }
+
+    // Construct the URL with semester_id
+    final url =
+        Uri.parse("${baseUrl}class-schedules/?semester_id=$selectedSemesterId");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        // print(data);
+
+        // Parse the response body as a list of class schedules
         _classSchedules =
-            data.map((item) => Map<String, dynamic>.from(item)).toList();
+            data.map((item) => ClassSchedule.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception(
             'Failed to fetch class schedules. Status Code: ${response.statusCode}');
       }
     } catch (error) {
-      print(error);
+      print("Error fetching class schedules: $error");
     }
   }
 
@@ -54,20 +168,23 @@ class ClassScheduleProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/add_schedule/");
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
 
-    print("PROV Subject Code: $subjectCode");
-    print("PROV Subject Title: $subjectTitle");
-    print("PROV Semester: $semesterId");
-    print("PROV Days: $dayOfWeek");
-    print("PROV Start Time: $startTime");
-    print("PROV End Time: $endTime");
-    print("PROV Room: $room");
-    print("PROV Start Time 2: $formattedStartTime");
-    print("PROV End Time 2: $formattedEndTime");
+    // Check for duplicates locally
+    bool isDuplicate = _classSchedules.any((schedule) =>
+        schedule.subjectCode == subjectCode &&
+        schedule.dayOfWeek == dayOfWeek &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime &&
+        schedule.room == room);
 
+    if (isDuplicate) {
+      throw Exception(
+          'Duplicate schedule detected locally. Please modify your entry.');
+    }
+
+    final url = Uri.parse("${baseUrl}class-schedules/add_schedule/");
     try {
       final response = await http.post(
         url,
@@ -87,21 +204,30 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 201) {
-        final newSchedule = json.decode(response.body) as Map<String, dynamic>;
+        print("Class schedule added successfully.");
+        final newSchedule = ClassSchedule.fromJson(json.decode(response.body));
         _classSchedules.add(newSchedule);
         notifyListeners();
+      } else if (response.statusCode == 400) {
+        // Handle duplicate check from the backend
+        final responseBody = json.decode(response.body);
+        if (responseBody['error'] == 'Duplicate schedule entry detected.') {
+          throw Exception('Duplicate schedule detected on the server.');
+        } else {
+          throw Exception('Error adding schedule: ${response.body}');
+        }
       } else {
-        throw Exception(
-            'Failed to add class schedule. Status Code: ${response.statusCode}');
+        throw Exception('Failed to add schedule: ${response.body}');
       }
     } catch (error) {
-      rethrow;
+      print('Add schedule error: $error');
+      throw Exception('Error adding schedule: $error');
     }
   }
 
   //Edit a class schedule
-  Future<void> editClassSchedule({
-    required int scheduleId,
+  Future<void> updateClassSchedule({
+    required int classschedId,
     required String subjectCode,
     required String subjectTitle,
     required int semesterId,
@@ -113,7 +239,7 @@ class ClassScheduleProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/$scheduleId/");
+    final url = Uri.parse("${baseUrl}class-schedules/$classschedId/");
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
 
@@ -136,27 +262,29 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final updatedSchedule = json.decode(response.body) as Map<String, dynamic>;
-        int index = _classSchedules.indexWhere((schedule) => schedule['id'] == scheduleId);
+        final updatedSchedule =
+            ClassSchedule.fromJson(json.decode(response.body));
+        final index = _classSchedules
+            .indexWhere((schedule) => schedule.classschedId == classschedId);
         if (index != -1) {
           _classSchedules[index] = updatedSchedule;
           notifyListeners();
         }
       } else {
-        throw Exception(
-            'Failed to edit class schedule. Status Code: ${response.statusCode}');
+        throw Exception('Failed to update class schedule: ${response.body}');
       }
     } catch (error) {
-      rethrow;
+      print('Update schedule error: $error');
+      throw Exception('Error updating schedule: $error');
     }
   }
 
   // Delete a class schedule
-  Future<void> deleteClassSchedule(int scheduleId) async {
+  Future<void> deleteClassSchedule(int classschedId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/$scheduleId/");
+    final url = Uri.parse("${baseUrl}class-schedules/$classschedId/");
 
     try {
       final response = await http.delete(
@@ -167,7 +295,8 @@ class ClassScheduleProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _classSchedules.removeWhere((schedule) => schedule['id'] == scheduleId);
+        _classSchedules
+            .removeWhere((schedule) => schedule.classschedId == classschedId);
         notifyListeners();
       } else {
         throw Exception(

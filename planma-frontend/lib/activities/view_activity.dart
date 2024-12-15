@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/activities/edit_activity.dart';
 import 'package:planma_app/activities/widget/activity_detail_screen.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class ViewActivity extends StatelessWidget {
   final String activityName;
@@ -24,34 +25,38 @@ class ViewActivity extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.blue),
+          icon: const Icon(Icons.close, color: Color(0xFF173F70)),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditActivity(),
-                  ),
-                );
-              }),
+            icon: const Icon(Icons.edit, color: Color(0xFF173F70)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditActivity(),
+                ),
+              );
+            },
+          ),
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.blue),
+            icon: const Icon(Icons.delete, color: Color(0xFF173F70)),
             onPressed: () {
               // Handle delete task logic
             },
           ),
         ],
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Activities',
-          style: TextStyle(
-              color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+          style: GoogleFonts.openSans(
+            color: Color(0xFF173F70),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Padding(
@@ -62,15 +67,34 @@ class ViewActivity extends StatelessWidget {
             color: Colors.grey[100],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(32.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ActivityDetailsScreen(title: 'Name:', detail: activityName),
                 ActivityDetailsScreen(
-                    title: 'Description:', detail: description),
-                ActivityDetailsScreen(title: 'Date:', detail: date),
-                ActivityDetailsScreen(title: 'Time:', detail: time),
+                  title: 'Name:',
+                  detail: activityName,
+                  textStyle: GoogleFonts.openSans(fontSize: 16),
+                ),
+                const Divider(),
+                ActivityDetailsScreen(
+                  title: 'Description:',
+                  detail: description,
+                  textStyle: GoogleFonts.openSans(fontSize: 16),
+                ),
+                const Divider(),
+                ActivityDetailsScreen(
+                  title: 'Date:',
+                  detail: date,
+                  textStyle: GoogleFonts.openSans(fontSize: 16),
+                ),
+                const Divider(),
+                ActivityDetailsScreen(
+                  title: 'Time:',
+                  detail: time,
+                  textStyle: GoogleFonts.openSans(fontSize: 16),
+                ),
+                const Divider(),
               ],
             ),
           ),

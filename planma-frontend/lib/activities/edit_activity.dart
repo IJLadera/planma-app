@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/activities/widget/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EditActivity extends StatefulWidget {
   const EditActivity({super.key});
@@ -48,13 +49,21 @@ class _EditActivity extends State<EditActivity> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Edit Activities'),
+          title: Text(
+            'Edit Activities',
+            style: GoogleFonts.openSans(
+              color: Color(0xFF173F70),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
         ),
         body: Column(
           children: [
@@ -63,16 +72,30 @@ class _EditActivity extends State<EditActivity> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  CustomWidgets.buildTitle(
+                    'Activity Name',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _activityNameController, 'Activity Name'),
-                  SizedBox(height: 16), // Increased space
+                  SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Description',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _activityDescriptionController, 'Description'),
-                  SizedBox(
-                      height: 16), // Space between time fields and room field
                   SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Scheduled Date',
+                  ),
+                  const SizedBox(height: 12),
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
+                  const SizedBox(height: 12),
+                  CustomWidgets.buildTitle(
+                    'Start and End Time',
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -107,15 +130,19 @@ class _EditActivity extends State<EditActivity> {
                   // Create task action
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF173F70),
+                  backgroundColor: const Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
                 ),
                 child: Text(
                   'Edit Activity',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),

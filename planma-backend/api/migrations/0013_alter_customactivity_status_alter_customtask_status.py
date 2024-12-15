@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='customactivity',
             name='status',
-            field=models.CharField(choices=[('1', 'Pending'), ('2', 'In Progress'), ('3', 'Completed')], max_length=50),
+            field=models.CharField(choices=[('Pending', 'Pending'), ('In Progress', 'In Progress'), ('Completed', 'Completed')], max_length=50),
         ),
         migrations.AlterField(
             model_name='customtask',
             name='status',
-            field=models.CharField(choices=[('1', 'Pending'), ('2', 'In Progress'), ('3', 'Completed')], max_length=50),
+            field=models.CharField(choices=[('Pending', 'Pending'), ('In Progress', 'In Progress'), ('Completed', 'Completed')], max_length=50),
         ),
     ]
