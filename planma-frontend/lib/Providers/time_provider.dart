@@ -7,16 +7,21 @@ class TimeProvider with ChangeNotifier {
   int initialTime = 0; // Original timer duration
   bool isRunning = false;
   Timer? _timer;
+  int elapsedTimeTimer = 0; // Elapsed time for countdown timer
 
   // Stopwatch Logic
   int elapsedTime = 0; // Time in seconds
   bool isStopwatchRunning = false;
   Timer? _stopwatchTimer;
 
+  // List to store recorded times
+  List<String> recordedTimes = [];
+
   // Timer Methods
   void setTime(int seconds) {
     remainingTime = seconds;
     initialTime = seconds;
+    elapsedTimeTimer = 0; // Reset elapsed time when setting new time
     notifyListeners();
   }
 
@@ -26,6 +31,7 @@ class TimeProvider with ChangeNotifier {
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (remainingTime > 0) {
           remainingTime--;
+          elapsedTimeTimer++; // Increment elapsed time
         } else {
           timer.cancel();
           isRunning = false;
@@ -36,14 +42,17 @@ class TimeProvider with ChangeNotifier {
   }
 
   void pauseTimer() {
-    _timer?.cancel();
-    isRunning = false;
-    notifyListeners();
+    if (isRunning) {
+      _timer?.cancel();
+      isRunning = false;
+      notifyListeners();
+    }
   }
 
   void resetTimer() {
     _timer?.cancel();
     remainingTime = initialTime;
+    elapsedTimeTimer = 0; // Reset elapsed time
     isRunning = false;
     notifyListeners();
   }
@@ -60,9 +69,11 @@ class TimeProvider with ChangeNotifier {
   }
 
   void pauseStopwatch() {
-    _stopwatchTimer?.cancel();
-    isStopwatchRunning = false;
-    notifyListeners();
+    if (isStopwatchRunning) {
+      _stopwatchTimer?.cancel();
+      isStopwatchRunning = false;
+      notifyListeners();
+    }
   }
 
   void resetStopwatch() {
@@ -70,5 +81,25 @@ class TimeProvider with ChangeNotifier {
     elapsedTime = 0;
     isStopwatchRunning = false;
     notifyListeners();
+  }
+
+  // Save final stopwatch time
+  void saveStopwatchTime() {
+    final formattedTime = _formatTime(elapsedTime);
+    recordedTimes.add(formattedTime);
+    notifyListeners();
+  }
+
+  // Helper: Format time for display
+  String _formatTime(int totalSeconds) {
+    int hours = totalSeconds ~/ 3600;
+    int minutes = (totalSeconds % 3600) ~/ 60;
+    int seconds = totalSeconds % 60;
+    return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
+  }
+
+  // Return elapsed time of the countdown timer
+  int getElapsedTime() {
+    return elapsedTimeTimer; // Return the elapsed time for the countdown timer
   }
 }
