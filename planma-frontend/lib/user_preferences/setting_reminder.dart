@@ -71,13 +71,6 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Set Sleep/Wake Reminder",
-          style: GoogleFonts.openSans(
-              fontSize: 20,
-              color: Color(0xFF173F70),
-              fontWeight: FontWeight.bold),
-        ),
         backgroundColor: const Color(0xFFFFFFFF),
       ),
       body: Center(
@@ -86,7 +79,6 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Heading
               Text(
                 "Let’s get you all\nset up!",
                 textAlign: TextAlign.center,
