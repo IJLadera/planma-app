@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/activities/widget/widget.dart';
 import 'package:provider/provider.dart';
-import 'package:jwt_decode/jwt_decode.dart';
-import 'package:planma_app/Providers/user_provider.dart';
-import 'package:planma_app/Front%20&%20back%20end%20connections/activity_service.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AddActivityScreen extends StatefulWidget {
@@ -16,8 +14,8 @@ class AddActivityScreen extends StatefulWidget {
 class _AddActivityState extends State<AddActivityScreen> {
   final _activityNameController = TextEditingController();
   final _activityDescriptionController = TextEditingController();
-  final TextEditingController _startTimeController = TextEditingController();
-  final TextEditingController _endTimeController = TextEditingController();
+  final _startTimeController = TextEditingController();
+  final _endTimeController = TextEditingController();
 
   DateTime? _scheduledDate;
 
@@ -49,74 +47,97 @@ class _AddActivityState extends State<AddActivityScreen> {
     }
   }
 
-  String to24HourFormat(String time) {
-    String finalStrTime = "";
-    List<String> timeSplit = time.split(":");
-    timeSplit[1] = timeSplit[1].split(" ").first;
-    if (time.split(" ")[1] == "PM") {
-      if (time.split(":").first == "12") {
-        // dont adjust by 12 hours if 12 PM
-        finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
-      } else {
-        finalStrTime =
-            "${(int.parse(timeSplit[0]) + 12).toString()}:${timeSplit[1]}";
-      }
-    } else if (time.split(" ")[1] == "AM" && time.split(":").first == "12") {
-      // if 12 AM, adjust by - 12
-      finalStrTime =
-          "${(int.parse(timeSplit[0]) - 12).toString()}:${timeSplit[1]}";
-    } else {
-      // if <12 PM just return hh:mm
-      finalStrTime = "${timeSplit[0]}:${timeSplit[1]}";
+  TimeOfDay? _stringToTimeOfDay(String timeString) {
+    try {
+      final timeParts = timeString.split(':');
+      final hour = int.parse(timeParts[0].trim());
+      final minuteParts = timeParts[1].split(' ');
+      final minute = int.parse(minuteParts[0].trim());
+      final period = minuteParts[1].toLowerCase();
+
+      // Adjust for AM/PM
+      final isPM = period == 'pm';
+      final adjustedHour =
+          (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
+
+      return TimeOfDay(hour: adjustedHour, minute: minute);
+    } catch (e) {
+      return null; // Return null if parsing fails
     }
-    return finalStrTime;
   }
 
-  Future<void> _createActivity() async {
-    if (_activityNameController.text.isEmpty ||
-        _activityDescriptionController.text.isEmpty ||
+  void _createActivity(BuildContext context) async {
+    final provider = Provider.of<ActivityProvider>(context, listen: false);
+
+    String activityName = _activityNameController.text.trim();
+    String activityDescription = _activityDescriptionController.text.trim();
+    String startTimeString = _startTimeController.text.trim();
+    String endTimeString = _endTimeController.text.trim();
+
+
+    // Convert String to TimeOfDay
+    final startTime = _stringToTimeOfDay(startTimeString);
+    final endTime = _stringToTimeOfDay(endTimeString);
+
+    if (activityName.isEmpty ||
+        activityDescription.isEmpty ||
         _scheduledDate == null ||
-        _startTimeController.text.isEmpty ||
-        _endTimeController.text.isEmpty) {
+        startTimeString.isEmpty ||
+        endTimeString.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill out all fields')),
       );
       return;
     }
-    final eventService = ActivityCreate();
-    // Collect data from UI inputs
-    final String activityName = _activityNameController.text;
-    final String activityDesc = _activityDescriptionController.text;
-    final String activityDate =
-        _scheduledDate!.toIso8601String().split("T").first;
-    final String startTime = _startTimeController.text;
-    final String endTime = _endTimeController.text;
 
-    // Call the service
-
-    final result = await eventService.activityCT(
-        activityname: activityName,
-        activitydesc: activityDesc,
-        scheduledate: activityDate,
-        starttime: to24HourFormat(startTime),
-        endtime: to24HourFormat(endTime),
-        status: "0",
-        //status: (context.read<UserProvider>().userName!), // need to change for now para walay error
-        studentID:
-            Jwt.parseJwt(context.read<UserProvider>().accessToken!)['user_id']);
-
-    // Handle response
-    if (result != null && result.containsKey('error')) {
+    
+    if (!_isValidTimeRange(startTime!, endTime!)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['error'])),
+        const SnackBar(content: Text('Start Time must be before End Time.')),
       );
-    } else {
+      return;
+    }
+
+    try {
+      await provider.addActivity(
+          activityName: activityName,
+          activityDesc: activityDescription,
+          scheduledDate: _scheduledDate!,
+          startTime: startTime,
+          endTime: endTime);
+
+      // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Event created successfully!')),
+        const SnackBar(content: Text('Activity added successfully!')),
       );
-      Navigator.of(context).pop(); // Navigate back on success
+
+      Navigator.pop(context);
+      // Clear fields after adding
+      _clearFields();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add activity (1): $error')),
+      );
     }
   }
+
+  // Valid Time Range Check
+  bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+  }
+
+  // Clear fields after submit
+  void _clearFields() {
+    _activityNameController.clear();
+    _activityDescriptionController.clear();
+    _startTimeController.clear();
+    _endTimeController.clear();
+    _scheduledDate = null;
+    setState(() {});
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +217,7 @@ class _AddActivityState extends State<AddActivityScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: _createActivity,
+                onPressed: () => _createActivity(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
@@ -215,6 +236,17 @@ class _AddActivityState extends State<AddActivityScreen> {
             ),
           ],
         ));
+  }
+  @override
+  void dispose() {
+    // Dispose controllers and clean up listeners
+    _activityNameController.dispose();
+    _activityDescriptionController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+
+    // Always call super.dispose()
+    super.dispose();
   }
 }
 

@@ -1,112 +1,107 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/activities/by_date_view.dart';
 import 'package:planma_app/activities/create_activity.dart';
-import 'package:planma_app/activities/view_activity.dart';
-import 'package:planma_app/activities/widget/activity_card.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/activities/widget/search_bar.dart';
+import 'package:provider/provider.dart';
 
-class ActivitiesScreen extends StatelessWidget {
-  ActivitiesScreen({Key? key}) : super(key: key);
+class ActivityPage extends StatefulWidget {
+  const ActivityPage({super.key});
 
-  final List<Map<String, String>> activities = [
-    {
-      'name': 'Yoga Class',
-      'time': '9:00 AM - 10:00 AM',
-      'description': 'A relaxing yoga session.',
-      'date': '2024-11-16',
-    },
-    {
-      'name': 'Cooking Workshop',
-      'time': '11:00 AM - 1:00 PM',
-      'description': 'Learn to cook delicious dishes.',
-      'date': '2024-11-18',
-    },
-    // Add more activities as needed
-  ];
+  @override
+  _ActivityPageState createState() => _ActivityPageState();
+}
+
+class _ActivityPageState extends State<ActivityPage> {
+  bool isByDate = true;
+
+
+  @override
+  void initState() {
+    super.initState();
+    final activityProvider = Provider.of<ActivityProvider>(context, listen: false);
+    // Automatically fetch activitys when screen loads
+    activityProvider.fetchActivity();
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Activities',
-          style: GoogleFonts.openSans(
-              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+    return Consumer<ActivityProvider>(builder: (context, activityProvider, child) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Activity',
+            style: GoogleFonts.openSans(
+                fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+          ),
+          backgroundColor: Color(0xFFFFFFFF),
         ),
-        backgroundColor: Color(0xFFFFFFFF),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: Column(
           children: [
-            const SizedBox(height: 10),
-            // Search Bar
-            TextField(
-              style:
-                  GoogleFonts.openSans(), // Apply Open Sans to the text input
-              decoration: InputDecoration(
-                hintText: 'Search',
-                hintStyle: GoogleFonts.openSans(
-                    color: Colors.grey), // Style the hint text
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
-              onChanged: (value) {
-                // TODO: Implement search functionality by filtering the activities list.
-              },
-            ),
-            const SizedBox(height: 20),
-            // List of Activities
-            Expanded(
-              child: ListView.builder(
-                itemCount: activities.length,
-                itemBuilder: (context, index) {
-                  var activity = activities[index];
-                  return GestureDetector(
-                    onTap: () {
-                      // Navigate to the ViewActivity screen and pass the selected activity data
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ViewActivity(
-                            activityName: activity['name']!,
-                            description: activity['description']!,
-                            date: activity['date']!,
-                            time: activity['time']!,
-                          ),
-                        ),
-                      );
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  Expanded(child: CustomSearchBar()),
+                  const SizedBox(width: 8),
+                  PopupMenuButton(
+                    icon: const Icon(Icons.filter_list, color: Colors.black),
+                    onSelected: (value) {
+                      setState(() {
+                        isByDate = value == 'By Date';
+                      });
                     },
-                    child: ActivityCard(
-                      activityName: activity['name']!,
-                      timePeriod: activity['time']!,
-                      description: activity['description']!,
-                      date: activity['date']!,
-                      backgroundColor: const Color.fromARGB(255, 246, 136, 136),
-                    ),
-                  );
-                },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'By Date',
+                        child: Text(
+                          'By Date',
+                          style: GoogleFonts.openSans(color: Colors.black),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'By Subject',
+                        child: Text(
+                          'By Subject',
+                          style: GoogleFonts.openSans(color: Colors.black),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
+            Expanded(
+              child: activityProvider.activity.isEmpty
+                ? Center(
+                  child: Text(
+                    'No activity added yet',
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                )
+              : ByDateView(activityView: activityProvider.activity,
+              ),
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddActivityScreen()),
-          );
-        },
-        backgroundColor: const Color(0xFF173F70),
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddActivityScreen()),
+            );
+          },
+          backgroundColor: const Color(0xFF173F70),
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
+      );
+    });
   }
 }
