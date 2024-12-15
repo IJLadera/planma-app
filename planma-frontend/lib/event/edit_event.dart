@@ -6,7 +6,6 @@ import 'package:planma_app/models/events_model.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/Providers/events_provider.dart';
 
-
 class EditEvent extends StatefulWidget {
   final Event event;
   const EditEvent({super.key, required this.event});
@@ -53,9 +52,11 @@ class _EditEvent extends State<EditEvent> {
       });
     }
   }
+
   TimeOfDay? _stringToTimeOfDay(String timeString) {
     try {
-      final format = RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
+      final format =
+          RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
       final match = format.firstMatch(timeString.trim());
 
       if (match == null) {
@@ -66,7 +67,9 @@ class _EditEvent extends State<EditEvent> {
       final minute = int.parse(match.group(2)!);
       final period = match.group(3)!.toLowerCase();
 
-      final adjustedHour = (period == 'pm' && hour != 12) ? hour + 12 : (hour == 12 && period == 'am' ? 0 : hour);
+      final adjustedHour = (period == 'pm' && hour != 12)
+          ? hour + 12
+          : (hour == 12 && period == 'am' ? 0 : hour);
 
       return TimeOfDay(hour: adjustedHour, minute: minute);
     } catch (e) {
@@ -100,11 +103,14 @@ class _EditEvent extends State<EditEvent> {
 
     // Pre-fill fields with current task details
     _eventNameController = TextEditingController(text: widget.event.eventName);
-    _descriptionController = TextEditingController(text: widget.event.eventDesc);
-    _eventLocationController = TextEditingController(text: widget.event.location);
-    _startTimeController = TextEditingController(text: _formatTimeForDisplay(widget.event.scheduledStartTime));
-    _endTimeController = TextEditingController(text: _formatTimeForDisplay(widget.event.scheduledEndTime));
-    
+    _descriptionController =
+        TextEditingController(text: widget.event.eventDesc);
+    _eventLocationController =
+        TextEditingController(text: widget.event.location);
+    _startTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.event.scheduledStartTime));
+    _endTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.event.scheduledEndTime));
 
     print(_formatTimeForDisplay(widget.event.scheduledStartTime));
     print(_formatTimeForDisplay(widget.event.scheduledEndTime));
@@ -132,7 +138,7 @@ class _EditEvent extends State<EditEvent> {
     print('formatted: $startTime');
     print('formatted: $endTime');
 
-    if (eventName.isEmpty || 
+    if (eventName.isEmpty ||
         eventDesc.isEmpty ||
         location.isEmpty ||
         _scheduledDate == null ||
@@ -165,12 +171,12 @@ class _EditEvent extends State<EditEvent> {
     try {
       print('Starting to update task...');
       await provider.updateEvent(
-        eventId: widget.event.eventId!, 
-        eventName: eventName, 
+        eventId: widget.event.eventId!,
+        eventName: eventName,
         eventDesc: eventDesc,
         location: location,
-        scheduledDate: _scheduledDate!, 
-        startTime: startTime, 
+        scheduledDate: _scheduledDate!,
+        startTime: startTime,
         endTime: endTime,
         eventType: _selectedEventType!,
       );
@@ -181,7 +187,7 @@ class _EditEvent extends State<EditEvent> {
         const SnackBar(content: Text('Event updated successfully!')),
       );
 
-      Navigator.pop(context);      
+      Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update event: $error')),
@@ -190,13 +196,9 @@ class _EditEvent extends State<EditEvent> {
   }
 
   bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
-  return startTime.hour < endTime.hour ||
-      (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -219,35 +221,35 @@ class _EditEvent extends State<EditEvent> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Event Name',
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventNameController, 'Event Name'),
                   SizedBox(height: 12),
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Description',
                   ),
                   const SizedBox(height: 12), // Increased space
                   CustomWidgets.buildTextField(
                       _descriptionController, 'Description'),
                   SizedBox(height: 12),
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Location',
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _eventLocationController, 'Location'),
                   SizedBox(height: 12),
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Scheduled Date',
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
                       context, true, _selectDate),
                   SizedBox(height: 12),
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Start and End Time',
                   ),
                   const SizedBox(height: 12),
@@ -274,7 +276,7 @@ class _EditEvent extends State<EditEvent> {
                     ],
                   ),
                   SizedBox(height: 12),
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Choose Subject',
                   ),
                   const SizedBox(height: 12),
@@ -289,10 +291,9 @@ class _EditEvent extends State<EditEvent> {
                       });
                     },
                     backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
                     borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     fontSize: 14.0,
                   )
                 ],
@@ -306,7 +307,7 @@ class _EditEvent extends State<EditEvent> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
                 ),
@@ -322,22 +323,4 @@ class _EditEvent extends State<EditEvent> {
           ],
         ));
   }
-}
-
-Widget _buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
-      ),
-    ),
-  );
 }

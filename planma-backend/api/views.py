@@ -5,6 +5,8 @@ from rest_framework import generics, permissions, status, viewsets
 from .models import *
 from .serializers import *
 from rest_framework.views import APIView
+from djoser.views import UserViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from datetime import datetime
@@ -572,6 +574,22 @@ class AttClassUpdateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 # OLANGO VIEWS
+# User/Student
+class CustomUserViewSet(UserViewSet):
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        if response.status_code == 201:  # Account successfully created
+            user = self.get_user_from_request(request.data)  # Custom method
+            refresh = RefreshToken.for_user(user)  # Generate tokens
+            response.data['refresh'] = str(refresh)
+            response.data['access'] = str(refresh.access_token)
+        return response
+
+    def get_user_from_request(self, data):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        return User.objects.get(email=data.get("email"))
+    
 # Class Schedule & Subject
 class ClassScheduleViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]

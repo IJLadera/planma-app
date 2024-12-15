@@ -22,8 +22,10 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
 
   Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
     final TimeOfDay initialTime = isSleepTime
-        ? sleepTime ?? TimeOfDay(hour: 23, minute: 0) // Default to 11:00 PM if null
-        : wakeTime ?? TimeOfDay(hour: 7, minute: 0); // Default to 7:00 AM if null
+        ? sleepTime ??
+            TimeOfDay(hour: 23, minute: 0) // Default to 11:00 PM if null
+        : wakeTime ??
+            TimeOfDay(hour: 7, minute: 0); // Default to 7:00 AM if null
 
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -42,7 +44,8 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
   }
 
   Future<void> _savePreferences() async {
-    final provider = Provider.of<UserPreferencesProvider>(context, listen: false);
+    final provider =
+        Provider.of<UserPreferencesProvider>(context, listen: false);
 
     try {
       // Ensure both times are selected before proceeding
@@ -50,28 +53,13 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
         throw Exception("Please set both sleep and wake times.");
       }
 
-      // Convert TimeOfDay to string
-      final usualSleepTime = timeToString(sleepTime ?? TimeOfDay(hour: 23, minute: 0));
-      final usualWakeTime = timeToString(wakeTime ?? TimeOfDay(hour: 7, minute: 0));
-
-      // Save the user preferences using the provider
-      await provider.saveUserPreferences(
-        usualSleepTime: usualSleepTime,
-        usualWakeTime: usualWakeTime,
-        reminderOffsetTime: "", // Assuming this is optional or empty
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Preferences saved successfully!")),
-      );
-
       // Navigate to the next screen
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => SleepWakeReminderScreen(
-            usualSleepTime: usualSleepTime,
-            usualWakeTime: usualWakeTime,
+          builder: (context) => ReminderOffsetSetupScreen(
+            usualSleepTime: sleepTime!,
+            usualWakeTime: wakeTime!,
           ),
         ),
       );
@@ -117,24 +105,26 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
                 height: 120.0,
               ),
               SizedBox(height: 24.0),
-              buildTimePickerField(
+              CustomWidget.buildTimePickerField(
                 context: context,
                 label: "Usual Sleep Time",
-                time: sleepTime ?? TimeOfDay(hour: 23, minute: 0), // Default value if null
+                time: sleepTime ??
+                    TimeOfDay(hour: 23, minute: 0), // Default value if null
                 onTap: () => _selectTime(context, true),
               ),
               SizedBox(height: 16.0),
-              buildTimePickerField(
+              CustomWidget.buildTimePickerField(
                 context: context,
                 label: "Usual Wake Time",
-                time: wakeTime ?? TimeOfDay(hour: 7, minute: 0), // Default value if null
+                time: wakeTime ??
+                    TimeOfDay(hour: 7, minute: 0), // Default value if null
                 onTap: () => _selectTime(context, false),
               ),
               SizedBox(height: 24.0),
               ElevatedButton(
                 onPressed: _savePreferences, // Trigger saving preferences
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 18.0),
+                  padding: EdgeInsets.symmetric(horizontal: 130, vertical: 15),
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),

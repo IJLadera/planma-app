@@ -153,6 +153,7 @@ class Dashboard extends StatelessWidget {
                               builder: (context) => ReportsPage()),
                         );
                       }),
+                  SizedBox(height: 50),
                 ],
               ),
             ),

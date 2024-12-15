@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 
 class EditTask extends StatefulWidget {
   final Task task;
-  
+
   const EditTask({super.key, required this.task});
 
   @override
@@ -62,7 +62,8 @@ class _EditTask extends State<EditTask> {
 
   TimeOfDay? _stringToTimeOfDay(String timeString) {
     try {
-      final format = RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
+      final format =
+          RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
       final match = format.firstMatch(timeString.trim());
 
       if (match == null) {
@@ -73,7 +74,9 @@ class _EditTask extends State<EditTask> {
       final minute = int.parse(match.group(2)!);
       final period = match.group(3)!.toLowerCase();
 
-      final adjustedHour = (period == 'pm' && hour != 12) ? hour + 12 : (hour == 12 && period == 'am' ? 0 : hour);
+      final adjustedHour = (period == 'pm' && hour != 12)
+          ? hour + 12
+          : (hour == 12 && period == 'am' ? 0 : hour);
 
       return TimeOfDay(hour: adjustedHour, minute: minute);
     } catch (e) {
@@ -107,9 +110,12 @@ class _EditTask extends State<EditTask> {
 
     // Pre-fill fields with current task details
     _taskNameController = TextEditingController(text: widget.task.taskName);
-    _descriptionController = TextEditingController(text: widget.task.taskDescription);
-    _startTimeController = TextEditingController(text: _formatTimeForDisplay(widget.task.scheduledStartTime));
-    _endTimeController = TextEditingController(text: _formatTimeForDisplay(widget.task.scheduledEndTime));
+    _descriptionController =
+        TextEditingController(text: widget.task.taskDescription);
+    _startTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.task.scheduledStartTime));
+    _endTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.task.scheduledEndTime));
 
     print(_formatTimeForDisplay(widget.task.scheduledStartTime));
     print(_formatTimeForDisplay(widget.task.scheduledEndTime));
@@ -119,8 +125,10 @@ class _EditTask extends State<EditTask> {
     _subject = widget.task.subjectCode;
 
     // Fetch semesters and subjects when the screen loads
-    final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
-    final classScheduleProvider = Provider.of<ClassScheduleProvider>(context, listen: false);
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
+    final classScheduleProvider =
+        Provider.of<ClassScheduleProvider>(context, listen: false);
 
     semesterProvider.fetchSemesters().then((_) {
       // Fetch subjects based on the active semester (determined in ClassScheduleProvider)
@@ -152,7 +160,7 @@ class _EditTask extends State<EditTask> {
     print('formatted: $startTime');
     print('formatted: $endTime');
 
-    if (taskName.isEmpty || 
+    if (taskName.isEmpty ||
         taskDescription.isEmpty ||
         _scheduledDate == null ||
         startTimeString.isEmpty ||
@@ -184,15 +192,14 @@ class _EditTask extends State<EditTask> {
     try {
       print('Starting to update task...');
       await provider.updateTask(
-        taskId: widget.task.taskId!, 
-        taskName: taskName, 
-        taskDesc: taskDescription, 
-        scheduledDate: _scheduledDate!, 
-        startTime: startTime, 
-        endTime: endTime, 
-        deadline: _deadline!, 
-        subjectCode: _subject!
-      );
+          taskId: widget.task.taskId!,
+          taskName: taskName,
+          taskDesc: taskDescription,
+          scheduledDate: _scheduledDate!,
+          startTime: startTime,
+          endTime: endTime,
+          deadline: _deadline!,
+          subjectCode: _subject!);
       print('Task updated successfully!');
 
       // After validation and adding logic
@@ -200,7 +207,7 @@ class _EditTask extends State<EditTask> {
         const SnackBar(content: Text('Task updated successfully!')),
       );
 
-      Navigator.pop(context);      
+      Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update task: $error')),
@@ -209,8 +216,8 @@ class _EditTask extends State<EditTask> {
   }
 
   bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
-  return startTime.hour < endTime.hour ||
-      (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
 
   @override
@@ -300,7 +307,8 @@ class _EditTask extends State<EditTask> {
                   CustomWidgets.buildDropdownField(
                     label: 'Choose Subject',
                     value: _subject,
-                    items: Provider.of<ClassScheduleProvider>(context).subjectCodes,
+                    items: Provider.of<ClassScheduleProvider>(context)
+                        .subjectCodes,
                     onChanged: (String? value) {
                       setState(() {
                         _subject = value;
@@ -310,7 +318,8 @@ class _EditTask extends State<EditTask> {
                     labelColor: Colors.black,
                     textColor: Colors.black,
                     borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     fontSize: 14.0,
                   ),
                 ],
@@ -325,7 +334,7 @@ class _EditTask extends State<EditTask> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),

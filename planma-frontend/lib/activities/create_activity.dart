@@ -163,28 +163,28 @@ class _AddActivityState extends State<AddActivityScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Activity Name',
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _activityNameController, 'Activity Name'),
                   SizedBox(height: 12),
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Description',
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                       _activityDescriptionController, 'Description'),
                   SizedBox(height: 12),
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Scheduled Date',
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
                       '', _scheduledDate, context, true, _selectDate),
                   SizedBox(height: 12),
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Start and End Time',
                   ),
                   const SizedBox(height: 12),
@@ -214,16 +214,15 @@ class _AddActivityState extends State<AddActivityScreen> {
               ),
             )),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+              padding: const EdgeInsets.all(16),
               child: ElevatedButton(
                 onPressed: () => _createActivity(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
                 child: Text(
                   'Create Activity',
@@ -248,22 +247,4 @@ class _AddActivityState extends State<AddActivityScreen> {
     // Always call super.dispose()
     super.dispose();
   }
-}
-
-Widget _buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
-      ),
-    ),
-  );
 }

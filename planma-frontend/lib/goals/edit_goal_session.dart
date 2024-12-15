@@ -122,10 +122,10 @@ class _EditGoalSession extends State<EditGoalSession> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
               child: Text(
                 'Add Goal Session',

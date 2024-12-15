@@ -196,23 +196,25 @@ class _CreateTaskState extends State<AddTaskScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  _buildTitle(
+                  CustomWidgets.buildTitle(
                     'Task Name',
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                     _taskNameController,
                     'Task Name',
+                    style: GoogleFonts.openSans(),
                   ),
                   const SizedBox(height: 12),
-                  _buildTitle('Description'),
+                  CustomWidgets.buildTitle('Description'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
                     _descriptionController,
                     'Description',
+                    style: GoogleFonts.openSans(),
                   ),
                   const SizedBox(height: 12),
-                  _buildTitle('Schedule Date'),
+                  CustomWidgets.buildTitle('Schedule Date'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
                     'Scheduled Date',
@@ -222,7 +224,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
                     (context, date) => _selectDate(context, true),
                   ),
                   const SizedBox(height: 12),
-                  _buildTitle('Start and End Time'),
+                  CustomWidgets.buildTitle('Start and End Time'),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -247,7 +249,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _buildTitle('Deadline'),
+                  CustomWidgets.buildTitle('Deadline'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDateTile(
                     'Deadline',
@@ -257,7 +259,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
                     (context, date) => _selectDate(context, false),
                   ),
                   const SizedBox(height: 12),
-                  _buildTitle('Choose a Subject'),
+                  CustomWidgets.buildTitle('Choose a Subject'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Choose Subject',
@@ -273,7 +275,8 @@ class _CreateTaskState extends State<AddTaskScreen> {
                     labelColor: Colors.black,
                     textColor: Colors.black,
                     borderRadius: 30.0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     fontSize: 14.0,
                   ),
                 ],
@@ -288,7 +291,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
@@ -319,22 +322,4 @@ class _CreateTaskState extends State<AddTaskScreen> {
     // Always call super.dispose()
     super.dispose();
   }
-}
-
-Widget _buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
-      ),
-    ),
-  );
 }

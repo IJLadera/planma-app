@@ -1,9 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/user_preferences/sleep_wake.dart';
+import 'package:provider/provider.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -41,7 +44,7 @@ class _SignUpState extends State<SignUp> {
     super.dispose();
   }
 
-  void _signUp() async {
+  Future<void> _signUp(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       // Perform sign-up logic (e.g., API call)
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,6 +65,12 @@ class _SignUpState extends State<SignUp> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Account created successfully!")),
         );
+        context.read<UserProvider>().init(
+              userName: emailController.text,
+              accessToken: response['access'],
+              refreshToken: response['refresh'],
+            );
+        context.read<UserProfileProvider>().init();
 
         Navigator.push(
           context,
@@ -220,17 +229,20 @@ class _SignUpState extends State<SignUp> {
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            _signUp();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => LogIn()),
-                            );
+                            _signUp(context);
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 15),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: MediaQuery.of(context).size.width *
+                                0.25, // 25% of screen width
+                            vertical: MediaQuery.of(context).size.height *
+                                0.02, // 2% of screen height
+                          ),
                           backgroundColor: const Color(0xFF173F70),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: Text(
                           'Create Account',

@@ -20,6 +20,9 @@ class _TimerPageState extends State<TimerPage> {
   int _stopwatchElapsed = 0;
   bool _isStopwatchRunning = false;
 
+  // Store saved times for Timer and Stopwatch
+  final List<String> _recordedTimes = [];
+
   @override
   Widget build(BuildContext context) {
     final timeProvider = Provider.of<TimeProvider>(context);
@@ -30,9 +33,9 @@ class _TimerPageState extends State<TimerPage> {
         return !disableBackButton;
       },
       child: Scaffold(
-        backgroundColor: widget.themeColor.withOpacity(0.1), // Use themeColor
+        backgroundColor: widget.themeColor.withOpacity(0.1),
         appBar: AppBar(
-          backgroundColor: widget.themeColor, // Use themeColor
+          backgroundColor: widget.themeColor,
           title: const Text("Timer & Stopwatch"),
           leading: disableBackButton
               ? null
@@ -43,43 +46,45 @@ class _TimerPageState extends State<TimerPage> {
                   },
                 ),
         ),
-        body: Column(
-          children: [
-            // Toggle Buttons for Timer/Stopwatch
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ToggleButtons(
-                isSelected: [isTimerMode, !isTimerMode],
-                onPressed: timeProvider.isRunning || _isStopwatchRunning
-                    ? null // Disable switching between modes if timer or stopwatch is running
-                    : (index) {
-                        setState(() {
-                          isTimerMode = index == 0;
-                        });
-                      },
-                borderRadius: BorderRadius.circular(10),
-                selectedColor: Colors.white,
-                fillColor: widget.themeColor, // Use themeColor
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text("Timer"),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text("Stopwatch"),
-                  ),
-                ],
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Toggle Buttons for Timer/Stopwatch
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ToggleButtons(
+                  isSelected: [isTimerMode, !isTimerMode],
+                  onPressed: timeProvider.isRunning || _isStopwatchRunning
+                      ? null // Disable switching between modes if timer or stopwatch is running
+                      : (index) {
+                          setState(() {
+                            isTimerMode = index == 0;
+                          });
+                        },
+                  borderRadius: BorderRadius.circular(10),
+                  selectedColor: Colors.white,
+                  fillColor: widget.themeColor,
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text("Timer"),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text("Stopwatch"),
+                    ),
+                  ],
+                ),
               ),
-            ),
-
-            // Conditionally Render Timer or Stopwatch
-            Expanded(
-              child: isTimerMode
+              // Conditionally Render Timer or Stopwatch
+              isTimerMode
                   ? _buildTimerView(context, timeProvider)
                   : _buildStopwatchView(),
-            ),
-          ],
+              const SizedBox(height: 20),
+              // Display Recorded Times
+              _buildRecordedTimesView(),
+            ],
+          ),
         ),
       ),
     );
@@ -87,7 +92,8 @@ class _TimerPageState extends State<TimerPage> {
 
   // Timer View
   Widget _buildTimerView(BuildContext context, TimeProvider timeProvider) {
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -103,7 +109,7 @@ class _TimerPageState extends State<TimerPage> {
                       ? timeProvider.remainingTime / timeProvider.initialTime
                       : 0,
                   strokeWidth: 8,
-                  color: widget.themeColor, // Use themeColor
+                  color: widget.themeColor,
                 ),
               ),
               GestureDetector(
@@ -141,7 +147,7 @@ class _TimerPageState extends State<TimerPage> {
                   width: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: widget.themeColor, // Use themeColor
+                    color: widget.themeColor,
                   ),
                   child: Icon(
                     timeProvider.isRunning ? Icons.pause : Icons.play_arrow,
@@ -163,7 +169,7 @@ class _TimerPageState extends State<TimerPage> {
                   width: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: widget.themeColor, // Use themeColor
+                    color: widget.themeColor,
                   ),
                   child: const Icon(
                     Icons.stop,
@@ -173,7 +179,33 @@ class _TimerPageState extends State<TimerPage> {
                 ),
               ),
             ],
-          )
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              if (!_isStopwatchRunning && _stopwatchElapsed > 0) {
+                _saveRecordedTime(_formatTime(_stopwatchElapsed));
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.themeColor,
+              shape: const CircleBorder(), // Makes the button round
+              padding:
+                  const EdgeInsets.all(20), // Adjusts the size of the button
+            ),
+            child: Column(
+              // Includes both the icon and text
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save, color: Colors.white), // Save icon
+                const SizedBox(height: 4), // Spacer between icon and text
+                Text(
+                  "Save",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -181,7 +213,8 @@ class _TimerPageState extends State<TimerPage> {
 
   // Stopwatch View
   Widget _buildStopwatchView() {
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -203,7 +236,7 @@ class _TimerPageState extends State<TimerPage> {
                   width: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: widget.themeColor, // Use themeColor
+                    color: widget.themeColor,
                   ),
                   child: Icon(
                     _isStopwatchRunning ? Icons.pause : Icons.play_arrow,
@@ -220,7 +253,7 @@ class _TimerPageState extends State<TimerPage> {
                   width: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: widget.themeColor, // Use themeColor
+                    color: widget.themeColor,
                   ),
                   child: const Icon(
                     Icons.stop,
@@ -231,12 +264,63 @@ class _TimerPageState extends State<TimerPage> {
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              if (!_isStopwatchRunning && _stopwatchElapsed > 0) {
+                _saveRecordedTime(_formatTime(_stopwatchElapsed));
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.themeColor,
+              shape: const CircleBorder(), // Makes the button round
+              padding:
+                  const EdgeInsets.all(20), // Adjusts the size of the button
+            ),
+            child: Column(
+              // Includes both the icon and text
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save, color: Colors.white), // Save icon
+                const SizedBox(height: 4), // Spacer between icon and text
+                Text(
+                  "Save",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Helper Methods (for Timer)
+  // Display Recorded Times
+  Widget _buildRecordedTimesView() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      height: 200,
+      child: _recordedTimes.isEmpty
+          ? const Center(child: Text("No recorded times"))
+          : ListView.builder(
+              itemCount: _recordedTimes.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: const Icon(Icons.history),
+                  title: Text(_recordedTimes[index]),
+                );
+              },
+            ),
+    );
+  }
+
+  // Helper Methods
+  void _saveRecordedTime(String time) {
+    setState(() {
+      _recordedTimes.add(time);
+    });
+  }
+
   void _showTimePicker(BuildContext context, TimeProvider timerProvider) {
     timerProvider.pauseTimer();
     showModalBottomSheet(
@@ -247,7 +331,8 @@ class _TimerPageState extends State<TimerPage> {
           height: 300,
           child: CupertinoTimerPicker(
             mode: CupertinoTimerPickerMode.hms,
-            initialTimerDuration: Duration(seconds: timerProvider.remainingTime),
+            initialTimerDuration:
+                Duration(seconds: timerProvider.remainingTime),
             onTimerDurationChanged: (Duration newDuration) {
               if (newDuration.inSeconds > 0) {
                 timerProvider.setTime(newDuration.inSeconds);
@@ -266,7 +351,6 @@ class _TimerPageState extends State<TimerPage> {
     return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
   }
 
-  // Stopwatch Methods
   void _toggleStopwatch() {
     if (_isStopwatchRunning) {
       _stopwatchTimer?.cancel();
@@ -277,19 +361,18 @@ class _TimerPageState extends State<TimerPage> {
         });
       });
     }
+
     setState(() {
       _isStopwatchRunning = !_isStopwatchRunning;
-      // Disable back button when stopwatch is running
-      disableBackButton = _isStopwatchRunning;
     });
   }
 
   void _resetStopwatch() {
-    _stopwatchTimer?.cancel();
     setState(() {
       _stopwatchElapsed = 0;
       _isStopwatchRunning = false;
-      disableBackButton = false;
     });
+
+    _stopwatchTimer?.cancel();
   }
 }

@@ -19,12 +19,12 @@ class DayButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: CircleAvatar(
-        radius: 16,
-        backgroundColor: isSelected ? Colors.blue : Colors.grey[200],
+        radius: 20,
+        backgroundColor: isSelected ? Color(0xFF173F70) : Colors.grey[200],
         child: Text(
           day,
           style: GoogleFonts.openSans(
-            fontSize: 16,
+            fontSize: 14,
             color: isSelected ? Colors.white : Colors.black,
           ),
         ),
@@ -34,6 +34,24 @@ class DayButton extends StatelessWidget {
 }
 
 class CustomWidgets {
+  static Widget buildTitle(String title) {
+    return Container(
+      margin: const EdgeInsets.only(
+          left: 16.0,
+          top: 8.0,
+          right: 16.0), // Adjust the margin values as needed
+      alignment: Alignment.centerLeft, // Ensures the text starts from the left
+      child: Text(
+        title,
+        style: GoogleFonts.openSans(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF173F70),
+        ),
+      ),
+    );
+  }
+
   static Widget buildTextField(
     TextEditingController controller,
     String labelText, {
@@ -110,7 +128,7 @@ class CustomWidgets {
         onTap: () => selectTime(context),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: textStyle ?? GoogleFonts.openSans(fontSize: 16),
+          labelStyle: textStyle ?? GoogleFonts.openSans(fontSize: 14),
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
@@ -137,7 +155,6 @@ class CustomWidgets {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4), // Add some padding
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -228,28 +245,33 @@ class CustomWidgets {
     required List<String> items,
     required Function(String?) onChanged,
     Color backgroundColor = const Color(0xFFF5F5F5),
-    Color labelColor = Colors.black,
-    Color textColor = Colors.black,
-    double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    Color labelColor = Colors.red,
+    Color textColor = const Color(0xFF173F70),
+    double borderRadius = 70.0,
     double fontSize = 14.0,
     TextStyle? textStyle,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      margin: EdgeInsets.symmetric(
+          horizontal: 20.0, vertical: 10.0), // Margin around the dropdown
       decoration: BoxDecoration(
+        color: backgroundColor, // Light background color
         border: Border.all(
-          color: getColor(value!),
+          color: value != null ? getColor(value) : Colors.blue, // Border color
+          width: 2.0, // Border width
         ),
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(borderRadius), // Rounded corners
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton2(
+        child: DropdownButton2<String>(
           isExpanded: true,
           hint: Text(
             label,
-            style:
-                textStyle ?? TextStyle(color: labelColor, fontSize: fontSize),
+            style: textStyle ??
+                GoogleFonts.openSans(
+                  color: labelColor,
+                  fontSize: fontSize,
+                ),
           ),
           value: value,
           onChanged: onChanged,
@@ -261,9 +283,11 @@ class CustomWidgets {
                   Expanded(
                     child: Text(
                       item,
-                      style: TextStyle(
-                        color:
-                            item == value ? getColor(item) : Color(0xFF173F70),
+                      style: GoogleFonts.openSans(
+                        color: item == value
+                            ? getColor(item) // Highlight selected item
+                            : const Color(0xFF173F70), // Default text color
+                        fontWeight: FontWeight.w500, // Medium weight for items
                       ),
                     ),
                   ),
@@ -271,22 +295,21 @@ class CustomWidgets {
               ),
             );
           }).toList(),
-          buttonStyleData: ButtonStyleData(
-            padding: contentPadding,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(borderRadius),
-            ),
+          style: GoogleFonts.openSans(
+            color: textColor,
+            fontWeight: FontWeight.w500,
+          ),
+          iconStyleData: IconStyleData(
+            icon: Icon(Icons.arrow_drop_down,
+                color: labelColor), // Custom arrow icon
+            iconSize: 24, // Adjust the arrow size
           ),
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(borderRadius),
-              color: Colors.white,
+              borderRadius: BorderRadius.circular(
+                  borderRadius), // Rounded corners for dropdown
+              color: Colors.white, // Background color for the dropdown
             ),
-          ),
-          iconStyleData: IconStyleData(
-            icon: Icon(Icons.arrow_drop_down, color: labelColor),
-            iconSize: 24,
           ),
         ),
       ),
@@ -302,7 +325,7 @@ class CustomWidgets {
       case 'Attended':
         return Color(0xFF32C652);
       default:
-        return Colors.grey;
+        return Color(0xFFF5F5F5);
     }
   }
 }
