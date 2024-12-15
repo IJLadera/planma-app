@@ -36,15 +36,12 @@ class DayButton extends StatelessWidget {
 class CustomWidgets {
   static Widget buildTitle(String title) {
     return Container(
-      margin: const EdgeInsets.only(
-          left: 16.0,
-          top: 8.0,
-          right: 16.0), // Adjust the margin values as needed
+      margin: const EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
       alignment: Alignment.centerLeft, // Ensures the text starts from the left
       child: Text(
         title,
         style: GoogleFonts.openSans(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
           color: Color(0xFF173F70),
         ),
@@ -86,7 +83,6 @@ class CustomWidgets {
       child: GestureDetector(
         onTap: () => selectDate(context, controller), // Trigger the date picker
         child: AbsorbPointer(
-          // Prevent editing directly in the text field
           child: Container(
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
@@ -96,13 +92,24 @@ class CustomWidgets {
               title: TextFormField(
                 controller: controller,
                 readOnly: true, // To prevent manual input
-                style: GoogleFonts.openSans(fontSize: 14, color: Colors.black),
+                style: GoogleFonts.openSans(
+                  fontSize: 14, // Make sure the font size is set here
+                  color: Colors.black, // Ensure text color is applied correctly
+                ),
                 decoration: InputDecoration(
                   labelText: label,
-                  hintText: 'Select Date',
+                  labelStyle: GoogleFonts.openSans(
+                    fontSize: 14, // Ensure the label style matches
+                    color: Colors.black, // Label text color
+                  ),
                   suffixIcon: const Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 5),
             ),
           ),
         ),
@@ -215,7 +222,7 @@ class CustomWidgets {
             isStartYear
                 ? selectedStartYear ?? hint
                 : selectedEndYear ?? hint, // Displays the selected year or hint
-            style: GoogleFonts.openSans(fontSize: 16),
+            style: GoogleFonts.openSans(fontSize: 14),
           ),
         ),
       ),

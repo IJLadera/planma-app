@@ -5,14 +5,14 @@ import 'package:planma_app/subject/widget/widget.dart'; // Assuming this contain
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AddSemesterScreen extends StatefulWidget {
-  const AddSemesterScreen({super.key});
+class EditSemesterScreen extends StatefulWidget {
+  const EditSemesterScreen({super.key});
 
   @override
-  _AddSemesterScreenState createState() => _AddSemesterScreenState();
+  _EditSemesterScreenState createState() => _EditSemesterScreenState();
 }
 
-class _AddSemesterScreenState extends State<AddSemesterScreen> {
+class _EditSemesterScreenState extends State<EditSemesterScreen> {
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
 
@@ -92,6 +92,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
     }
   }
 
+//changes to edit
   void _submitSemester(BuildContext context) async {
     final provider = Provider.of<SemesterProvider>(context, listen: false);
 
@@ -139,7 +140,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Add Semester',
+          'Edit Semester',
           style: GoogleFonts.openSans(
             fontSize: 20,
             color: Color(0xFF173F70),
@@ -153,7 +154,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
         backgroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(30.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -206,7 +207,8 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
               labelColor: Colors.black,
               textColor: Colors.black,
               borderRadius: 30.0,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               fontSize: 14.0,
             ),
             const SizedBox(height: 12),
@@ -223,7 +225,8 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
               labelColor: Colors.black,
               textColor: Colors.black,
               borderRadius: 30.0,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               fontSize: 14.0,
             ),
             const SizedBox(height: 12),
@@ -240,6 +243,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                     _selectDate(context, true); // Pass true for start date
                   },
                 ),
+                SizedBox(width: 10),
                 CustomWidgets.buildDateTile(
                   'End Date',
                   endDateController,
@@ -260,7 +264,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                   backgroundColor: const Color(0xFF173F70),
                   padding: const EdgeInsets.symmetric(vertical: 20),
                 ),
-                child: const Text('Add Semester',
+                child: const Text('Edit Semester',
                     style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),

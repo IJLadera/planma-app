@@ -4,7 +4,8 @@ import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/by_date_view.dart';
 import 'package:planma_app/subject/by_subject_view.dart';
 import 'package:planma_app/subject/create_subject.dart';
-import 'package:planma_app/subject/widget/add_semester.dart';
+import 'package:planma_app/subject/semester/view_semester.dart';
+import 'package:planma_app/subject/semester/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
@@ -84,8 +85,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
               : Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 10),
+                      padding: const EdgeInsets.all(10),
                       child: Row(
                         children: [
                           Expanded(
@@ -157,29 +157,52 @@ class _ClassScheduleState extends State<ClassSchedule> {
                               textColor: Colors.black,
                               borderRadius: 30.0,
                               contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
+                                  const EdgeInsets.symmetric(horizontal: 5),
                               fontSize: 14.0,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          IconButton(
+                            icon: Icon(
+                              Icons.calendar_today,
+                              size: 18.0,
+                            ),
+                            tooltip: 'View Semester',
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SemesterScreen()),
+                              );
+                            },
+                          ),
                           PopupMenuButton<String>(
-                            icon: const Icon(Icons.filter_list,
-                                color: Colors.black),
+                            icon: const Icon(
+                              Icons.filter_list,
+                              color: Colors.black,
+                              size: 18.0,
+                            ),
                             onSelected: (value) {
                               setState(() {
                                 isByDate = value == 'By Date';
                               });
                             },
                             itemBuilder: (context) => [
-                              const PopupMenuItem<String>(
+                              PopupMenuItem<String>(
                                 value: 'By Date',
-                                child: Text('By Date',
-                                    style: TextStyle(color: Colors.black)),
+                                child: Text(
+                                  'By Date',
+                                  style: GoogleFonts.openSans(
+                                      color: Color(0xFF173F70), fontSize: 14),
+                                ),
                               ),
-                              const PopupMenuItem<String>(
+                              PopupMenuItem<String>(
                                 value: 'By Subject',
-                                child: Text('By Subject',
-                                    style: TextStyle(color: Colors.black)),
+                                child: Text(
+                                  'By Subject',
+                                  style: GoogleFonts.openSans(
+                                      color: Color(0xFF173F70), fontSize: 14),
+                                ),
                               ),
                             ],
                           ),

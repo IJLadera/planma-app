@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
-import 'package:planma_app/subject/widget/add_semester.dart';
+import 'package:planma_app/subject/semester/add_semester.dart';
 import 'package:planma_app/subject/widget/widget.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
