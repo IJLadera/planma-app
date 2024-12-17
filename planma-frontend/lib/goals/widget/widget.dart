@@ -51,7 +51,7 @@ class CustomWidgets {
     double borderRadius = 30.0,
     EdgeInsets contentPadding =
         const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-    double fontSize = 14.0,
+    double fontSize = 14.0, required TextStyle textStyle,
   }) {
     return Container(
       decoration: BoxDecoration(
