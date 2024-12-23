@@ -120,30 +120,6 @@ class CustomWidget {
     //   );
     // }
   }
-
-    Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
-    final TimeOfDay initialTime = isSleepTime
-        ? sleepTime ??
-            TimeOfDay(hour: 23, minute: 0) // Default to 11:00 PM if null
-        : wakeTime ??
-            TimeOfDay(hour: 7, minute: 0); // Default to 7:00 AM if null
-
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-    );
-
-    if (picked != null) {
-      setState(() {
-        if (isSleepTime) {
-          sleepTime = picked; // Update the sleep time
-        } else {
-          wakeTime = picked; // Update the wake time
-        }
-      });
-    }
-  }
-
 }
 
 
