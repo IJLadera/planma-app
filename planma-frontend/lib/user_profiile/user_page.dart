@@ -149,7 +149,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     // Introduce an artificial delay (e.g., 2 seconds)
     await Future.delayed(Duration(seconds: 2));
 
-    await authLogout.logOut();
+    await authLogout.logOut(context);
 
     // Dismiss the loading dialog
     Navigator.pop(context);
@@ -162,17 +162,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       MaterialPageRoute(builder: (context) => LogIn()),
     );
 
-    // if (response != null && response["error"] == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text("Logout successful"))
-    //   );
-    //   // Successful logout, navigate to login screen
-    //   Navigator.pushReplacement(
+    // try {
+    //   final bool logoutSuccess = await authLogout.logOut(); // Updated to return a boolean
+
+    //   Navigator.pop(context); // Dismiss the loading dialog
+
+    //   if (logoutSuccess) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(content: Text("Logout successful")),
+    //     );
+
+    //     // Navigate to login screen
+    //     Navigator.pushReplacement(
     //       context,
     //       MaterialPageRoute(builder: (context) => LogIn()),
     //     );
-    // } else {
-    //   // Handle logout failure
+    //   } else {
+    //     throw Exception("Logout failed");
+    //   }
+    // } catch (e) {
+    //   Navigator.pop(context); // Dismiss the loading dialog
     //   ScaffoldMessenger.of(context).showSnackBar(
     //     SnackBar(content: Text('Logout failed, please try again')),
     //   );

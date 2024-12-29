@@ -107,7 +107,7 @@ class TaskCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         // Subject Code with time range
                         Text(
-                          '${task.subjectCode} ($startTime - $endTime)',
+                          '${task.subject?.subjectCode} ($startTime - $endTime)',
                           style: GoogleFonts.openSans(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,

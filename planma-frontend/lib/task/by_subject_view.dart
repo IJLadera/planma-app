@@ -13,8 +13,8 @@ class BySubjectView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> subjects = tasksView
-        .map((task) => task.subjectCode)
+    final List<String?> subjects = tasksView
+        .map((task) => task.subject?.subjectCode)
         .toSet() // Use a Set to remove duplicates
         .toList();
 
@@ -24,7 +24,7 @@ class BySubjectView extends StatelessWidget {
       itemCount: subjects.length,
       itemBuilder: (context, index) {
         final filteredTasks = tasksView
-            .where((task) => task.subjectCode == subjects[index])
+            .where((task) => task.subject?.subjectCode == subjects[index])
             .toList();
 
         return filteredTasks.isNotEmpty
@@ -36,7 +36,7 @@ class BySubjectView extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                       child: Text(
-                        subjects[index],
+                        subjects[index]!,
                         style: GoogleFonts.openSans(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

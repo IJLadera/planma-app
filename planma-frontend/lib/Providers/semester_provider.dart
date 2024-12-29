@@ -92,7 +92,7 @@ class SemesterProvider with ChangeNotifier {
       throw Exception("Start date must be before the end date.");
     }
 
-    final url = Uri.parse("${baseUrl}semesters/");
+    final url = Uri.parse("${baseUrl}semesters/add_semester/");
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
@@ -128,4 +128,11 @@ class SemesterProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  void resetState() {
+    _semesters = [];
+    notifyListeners();
+  }
 }
+
+

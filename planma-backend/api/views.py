@@ -2,6 +2,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from .models import *
 from .serializers import *
 from rest_framework.views import APIView
@@ -10,31 +11,19 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from datetime import datetime
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.timezone import make_aware
 
 
 #Below is the Events tables
 
-class CustomEventListCreateView(APIView):
-    
-    permission_classes = [permissions.IsAuthenticated]
-    def post(self, request):
-        data = request.data
-        # data['student_id'] = request.data.student_id
-        
-        serializer = CustomEventSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student field to the authenticated user on creation
-
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = CustomEvents.objects.all()
     serializer_class = CustomEventSerializer
+
+    def get_queryset(self):
+        # Filter events based on the logged-in user
+        return CustomEvents.objects.filter(student_id=self.request.user)
 
     @action(detail=False, methods=['post'])
     def add_event(self, request):
@@ -521,8 +510,20 @@ class CustomUserViewSet(UserViewSet):
 # Class Schedule & Subject
 class ClassScheduleViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = CustomClassSchedule.objects.all()
     serializer_class = CustomClassScheduleSerializer
+
+    def get_queryset(self):   
+        # Fetch schedules tied to the current user's student_id
+        queryset = CustomClassSchedule.objects.filter(student_id=self.request.user.student_id)
+    
+        # Optionally filter by semester_id if provided
+        semester_id = self.request.query_params.get('semester_id')
+        if semester_id:
+            # Validate semester_id before filtering
+            get_object_or_404(CustomSemester, pk=semester_id)
+            queryset = queryset.filter(subject__semester_id=semester_id)
+    
+        return queryset
 
     @action(detail=False, methods=['post'])
     def add_schedule(self, request):
@@ -543,13 +544,22 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # Fetch or create subject uniquely for this user
+            subject, created = CustomSubject.objects.get_or_create(
+                subject_code=subject_code,
+                student_id_id=student_id,
+                semester_id_id=semester_id,
+                defaults={'subject_title': subject_title}
+            )
+
             # Check for duplicate schedule
             duplicate = CustomClassSchedule.objects.filter(
+                Q(subject=subject) &
                 Q(day_of_week=day_of_week) &
                 Q(scheduled_start_time=start_time) &
                 Q(scheduled_end_time=end_time) &
                 Q(room=room) &
-                Q(student_id=student_id) 
+                Q(student_id=student_id)
             ).exists()
 
             if duplicate:
@@ -558,19 +568,9 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Create or get the Subject
-            subject, created = CustomSubject.objects.get_or_create(
-                subject_code=subject_code,
-                defaults={
-                    'subject_title': subject_title,
-                    'semester_id_id': semester_id,
-                    'student_id_id': student_id,
-                }
-            )
-
             # Create the Class Schedule
             class_schedule = CustomClassSchedule.objects.create(
-                subject_code=subject,
+                subject=subject,
                 day_of_week=day_of_week,
                 scheduled_start_time=start_time,
                 scheduled_end_time=end_time,
@@ -582,64 +582,68 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(class_schedule)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        except IntegrityError:
+        except IntegrityError as e:
             return Response(
-                {'error': 'A database integrity error occurred.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+                {'error': 'Database integrity error: ' + str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST)
+        
         except Exception as e:
             return Response(
                 {'error': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        semester_id = self.request.query_params.get('semester_id')
-        if semester_id:
-            # Validate if the semester_id exists
-            get_object_or_404(CustomSemester, pk=semester_id)
-            queryset = queryset.filter(subject_code__semester_id=semester_id)
-        return queryset
-    
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+
+        if instance.student_id_id != request.user.student_id:
+            return Response(
+                {"error": "You are not authorized to update this record."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         data = request.data
 
         # Update fields for the class schedule
-        subject_code = data.get('subject_code')
-        subject_title = data.get('subject_title')
-        semester_id = data.get('semester_id')
-        day_of_week = data.get('day_of_week')
-        start_time = data.get('scheduled_start_time')
-        end_time = data.get('scheduled_end_time')
-        room = data.get('room')
-
-        # Validate input
-        if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room]):
-            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
-
+        allowed_fields = [
+            "subject_code", "subject_title", "semester_id",
+            "day_of_week", "scheduled_start_time", "scheduled_end_time", "room"
+        ]
+        
+        # Validate and sanitize input
+        for field in allowed_fields:
+            if field not in data or data[field] in [None, ""]:
+                return Response(
+                    {"error": f"Field '{field}' is required and cannot be blank."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
         try:
             # Check if the subject needs updating or creation
             subject, created = CustomSubject.objects.get_or_create(
-                subject_code=subject_code,
+                subject_code=data["subject_code"],
+                student_id_id=request.user.student_id,
                 defaults={
-                    'subject_title': subject_title,
-                    'semester_id_id': semester_id,
-                    'student_id_id': request.user.student_id,
+                    "subject_title": data["subject_title"],
+                    "semester_id_id": data["semester_id"],
                 },
             )
-            if not created:  # If the subject already exists, update its details
-                subject.subject_title = subject_title
-                subject.semester_id_id = semester_id
+            if not created:
+                if subject.student_id_id != request.user.student_id:
+                    return Response(
+                        {'error': 'You do not own this subject record.'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+                subject.subject_title = data['subject_title']
+                subject.semester_id_id = data['semester_id']
                 subject.save()
 
             # Update the class schedule instance
             instance.subject_code = subject
-            instance.day_of_week = day_of_week
-            instance.scheduled_start_time = start_time
-            instance.scheduled_end_time = end_time
-            instance.room = room
+            instance.day_of_week = data["day_of_week"]
+            instance.scheduled_start_time = data["scheduled_start_time"]
+            instance.scheduled_end_time = data["scheduled_end_time"]
+            instance.room = data["room"]
             instance.save()
 
             serializer = self.get_serializer(instance)
@@ -653,66 +657,174 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        subject_code = instance.subject_code
+
+        if instance.student_id_id != request.user.student_id:
+            raise PermissionDenied("You are not authorized to delete this record.")
+
+        subject = instance.subject
 
         with transaction.atomic():
             self.perform_destroy(instance)
-            if not CustomClassSchedule.objects.filter(subject_code=subject_code).exists():
-                subject_code.delete()
+
+            # Check if the subject is still referenced in any other records *belonging to the same user*
+            if not CustomClassSchedule.objects.filter(
+                subject=subject,
+                student_id=request.user.student_id
+            ).exists():
+                subject.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Subject
 class SubjectViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = CustomSubject.objects.all()
     serializer_class = CustomSubjectSerializer
+
+    def get_queryset(self):
+        # Filter subjects based on the logged-in user
+        queryset = CustomSubject.objects.filter(student_id=self.request.user.student_id)
+
+        # Apply semester_id filtering if provided in query params
+        semester_id = self.request.query_params.get('semester_id')
+        if semester_id:
+            queryset = queryset.filter(semester_id=semester_id)
+
+        return queryset
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Ownership check
+        if instance.student_id != request.user.student_id:
+            return Response(
+                {"error": "You are not authorized to update this record."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        return super().update(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'], url_path='(?P<subject_code>[^/.]+)')
     def get_subject_by_code(self, request, subject_code):
         try:
-            subject = CustomSubject.objects.get(subject_code=subject_code)
+            subject = CustomSubject.objects.get(
+                subject_code=subject_code, 
+                student_id=request.user.student_id
+            )
             serializer = self.get_serializer(subject)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except CustomSubject.DoesNotExist:
             return Response({'error': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    def get_queryset(self):
-        semester_id = self.request.query_params.get('semester_id', None)
-        subject_code = self.kwargs.get('subject_code')
-
-        if semester_id:
-            return CustomSubject.objects.filter(semester_id=semester_id)  # Filter by semester_id
-
-        if subject_code:
-            return CustomSubject.objects.filter(subject_code=subject_code)  # Filter by subject_code
-        
-        return CustomSubject.objects.all()
-
 # Semester
 class SemesterViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = CustomSemester.objects.all()
     serializer_class = CustomSemesterSerializer
 
-    # def get(self, request):
-    #     semesters = CustomSemester.objects.all()
-    #     serializer = CustomSemesterSerializer(semesters, many=True)
-    #     return Response(serializer.data)
+    def get_queryset(self):
+        # Retrieve semesters linked to the logged-in user
+        return CustomSemester.objects.filter(student_id=self.request.user.student_id)
 
+    def perform_create(self, serializer):
+        # Automatically link the semester to the logged-in user
+        serializer.save(student_id=self.request.user.student_id)
+
+    @action(detail=False, methods=['get'], url_path='filter')
+    def filter_semesters(self, request):
+        queryset = self.get_queryset()
+
+        # Optional query parameters for filtering
+        acad_year_start = request.query_params.get('acad_year_start')
+        year_level = request.query_params.get('year_level')
+        semester = request.query_params.get('semester')
+
+        if acad_year_start:
+            queryset = queryset.filter(acad_year_start=acad_year_start)
+        if year_level:
+            queryset = queryset.filter(year_level=year_level)
+        if semester:
+            queryset = queryset.filter(semester=semester)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
     @action(detail=False, methods=['post'])
-    def post(self, request):
-        serializer = CustomSemesterSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+    def add_semester(self, request):
+        data = request.data
+
+        # Extract data from request
+        acad_year_start = data.get('acad_year_start')
+        acad_year_end = data.get('acad_year_end')
+        year_level = data.get('year_level')
+        semester = data.get('semester')
+        sem_start_date = data.get('sem_start_date')
+        sem_end_date = data.get('sem_end_date')
+        student_id = request.user.student_id  # Authenticated user
+
+        # Validate input
+        if not all([acad_year_start, acad_year_end, year_level, semester, sem_start_date, sem_end_date]):
+            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
+
+            # Check for duplicate semester
+            duplicate = CustomSemester.objects.filter(
+                Q(acad_year_start=acad_year_start) &
+                Q(acad_year_end=acad_year_end) &
+                Q(year_level=year_level) &
+                Q(semester=semester) &
+                Q(student_id=student)
+            ).exists()
+
+            if duplicate:
+                return Response(
+                    {'error': 'Duplicate semester entry detected.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create Semester
+            semester = CustomSemester.objects.create(
+                acad_year_start=acad_year_start,
+                acad_year_end=acad_year_end,
+                year_level=year_level,
+                semester=semester,
+                sem_start_date=sem_start_date,
+                sem_end_date=sem_end_date,
+                student_id=student,
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(semester)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response(
+                {'error': 'A database integrity error occurred.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 # Task
 class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = CustomTask.objects.all()
     serializer_class = CustomTaskSerializer
+
+    def get_queryset(self):
+        # Filter tasks based on the logged-in user
+        return CustomTask.objects.filter(student_id=self.request.user)
 
     @action(detail=False, methods=['post'])
     def add_task(self, request):
@@ -725,11 +837,11 @@ class TaskViewSet(viewsets.ModelViewSet):
         start_time = data.get('scheduled_start_time')
         end_time = data.get('scheduled_end_time')
         deadline_str = data.get('deadline')
-        subject_code = data.get('subject_code')
+        subject_id = data.get('subject_id')
         student_id = request.user.student_id  # Authenticated user
 
         # Validate input
-        if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_code]):
+        if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_id]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -743,7 +855,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         try:
             # Fetch or raise error if subject doesn't exist
-            subject = get_object_or_404(CustomSubject, subject_code=subject_code)
+            subject = get_object_or_404(CustomSubject, subject_id=subject_id)
 
             # Fetch the CustomUser instance
             student = CustomUser.objects.get(student_id=student_id)
@@ -771,7 +883,7 @@ class TaskViewSet(viewsets.ModelViewSet):
                 scheduled_end_time=end_time,
                 deadline=deadline,
                 status='Pending',
-                subject_code=subject,
+                subject_id=subject,
                 student_id=student,
             )
 
@@ -808,10 +920,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         start_time = data.get('scheduled_start_time')
         end_time = data.get('scheduled_end_time')
         deadline_str = data.get('deadline')
-        subject_code = data.get('subject_code')
+        subject_id = data.get('subject_id')
 
         # Validate input
-        if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_code]):
+        if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_id]):
             return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -825,7 +937,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         try:
             # Fetch or raise error if subject doesn't exist
-            subject = get_object_or_404(CustomSubject, subject_code=subject_code)
+            subject = get_object_or_404(CustomSubject, subject_id=subject_id)
 
             # Check for conflicting task schedule (excluding current task)
             duplicate = CustomTask.objects.filter(
@@ -849,7 +961,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             instance.scheduled_start_time = start_time
             instance.scheduled_end_time = end_time
             instance.deadline = deadline
-            instance.subject_code = subject
+            instance.subject_id = subject
             instance.save()
 
             # Serialize and return the updated data
@@ -863,6 +975,7 @@ class TaskViewSet(viewsets.ModelViewSet):
                 {'error': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 # Goals
 class GoalViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]

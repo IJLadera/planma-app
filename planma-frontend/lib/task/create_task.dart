@@ -21,7 +21,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
 
   DateTime? _scheduledDate;
   DateTime? _deadline;
-  String? _subject;
+  int? _subject;
 
   // Method to select date
   Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
@@ -77,6 +77,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
 
   void _submitTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
+    final subjects = Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
 
     String taskName = _taskNameController.text.trim();
     String taskDescription = _descriptionController.text.trim();
@@ -107,6 +108,8 @@ class _CreateTaskState extends State<AddTaskScreen> {
       return;
     }
 
+    final selectedSubject = subjects.firstWhere((subject) => subject.subjectId == _subject);
+
     try {
       await provider.addTask(
           taskName: taskName,
@@ -115,7 +118,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
           startTime: startTime,
           endTime: endTime,
           deadline: _deadline!,
-          subjectCode: _subject!);
+          subject: selectedSubject,);
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
@@ -265,8 +268,13 @@ class _CreateTaskState extends State<AddTaskScreen> {
                     label: 'Choose Subject',
                     value: _subject,
                     items: Provider.of<ClassScheduleProvider>(context)
-                        .subjectCodes,
-                    onChanged: (String? value) {
+                        .subjects
+                        .map((subject) => DropdownMenuItem(
+                            value: subject.subjectId,
+                            child: Text(subject.subjectCode),
+                          ))
+                        .toList(),
+                    onChanged: (int? value) {
                       setState(() {
                         _subject = value;
                       });

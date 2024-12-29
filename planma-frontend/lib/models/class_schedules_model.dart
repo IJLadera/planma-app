@@ -1,5 +1,6 @@
 class ClassSchedule {
   final int? classschedId;
+  final int? subjectId;
   final String subjectCode;
   final String subjectTitle;
   final int semesterId;
@@ -10,6 +11,7 @@ class ClassSchedule {
 
   ClassSchedule({
     this.classschedId,
+    this.subjectId,
     required this.subjectCode,
     required this.subjectTitle,
     required this.semesterId,
@@ -22,14 +24,15 @@ class ClassSchedule {
   // Factory method to create an instance from JSON
   factory ClassSchedule.fromJson(Map<String, dynamic> json) {
     return ClassSchedule(
-      classschedId: json['classsched_id'] as int?, // Optional
-      subjectCode: json['subject_code']['subject_code'] ?? 'N/A', // Default if null
-      subjectTitle: json['subject_code']['subject_title'] ?? 'N/A', // Default if null
-      semesterId: json['subject_code']['semester_id'] != null
-        ? json['subject_code']['semester_id']['semester_id'] ?? 0
-        : 0, // Extract the semester_id if it's present, otherwise default to 0
+      classschedId: json['classsched_id'] as int?, 
+      subjectId: json['subject']['subject_id'] as int?,
+      subjectCode: json['subject']['subject_code'] ?? 'N/A', 
+      subjectTitle: json['subject']['subject_title'] ?? 'N/A',
+      semesterId: json['subject']['semester_id'] != null
+        ? json['subject']['semester_id']['semester_id'] ?? 0
+        : 0,
       dayOfWeek: json['day_of_week'] ?? 'Unknown',
-      scheduledStartTime: json['scheduled_start_time'] ?? '00:00', // Default time
+      scheduledStartTime: json['scheduled_start_time'] ?? '00:00',
       scheduledEndTime: json['scheduled_end_time'] ?? '00:00',
       room: json['room'] ?? 'No Room',
     );
@@ -39,6 +42,7 @@ class ClassSchedule {
   Map<String, dynamic> toJson() {
     return {
       'classsched_id': classschedId,
+      'subject_id': subjectId,
       'subject_code': subjectCode,
       'subject_title': subjectTitle,
       'semester_id': semesterId,

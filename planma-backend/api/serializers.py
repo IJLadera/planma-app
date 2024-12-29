@@ -57,11 +57,14 @@ class UserPrefSerializer(serializers.ModelSerializer):
 
         
 class CustomSemesterSerializer(serializers.ModelSerializer):
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
     class Meta:
         model = CustomSemester
         fields = ['semester_id', 'acad_year_start', 'acad_year_end',
                   'year_level', 'semester', 'sem_start_date',
-                  'sem_end_date']
+                  'sem_end_date', 'student_id']
+        
     def validate(self, data):
         if data['acad_year_end'] <= data['acad_year_start']:
             raise serializers.ValidationError("Academic year end must be greater than start year.")
@@ -74,15 +77,15 @@ class CustomSubjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomSubject
-        fields = ['subject_code', 'subject_title',
+        fields = ['subject_id', 'subject_code', 'subject_title',
                   'student_id', 'semester_id']
 
 class CustomClassScheduleSerializer(serializers.ModelSerializer):
-    subject_code = CustomSubjectSerializer()
+    subject = CustomSubjectSerializer()
 
     class Meta: 
         model = CustomClassSchedule
-        fields = ['classsched_id', 'subject_code', 'day_of_week',
+        fields = ['classsched_id', 'subject', 'day_of_week',
                   'scheduled_start_time', 'scheduled_end_time',
                   'room', 'student_id']
         read_only_fields = ['classsched_id']
@@ -94,7 +97,7 @@ class AttendedClassSerializer(serializers.ModelSerializer):
                   'isExcused', 'hasAttended']
         
 class CustomTaskSerializer(serializers.ModelSerializer):
-    subject_code = CustomSubjectSerializer()
+    subject_id = CustomSubjectSerializer()
     student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
 
     class Meta:
@@ -103,7 +106,7 @@ class CustomTaskSerializer(serializers.ModelSerializer):
             'task_id', 'task_name', 'task_desc', 
             'scheduled_date', 'scheduled_start_time', 
             'scheduled_end_time', 'deadline', 
-            'status', 'subject_code', 'student_id'
+            'status', 'subject_id', 'student_id'
         ]
         read_only_fields = ['student_id']
                 

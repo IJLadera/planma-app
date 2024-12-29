@@ -92,7 +92,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           scheduledStartTime: '00:00',
           scheduledEndTime: '00:00',
           deadline: DateTime(2020, 1, 1, 0, 0),
-          subjectCode: 'N/A',
+          subject: null,
         ),
       );
 
@@ -167,7 +167,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   const Divider(),
                   TaskDetailRow(title: 'Deadline:', detail: formattedDeadline),
                   const Divider(),
-                  TaskDetailRow(title: 'Subject:', detail: task.subjectCode),
+                  TaskDetailRow(title: 'Subject:', detail: task.subject?.subjectTitle),
                   const Divider(),
                 ],
               ),

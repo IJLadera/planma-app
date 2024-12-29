@@ -21,11 +21,6 @@ urlpatterns = [
     path ('auth/', include ('djoser.urls.jwt')),
     #ModelViewSet
     path('', include(router.urls)),
-    #events
-    path('createevents/', CustomEventListCreateView.as_view(), name='event-list-create'),
-    # path('events/<uuid:pk>/', CustomEventDetailView.as_view(), name='event-detail'),
-    # path('deleteevent/<int:pk>/', CustomEventDeleteView.as_view(), name='event-delete'),
-    # path('updateevent/<int:pk>/',CustomEventUpdateView.as_view(), name='updateevent' ),
     # attended event
     path('createattevents/', AttendedEventListCreateView.as_view(), name='attevent-list-create'),
     path('attevents/<uuid:pk>/', AttendedEventDetailView.as_view(), name='attevent-detail'),

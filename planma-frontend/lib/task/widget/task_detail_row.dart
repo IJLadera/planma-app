@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class TaskDetailRow extends StatelessWidget {
   final String title;
-  final String detail;
+  final dynamic detail;
 
   const TaskDetailRow({
     super.key,
