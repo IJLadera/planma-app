@@ -13,7 +13,7 @@ class CustomWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 25.0),
+        padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 25.0),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey[300]!),
           borderRadius: BorderRadius.circular(8.0),
@@ -91,7 +91,7 @@ class CustomWidget {
     // Introduce an artificial delay (e.g., 2 seconds)
     await Future.delayed(Duration(seconds: 2));
 
-    await authLogout.logOut();
+    await authLogout.logOut(context);
 
     // Dismiss the loading dialog
     Navigator.pop(context);

@@ -25,7 +25,7 @@ class _EditTask extends State<EditTask> {
 
   DateTime? _scheduledDate;
   DateTime? _deadline;
-  String? _subject;
+  int? _subject;
 
   // Method to select date
   Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
@@ -122,7 +122,7 @@ class _EditTask extends State<EditTask> {
 
     _scheduledDate = widget.task.scheduledDate;
     _deadline = widget.task.deadline;
-    _subject = widget.task.subjectCode;
+    _subject = widget.task.subject?.subjectId;
 
     // Fetch semesters and subjects when the screen loads
     final semesterProvider =
@@ -144,6 +144,7 @@ class _EditTask extends State<EditTask> {
 
   void _editTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
+    final subjects = Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
 
     String taskName = _taskNameController.text.trim();
     String taskDescription = _descriptionController.text.trim();
@@ -189,6 +190,8 @@ class _EditTask extends State<EditTask> {
     print('Deadline: $_deadline');
     print('Subject: $_subject');
 
+    final selectedSubject = subjects.firstWhere((subject) => subject.subjectId == _subject);
+
     try {
       print('Starting to update task...');
       await provider.updateTask(
@@ -199,7 +202,7 @@ class _EditTask extends State<EditTask> {
           startTime: startTime,
           endTime: endTime,
           deadline: _deadline!,
-          subjectCode: _subject!);
+          subject: selectedSubject,);
       print('Task updated successfully!');
 
       // After validation and adding logic
@@ -308,8 +311,13 @@ class _EditTask extends State<EditTask> {
                     label: 'Choose Subject',
                     value: _subject,
                     items: Provider.of<ClassScheduleProvider>(context)
-                        .subjectCodes,
-                    onChanged: (String? value) {
+                        .subjects
+                        .map((subject) => DropdownMenuItem(
+                            value: subject.subjectId,
+                            child: Text(subject.subjectCode),
+                          ))
+                        .toList(),
+                    onChanged: (int? value) {
                       setState(() {
                         _subject = value;
                       });

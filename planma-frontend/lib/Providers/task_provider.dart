@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:planma_app/models/subjects_model.dart';
 import 'package:planma_app/models/tasks_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,7 +55,7 @@ class TaskProvider with ChangeNotifier {
     required TimeOfDay startTime,
     required TimeOfDay endTime,
     required DateTime deadline,
-    required String subjectCode,
+    required Subject subject,
   }) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -81,7 +82,7 @@ class TaskProvider with ChangeNotifier {
       schedule.scheduledStartTime == formattedStartTime &&
       schedule.scheduledEndTime == formattedEndTime &&
       schedule.deadline == deadline &&
-      schedule.subjectCode == subjectCode);
+      schedule.subject?.subjectId == subject.subjectId);
 
     if (isDuplicate) {
       throw Exception(
@@ -103,7 +104,7 @@ class TaskProvider with ChangeNotifier {
           'scheduled_start_time': formattedStartTime,
           'scheduled_end_time': formattedEndTime,
           'deadline': formattedDeadline,
-          'subject_code': subjectCode,
+          'subject_id': subject.subjectId,
         }),
       );
 
@@ -138,7 +139,7 @@ class TaskProvider with ChangeNotifier {
     required TimeOfDay startTime,
     required TimeOfDay endTime,
     required DateTime deadline,
-    required String subjectCode,
+    required Subject subject,
   }) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -166,7 +167,7 @@ class TaskProvider with ChangeNotifier {
       schedule.scheduledStartTime == formattedStartTime &&
       schedule.scheduledEndTime == formattedEndTime &&
       schedule.deadline == deadline &&
-      schedule.subjectCode == subjectCode);
+      schedule.subject?.subjectId == subject.subjectId);
 
     if (isDuplicate) {
       throw Exception(
@@ -189,7 +190,7 @@ class TaskProvider with ChangeNotifier {
           'scheduled_start_time': formattedStartTime,
           'scheduled_end_time': formattedEndTime,
           'deadline': formattedDeadline,
-          'subject_code': subjectCode,
+          'subject_id': subject.subjectId,
         }),
       );
 

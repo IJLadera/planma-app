@@ -22,13 +22,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
 
   // List of days
   final List<String> days = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday'
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
   ];
 
   // Selected semester

@@ -25,7 +25,7 @@ class _GoalPageState extends State<GoalPage> {
     {
       "name": "Study for Math Exam",
       "targetHours": 15,
-      "progress": 0.3,
+      "progress": 1.0,
       "goalCode": "MATH101",
       "description": "Prepare for the upcoming exam",
       "timeFrame": "1 Week",

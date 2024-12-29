@@ -41,10 +41,12 @@ AUTH_USER_MODEL = "api.CustomUser"
 INSTALLED_APPS = [
     
     'rest_framework',
+    'rest_framework_simplejwt',
     'djoser',
     'corsheaders',
     'api.apps.ApiConfig',
     
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

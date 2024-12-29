@@ -105,11 +105,11 @@ class CustomWidgets {
     );
   }
 
-  static Widget buildDropdownField({
+  static Widget buildDropdownField<T>({
     required String label,
-    required String? value,
-    required List<String> items,
-    required Function(String?) onChanged,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required Function(T?) onChanged,
     Color backgroundColor = const Color(0xFFF5F5F5),
     Color labelColor = Colors.black,
     Color textColor = Colors.black,
@@ -128,21 +128,11 @@ class CustomWidgets {
           isExpanded: true,
           hint: Text(
             label,
-            style: textStyle ??
-                GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
+            style: textStyle ?? GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
           ),
           value: value,
           onChanged: onChanged,
-          items: items.map((item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item,
-                style: textStyle ??
-                    GoogleFonts.openSans(fontSize: fontSize, color: textColor),
-              ),
-            );
-          }).toList(),
+          items: items,
           buttonStyleData: ButtonStyleData(
             padding: contentPadding,
             decoration: BoxDecoration(

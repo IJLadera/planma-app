@@ -9,7 +9,7 @@ import '../models/subjects_model.dart';
 
 class ClassScheduleProvider with ChangeNotifier {
   List<ClassSchedule> _classSchedules = [];
-  List<String> subjectCodes = [];
+  List<Subject> subjects = [];
   Subject? _selectedSubject;
   String? _accessToken;
   int? activeSemesterId;
@@ -40,22 +40,28 @@ class ClassScheduleProvider with ChangeNotifier {
         return currentDate.isAfter(startDate) && currentDate.isBefore(endDate);
       },
       orElse: () {
-        // Proper fallback with valid default map
-        print("No active semester found!");
-        return {
-          'id': -1,
-          'start_date': '2000-01-01', // Default date to avoid parsing errors
-          'end_date': '2000-12-31',   // Default date to avoid parsing errors
-        };
+        // No active semester; fallback to the last active semester
+        print("No active semester found. Attempting to use the last active semester.");
+        semesterProvider.semesters.sort((a, b) {
+          DateTime aEndDate = DateTime.parse(a['sem_end_date']);
+          DateTime bEndDate = DateTime.parse(b['sem_end_date']);
+          return bEndDate.compareTo(aEndDate); // Sort descending by end date
+        });
+
+        for (var semester in semesterProvider.semesters) {
+          DateTime endDate = DateTime.parse(semester['sem_end_date']);
+          if (currentDate.isAfter(endDate)) {
+            return semester;
+          }
+        }
+
+        // If no past semester exists, return the first semester as fallback
+        return semesterProvider.semesters.last;
       },
     );
 
     activeSemesterId = activeSemester['semester_id'];
     print("Active semester Id: $activeSemesterId");
-
-    if (activeSemesterId == -1) {
-      print("No active semester. Fallback semester ID used.");
-    }
 
     // Fetch subjects for the active semester
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -72,7 +78,7 @@ class ClassScheduleProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        subjectCodes = data.map((item) => Subject.fromJson(item).subjectCode).toList();
+        subjects = data.map((item) => Subject.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception('Error fetching subjects');
@@ -140,7 +146,7 @@ class ClassScheduleProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        // print(data);
+        print(data);
 
         // Parse the response body as a list of class schedules
         _classSchedules =
@@ -305,6 +311,11 @@ class ClassScheduleProvider with ChangeNotifier {
     } catch (error) {
       rethrow;
     }
+  }
+
+  void resetState() {
+    _classSchedules = [];
+    notifyListeners();
   }
 
   // Utility method to format TimeOfDay to HH:mm:ss

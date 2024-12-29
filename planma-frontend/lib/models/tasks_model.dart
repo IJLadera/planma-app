@@ -1,3 +1,5 @@
+import 'package:planma_app/models/subjects_model.dart';
+
 class Task {
   final int? taskId;
   final String taskName;
@@ -7,7 +9,7 @@ class Task {
   final String scheduledEndTime;
   final DateTime deadline;
   final String? status;
-  final String subjectCode;
+  final Subject? subject;
 
   Task({
     this.taskId,
@@ -18,7 +20,7 @@ class Task {
     required this.scheduledEndTime,
     required this.deadline,
     this.status,
-    required this.subjectCode,
+    this.subject,
   });
 
   // Factory method to create an instance from JSON
@@ -32,7 +34,7 @@ class Task {
     scheduledEndTime: json['scheduled_end_time'] ?? '00:00', // Default time
     deadline: DateTime.parse(json['deadline']),
     status: json['status'] ?? 'Pending',
-    subjectCode: json['subject_code']['subject_code'] ?? 'N/A',
+    subject: json['subject_id'] != null ? Subject.fromJson(json['subject_id']) : null,
   );
 }
 
@@ -48,7 +50,7 @@ class Task {
       'scheduled_end_time': scheduledEndTime,
       'deadline': deadline.toIso8601String(),
       'status': status,
-      'subject_code': subjectCode,
+      'subject_id': subject?.subjectId,
     };
   }
 }

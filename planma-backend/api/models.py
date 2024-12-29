@@ -206,14 +206,22 @@ class CustomSemester(models.Model):
     semester = models.CharField(max_length=12, choices=SEMESTER_CHOICES)
     sem_start_date = models.DateField()
     sem_end_date = models.DateField()
+    student_id = models.ForeignKey(
+        CustomUser,  # This links to your custom user model
+        on_delete=models.CASCADE,
+        related_name='semesters', db_column='student_id'
+    )
 
     def __str__(self):
         return f"{self.acad_year_start}-{self.acad_year_end} {self.semester}"
 
 #Class Schedule
 class CustomSubject(models.Model):
+    #Primary Key
+    subject_id = models.AutoField(primary_key=True)
+
     # Subject Details
-    subject_code = models.CharField(max_length=20, primary_key=True)
+    subject_code = models.CharField(max_length=20,)
     subject_title = models.CharField(max_length=255)
     student_id = models.ForeignKey(
         CustomUser,  # This links to your custom user model
@@ -224,7 +232,10 @@ class CustomSubject(models.Model):
         CustomSemester,  # This links to your custom semester model
         on_delete=models.CASCADE,
         related_name='subsems', db_column='semester_id'
-    ) 
+    )
+
+    class Meta:
+        unique_together = ('subject_code', 'student_id', 'semester_id')
 
     def __str__(self):
         return f'{self.subject_code} - {self.subject_title}'
@@ -235,10 +246,10 @@ class CustomClassSchedule(models.Model):
     classsched_id = models.AutoField(primary_key=True)
 
     # Class Details
-    subject_code = models.ForeignKey(
+    subject = models.ForeignKey(
         CustomSubject,  # This links to your CustomSubject model
         on_delete=models.CASCADE,
-        related_name='classes', db_column='subject_code'
+        related_name='classes', db_column='subject_id'
     )
     day_of_week = models.CharField(max_length=10)
     scheduled_start_time = models.TimeField()
@@ -251,12 +262,14 @@ class CustomClassSchedule(models.Model):
     )
 
     class Meta:
-        unique_together = ('day_of_week', 'scheduled_start_time', 'scheduled_end_time', 'room', 'student_id')
+        unique_together = ('subject', 'day_of_week', 'scheduled_start_time', 'scheduled_end_time', 'room', 'student_id')
 
     def __str__(self):
+        # < MIGHT CAUSE ISSUES >
         # Access the related CustomSubject's title
-        subject_title = self.subject_code.subject_title
-        return f"{self.subject_code.subject_code} - {subject_title} | {self.room} | {self.day_of_week}"
+        subject_title = self.subject.subject_title
+        return f"{self.subject.subject_code} - {subject_title} | {self.room} | {self.day_of_week}"
+
 
 class AttendedClass(models.Model):
 
@@ -292,10 +305,10 @@ class CustomTask(models.Model):
     scheduled_end_time = models.TimeField()
     deadline = models.DateTimeField()
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
-    subject_code = models.ForeignKey(
+    subject_id = models.ForeignKey(
         CustomSubject,  # This links to your CustomSubject model
         on_delete=models.CASCADE,
-        related_name='subject', db_column='subject_code'
+        related_name='subject', db_column='subject_id'
     )
     # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
