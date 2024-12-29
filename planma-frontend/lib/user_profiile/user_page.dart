@@ -57,6 +57,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 // Helper method to parse time string into TimeOfDay
 
   Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
+    final userPreferencesProvider = context.read<UserPreferencesProvider>();
+
     final TimeOfDay initialTime = isSleepTime
         ? sleepTime ??
             TimeOfDay(hour: 23, minute: 0) // Default to 11:00 PM if null
@@ -96,7 +98,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ),
           content: Container(
             height: 200, // Increased height for better space
-            width: 250, // Increased width for better space
+            width: 350, // Increased width for better space
             padding: EdgeInsets.symmetric(horizontal: 5.0), // Added padding
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -172,7 +174,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           content: Container(
             height: 250,
             width: 350,
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
+            padding: EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
               children: [
                 Expanded(
