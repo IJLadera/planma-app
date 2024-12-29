@@ -14,7 +14,7 @@ class GoalProvider extends ChangeNotifier {
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
   //Fetch all goals
-  Future<void> fetchGoals () async {
+  Future<void> fetchGoals() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
@@ -33,8 +33,7 @@ class GoalProvider extends ChangeNotifier {
         // print(data);
 
         // Parse the response body as a list of class schedules
-        _goals =
-            data.map((item) => Goal.fromJson(item)).toList();
+        _goals = data.map((item) => Goal.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception(
@@ -50,25 +49,28 @@ class GoalProvider extends ChangeNotifier {
     required String goalName,
     required String goalDescription,
     required String timeframe,
-    required String targetHours,
+    required Duration targetHours,
     required String goalType,
     required int? semester,
   }) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    int formattedTargetHours = int.parse(targetHours);
+    int formattedTargetHours = targetHours.inHours;
 
     bool isDuplicate = _goals.any((schedule) =>
-      schedule.goalName == goalName &&
-      schedule.timeframe == timeframe &&
-      schedule.targetHours == targetHours &&
-      schedule.goalType == goalType);
+        schedule.goalName == goalName &&
+        schedule.timeframe == timeframe &&
+        schedule.targetHours == targetHours &&
+        schedule.goalType == goalType);
 
     if (isDuplicate) {
       throw Exception(
           'Duplicate goal entry detected locally. Please modify your entry.');
-    }    
+    }
+
+    // If the goal type is "Personal", set semester to null
+    int? finalSemester = (goalType == "Personal") ? null : semester;
 
     final url = Uri.parse("${baseUrl}goals/add_goal/");
     try {
@@ -79,12 +81,12 @@ class GoalProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
         body: json.encode({
-          'goal_name': goalName, 
-          'goal_desc': goalDescription, 
-          'timeframe': timeframe, 
-          'target_hours': formattedTargetHours, 
+          'goal_name': goalName,
+          'goal_desc': goalDescription,
+          'timeframe': timeframe,
+          'target_hours': formattedTargetHours,
           'goal_type': goalType,
-          'semester_id': semester,
+          'semester_id': finalSemester,
         }),
       );
 
@@ -103,7 +105,6 @@ class GoalProvider extends ChangeNotifier {
       } else {
         throw Exception('Failed to add goal: ${response.body}');
       }
-
     } catch (error) {
       print('Add goal error: $error');
       throw Exception('Error adding goal: $error');
@@ -126,15 +127,18 @@ class GoalProvider extends ChangeNotifier {
     int formattedTargetHours = int.parse(targetHours);
 
     bool isDuplicate = _goals.any((schedule) =>
-      schedule.goalName == goalName &&
-      schedule.timeframe == timeframe &&
-      schedule.targetHours == targetHours &&
-      schedule.goalType == goalType);
+        schedule.goalName == goalName &&
+        schedule.timeframe == timeframe &&
+        schedule.targetHours == targetHours &&
+        schedule.goalType == goalType);
 
     if (isDuplicate) {
       throw Exception(
           'Duplicate goal entry detected locally. Please modify your entry.');
-    }    
+    }
+
+    // If the goal type is "Personal", set semester to null
+    int? finalSemester = (goalType == "Personal") ? null : semester;
 
     final url = Uri.parse("${baseUrl}goals/$goalId/");
 
@@ -146,19 +150,19 @@ class GoalProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
         body: json.encode({
-          'goal_name': goalName, 
-          'goal_desc': goalDescription, 
-          'timeframe': timeframe, 
-          'target_hours': formattedTargetHours, 
+          'goal_name': goalName,
+          'goal_desc': goalDescription,
+          'timeframe': timeframe,
+          'target_hours': formattedTargetHours,
           'goal_type': goalType,
-          'semester_id': semester,
+          'semester_id': finalSemester,
         }),
       );
 
       if (response.statusCode == 200) {
         final updatedSchedule = Goal.fromJson(json.decode(response.body));
-        final index = _goals
-            .indexWhere((schedule) => schedule.goalId == goalId);
+        final index =
+            _goals.indexWhere((schedule) => schedule.goalId == goalId);
         if (index != -1) {
           _goals[index] = updatedSchedule;
           notifyListeners();
@@ -196,8 +200,7 @@ class GoalProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _goals
-            .removeWhere((schedule) => schedule.goalId == goalId);
+        _goals.removeWhere((schedule) => schedule.goalId == goalId);
         notifyListeners();
       } else {
         throw Exception(
@@ -205,6 +208,6 @@ class GoalProvider extends ChangeNotifier {
       }
     } catch (error) {
       rethrow;
-    }    
+    }
   }
 }

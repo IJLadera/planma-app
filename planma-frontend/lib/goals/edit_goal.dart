@@ -72,6 +72,8 @@ class _EditGoal extends State<EditGoal> {
                   const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Timeframe',
+                    textStyle: GoogleFonts.openSans(
+                        fontSize: 16),
                     value: _selectedTimeframe,
                     items: _timeframe,
                     onChanged: (value) =>
@@ -102,6 +104,8 @@ class _EditGoal extends State<EditGoal> {
                   const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Goal Type',
+                    textStyle: GoogleFonts.openSans(
+                        fontSize: 16),
                     value: _selectedGoalType,
                     items: _goalType,
                     onChanged: (String? value) =>
@@ -114,6 +118,8 @@ class _EditGoal extends State<EditGoal> {
                   const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label: 'Semester',
+                    textStyle: GoogleFonts.openSans(
+                        fontSize: 16),
                     value: _selectedSemester,
                     items: _semesters,
                     onChanged: (String? value) =>

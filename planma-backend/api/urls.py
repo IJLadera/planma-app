@@ -10,6 +10,7 @@ router.register(r'tasks', TaskViewSet, basename='task')
 router.register(r'events', EventViewSet, basename='event')
 router.register(r'goals', GoalViewSet, basename='goal')
 router.register(r'goal-schedules', GoalScheduleViewSet, basename='goalschedule')
+router.register(r'activities', ActivityViewSet, basename='activity')
 
 
 router.register(r'userprefs', UserPrefListCreateView, basename='userpref')
@@ -21,16 +22,15 @@ urlpatterns = [
     path ('auth/', include ('djoser.urls.jwt')),
     #ModelViewSet
     path('', include(router.urls)),
-    # attended event
     path('createattevents/', AttendedEventListCreateView.as_view(), name='attevent-list-create'),
     path('attevents/<uuid:pk>/', AttendedEventDetailView.as_view(), name='attevent-detail'),
     path('deleteattevents/<int:pk>/', AttendedEventDeleteView.as_view(), name='attevent-delete'),
     path('updateattevent/<int:pk>/',AttendedEventUpdateView.as_view(), name='updateattevent' ),
     #activity
-    path('createactivity/', CustomActivityListCreateView.as_view(), name='activity-list-create'),
-    path('activities/<uuid:pk>/', CustomActivityDetailView.as_view(), name='activity-detail'),
-    path('deleteactivity/<int:pk>/', CustomActivityDeleteView.as_view(), name='activity-delete'),
-    path('updateactivity/<int:pk>/',CustomActivityUpdateView.as_view(), name='updateactivity' ),
+    # path('createactivity/', CustomActivityListCreateView.as_view(), name='activity-list-create'),
+    # path('activities/<uuid:pk>/', CustomActivityDetailView.as_view(), name='activity-detail'),
+    # path('deleteactivity/<int:pk>/', CustomActivityDeleteView.as_view(), name='activity-delete'),
+    # path('updateactivity/<int:pk>/',CustomActivityUpdateView.as_view(), name='updateactivity' ),
     #actlog
     path('createactlog/', LogActivityListCreateView.as_view(), name='actlog-list-create'),
     path('actlog/<uuid:pk>/', LogActivityDetailView.as_view(), name='actlog-detail'),

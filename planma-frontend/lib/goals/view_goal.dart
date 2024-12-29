@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/goals/edit_goal.dart';
 import 'package:planma_app/goals/edit_goal_session.dart';
-import 'package:planma_app/goals/widget/goal_card.dart';
 import 'package:planma_app/goals/widget/goal_detail_row.dart';
 import 'package:google_fonts/google_fonts.dart';
 

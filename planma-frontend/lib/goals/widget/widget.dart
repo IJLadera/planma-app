@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
@@ -52,7 +51,7 @@ class CustomWidgets {
     double borderRadius = 30.0,
     EdgeInsets contentPadding =
         const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-    double fontSize = 14.0,
+    double fontSize = 14.0, required TextStyle textStyle,
   }) {
     return Container(
       decoration: BoxDecoration(

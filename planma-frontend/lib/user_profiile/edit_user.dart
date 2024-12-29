@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EditProfileScreen extends StatelessWidget {
   final String username;
@@ -8,7 +9,8 @@ class EditProfileScreen extends StatelessWidget {
   final String lastName;
   final _formKey = GlobalKey<FormState>();
 
-  EditProfileScreen({super.key, 
+  EditProfileScreen({
+    super.key,
     required this.username,
     required this.firstName,
     required this.lastName,
@@ -28,7 +30,15 @@ class EditProfileScreen extends StatelessWidget {
             Navigator.pop(context);
           },
         ),
-        title: Text('Edit Profile'),
+        title: Text(
+          'Edit Profile',
+          style: GoogleFonts.openSans(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
+          ),
+        ),
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
@@ -99,7 +109,10 @@ class EditProfileScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    context.read<UserProfileProvider>().updateUserProfile(firstNameController.text, lastNameController.text, usernameController.text); 
+                    context.read<UserProfileProvider>().updateUserProfile(
+                        firstNameController.text,
+                        lastNameController.text,
+                        usernameController.text);
                     Navigator.pop(context, {
                       'username': usernameController.text,
                       'firstName': firstNameController.text,
@@ -108,12 +121,18 @@ class EditProfileScreen extends StatelessWidget {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50),
-                  backgroundColor: Color(0xFF173F70),
+                  backgroundColor: const Color(0xFF173F70),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 child: Text(
                   'Save Changes',
-                  style: TextStyle(fontSize: 14, color: Colors.white),
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
