@@ -108,7 +108,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
     }
 
     try {
-      await provider.addSemester(
+      final newSemesterId = await provider.addSemester(
         acadYearStart: int.parse(_selectedStartYear!),
         acadYearEnd: int.parse(_selectedEndYear!),
         yearLevel: _selectedYearLevel!,
@@ -119,7 +119,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Semester added successfully!')),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, newSemesterId);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add semester: $error')),

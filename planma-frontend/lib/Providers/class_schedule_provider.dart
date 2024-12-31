@@ -12,11 +12,17 @@ class ClassScheduleProvider with ChangeNotifier {
   List<Subject> subjects = [];
   Subject? _selectedSubject;
   String? _accessToken;
-  int? activeSemesterId;
+  int? _activeSemesterId;
 
   List<ClassSchedule> get classSchedules => _classSchedules;
   Subject? get selectedSubject => _selectedSubject;
   String? get accessToken => _accessToken;
+  int? get activeSemesterId => _activeSemesterId;
+
+  set activeSemesterId(int? value) {
+    _activeSemesterId = value;
+    notifyListeners();
+  }
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
@@ -60,13 +66,13 @@ class ClassScheduleProvider with ChangeNotifier {
       },
     );
 
-    activeSemesterId = activeSemester['semester_id'];
-    print("Active semester Id: $activeSemesterId");
+    _activeSemesterId = activeSemester['semester_id'];
+    print("Active semester Id: $_activeSemesterId");
 
     // Fetch subjects for the active semester
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${baseUrl}subjects/?semester_id=$activeSemesterId");
+    final url = Uri.parse("${baseUrl}subjects/?semester_id=$_activeSemesterId");
 
     try {
       final response = await http.get(
