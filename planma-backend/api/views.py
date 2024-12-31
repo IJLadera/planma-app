@@ -417,12 +417,11 @@ class LogActivityUpdateView(APIView):
 
 #User Preferences
 class UserPrefListCreateView(viewsets.ModelViewSet):
-    queryset = UserPref.objects.all()
     serializer_class = UserPrefSerializer  
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return UserPref.objects.filter(studdent_id=self.request.user)
+        return UserPref.objects.filter(student_id=self.request.user)
     
     def perform_create(self, serializer):
         serializer.save(student_id=self.request.user)
