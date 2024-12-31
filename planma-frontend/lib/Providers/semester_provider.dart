@@ -77,7 +77,7 @@ class SemesterProvider with ChangeNotifier {
 
 
   //Add a semester
-  Future<void> addSemester({
+  Future<int> addSemester({
     required int acadYearStart,
     required int acadYearEnd,
     required String yearLevel,
@@ -118,8 +118,10 @@ class SemesterProvider with ChangeNotifier {
 
       if (response.statusCode == 201) {
         final newSemester = json.decode(response.body) as Map<String, dynamic>;
+        final int newSemesterId = newSemester['semester_id'];
         _semesters.add(newSemester);
         notifyListeners();
+        return newSemesterId;
       } else {
         throw Exception(
             'Failed to add semester. Status Code: ${response.statusCode}');

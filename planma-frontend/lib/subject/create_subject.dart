@@ -7,7 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class AddClassScreen extends StatefulWidget {
-  const AddClassScreen({super.key});
+  final int? selectedSemesterId;
+
+  const AddClassScreen({super.key, this.selectedSemesterId});
 
   @override
   _AddClassScreenState createState() => _AddClassScreenState();
@@ -100,6 +102,8 @@ class _AddClassScreenState extends State<AddClassScreen> {
     }
 
     try {
+      provider.activeSemesterId ??= selectedSemesterId;
+
       await provider.addClassScheduleWithSubject(
           subjectCode: subjectCode,
           subjectTitle: subjectTitle,
@@ -109,12 +113,15 @@ class _AddClassScreenState extends State<AddClassScreen> {
           endTime: endTime,
           room: room);
 
+      // Update the selected semester and fetch class schedules
+      onAddClassSuccess(context, selectedSemesterId!);
+
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Class Schedule added successfully!')),
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context, selectedSemesterId);
       // Clear fields after adding
       _clearFields();
     } catch (error) {
@@ -122,6 +129,14 @@ class _AddClassScreenState extends State<AddClassScreen> {
         SnackBar(content: Text('Failed to add class schedule 1: $error')),
       );
     }
+  }
+
+  void onAddClassSuccess(BuildContext context, int newSemesterId) {
+    final provider = Provider.of<ClassScheduleProvider>(context, listen: false);
+
+    provider.activeSemesterId = newSemesterId;
+
+    provider.fetchClassSchedules(selectedSemesterId: provider.activeSemesterId);
   }
 
   // Valid Time Range Check

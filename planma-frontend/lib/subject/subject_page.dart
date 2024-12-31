@@ -22,7 +22,13 @@ class _ClassScheduleState extends State<ClassSchedule> {
 
   // List of days
   final List<String> days = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday'
   ];
 
   // Selected semester
@@ -97,9 +103,33 @@ class _ClassScheduleState extends State<ClassSchedule> {
                                         builder: (context) =>
                                             AddSemesterScreen(),
                                       ),
-                                    ).then((_) {
+                                    ).then((newSemesterId) {
                                       // Refresh semesters after returning
-                                      semesterProvider.fetchSemesters();
+                                      semesterProvider
+                                          .fetchSemesters()
+                                          .then((_) {
+                                        if (newSemesterId != null) {
+                                          // Automatically select the new semester in the dropdown
+                                          final newSemester = semesterProvider
+                                              .semesters
+                                              .firstWhere((semester) =>
+                                                  semester['semester_id'] ==
+                                                  newSemesterId);
+
+                                          if (newSemester != null) {
+                                            setState(() {
+                                              selectedSemester =
+                                                  "${newSemester['acad_year_start']} - ${newSemester['acad_year_end']} ${newSemester['semester']}";
+                                            });
+
+                                            // Fetch schedules for the newly added semester
+                                            classScheduleProvider
+                                                .fetchClassSchedules(
+                                              selectedSemesterId: newSemesterId,
+                                            );
+                                          }
+                                        }
+                                      });
                                     });
                                   } else if (value != null) {
                                     // Update the selected semester
@@ -233,10 +263,38 @@ class _ClassScheduleState extends State<ClassSchedule> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
+          final classScheduleProvider = Provider.of<ClassScheduleProvider>(context, listen: false);
+
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddClassScreen()),
-          );
+            MaterialPageRoute(
+              builder: (context) => AddClassScreen(),
+            ),
+          ).then((createdClassSemesterId) {
+            print("Gae: $createdClassSemesterId");
+            if (createdClassSemesterId != null) {
+              // Fetch the semester details based on the returned semester_id
+              final newSemester = semesterProvider.semesters.firstWhere(
+                (semester) => semester['semester_id'] == createdClassSemesterId,
+                orElse: () =>
+                    {}, // Handle cases where the semester might not exist
+              );
+
+              if (newSemester != null) {
+                setState(() {
+                  // Update the selectedSemester to the newly created class's semester
+                  selectedSemester =
+                      "${newSemester['acad_year_start']} - ${newSemester['acad_year_end']} ${newSemester['semester']}";
+                });
+
+                // Fetch and display class schedules for the newly created semester
+                classScheduleProvider.fetchClassSchedules(
+                  selectedSemesterId: createdClassSemesterId,
+                );
+              }
+            }
+          });
         },
         backgroundColor: const Color(0xFF173F70),
         shape: const CircleBorder(),
