@@ -17,6 +17,8 @@ class CustomUserSerializer(UserSerializer):
 
 
 class CustomEventSerializer(serializers.ModelSerializer):
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
     class Meta: 
         model = CustomEvents
         fields = ['event_id', 'event_name', 'event_desc', 
@@ -25,6 +27,7 @@ class CustomEventSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'student_id': {'required': True},
         }
+        read_only_fields = ['student_id']
         
 class AttendedEventSerializer(serializers.ModelSerializer):
     class Meta: 
@@ -32,6 +35,8 @@ class AttendedEventSerializer(serializers.ModelSerializer):
         fields = ['att_events_id','event_id', 'date', 'has_attended']
 
 class CustomActivitySerializer(serializers.ModelSerializer):
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
     class Meta: 
         model = CustomActivity
         fields = ['activity_id', 'activity_name', 'activity_desc', 
@@ -40,6 +45,7 @@ class CustomActivitySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'student_id': {'required': True},
         }
+        read_only_fields = ['student_id']
         
 class ActivityLogSerializer(serializers.ModelSerializer):
     class Meta: 

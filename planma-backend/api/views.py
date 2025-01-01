@@ -15,27 +15,12 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.timezone import make_aware
 
 
-#Below is the Events tables
-
-# class CustomEventListCreateView(APIView):
-    
-#     permission_classes = [permissions.IsAuthenticated]
-#     def post(self, request):
-#         data = request.data
-#         # data['student_id'] = request.data.student_id
-        
-#         serializer = CustomEventSerializer(data=data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response({**serializer.data}, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-#         # Set the student field to the authenticated user on creation
-
 class ActivityViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = CustomActivity.objects.all()
     serializer_class = CustomActivitySerializer
+
+    def get_queryset(self):
+        return CustomActivity.objects.filter(student_id=self.request.user)
 
     @action(detail=False, methods=['post'])
     def add_activity(self, request):
@@ -353,10 +338,6 @@ class AttendedEventUpdateView(APIView):
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-#below is the activity tables
-
-
-
 #below is the Activity Log view
 
 class LogActivityListCreateView(APIView):
@@ -474,50 +455,7 @@ class UserPrefListCreateView(viewsets.ModelViewSet):
             status=status.HTTP_204_NO_CONTENT
         )
 
-
-class UserPrefDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        user = UserPref.objects.get(student_id = pk)
-        userpref = CustomUser.objects.filter(student_id = user)
-        serializer = UserPrefSerializer(userpref, many = True)
-        
-        return Response(serializer.data)
     
-class UserPrefDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deleteuserpref = UserPref.objects.get(pref_id = pk)
-            
-            deleteuserpref.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except UserPref.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class UserPrefUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        userprefid= UserPref.objects.get(pref_id = pk)
-        
-        serializer = UserPrefSerializer(instance=userprefid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-     
 # Class Attended
 
 class AttClassListCreateView(APIView):

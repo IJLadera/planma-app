@@ -38,15 +38,31 @@ class _EditClassState extends State<EditClass> {
     'Sa': 'Saturday',
   };
 
+  // Method to select time
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
+    // Parse the existing time from the controller, or use a default time
+    TimeOfDay initialTime;
+    if (controller.text.isNotEmpty) {
+      try {
+        final parsedTime = DateFormat.jm().parse(controller.text); // Parse time from "h:mm a" format
+        initialTime = TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
+      } catch (e) {
+        initialTime = TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+      }
+    } else {
+      initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
+    }
+
+    // Show the time picker with the initial time
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay(hour: 12, minute: 0),
+      initialTime: initialTime,
     );
+
     if (picked != null) {
       setState(() {
-        controller.text = picked.format(context);
+        controller.text = picked.format(context); // Update the controller text
       });
     }
   }
