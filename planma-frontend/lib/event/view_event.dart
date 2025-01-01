@@ -171,32 +171,32 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   EventDetailRow(
-                    title: 'Title',
+                    title: 'Title:',
                     value: event.eventName,
                   ),
                   const Divider(),
                   EventDetailRow(
-                    title: 'Description',
+                    title: 'Description:',
                     value: event.eventDesc,
                   ),
                   const Divider(),
                   EventDetailRow(
-                    title: 'Location',
+                    title: 'Location:',
                     value: event.location,
                   ),
                   const Divider(),
                   EventDetailRow(
-                    title: 'Date',
+                    title: 'Date:',
                     value: formattedScheduledDate.toString(),
                   ),
                   const Divider(),
                   EventDetailRow(
-                    title: 'Time',
+                    title: 'Time:',
                     value: '$startTime - $endTime',
                   ),
                   const Divider(),
                   EventDetailRow(
-                    title: 'Type',
+                    title: 'Type:',
                     value: event.eventType,
                   ),
                   const Divider(),

@@ -261,6 +261,9 @@ class EventsProvider with ChangeNotifier {
     }
   }
 
-  
+  void resetState() {
+    _events = [];
+    notifyListeners();
+  }
 }
 

@@ -247,6 +247,11 @@ class TaskProvider with ChangeNotifier {
     }    
   }
 
+  void resetState() {
+    _tasks = [];
+    notifyListeners();
+  }
+
   // Utility method to format TimeOfDay to HH:mm:ss
   String _formatTimeOfDay(TimeOfDay time) {
     final now = DateTime.now();

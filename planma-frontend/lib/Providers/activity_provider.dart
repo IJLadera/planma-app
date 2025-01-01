@@ -251,4 +251,9 @@ class ActivityProvider with ChangeNotifier {
     );
     return DateFormat('HH:mm:ss').format(dateTime);
   }
+
+  void resetState() {
+    _activity = [];
+    notifyListeners();
+  }
 }

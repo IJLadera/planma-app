@@ -8,7 +8,6 @@ import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/authentication/splash_screen.dart';
 import 'package:planma_app/core/dashboard.dart';
-import 'package:planma_app/user_preferences/sleep_wake.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/Providers/time_provider.dart';
