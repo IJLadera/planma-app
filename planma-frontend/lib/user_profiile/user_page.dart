@@ -279,7 +279,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              username!,
+              username ??
+                  'Guest', // Use 'Guest' as a fallback if username is null
               style: GoogleFonts.openSans(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
