@@ -8,13 +8,11 @@ import 'package:planma_app/models/activity_model.dart';
 class ActivityCard extends StatelessWidget {
   final Activity activity;
   final bool isByDate;
- 
 
   const ActivityCard({
     super.key,
     required this.isByDate,
     required this.activity,
-    
   });
 
   String _formatTimeForDisplay(String time24) {
@@ -37,7 +35,6 @@ class ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final startTime = _formatTimeForDisplay(activity.scheduledStartTime);
     final endTime = _formatTimeForDisplay(activity.scheduledEndTime);
 
@@ -62,8 +59,8 @@ class ActivityCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: 
-                  Color(0xFFC0D7F3).withOpacity(0.6), // Slight transparency for the background
+              color: Color(0xFFFBA2A2)
+                  .withOpacity(0.6), // Slight transparency for the background
               borderRadius: BorderRadius.circular(12), // Rounded corners
             ),
             child: Row(
