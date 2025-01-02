@@ -6,15 +6,12 @@ import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 class CustomWidgets {
   static Widget buildTitle(String title) {
     return Container(
-      margin: const EdgeInsets.only(
-          left: 16.0,
-          top: 8.0,
-          right: 16.0), // Adjust the margin values as needed
+      margin: const EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
       alignment: Alignment.centerLeft, // Ensures the text starts from the left
       child: Text(
         title,
         style: GoogleFonts.openSans(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
           color: Color(0xFF173F70),
         ),
@@ -35,7 +32,6 @@ class CustomWidgets {
           labelText: labelText,
           labelStyle: GoogleFonts.openSans(
             fontSize: 14,
-            color: Colors.grey[600],
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.all(16),
@@ -67,8 +63,7 @@ class CustomWidgets {
                 date != null
                     ? DateFormat('dd MMMM yyyy').format(date)
                     : 'Select Date',
-                style: GoogleFonts.openSans(
-                    fontSize: 14, color: Colors.grey[600])),
+                style: GoogleFonts.openSans(fontSize: 14)),
             const Icon(Icons.calendar_today),
           ],
         ),
@@ -96,7 +91,6 @@ class CustomWidgets {
           labelText: label,
           labelStyle: GoogleFonts.openSans(
             fontSize: 14,
-            color: Colors.grey[600],
           ),
           suffixIcon: const Icon(Icons.access_time),
           border: InputBorder.none,
@@ -112,12 +106,13 @@ class CustomWidgets {
     required String? value,
     required List<String> items,
     required Function(String?) onChanged,
-    Color backgroundColor = const Color.fromARGB(255, 138, 172, 207),
-    Color labelColor = const Color(0xFF173F70),
-    Color textColor = const Color(0xFF173F70),
+    Color backgroundColor = const Color(0xFFF5F5F5),
+    Color labelColor = Colors.black,
+    Color textColor = Colors.black,
     double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(16),
+    EdgeInsets contentPadding = const EdgeInsets.all(12),
     double fontSize = 14.0,
+    TextStyle? textStyle,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -130,10 +125,8 @@ class CustomWidgets {
           isExpanded: true,
           hint: Text(
             label,
-            style: GoogleFonts.openSans(
-              fontSize: fontSize,
-              color: labelColor,
-            ),
+            style: textStyle ??
+                GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
           ),
           value: value,
           onChanged: onChanged,
@@ -144,7 +137,7 @@ class CustomWidgets {
                 item,
                 style: GoogleFonts.openSans(
                   fontSize: fontSize,
-                  color: labelColor,
+                  color: textColor,
                 ),
               ),
             );

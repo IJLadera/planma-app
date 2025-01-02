@@ -44,12 +44,12 @@ class ByDateView extends StatelessWidget {
 
         return events.isNotEmpty
             ? Padding(
-                padding: const EdgeInsets.all(2),
+                padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Text(
                         category,
                         style: GoogleFonts.openSans(
