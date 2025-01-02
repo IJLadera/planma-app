@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/time_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'package:planma_app/reports/report_page.dart';
 
 class TimerPage extends StatefulWidget {
   final Color themeColor;
@@ -83,6 +84,21 @@ class _TimerPageState extends State<TimerPage> {
               const SizedBox(height: 20),
               // Display Recorded Times
               _buildRecordedTimesView(),
+              // Button to navigate to Reports Page
+              // ElevatedButton(
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) => ReportsPage(recordedTimes: _recordedTimes), // error fixed here
+              //       ),
+              //     );
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: widget.themeColor,
+              //   ),
+              //   child: const Text("View Reports"),
+              // ),
             ],
           ),
         ),
@@ -189,20 +205,15 @@ class _TimerPageState extends State<TimerPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: widget.themeColor,
-              shape: const CircleBorder(), // Makes the button round
-              padding:
-                  const EdgeInsets.all(20), // Adjusts the size of the button
+              shape: const CircleBorder(),
+              padding: const EdgeInsets.all(20),
             ),
             child: Column(
-              // Includes both the icon and text
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.save, color: Colors.white), // Save icon
-                const SizedBox(height: 4), // Spacer between icon and text
-                Text(
-                  "Save",
-                  style: TextStyle(color: Colors.white),
-                ),
+                Icon(Icons.save, color: Colors.white),
+                const SizedBox(height: 4),
+                Text("Save", style: TextStyle(color: Colors.white)),
               ],
             ),
           ),
@@ -273,20 +284,15 @@ class _TimerPageState extends State<TimerPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: widget.themeColor,
-              shape: const CircleBorder(), // Makes the button round
-              padding:
-                  const EdgeInsets.all(20), // Adjusts the size of the button
+              shape: const CircleBorder(),
+              padding: const EdgeInsets.all(20),
             ),
             child: Column(
-              // Includes both the icon and text
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.save, color: Colors.white), // Save icon
-                const SizedBox(height: 4), // Spacer between icon and text
-                Text(
-                  "Save",
-                  style: TextStyle(color: Colors.white),
-                ),
+                Icon(Icons.save, color: Colors.white),
+                const SizedBox(height: 4),
+                Text("Save", style: TextStyle(color: Colors.white)),
               ],
             ),
           ),
@@ -361,7 +367,6 @@ class _TimerPageState extends State<TimerPage> {
         });
       });
     }
-
     setState(() {
       _isStopwatchRunning = !_isStopwatchRunning;
     });
@@ -371,8 +376,7 @@ class _TimerPageState extends State<TimerPage> {
     setState(() {
       _stopwatchElapsed = 0;
       _isStopwatchRunning = false;
+      _stopwatchTimer?.cancel();
     });
-
-    _stopwatchTimer?.cancel();
   }
 }
