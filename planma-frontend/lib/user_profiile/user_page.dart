@@ -161,75 +161,78 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Select Reminder Offset',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.openSans(
-              fontSize: 24,
-              color: Color(0xFF173F70),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Container(
-            height: 250,
-            width: 350,
-            padding: EdgeInsets.symmetric(horizontal: 10.0),
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _timeOptions.length,
-                    itemBuilder: (context, index) {
-                      return RadioListTile<String>(
-                        title: Text(
-                          _timeOptions[index],
-                          style: GoogleFonts.openSans(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        value: _timeOptions[index],
-                        groupValue: _tempSelectedTime,
-                        onChanged: (value) {
-                          setState(() {
-                            _tempSelectedTime = value ?? '';
-                          });
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(
+                'Change Reminder Offset',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.openSans(
+                  fontSize: 24,
+                  color: Color(0xFF173F70),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Container(
+                height: 150,
+                width: 250,
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _timeOptions.length,
+                        itemBuilder: (context, index) {
+                          return RadioListTile<String>(
+                            title: Text(
+                              _timeOptions[index],
+                              style: GoogleFonts.openSans(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            value: _timeOptions[index],
+                            groupValue: _tempSelectedTime,
+                            onChanged: (value) {
+                              setState(() {
+                                _tempSelectedTime = value ?? '';
+                              });
+                            },
+                          );
                         },
-                      );
-                    },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                // Cancel Button
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.openSans(
+                        fontSize: 14, color: Color(0xFF173F70)),
+                  ),
+                ),
+                // Save Button
+                TextButton(
+                  onPressed: () async {
+                    // await saveUserPreferences(); // Save preferences
+                    Navigator.of(context)
+                        .pop(); // Close the dialog after saving
+                  },
+                  child: Text(
+                    'Save',
+                    style: GoogleFonts.openSans(
+                        fontSize: 14, color: Color(0xFF173F70)),
                   ),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _selectedTime = _tempSelectedTime;
-                });
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text(
-                'OK',
-                style: GoogleFonts.openSans(
-                  fontSize: 18,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.openSans(
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         );
       },
     );
