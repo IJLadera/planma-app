@@ -3,12 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 class GoalDetailRow extends StatelessWidget {
   final String label;
-  final String value;
+  final String detail;
 
   const GoalDetailRow({
     super.key,
     required this.label,
-    required this.value,
+    required this.detail,
   });
 
   @override
@@ -27,7 +27,7 @@ class GoalDetailRow extends StatelessWidget {
             ),
           ),
           Text(
-            value,
+            detail,
             style: GoogleFonts.openSans(
               fontSize: 14,
               color: Color(0xFF173F70),
