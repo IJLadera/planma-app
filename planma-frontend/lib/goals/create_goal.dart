@@ -39,21 +39,24 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
     if (goalName.isEmpty ||
         goalDescription.isEmpty ||
         _selectedGoalType == null ||
-        _selectedTimeframe == null) {
+        _selectedTimeframe == null ||
+        (_selectedGoalType == 'Academic' && _selectedSemesterId == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields!')),
+        const SnackBar(content: Text('Please fill in all required fields!')),
       );
       return;
     }
 
     try {
+      int? semester = _selectedGoalType == 'Personal' ? null : _selectedSemesterId;
+
       await provider.addGoal(
           goalName: goalName,
           goalDescription: goalDescription,
           timeframe: _selectedTimeframe!,
           targetHours: _targetDuration,
           goalType: _selectedGoalType!,
-          semester: _selectedSemesterId!);
+          semester: semester);
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
@@ -68,12 +71,6 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
         SnackBar(content: Text('Failed to add goal (1): $error')),
       );
     }
-  }
-
-  // Valid Time Range Check
-  bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
-    return startTime.hour < endTime.hour ||
-        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
 
   // Clear fields after submit
@@ -146,12 +143,12 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                       CustomWidgets.buildTitle('Goal Name'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildTextField(
-                          _goalNameController, 'Enter Goal Name'),
+                          _goalNameController, 'Goal Name'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildTitle('Description'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildTextField(
-                          _descriptionController, 'Enter Description'),
+                          _descriptionController, 'Description'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildTitle('Timeframe'),
                       const SizedBox(height: 12),
@@ -185,7 +182,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                       CustomWidgets.buildTitle('Goal Type'),
                       const SizedBox(height: 12),
                       CustomWidgets.buildDropdownField(
-                        label: 'Goal Type',
+                        label: 'Choose Goal Type',
                         textStyle: GoogleFonts.openSans(fontSize: 14),
                         value: _selectedGoalType,
                         items: _goalTypes,

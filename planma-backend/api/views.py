@@ -1003,8 +1003,10 @@ class TaskViewSet(viewsets.ModelViewSet):
 # Goals
 class GoalViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = Goals.objects.all()
     serializer_class = GoalsSerializer
+
+    def get_queryset(self):
+        return Goals.objects.filter(student_id=self.request.user)
 
     @action(detail=False, methods=['post'])
     def add_goal(self, request):
@@ -1029,7 +1031,7 @@ class GoalViewSet(viewsets.ModelViewSet):
         # Additional validation for `semester_id` based on `goal_type`
         if goal_type == 'Academic' and not semester_id:
             return Response({'error': 'semester_id is required for Academic goals.'}, status=status.HTTP_400_BAD_REQUEST)
-        elif goal_type == 'Personal' and semester_id:
+        elif goal_type == 'Personal' and semester_id is not None:
             return Response({'error': 'semester_id must be null for Personal goals.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:

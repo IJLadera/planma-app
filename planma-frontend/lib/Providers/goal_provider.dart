@@ -117,14 +117,14 @@ class GoalProvider extends ChangeNotifier {
     required String goalName,
     required String goalDescription,
     required String timeframe,
-    required String targetHours,
+    required Duration targetHours,
     required String goalType,
     required int? semester,
   }) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    int formattedTargetHours = int.parse(targetHours);
+    int formattedTargetHours = targetHours.inHours;
 
     bool isDuplicate = _goals.any((schedule) =>
         schedule.goalName == goalName &&

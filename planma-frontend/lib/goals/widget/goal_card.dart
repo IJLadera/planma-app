@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/goals/view_goal.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/models/goals_model.dart';
 
 class GoalCard extends StatelessWidget {
-  final String goalName;
-  final int targetHours;
-  final double progress;
-  final Map<String, dynamic> goalDetails;
+  final Goal goal;
+  final double progress = 0; 
 
   const GoalCard({
     super.key,
-    required this.goalName,
-    required this.targetHours,
-    required this.progress,
-    required this.goalDetails,
+    required this.goal,
   });
 
   @override
@@ -26,30 +22,13 @@ class GoalCard extends StatelessWidget {
         ),
         elevation: 5,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.0),
           onTap: () {
+            // Navigate to GoalDetails page with dynamic data
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ViewGoal(
-                  goalDetails: goalDetails,
-                  sessions: [
-                    {"sessionName": "UI Design", "hoursSpent": 5},
-                    {"sessionName": "Backend Setup", "hoursSpent": 8},
-                  ],
-                  filteredGoals: [
-                    {
-                      "name": "Subtask 1",
-                      "targetHours": 5,
-                      "progress": 0.5,
-                    },
-                    {
-                      "name": "Subtask 2",
-                      "targetHours": 3,
-                      "progress": 0.8,
-                    },
-                  ],
-                ),
+                builder: (context) => GoalDetailScreen(goal: goal),
               ),
             );
           },
@@ -73,16 +52,15 @@ class GoalCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        goalName,
+                        goal.goalName,
                         style: GoogleFonts.openSans(
-                          fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF173F70),
+                          fontSize: 18,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Target Hours: $targetHours',
+                        'Target Hours: ${goal.targetHours}',
                         style: GoogleFonts.openSans(
                           fontSize: 14,
                           color: const Color(0xFF173F70),
