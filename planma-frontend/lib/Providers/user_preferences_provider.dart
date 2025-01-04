@@ -35,7 +35,8 @@ class UserPreferencesProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        _userPreferences = data.map((item) => UserPreferences.fromJson(item)).toList();
+        _userPreferences =
+            data.map((item) => UserPreferences.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception('Failed to fetch user preferences');
@@ -46,7 +47,7 @@ class UserPreferencesProvider with ChangeNotifier {
     }
   }
 
-  // Create or Update User Preferences
+  // Create User Preferences
   Future<void> saveUserPreferences({
     required TimeOfDay usualSleepTime,
     required TimeOfDay usualWakeTime,
@@ -63,12 +64,9 @@ class UserPreferencesProvider with ChangeNotifier {
       throw Exception('Access token is missing or invalid');
     }
 
-    final url = prefId != null
-        ? Uri.parse("${baseUrl}userprefs/$prefId/") // Update URL
-        : Uri.parse("${baseUrl}userprefs/"); // Create URL
-
+    final url = Uri.parse("${baseUrl}userprefs/");
     try {
-      final response = await (prefId != null ? http.put : http.post)(
+      final response = await http.post(
         url,
         headers: {
           'Authorization': 'Bearer $_accessToken',
@@ -84,13 +82,122 @@ class UserPreferencesProvider with ChangeNotifier {
       print("Preferences saved: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final newUserPreferences = UserPreferences.fromJson(json.decode(response.body));
+        final newUserPreferences =
+            UserPreferences.fromJson(json.decode(response.body));
         _userPreferences.add(newUserPreferences);
+        notifyListeners();
       } else {
         throw Exception('Failed to save user preferences');
       }
     } catch (error) {
       print("Error saving user preferences: $error");
+      throw Exception("Error: $error");
+    }
+  }
+
+  // Save Sleep and Wake Times
+  Future<void> saveSleepWakeTimes({
+    required TimeOfDay usualSleepTime,
+    required TimeOfDay usualWakeTime,
+    required int prefId,
+  }) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    String formattedUsualSleepTime = _formatTimeOfDay(usualSleepTime);
+    String formattedUsualWakeTime = _formatTimeOfDay(usualWakeTime);
+
+    if (_accessToken == null) {
+      throw Exception('Access token is missing or invalid');
+    }
+
+    final url = Uri.parse("${baseUrl}userprefs/$prefId/");
+
+    try {
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'usual_sleep_time': formattedUsualSleepTime,
+          'usual_wake_time': formattedUsualWakeTime,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final updatedPreferences =
+            UserPreferences.fromJson(json.decode(response.body));
+
+        // Update only sleep/wake times in the local state
+        final index =
+            _userPreferences.indexWhere((pref) => pref.prefId == prefId);
+        if (index != -1) {
+          _userPreferences[index] = UserPreferences(
+            prefId: _userPreferences[index].prefId,
+            usualSleepTime: updatedPreferences.usualSleepTime,
+            usualWakeTime: updatedPreferences.usualWakeTime,
+            reminderOffsetTime: _userPreferences[index].reminderOffsetTime,
+          );
+        }
+        notifyListeners();
+      } else {
+        throw Exception('Failed to update sleep and wake times');
+      }
+    } catch (error) {
+      print("Error updating sleep and wake times: $error");
+      throw Exception("Error: $error");
+    }
+  }
+
+  // Save Reminder Offset Time
+  Future<void> saveReminderOffsetTime({
+    required String reminderOffsetTime,
+    required int prefId,
+  }) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    if (_accessToken == null) {
+      throw Exception('Access token is missing or invalid');
+    }
+
+    final url = Uri.parse("${baseUrl}userprefs/$prefId/");
+
+    try {
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'reminder_offset_time': reminderOffsetTime,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final updatedPreferences =
+            UserPreferences.fromJson(json.decode(response.body));
+
+        // Update only reminder offset time in the local state
+        final index =
+            _userPreferences.indexWhere((pref) => pref.prefId == prefId);
+        if (index != -1) {
+          _userPreferences[index] = UserPreferences(
+            prefId: _userPreferences[index].prefId,
+            usualSleepTime: _userPreferences[index].usualSleepTime,
+            usualWakeTime: _userPreferences[index].usualWakeTime,
+            reminderOffsetTime: updatedPreferences.reminderOffsetTime,
+          );
+        }
+        notifyListeners();
+      } else {
+        throw Exception('Failed to update reminder offset time');
+      }
+    } catch (error) {
+      print("Error updating reminder offset time: $error");
       throw Exception("Error: $error");
     }
   }

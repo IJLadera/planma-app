@@ -13,7 +13,7 @@ router.register(r'goal-schedules', GoalScheduleViewSet, basename='goalschedule')
 router.register(r'activities', ActivityViewSet, basename='activity')
 
 
-router.register(r'userprefs', UserPrefListCreateView, basename='userpref')
+router.register(r'userprefs', UserPreferenceView, basename='userpref')
 router.register(r'users', CustomUserViewSet, basename='user')
 
 

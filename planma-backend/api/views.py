@@ -397,7 +397,7 @@ class LogActivityUpdateView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #User Preferences
-class UserPrefListCreateView(viewsets.ModelViewSet):
+class UserPreferenceView(viewsets.ModelViewSet):
     serializer_class = UserPrefSerializer  
     permission_classes = [permissions.IsAuthenticated]
 
