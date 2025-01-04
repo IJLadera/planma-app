@@ -25,8 +25,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     "01 h : 00 m",
     "02 h : 00 m",
   ];
-  String _selectedTime = "01 h : 00 m"; // Default value for the dropdown
+  // String? _selectedTime; // Default value for the dropdown
   String? reminderOffsetTime;
+
+  String formatReminderOffset(String time) {
+    final parts = time.split(':'); // Split "01:00:00" into ["01", "00", "00"]
+    final hours = parts[0];
+    final minutes = parts[1];
+    return "${hours.padLeft(2, '0')} h : ${minutes.padLeft(2, '0')} m";
+  }
 
   @override
   void initState() {
@@ -38,11 +45,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             context.read<UserPreferencesProvider>().userPreferences;
         if (userPreferences.isNotEmpty) {
           setState(() {
-            sleepTime =
-                CustomWidget.parseTimeOfDay(userPreferences[0].usualSleepTime);
-            wakeTime =
-                CustomWidget.parseTimeOfDay(userPreferences[0].usualWakeTime);
-            reminderOffsetTime = userPreferences[0].reminderOffsetTime;
+            sleepTime = CustomWidget.parseTimeOfDay(userPreferences[0].usualSleepTime);
+            wakeTime = CustomWidget.parseTimeOfDay(userPreferences[0].usualWakeTime);
+            reminderOffsetTime = formatReminderOffset(userPreferences[0].reminderOffsetTime);
+            print('Reminder Time: $reminderOffsetTime');
           });
         }
       } catch (error) {
@@ -54,110 +60,126 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     });
   }
 
-// Helper method to parse time string into TimeOfDay
-
-  Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
-    final userPreferencesProvider = context.read<UserPreferencesProvider>();
-
-    final TimeOfDay initialTime = isSleepTime
-        ? sleepTime ??
-            TimeOfDay(hour: 23, minute: 0) // Default to 11:00 PM if null
-        : wakeTime ??
-            TimeOfDay(hour: 7, minute: 0); // Default to 7:00 AM if null
-
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-    );
-
-    if (picked != null) {
-      setState(() {
-        if (isSleepTime) {
-          sleepTime = picked; // Update the sleep time
-        } else {
-          wakeTime = picked; // Update the wake time
-        }
-      });
-    }
-  }
-
   Future<void> _showTimePickerDialog(
       BuildContext context, UserPreferencesProvider provider) async {
     // Show dialog with Sleep and Wake time options
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Change Sleep & Wake Time',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.openSans(
-                fontSize: 24, // Increased font size for the title
-                color: Color(0xFF173F70),
-                fontWeight: FontWeight.bold),
-          ),
-          content: Container(
-            height: 200, // Increased height for better space
-            width: 350, // Increased width for better space
-            padding: EdgeInsets.symmetric(horizontal: 5.0), // Added padding
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 20),
-                CustomWidget.buildTimePickerField(
-                  context: context,
-                  label: "Usual Sleep Time",
-                  time: sleepTime ?? TimeOfDay(hour: 23, minute: 0),
-                  onTap: () =>
-                      _selectTime(context, true), // true for sleep time
+        return StatefulBuilder(
+          // Use StatefulBuilder to update the dialog's state
+          builder: (BuildContext context, StateSetter setDialogState) {
+            return AlertDialog(
+              title: Text(
+                'Change Sleep & Wake Time',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.openSans(
+                    fontSize: 24, // Increased font size for the title
+                    color: Color(0xFF173F70),
+                    fontWeight: FontWeight.bold),
+              ),
+              content: Container(
+                height: 200, // Increased height for better space
+                width: 350, // Increased width for better space
+                padding: EdgeInsets.symmetric(horizontal: 5.0), // Added padding
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: 20),
+                    CustomWidget.buildTimePickerField(
+                      context: context,
+                      label: "Usual Sleep Time",
+                      time: sleepTime!, // Reference updated sleepTime
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: sleepTime!,
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            sleepTime = picked; // Update main state
+                          });
+                          setDialogState(() {
+                            // Update dialog state to reflect changes
+                            sleepTime = picked;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(
+                        height: 30), // Increased space between fields
+                    // Wake Time Picker
+                    CustomWidget.buildTimePickerField(
+                      context: context,
+                      label: "Usual Wake Time",
+                      time: wakeTime!, // Reference updated wakeTime
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: wakeTime!,
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            wakeTime = picked; // Update main state
+                          });
+                          setDialogState(() {
+                            // Update dialog state to reflect changes
+                            wakeTime = picked;
+                          });
+                        }
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 30), // Increased space between fields
-                // Wake Time Picker
-                CustomWidget.buildTimePickerField(
-                  context: context,
-                  label: "Usual Wake Time",
-                  time: wakeTime ?? TimeOfDay(hour: 7, minute: 0),
-                  onTap: () => _selectTime(
-                    context,
-                    false,
+              ),
+              actions: [
+                // Cancel Button
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.openSans(
+                        fontSize: 14, color: Color(0xFF173F70)),
+                  ),
+                ),
+                // Save Button
+                TextButton(
+                  onPressed: () async {
+                    final prefId = provider.userPreferences[0].prefId;
+
+                    if (prefId != null) {
+                      await provider.saveSleepWakeTimes(
+                        usualSleepTime: sleepTime!,
+                        usualWakeTime: wakeTime!,
+                        prefId: prefId,
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text("Sleep/Wake times updated successfully")),
+                      );
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: Text(
+                    'Save',
+                    style: GoogleFonts.openSans(
+                      fontSize: 14,
+                      color: Color(0xFF173F70),
+                    ),
                   ),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            // Cancel Button
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.openSans(
-                    fontSize: 14, color: Color(0xFF173F70)),
-              ),
-            ),
-            // Save Button
-            TextButton(
-              onPressed: () async {
-                // await saveUserPreferences(); // Save preferences
-                Navigator.of(context).pop(); // Close the dialog after saving
-              },
-              child: Text(
-                'Save',
-                style: GoogleFonts.openSans(
-                    fontSize: 14, color: Color(0xFF173F70)),
-              ),
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
 
   Future<void> _showOffsetReminderDialog(BuildContext context) async {
-    String _tempSelectedTime = _selectedTime;
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -192,10 +214,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               ),
                             ),
                             value: _timeOptions[index],
-                            groupValue: _tempSelectedTime,
+                            groupValue: reminderOffsetTime,
                             onChanged: (value) {
                               setState(() {
-                                _tempSelectedTime = value ?? '';
+                                reminderOffsetTime = value ?? '';
                               });
                             },
                           );
@@ -206,7 +228,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
               ),
               actions: [
-                // Cancel Button
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the dialog
@@ -214,20 +235,48 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   child: Text(
                     'Cancel',
                     style: GoogleFonts.openSans(
-                        fontSize: 14, color: Color(0xFF173F70)),
+                      fontSize: 14,
+                      color: Color(0xFF173F70),
+                    ),
                   ),
                 ),
-                // Save Button
                 TextButton(
                   onPressed: () async {
-                    // await saveUserPreferences(); // Save preferences
-                    Navigator.of(context)
-                        .pop(); // Close the dialog after saving
+                    final provider = context.read<UserPreferencesProvider>();
+                    final prefId = provider.userPreferences.isNotEmpty
+                        ? provider.userPreferences[0].prefId
+                        : null;
+
+                    final reminderOffsetDuration = provider.parseReminderOffset(reminderOffsetTime!);
+                    final reminderOffsetTimeString = reminderOffsetDuration.inSeconds.toString();
+
+                    try {
+                      await provider.saveReminderOffsetTime(
+                        reminderOffsetTime: reminderOffsetTimeString,
+                        prefId: prefId!,
+                      );
+                      print(
+                          "New Reminder Offset Time: $reminderOffsetTimeString");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                "Reminder offset time updated successfully")),
+                      );
+                      Navigator.of(context).pop();
+                    } catch (error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text("Failed to update reminder offset time")),
+                      );
+                    }
                   },
                   child: Text(
                     'Save',
                     style: GoogleFonts.openSans(
-                        fontSize: 14, color: Color(0xFF173F70)),
+                      fontSize: 14,
+                      color: Color(0xFF173F70),
+                    ),
                   ),
                 ),
               ],
