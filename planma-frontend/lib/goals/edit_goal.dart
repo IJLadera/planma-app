@@ -113,7 +113,7 @@ class _EditGoal extends State<EditGoal> {
         const SnackBar(content: Text('goal added successfully!')),
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update class schedule: $error')),

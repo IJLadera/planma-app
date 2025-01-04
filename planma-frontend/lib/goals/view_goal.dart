@@ -20,24 +20,30 @@ class GoalDetailScreen extends StatefulWidget {
 class _GoalDetailScreenState extends State<GoalDetailScreen> {
   List<Map<String, dynamic>>? sessions = [];
   String semesterDetails = 'Loading...';
-  late SemesterProvider semesterProvider;
-  late GoalProvider goalProvider;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchSemesterDetails();
-    });
+    _fetchSemesterDetails();
   }
 
   Future<void> _fetchSemesterDetails() async {
+    final goal = Provider.of<GoalProvider>(context, listen: false)
+        .goals
+        .firstWhere((g) => g.goalId == widget.goal.goalId);
+
+    if (goal.semester == null) {
+      setState(() {
+        semesterDetails = "N/A (Personal Goal)";
+      });
+      return;
+    }
+
     final semesterProvider =
         Provider.of<SemesterProvider>(context, listen: false);
-    print('Fetching semester with ID: ${widget.goal.semester}');
     try {
       final semester =
-          await semesterProvider.getSemesterDetails(widget.goal.semester!);
+          await semesterProvider.getSemesterDetails(goal.semester!);
       setState(() {
         semesterDetails =
             "${semester?['acad_year_start']} - ${semester?['acad_year_end']} ${semester?['semester']}";
@@ -82,9 +88,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<GoalProvider>(builder: (context, goalProvider, child) {
-      final goal = goalProvider.goals
-          .firstWhere((goal) => goal.goalId == widget.goal.goalId);
+    return Consumer2<GoalProvider, SemesterProvider>(
+        builder: (context, goalProvider, semesterProvider, child) {
+      // Dynamically fetch the updated goal
+      final goal =
+          goalProvider.goals.firstWhere((g) => g.goalId == widget.goal.goalId);
 
       return Scaffold(
         backgroundColor: Colors.white,
@@ -102,8 +110,14 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => EditGoal(goal: widget.goal)),
-                );
+                    builder: (context) => EditGoal(goal: goal),
+                  ),
+                ).then((updated) {
+                  if (updated == true) {
+                    _fetchSemesterDetails(); // Refresh semester details
+                    // print("gae");
+                  }
+                });
               },
             ),
             IconButton(
@@ -146,8 +160,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   const Divider(),
                   GoalDetailRow(label: 'Type:', detail: goal.goalType),
                   const Divider(),
-                  GoalDetailRow(label: 'Semester:', detail: semesterDetails),
-                  const Divider(),
+                  if (goal.goalType == 'Academic') ...[
+                    GoalDetailRow(
+                      label: 'Semester:',
+                      detail: semesterDetails,
+                    ),
+                    const Divider(),
+                  ],
                   const SizedBox(height: 8),
 
                   sessions!.isNotEmpty

@@ -48,7 +48,6 @@ class SemesterProvider with ChangeNotifier {
     final semesterUrl = Uri.parse("${baseUrl}semesters/$semesterId/"); // Correct URL format
 
     try {
-      // Sending GET request to fetch the semester details
       final response = await http.get(
         semesterUrl,
         headers: {
@@ -62,7 +61,7 @@ class SemesterProvider with ChangeNotifier {
         final semesterData = json.decode(response.body);
         // print("Semester details: $semesterData");
 
-        // Return the semester data as a Map
+        notifyListeners();
         return semesterData;
       } else {
         // If request fails, throw an exception with error details
