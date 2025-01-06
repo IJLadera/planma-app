@@ -10,6 +10,8 @@ import 'package:planma_app/user_profiile/widget/profile_upload.dart';
 import 'package:planma_app/user_profiile/widget/widget.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -28,6 +30,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   ];
   // String? _selectedTime; // Default value for the dropdown
   String? reminderOffsetTime;
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
 
   String formatReminderOffset(String time) {
     final parts = time.split(':'); // Split "01:00:00" into ["01", "00", "00"]
@@ -293,6 +297,50 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
+  Future<void> _chooseImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+    Navigator.pop(context); // Close the bottom sheet after selection
+  }
+
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.photo_camera),
+                title: Text(
+                  'Take Photo',
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                  ),
+                ),
+                onTap: () => _chooseImage(ImageSource.camera),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text(
+                  'Choose from Gallery',
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                  ),
+                ),
+                onTap: () => _chooseImage(ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     String? username = context.watch<UserProfileProvider>().username;
@@ -324,23 +372,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ImageUpload()),
-                );
-              },
+              onTap: _showImagePickerOptions,
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
                   CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.yellow,
-                    child: Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Colors.black,
-                    ),
+                    backgroundImage: _image != null ? FileImage(_image!) : null,
+                    child: _image == null
+                        ? Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.black,
+                          )
+                        : null,
                   ),
                   Container(
                     padding: EdgeInsets.all(6),
