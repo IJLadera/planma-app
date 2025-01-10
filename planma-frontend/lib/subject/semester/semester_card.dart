@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/subject/semester/edit_semester.dart';
 
 class SemesterCard extends StatelessWidget {
   final Map<String, dynamic> semester; // Change type to Map<String, dynamic>
@@ -55,6 +56,27 @@ class SemesterCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.edit,
+                  color: Color(0xFF173F70)), // Edit icon with the correct color
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => EditSemesterScreen()));
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.delete,
+                  color:
+                      Color(0xFF840000)), // Delete icon with the correct color
+              onPressed: () {},
             ),
           ],
         ),
