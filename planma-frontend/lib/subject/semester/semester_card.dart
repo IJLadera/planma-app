@@ -3,66 +3,56 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/subject/semester/edit_semester.dart';
 
 class SemesterCard extends StatelessWidget {
-  final String title;
-  final String dateRange;
-  final String yearLevel; // Changed to yearLevel
-  final String semester;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  final Map<String, dynamic> semester; // Change type to Map<String, dynamic>
 
   const SemesterCard({
-    Key? key,
-    required this.title,
-    required this.dateRange,
-    required this.yearLevel, // Modified to yearLevel
+    super.key,
     required this.semester,
-    required this.onEdit,
-    required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: Color(0xFFE3E3E3),
+        color: const Color(0xFFE3E3E3),
         borderRadius: BorderRadius.circular(12.0),
       ),
-      child: ListTile(
+      child: ListTile(    
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              "S.Y. ${semester['acad_year_start']} - ${semester['acad_year_end']}", // Access Map fields directly
               style: GoogleFonts.openSans(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF173F70),
+                color: const Color(0xFF173F70),
               ),
             ),
-            SizedBox(height: 4), // Adds space between title and subtitle
+            const SizedBox(height: 4),
           ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              dateRange,
+              "${semester['sem_start_date']} - ${semester['sem_end_date']}",
               style: GoogleFonts.openSans(
                 fontSize: 14,
-                color: Color(0xFF173F70),
+                color: const Color(0xFF173F70),
               ),
             ),
-            SizedBox(height: 4), // Adds space between dateRange and row
+            const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  "$yearLevel - $semester", // Concatenate yearLevel and semester
+                  "${semester['year_level']} - ${semester['semester']}",
                   style: GoogleFonts.openSans(
                     fontSize: 14,
-                    color: Color(0xFF173F70),
+                    color: const Color(0xFF173F70),
                   ),
                 ),
               ],
@@ -86,7 +76,7 @@ class SemesterCard extends StatelessWidget {
               icon: Icon(Icons.delete,
                   color:
                       Color(0xFF840000)), // Delete icon with the correct color
-              onPressed: onDelete,
+              onPressed: () {},
             ),
           ],
         ),
