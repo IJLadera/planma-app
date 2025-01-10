@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/user_profiile/edit_user.dart';
+import 'package:planma_app/user_profiile/widget/profile_upload.dart';
 import 'package:planma_app/user_profiile/widget/widget.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -23,6 +26,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   ];
   // String? _selectedTime; // Default value for the dropdown
   String? reminderOffsetTime;
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
 
   String formatReminderOffset(String time) {
     final parts = time.split(':'); // Split "01:00:00" into ["01", "00", "00"]
@@ -41,9 +46,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             context.read<UserPreferencesProvider>().userPreferences;
         if (userPreferences.isNotEmpty) {
           setState(() {
-            sleepTime = CustomWidget.parseTimeOfDay(userPreferences[0].usualSleepTime);
-            wakeTime = CustomWidget.parseTimeOfDay(userPreferences[0].usualWakeTime);
-            reminderOffsetTime = formatReminderOffset(userPreferences[0].reminderOffsetTime);
+            sleepTime =
+                CustomWidget.parseTimeOfDay(userPreferences[0].usualSleepTime);
+            wakeTime =
+                CustomWidget.parseTimeOfDay(userPreferences[0].usualWakeTime);
+            reminderOffsetTime =
+                formatReminderOffset(userPreferences[0].reminderOffsetTime);
             print('Reminder Time: $reminderOffsetTime');
           });
         }
@@ -243,8 +251,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         ? provider.userPreferences[0].prefId
                         : null;
 
-                    final reminderOffsetDuration = provider.parseReminderOffset(reminderOffsetTime!);
-                    final reminderOffsetTimeString = reminderOffsetDuration.inSeconds.toString();
+                    final reminderOffsetDuration =
+                        provider.parseReminderOffset(reminderOffsetTime!);
+                    final reminderOffsetTimeString =
+                        reminderOffsetDuration.inSeconds.toString();
 
                     try {
                       await provider.saveReminderOffsetTime(
@@ -283,6 +293,50 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
+  Future<void> _chooseImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+    Navigator.pop(context); // Close the bottom sheet after selection
+  }
+
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.photo_camera),
+                title: Text(
+                  'Take Photo',
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                  ),
+                ),
+                onTap: () => _chooseImage(ImageSource.camera),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text(
+                  'Choose from Gallery',
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                  ),
+                ),
+                onTap: () => _chooseImage(ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     String? username = context.watch<UserProfileProvider>().username;
@@ -295,7 +349,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.of(context).pop();
           },
         ),
         title: Text(
@@ -313,13 +367,36 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.yellow,
-              child: Icon(
-                Icons.person,
-                size: 50,
-                color: Colors.black,
+            GestureDetector(
+              onTap: _showImagePickerOptions,
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.yellow,
+                    backgroundImage: _image != null ? FileImage(_image!) : null,
+                    child: _image == null
+                        ? Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.black,
+                          )
+                        : null,
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.edit,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(height: 10),
