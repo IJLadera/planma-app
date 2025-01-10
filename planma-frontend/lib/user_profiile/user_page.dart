@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:planma_app/Front%20&%20back%20end%20connections/logout_service.dart';
 import 'package:planma_app/Providers/user_preferences_provider.dart';
-import 'package:planma_app/Providers/user_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
-import 'package:planma_app/authentication/log_in.dart';
 import 'package:planma_app/user_profiile/edit_user.dart';
 import 'package:planma_app/user_profiile/widget/profile_upload.dart';
 import 'package:planma_app/user_profiile/widget/widget.dart';

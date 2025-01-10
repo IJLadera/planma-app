@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
+import 'package:planma_app/Providers/goal_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/goals/edit_goal.dart';
-import 'package:planma_app/goals/edit_goal_session.dart';
+import 'package:planma_app/goals/add_goal_session.dart';
 import 'package:planma_app/goals/widget/goal_detail_row.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/goals/widget/goal_session_card.dart';
 import 'package:planma_app/models/goals_model.dart';
 import 'package:provider/provider.dart';
 
@@ -18,13 +20,13 @@ class GoalDetailScreen extends StatefulWidget {
 }
 
 class _GoalDetailScreenState extends State<GoalDetailScreen> {
-  List<Map<String, dynamic>>? sessions = [];
   String semesterDetails = 'Loading...';
 
   @override
   void initState() {
     super.initState();
     _fetchSemesterDetails();
+    _fetchGoalSessions();
   }
 
   Future<void> _fetchSemesterDetails() async {
@@ -53,6 +55,12 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         semesterDetails = 'Error fetching semester details';
       });
     }
+  }
+
+  Future<void> _fetchGoalSessions() async {
+    final scheduleProvider =
+        Provider.of<GoalScheduleProvider>(context, listen: false);
+    await scheduleProvider.fetchGoalSchedulesPerGoal(widget.goal.goalId!);
   }
 
   void _handleDelete(BuildContext context) async {
@@ -86,13 +94,21 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
-    return Consumer2<GoalProvider, SemesterProvider>(
-        builder: (context, goalProvider, semesterProvider, child) {
+    return Consumer3<GoalProvider, SemesterProvider, GoalScheduleProvider>(
+        builder: (context, goalProvider, semesterProvider, scheduleProvider, child) {
       // Dynamically fetch the updated goal
       final goal =
           goalProvider.goals.firstWhere((g) => g.goalId == widget.goal.goalId);
+
+      final sessions = scheduleProvider.goalschedules
+          .where((s) => s.goal?.goalId == widget.goal.goalId)
+          .toList();
+
+      // print("Sessions xd: $sessions");
 
       return Scaffold(
         backgroundColor: Colors.white,
@@ -107,15 +123,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             IconButton(
               icon: const Icon(Icons.edit, color: Color(0xFF173F70)),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
+                Navigator.push(context,MaterialPageRoute(
                     builder: (context) => EditGoal(goal: goal),
                   ),
                 ).then((updated) {
                   if (updated == true) {
                     _fetchSemesterDetails(); // Refresh semester details
-                    // print("gae");
+                    _fetchGoalSessions();
                   }
                 });
               },
@@ -149,117 +163,42 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 children: [
                   GoalDetailRow(label: 'Name:', detail: goal.goalName),
                   const Divider(),
-                  GoalDetailRow(
-                      label: 'Description:', detail: goal.goalDescription),
+                  GoalDetailRow(label: 'Description:', detail: goal.goalDescription),
                   const Divider(),
                   GoalDetailRow(label: 'Timeframe:', detail: goal.timeframe),
                   const Divider(),
-                  GoalDetailRow(
-                      label: 'Target Hours:',
-                      detail: goal.targetHours.toString()),
+                  GoalDetailRow(label: 'Target Hours:', detail: goal.targetHours.toString()),
                   const Divider(),
                   GoalDetailRow(label: 'Type:', detail: goal.goalType),
                   const Divider(),
                   if (goal.goalType == 'Academic') ...[
-                    GoalDetailRow(
-                      label: 'Semester:',
-                      detail: semesterDetails,
-                    ),
+                    GoalDetailRow(label: 'Semester:', detail: semesterDetails,),
                     const Divider(),
                   ],
-                  const SizedBox(height: 8),
-
-                  sessions!.isNotEmpty
+                  const SizedBox(height: 16),
+                  Text(
+                    'Sessions',
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF173F70),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  sessions.isNotEmpty
                       ? ListView.builder(
                           shrinkWrap: true,
-                          itemCount: sessions!.length,
+                          itemCount: sessions.length,
                           itemBuilder: (context, index) {
-                            final session = sessions![index];
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 4.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                      0xFFE0E0E0), // Background color (light gray)
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  children: [
-                                    // Play Icon
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: const Color(
-                                            0xFF173F70), // Icon background color
-                                      ),
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: const Icon(
-                                        Icons.play_arrow,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    // Vertical Divider
-                                    Container(
-                                      width: 1.5,
-                                      height: 30,
-                                      color: Colors.grey,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    // Session Details
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            session['sessionName'],
-                                            style: GoogleFonts.openSans(
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color(0xFF173F70),
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                session['date'] ?? 'Date',
-                                                style: GoogleFonts.openSans(
-                                                  color:
-                                                      const Color(0xFF173F70),
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              const Spacer(),
-                                              Text(
-                                                session['timePeriod'] ??
-                                                    '(Time Period)',
-                                                style: GoogleFonts.openSans(
-                                                  color:
-                                                      const Color(0xFF173F70),
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
+                            final session = sessions[index];
+                            return GoalSessionCard(session: session);
                           },
                         )
                       : Center(
                           child: Text(
                             'No sessions added yet.',
-                            style: GoogleFonts.openSans(
-                                color: const Color(0xFF173F70)),
+                            style: GoogleFonts.openSans(color: const Color(0xFF173F70)),
                           ),
                         ),
                   SizedBox(height: 12),
@@ -268,20 +207,18 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     alignment: Alignment.center,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditGoalSession(),
+                        Navigator.push(context,MaterialPageRoute(
+                            builder: (context) => AddGoalSession(
+                              goalName: goal.goalName,
+                              goalId: goal.goalId!
+                            ),
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFFB8B8B8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 24),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                       ),
                       child: Text(
                         'Add Session',
