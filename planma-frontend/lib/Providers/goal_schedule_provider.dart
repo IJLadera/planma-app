@@ -46,6 +46,35 @@ class GoalScheduleProvider extends ChangeNotifier {
     }
   }
 
+  //Fetch specific goal schedules
+  Future<void> fetchGoalSchedulesPerGoal(int goalId) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}goal-schedules/?goal_id=$goalId");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        _goalschedules =
+            data.map((item) => GoalSchedule.fromJson(item)).toList();
+        notifyListeners();
+      } else {
+        throw Exception(
+            'Failed to fetch goal schedules. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print("Error fetching goal schedules: $error");
+    }
+  }
+
   //Add a goal schedule
   Future<void> addGoalSchedule({
     required int goalId,
@@ -71,7 +100,7 @@ class GoalScheduleProvider extends ChangeNotifier {
     }
 
     bool isDuplicate = _goalschedules.any((schedule) =>
-      schedule.goalId == goalId &&
+      schedule.goal?.goalId == goalId &&
       schedule.scheduledDate == scheduledDate &&
       schedule.scheduledStartTime == formattedStartTime &&
       schedule.scheduledEndTime == formattedEndTime);
@@ -146,7 +175,7 @@ class GoalScheduleProvider extends ChangeNotifier {
     }
 
     bool isDuplicate = _goalschedules.any((schedule) =>
-      schedule.goalId == goalId &&
+      schedule.goal?.goalId == goalId &&
       schedule.scheduledDate == scheduledDate &&
       schedule.scheduledStartTime == formattedStartTime &&
       schedule.scheduledEndTime == formattedEndTime);
@@ -156,7 +185,7 @@ class GoalScheduleProvider extends ChangeNotifier {
           'Duplicate goal entry detected locally. Please modify your entry.');
     }
 
-    final url = Uri.parse("${baseUrl}goal-schedules/add_schedule/");
+    final url = Uri.parse("${baseUrl}goal-schedules/$goalScheduleId/");
 
     try {
       final response = await http.put(

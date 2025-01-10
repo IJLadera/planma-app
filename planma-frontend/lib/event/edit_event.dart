@@ -160,7 +160,6 @@ class _EditEvent extends State<EditEvent> {
         _scheduledDate == null ||
         startTimeString.isEmpty ||
         endTimeString.isEmpty ||
-        endTimeString.isEmpty ||
         _selectedEventType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields!')),
@@ -175,17 +174,16 @@ class _EditEvent extends State<EditEvent> {
       return;
     }
 
-    print('FROM UI:');
-    print('Event Name: $eventName');
-    print('event Description: $eventDesc');
-    print('location: $location');
-    print('Scheduled Date: $_scheduledDate');
-    print('Start Time: $startTime');
-    print('End Time: $endTime');
-    print('eventType: $_selectedEventType');
+    // print('FROM UI:');
+    // print('Event Name: $eventName');
+    // print('event Description: $eventDesc');
+    // print('location: $location');
+    // print('Scheduled Date: $_scheduledDate');
+    // print('Start Time: $startTime');
+    // print('End Time: $endTime');
+    // print('eventType: $_selectedEventType');
 
     try {
-      print('Starting to update task...');
       await provider.updateEvent(
         eventId: widget.event.eventId!,
         eventName: eventName,
@@ -337,6 +335,7 @@ class _EditEvent extends State<EditEvent> {
               ),
             ),
           ],
-        ));
+        )
+      );
   }
 }

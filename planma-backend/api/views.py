@@ -1157,8 +1157,10 @@ class GoalViewSet(viewsets.ModelViewSet):
 # Goal Schedule
 class GoalScheduleViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = GoalSchedule.objects.all()
     serializer_class = GoalScheduleSerializer
+
+    def get_queryset(self):
+        return GoalSchedule.objects.filter(goal_id__student_id=self.request.user)
 
     @action(detail=False, methods=['post'])
     def add_schedule(self, request):

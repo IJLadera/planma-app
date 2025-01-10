@@ -1,29 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/goal_schedule_provider.dart';
-import 'package:planma_app/models/goal_schedules_model.dart';
+import 'package:planma_app/goals/widget/widget.dart';
 import 'package:provider/provider.dart';
-import 'package:planma_app/task/widget/widgets.dart';
 
-class EditGoalSession extends StatefulWidget {
-  final GoalSchedule session;
-  
-  const EditGoalSession({
-    super.key,
-    required this.session
-  });
+class AddGoalSession extends StatefulWidget {
+  final String goalName;
+  final int goalId;
+
+  const AddGoalSession({super.key, required this.goalName, required this.goalId});
 
   @override
-  State<EditGoalSession> createState() => _EditGoalSessionState();
+  _AddGoalSession createState() => _AddGoalSession();
 }
 
-class _EditGoalSessionState extends State<EditGoalSession> {
+class _AddGoalSession extends State<AddGoalSession> {
   late TextEditingController _goalNameController;
-  late TextEditingController _startTimeController;
-  late TextEditingController _endTimeController;
+  final TextEditingController _startTimeController = TextEditingController();
+  final TextEditingController _endTimeController = TextEditingController();
 
   DateTime? _scheduledDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _goalNameController = TextEditingController(text: widget.goalName);
+  }
+
+  @override
+  void dispose() {
+    _goalNameController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+    super.dispose();
+  }
 
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
@@ -72,60 +82,28 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     }
   }
 
-  String _formatTimeForDisplay(String time24) {
-    final timeParts = time24.split(':');
-    final hour = int.parse(timeParts[0]);
-    final minute = int.parse(timeParts[1]);
-    final timeOfDay = TimeOfDay(hour: hour, minute: minute);
-
-    // Format to "H:mm a"
-    final now = DateTime.now();
-    final dateTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      timeOfDay.hour,
-      timeOfDay.minute,
-    );
-    return DateFormat.jm().format(dateTime);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _goalNameController = TextEditingController(text: widget.session.goal?.goalName);
-    _startTimeController = TextEditingController(
-        text: _formatTimeForDisplay(widget.session.scheduledStartTime));
-    _endTimeController = TextEditingController(
-        text: _formatTimeForDisplay(widget.session.scheduledEndTime));
-    _scheduledDate = DateTime.parse(widget.session.scheduledDate);
-  }
-
-  @override
-  void dispose() {
-    _goalNameController.dispose();
-    _startTimeController.dispose();
-    _endTimeController.dispose();
-    super.dispose();
-  }
-
-  void _editGoalSession(BuildContext context) async {
-    final provider = Provider.of<GoalScheduleProvider>(context, listen: false);
+  void _submitForm(BuildContext context) async {
+    final provider = Provider.of<GoalScheduleProvider>(context, listen: false);    
 
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
-
-    print(startTimeString);
-    print(endTimeString);
-
+    
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
+
+    print("Goal ID: ${widget.goalId}");
+    print("Session Date: $_scheduledDate");
+    print("Session Start: $startTimeString");
+    print("Session End: $endTimeString");
+    print("Session Start Formatted: $startTime");
+    print("Session End Formatted: $endTime");
 
     if (_scheduledDate == null ||
         startTimeString.isEmpty ||
         endTimeString.isEmpty) {
+      // Show error dialog if any field is empty
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields!')),
+        const SnackBar(content: Text('Please fill in all fields')),
       );
       return;
     }
@@ -138,31 +116,41 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     }
 
     try {
-      await provider.updateGoalSchedule(
-        goalScheduleId: widget.session.goalScheduleId!, 
-        goalId: widget.session.goal!.goalId!, 
-        scheduledDate: _scheduledDate!, 
-        startTime: startTime, 
-        endTime: endTime
+      await provider.addGoalSchedule(
+        goalId: widget.goalId,
+        scheduledDate: _scheduledDate!,
+        startTime: startTime,
+        endTime: endTime,
       );
-      print('Goal schedule updated successfully!');
 
-      // After validation and adding logic
+      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Goal schedule updated successfully!')),
+        const SnackBar(content: Text('Goal schedule added successfully!')),
       );
 
+      // Navigate back or clear fields (depends on use case)
       Navigator.pop(context);
+      _clearFields();
     } catch (error) {
+      // Handle errors from the provider
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update goal schedule: $error')),
+        SnackBar(content: Text('Error: $error')),
       );
     }
   }
 
+  // Valid Time Range Check
   bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
     return startTime.hour < endTime.hour ||
         (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+  }
+
+  // Clear fields after submit
+  void _clearFields() {
+    _scheduledDate = null;
+    _startTimeController.clear();
+    _endTimeController.clear();
+    setState(() {});
   }
 
   @override
@@ -170,7 +158,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Edit Goal Session',
+          'Add Goal Session',
           style: GoogleFonts.openSans(
             fontWeight: FontWeight.bold,
             color: Color(0xFF173F70),
@@ -234,7 +222,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             child: ElevatedButton(
-              onPressed: () => _editGoalSession(context),
+              onPressed: () => _submitForm(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF173F70),
                 shape: RoundedRectangleBorder(
@@ -244,7 +232,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
               ),
               child: Text(
-                'Edit Goal Session',
+                'Add Goal Session',
                 style: GoogleFonts.openSans(
                   fontSize: 16,
                   color: Color(0xFFFFFFFF),

@@ -92,22 +92,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return Consumer<EventsProvider>(builder: (context, eventProvider, child) {
       final event = eventProvider.events.firstWhere(
         (event) => event.eventId == widget.event.eventId,
-        orElse: () => Event(
-          eventId: -1,
-          eventName: 'N/A',
-          eventDesc: 'N/A',
-          location: 'N/A',
-          scheduledDate: DateTime(2020, 1, 1),
-          scheduledStartTime: '00:00',
-          scheduledEndTime: '00:00',
-          eventType: 'N/A',
-        ),
       );
       print("event.eventId: ${event.eventId}");
       print("widget.eventId: ${widget.event.eventId}");
       print("widget.event: ${widget.event}");
 
-      if (event.eventId == -1) {
+      if (event.eventId == null) {
         return Scaffold(
           appBar: AppBar(title: Text('Event Details')),
           body: Center(child: Text('Event not found')),
@@ -125,14 +115,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.close, color: Colors.blue),
+            icon: Icon(Icons.close, color: Color(0xFF173F70)),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
           actions: [
             IconButton(
-              icon: Icon(Icons.edit, color: Colors.blue),
+              icon: Icon(Icons.edit, color: Color(0xFF173F70)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -144,7 +134,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               },
             ),
             IconButton(
-              icon: Icon(Icons.delete, color: Colors.blue),
+              icon: Icon(Icons.delete, color: Color(0xFF173F70)),
               onPressed: () => _handleDelete(context),
             ),
           ],

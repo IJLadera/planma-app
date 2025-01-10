@@ -9,20 +9,42 @@ class CustomWidgets {
     TextEditingController controller,
     String labelText, {
     TextStyle? style,
+    TextStyle? labelStyle,
+    Color backgroundColor = const Color(0xFFF5F5F5),
+    Color readOnlyBackgroundColor =
+        const Color(0xFFE0E0E0), // Light grey for read-only
+    double borderRadius = 30.0,
+    EdgeInsetsGeometry contentPadding = const EdgeInsets.all(16),
+    bool readOnly = false,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(30),
+        color: readOnly
+            ? readOnlyBackgroundColor
+            : backgroundColor, // Change background for read-only
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: TextField(
         controller: controller,
-        style: style ?? GoogleFonts.openSans(fontSize: 14),
+        style: style ??
+            GoogleFonts.openSans(
+              fontSize: 14,
+              color: readOnly
+                  ? Colors.grey
+                  : Colors.black, // Grey out text for read-only
+            ),
+        readOnly: readOnly,
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: GoogleFonts.openSans(fontSize: 14),
+          labelStyle: labelStyle ??
+              GoogleFonts.openSans(
+                fontSize: 14,
+                color: readOnly
+                    ? Colors.grey
+                    : Colors.black, // Grey out label for read-only
+              ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding: contentPadding,
         ),
       ),
     );
@@ -61,22 +83,22 @@ class CustomWidgets {
   }
 
   static Widget buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
+    return Container(
+      margin: const EdgeInsets.only(
+          left: 16.0,
+          top: 8.0,
+          right: 16.0), // Adjust the margin values as needed
+      alignment: Alignment.centerLeft, // Ensures the text starts from the left
+      child: Text(
+        title,
+        style: GoogleFonts.openSans(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF173F70),
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   static Widget buildTimeField(
     String label,
@@ -128,7 +150,8 @@ class CustomWidgets {
           isExpanded: true,
           hint: Text(
             label,
-            style: textStyle ?? GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
+            style: textStyle ??
+                GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
           ),
           value: value,
           onChanged: onChanged,
