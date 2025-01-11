@@ -11,7 +11,7 @@ router.register(r'events', EventViewSet, basename='event')
 router.register(r'goals', GoalViewSet, basename='goal')
 router.register(r'goal-schedules', GoalScheduleViewSet, basename='goalschedule')
 router.register(r'activities', ActivityViewSet, basename='activity')
-
+router.register(r'attended-events', AttendedEventViewSet, basename='attendedevent')
 
 router.register(r'userprefs', UserPreferenceView, basename='userpref')
 router.register(r'users', CustomUserViewSet, basename='user')

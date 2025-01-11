@@ -30,6 +30,8 @@ class CustomEventSerializer(serializers.ModelSerializer):
         read_only_fields = ['student_id']
         
 class AttendedEventSerializer(serializers.ModelSerializer):
+    event_id = CustomEventSerializer()
+
     class Meta: 
         model = AttendedEvents
         fields = ['att_events_id','event_id', 'date', 'has_attended']
