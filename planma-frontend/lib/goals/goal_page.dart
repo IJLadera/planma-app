@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
+import 'package:planma_app/goals/widget/search_bar.dart';
 import 'package:planma_app/goals/create_goal.dart';
 import 'package:planma_app/goals/widget/goal_card.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -61,46 +62,32 @@ class _GoalPageState extends State<GoalPage> {
             ),
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Search Bar
-              TextField(
-                onChanged: _filterGoals,
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Goal Cards
-              Expanded(
-                child: filteredGoals.isNotEmpty
-                    ? ListView.builder(
-                        itemCount: filteredGoals.length,
-                        itemBuilder: (context, index) {
-                          final goal = filteredGoals[index];
-                          return GoalCard(goal: goal);
-                        },
-                      )
-                    : Center(
-                        child: Text(
-                          'No goals found',
-                          style: GoogleFonts.openSans(
-                            color: const Color(0xFF173F70),
-                          ),
+        body: Column(
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+              child: CustomSearchBar(),
+            ),
+            Expanded(
+              child: filteredGoals.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: filteredGoals.length,
+                      itemBuilder: (context, index) {
+                        final goal = filteredGoals[index];
+                        return GoalCard(goal: goal);
+                      },
+                    )
+                  : Center(
+                      child: Text(
+                        'No goals found',
+                        style: GoogleFonts.openSans(
+                          color: const Color(0xFF173F70),
                         ),
                       ),
-              ),
-            ],
-          ),
+                    ),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {

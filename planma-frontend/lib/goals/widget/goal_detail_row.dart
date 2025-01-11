@@ -14,25 +14,30 @@ class GoalDetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.openSans(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF173F70),
+          Expanded(
+            flex: 3,
+            child: Text(
+              label,
+              style: GoogleFonts.openSans(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF173F70),
+              ),
             ),
           ),
-          Text(
-            detail,
-            style: GoogleFonts.openSans(
-              fontSize: 14,
-              color: Color(0xFF173F70),
+          Expanded(
+            flex: 5,
+            child: Text(
+              detail,
+              style: GoogleFonts.openSans(
+                fontSize: 14,
+                color: Color(0xFF173F70),
+              ),
             ),
-          ),
+          )
         ],
       ),
     );
