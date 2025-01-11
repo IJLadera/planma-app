@@ -60,15 +60,13 @@ class TaskCard extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color:
-                    Color(0xFFC0D7F3).withOpacity(0.6), // Slight transparency
+                    Color(0xFFC0D7F3).withOpacity(0.6), 
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  // GestureDetector for the time icon (same as original position)
                   GestureDetector(
                     onTap: () {
-                      // Navigate to TimerPage when the time icon is tapped
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -110,7 +108,6 @@ class TaskCard extends StatelessWidget {
                           '${task.subject?.subjectCode} ($startTime - $endTime)',
                           style: GoogleFonts.openSans(
                             fontSize: 14,
-                            fontWeight: FontWeight.w500,
                             color: Color(0xFF173F70),
                           ),
                         ),

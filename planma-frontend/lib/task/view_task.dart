@@ -112,11 +112,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.close, color: Color(0xFF173F70)),
-            onPressed: () => Navigator.pop(context),
-          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.edit, color: Color(0xFF173F70)),

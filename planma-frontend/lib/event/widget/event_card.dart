@@ -69,7 +69,7 @@ class EventCard extends StatelessWidget {
                 const SizedBox(width: 3, height: 10),
                 // Divider
                 Container(
-                  height: 60, // Height of the divider
+                  height: 50, // Height of the divider
                   width: 2, // Thickness of the divider
                   color: const Color(0xFF30BB90), // Divider color
                 ),

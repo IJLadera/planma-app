@@ -15,19 +15,26 @@ class ByDateView extends StatelessWidget {
 
     // Categorize tasks
     final Map<String, List<Task>> groupedTasks = {
-      "Past": tasksView.where((task) => task.scheduledDate.isBefore(today)).toList(),
-      "Today": tasksView.where((task) => task.scheduledDate.isAtSameMomentAs(today)).toList(),
+      "Past": tasksView
+          .where((task) => task.scheduledDate.isBefore(today))
+          .toList(),
+      "Today": tasksView
+          .where((task) => task.scheduledDate.isAtSameMomentAs(today))
+          .toList(),
       "Tomorrow": tasksView
-          .where((task) => task.scheduledDate.isAtSameMomentAs(today.add(const Duration(days: 1))))
+          .where((task) => task.scheduledDate
+              .isAtSameMomentAs(today.add(const Duration(days: 1))))
           .toList(),
       "This Week": tasksView.where((task) {
         final weekEnd = today.add(Duration(days: 7 - today.weekday));
         return task.scheduledDate.isAfter(today) &&
             task.scheduledDate.isBefore(weekEnd) &&
-            !task.scheduledDate.isAtSameMomentAs(today.add(const Duration(days: 1)));
+            !task.scheduledDate
+                .isAtSameMomentAs(today.add(const Duration(days: 1)));
       }).toList(),
       "Future": tasksView
-          .where((task) => task.scheduledDate.isAfter(today.add(Duration(days: 7 - today.weekday))))
+          .where((task) => task.scheduledDate
+              .isAfter(today.add(Duration(days: 7 - today.weekday))))
           .toList(),
     };
 
@@ -43,11 +50,12 @@ class ByDateView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
+                      padding: const EdgeInsets.only(
+                          left: 16.0, right: 16.0, bottom: 8.0),
                       child: Text(
                         category,
                         style: GoogleFonts.openSans(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
