@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
+import 'package:planma_app/Providers/events_provider.dart';
+import 'package:planma_app/Providers/goal_provider.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/activities/activity_page.dart';
 import 'package:planma_app/core/widget/button_sheet.dart';
@@ -9,13 +15,59 @@ import 'package:planma_app/goals/goal_page.dart';
 import 'package:planma_app/reports/report_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
+import 'package:planma_app/timer/countdown/countdown_timer.dart';
 import 'package:planma_app/timetable/calendar.dart';
 import 'package:planma_app/user_profiile/user_page.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class Dashboard extends StatelessWidget {
+class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
+
+  @override
+  State<Dashboard> createState() => _DashboardState();
+}
+
+class _DashboardState extends State<Dashboard> {
+  String? selectedSemester;
+
+  @override
+  void initState() {
+    super.initState();
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
+    final classScheduleProvider =
+        Provider.of<ClassScheduleProvider>(context, listen: false);
+
+    semesterProvider.fetchSemesters().then((_) {
+      if (semesterProvider.semesters.isNotEmpty) {
+        // Set the default selected semester
+        setState(() {
+          selectedSemester =
+              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+        });
+
+        // Automatically fetch class schedules for the default semester
+        final defaultSemesterId = semesterProvider.semesters[0]['semester_id'];
+        classScheduleProvider.fetchClassSchedules(
+          selectedSemesterId: defaultSemesterId,
+        );
+      } else {
+        setState(() {
+          selectedSemester = "No semester available";
+        });
+      }
+    });
+
+    // Fetch data for all relevant providers when the screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TaskProvider>().fetchTasks();
+      // context.read<ClassScheduleProvider>().fetchClassSchedules(selectedSemesterId: 1);
+      context.read<EventsProvider>().fetchEvents();
+      context.read<ActivityProvider>().fetchActivity();
+      context.read<GoalProvider>().fetchGoals();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +81,7 @@ class Dashboard extends StatelessWidget {
           ),
         ),
         foregroundColor: Color(0xFF173F70),
+        backgroundColor: Color(0xFFFFFFFF),
         elevation: 2,
         actions: [
           IconButton(
@@ -44,7 +97,6 @@ class Dashboard extends StatelessWidget {
             },
           ),
         ],
-        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -67,71 +119,83 @@ class Dashboard extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  MenuButtonWidget(
-                    color: const Color(0xFF50B6FF),
-                    icon: Icons.check_circle,
-                    title: 'Tasks',
-                    subtitle: '4 tasks',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => TasksPage()),
-                      );
-                    },
+                  Consumer<TaskProvider>(
+                    builder: (context, taskProvider, _) => MenuButtonWidget(
+                      color: const Color(0xFF50B6FF),
+                      icon: Icons.check_circle,
+                      title: 'Tasks',
+                      subtitle: '${taskProvider.tasks.length} tasks',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => TasksPage()),
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 15),
-                  MenuButtonWidget(
-                    color: Color(0xFFFFE1BF),
-                    icon: Icons.description,
-                    title: 'Class Schedule',
-                    subtitle: '11 classes',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ClassSchedule()),
-                      );
-                    },
+                  Consumer2<ClassScheduleProvider, SemesterProvider>(
+                    builder: (context, classScheduleProvider, semesterProvider, _) => MenuButtonWidget(
+                      color: const Color(0xFFFFE1BF),
+                      icon: Icons.description,
+                      title: 'Class Schedule',
+                      subtitle: semesterProvider.semesters.isEmpty
+                            ? "0 classes"
+                            : '${classScheduleProvider.classSchedules.length} classes',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ClassSchedule()),
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 15),
-                  MenuButtonWidget(
-                    color: Color(0xFF7DCFB6),
-                    icon: Icons.event,
-                    title: 'Events',
-                    subtitle: '1 event',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => EventsPage()),
-                      );
-                    },
+                  Consumer<EventsProvider>(
+                    builder: (context, eventsProvider, _) => MenuButtonWidget(
+                      color: const Color(0xFF7DCFB6),
+                      icon: Icons.event,
+                      title: 'Events',
+                      subtitle: '${eventsProvider.events.length} events',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => EventsPage()),
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 15),
-                  MenuButtonWidget(
-                    color: Color(0xFFFBA2A2),
-                    icon: Icons.accessibility,
-                    title: 'Activities',
-                    subtitle: '1 activity',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ActivityPage()),
-                      );
-                    },
+                  Consumer<ActivityProvider>(
+                    builder: (context, activityProvider, _) => MenuButtonWidget(
+                      color: const Color(0xFFFBA2A2),
+                      icon: Icons.accessibility,
+                      title: 'Activities',
+                      subtitle: '${activityProvider.activity.length} activities',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ActivityPage()),
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 15),
-                  MenuButtonWidget(
-                    color: Color(0xFFD7C0F3),
-                    icon: FontAwesomeIcons.flag,
-                    title: 'Goals',
-                    subtitle: '1 goal',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => GoalPage()),
-                      );
-                    },
+                  Consumer<GoalProvider>(
+                    builder: (context, goalProvider, _) => MenuButtonWidget(
+                      color: Color(0xFFD7C0F3),
+                      icon: FontAwesomeIcons.flag,
+                      title: 'Goals',
+                      subtitle: '${goalProvider.goals.length} goals',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => GoalPage()),
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
@@ -139,7 +203,13 @@ class Dashboard extends StatelessWidget {
                       icon: FontAwesomeIcons.moon,
                       title: 'Sleep',
                       subtitle: '',
-                      onPressed: () {}),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => TimerPage(themeColor: Color(0xFF535D88)))
+                        );
+                      },
+                    ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
                       color: Color(0xFF537488),
