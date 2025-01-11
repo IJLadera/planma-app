@@ -149,7 +149,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               color: Colors.grey[100],
             ),
             child: Padding(
-              padding: EdgeInsets.all(32.0),
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

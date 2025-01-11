@@ -64,7 +64,7 @@ class GoalSessionCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               // Vertical Divider
-              Container(width: 1.5, height: 30, color: Colors.grey),
+              Container(width: 1.5, height: 40, color: Colors.grey),
               const SizedBox(width: 12),
               // Session Details
               Expanded(
@@ -90,7 +90,7 @@ class GoalSessionCard extends StatelessWidget {
                             fontSize: 14,
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 15),
                         Text(
                           "(${_formatTimeForDisplay(session.scheduledStartTime)} - ${_formatTimeForDisplay(session.scheduledEndTime)})",
                           style: GoogleFonts.openSans(

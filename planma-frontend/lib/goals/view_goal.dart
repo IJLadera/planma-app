@@ -94,12 +94,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Consumer3<GoalProvider, SemesterProvider, GoalScheduleProvider>(
-        builder: (context, goalProvider, semesterProvider, scheduleProvider, child) {
+        builder:
+            (context, goalProvider, semesterProvider, scheduleProvider, child) {
       // Dynamically fetch the updated goal
       final goal =
           goalProvider.goals.firstWhere((g) => g.goalId == widget.goal.goalId);
@@ -114,16 +113,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.close, color: Color(0xFF173F70)),
-            onPressed: () => Navigator.pop(context),
-          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.edit, color: Color(0xFF173F70)),
               onPressed: () {
-                Navigator.push(context,MaterialPageRoute(
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
                     builder: (context) => EditGoal(goal: goal),
                   ),
                 ).then((updated) {
@@ -163,29 +159,36 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 children: [
                   GoalDetailRow(label: 'Name:', detail: goal.goalName),
                   const Divider(),
-                  GoalDetailRow(label: 'Description:', detail: goal.goalDescription),
+                  GoalDetailRow(
+                      label: 'Description:', detail: goal.goalDescription),
                   const Divider(),
                   GoalDetailRow(label: 'Timeframe:', detail: goal.timeframe),
                   const Divider(),
-                  GoalDetailRow(label: 'Target Hours:', detail: goal.targetHours.toString()),
+                  GoalDetailRow(
+                      label: 'Target Hours:',
+                      detail: goal.targetHours.toString()),
                   const Divider(),
                   GoalDetailRow(label: 'Type:', detail: goal.goalType),
                   const Divider(),
                   if (goal.goalType == 'Academic') ...[
-                    GoalDetailRow(label: 'Semester:', detail: semesterDetails,),
+                    GoalDetailRow(
+                      label: 'Semester:',
+                      detail: semesterDetails,
+                    ),
                     const Divider(),
                   ],
                   const SizedBox(height: 16),
-                  Text(
-                    'Sessions',
-                    style: GoogleFonts.openSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF173F70),
+                  Center(
+                    child: Text(
+                      'Sessions',
+                      style: GoogleFonts.openSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF173F70),
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 12),
                   sessions.isNotEmpty
                       ? ListView.builder(
                           shrinkWrap: true,
@@ -198,7 +201,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                       : Center(
                           child: Text(
                             'No sessions added yet.',
-                            style: GoogleFonts.openSans(color: const Color(0xFF173F70)),
+                            style: GoogleFonts.openSans(
+                                color: const Color(0xFF173F70)),
                           ),
                         ),
                   SizedBox(height: 12),
@@ -207,24 +211,36 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     alignment: Alignment.center,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(context,MaterialPageRoute(
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
                             builder: (context) => AddGoalSession(
                               goalName: goal.goalName,
-                              goalId: goal.goalId!
+                              goalId: goal.goalId!,
                             ),
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFB8B8B8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                        backgroundColor: Colors.white, // Transparent background
+                        side: BorderSide(
+                          color: Color(
+                              0xFF173F70), // Border color matches the text
+                          width: 1, // Border width
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12, // Vertical padding
+                          horizontal: 20, // Horizontal padding
+                        ),
                       ),
                       child: Text(
                         'Add Session',
                         style: GoogleFonts.openSans(
-                          fontSize: 16,
-                          color: Color(0xFF173F70),
+                          fontSize: 12,
+                          color: Color(0xFF173F70), // Text color
                         ),
                       ),
                     ),

@@ -8,7 +8,8 @@ class AddGoalSession extends StatefulWidget {
   final String goalName;
   final int goalId;
 
-  const AddGoalSession({super.key, required this.goalName, required this.goalId});
+  const AddGoalSession(
+      {super.key, required this.goalName, required this.goalId});
 
   @override
   _AddGoalSession createState() => _AddGoalSession();
@@ -83,11 +84,11 @@ class _AddGoalSession extends State<AddGoalSession> {
   }
 
   void _submitForm(BuildContext context) async {
-    final provider = Provider.of<GoalScheduleProvider>(context, listen: false);    
+    final provider = Provider.of<GoalScheduleProvider>(context, listen: false);
 
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
-    
+
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
 
@@ -164,10 +165,6 @@ class _AddGoalSession extends State<AddGoalSession> {
             color: Color(0xFF173F70),
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         backgroundColor: Color(0xFFFFFFFF),
       ),
       body: Column(
@@ -180,7 +177,7 @@ class _AddGoalSession extends State<AddGoalSession> {
                   _buildTitle('Goal Name'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                    _goalNameController, 
+                    _goalNameController,
                     'Goal Name',
                     readOnly: true,
                   ),
@@ -229,7 +226,7 @@ class _AddGoalSession extends State<AddGoalSession> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
               ),
               child: Text(
                 'Add Goal Session',

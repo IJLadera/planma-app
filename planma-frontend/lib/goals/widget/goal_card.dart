@@ -5,7 +5,7 @@ import 'package:planma_app/models/goals_model.dart';
 
 class GoalCard extends StatelessWidget {
   final Goal goal;
-  final double progress = 0; 
+  final double progress = 0;
 
   const GoalCard({
     super.key,
@@ -35,14 +35,14 @@ class GoalCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: const Color(0xFFD7C0F3).withOpacity(0.7),
+              color: const Color(0xFFD7C0F3).withOpacity(0.6),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: 60,
+                  height: 70,
                   width: 2,
                   color: const Color(0xFFB480F3),
                 ),
@@ -55,14 +55,23 @@ class GoalCard extends StatelessWidget {
                         goal.goalName,
                         style: GoogleFonts.openSans(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 16,
+                          color: const Color(0xFF173F70),
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Target Hours: ${goal.targetHours}',
+                        'Target Hours',
                         style: GoogleFonts.openSans(
-                          fontSize: 14,
+                          fontSize: 12,
+                          color: const Color(0xFF173F70),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${goal.targetHours}',
+                        style: GoogleFonts.openSans(
+                          fontSize: 12,
                           color: const Color(0xFF173F70),
                         ),
                       ),
@@ -70,8 +79,8 @@ class GoalCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  width: 50,
-                  height: 50,
+                  width: 60,
+                  height: 60,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
