@@ -12,7 +12,7 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from datetime import datetime
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, now
 
 
 class ActivityViewSet(viewsets.ModelViewSet):
@@ -150,6 +150,26 @@ class EventViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Filter events based on the logged-in user
         return CustomEvents.objects.filter(student_id=self.request.user)
+    
+    @action(detail=False, methods=['get'])
+    def upcoming_events(self, request):
+        # Get events that are today or in the future
+        events = CustomEvents.objects.filter(
+            student_id=request.user.student_id,
+            scheduled_date__gte=now().date()
+        )
+        serializer = self.get_serializer(events, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def past_events(self, request):
+        # Get events that are in the past
+        events = CustomEvents.objects.filter(
+            student_id=request.user.student_id,
+            scheduled_date__lt=now().date()
+        )
+        serializer = self.get_serializer(events, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
     def add_event(self, request):
@@ -279,64 +299,87 @@ class EventViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        
-#below is the Attended Event Table
-
-class AttendedEventListCreateView(APIView):
-    
+class AttendedEventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    def post(self, request):
+    serializer_class = AttendedEventSerializer
+
+    def get_queryset(self):
+        # Filter attended events based on the logged-in user
+        return AttendedEvents.objects.filter(event_id__student_id=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def mark_attendance(self, request):
         data = request.data
-        serializer = AttendedEventSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the event_id field to the authenticated user on creation
-        
-class AttendedEventDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
 
-    def get(self,request,pk):
-        
-        event = CustomEvents.objects.get(event_id = pk)
-        attev = AttendedEvents.objects.filter(event_id = event)
-        serializer = AttendedEventSerializer(attev, many = True)
-        
-        return Response(serializer.data)
-    
-class AttendedEventDeleteView(APIView):
+        event_id = data.get('event_id')
+        date = data.get('date')
+        has_attended = data.get('has_attended', False)
 
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
+        # Validate input
+        if not all([event_id, date]):
+            return Response(
+                {'error': 'event_id and date are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         try:
-            
-            deleteattev = CustomEvents.objects.get(att_events_id = pk)
-            
-            deleteattev.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
+            # Validate the event exists
+            event = CustomEvents.objects.get(event_id=event_id, student_id=request.user)
+
+            # Check if attendance already exists for the event
+            attendance, created = AttendedEvents.objects.get_or_create(
+                event_id=event,
+                date=date,
+                defaults={'has_attended': has_attended}
+            )
+
+            if not created:
+                return Response(
+                    {'message': 'Attendance already marked for this event.'},
+                    status=status.HTTP_200_OK
+                )
+
+            # Serialize and return the new attendance
+            serializer = self.get_serializer(attendance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except CustomEvents.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class AttendedEventUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        attevid= CustomEvents.objects.get(att_events_id = pk)
+            return Response(
+                {'error': 'Event not found or not associated with the logged-in user.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
-        serializer = CustomTaskSerializer(instance=attevid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        has_attended = data.get('has_attended', None)
+        if has_attended is None:
+            return Response(
+                {'error': 'has_attended field is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Update the attendance status
+            instance.has_attended = has_attended
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 #below is the Activity Log view
 
