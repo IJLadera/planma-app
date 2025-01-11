@@ -110,16 +110,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           DateFormat('dd MMMM yyyy').format(event.scheduledDate);
 
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFFFFFFF),
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.close, color: Color(0xFF173F70)),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+          backgroundColor: Color(0xFFFFFFFF),
           actions: [
             IconButton(
               icon: Icon(Icons.edit, color: Color(0xFF173F70)),

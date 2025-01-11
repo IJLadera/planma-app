@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/event/create_event.dart';
 import 'package:planma_app/event/widget/by_date_view.dart';
 import 'package:planma_app/Providers/events_provider.dart';
+import 'package:planma_app/goals/widget/search_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -31,46 +32,31 @@ class _EventsPageState extends State<EventsPage> {
             style: GoogleFonts.openSans(
                 fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
           ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
           backgroundColor: Color(0xFFFFFFFF),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              // Search bar
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  hintStyle: GoogleFonts.openSans(),
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // List of events
-              Expanded(
-                child: eventProvider.events.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No events found',
-                          style: GoogleFonts.openSans(
-                              fontSize: 16, color: Colors.black),
+        body: Column(
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+              child: CustomSearchBar(),
+            ),
+            Expanded(
+              child: eventProvider.events.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No events found',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.black,
                         ),
-                      )
-                    : ByDateView(
-                        eventsView: eventProvider.events,
                       ),
-              )
-            ],
-          ),
+                    )
+                  : ByDateView(
+                      eventsView: eventProvider.events,
+                    ),
+            ),
+          ]
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
