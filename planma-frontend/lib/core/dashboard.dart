@@ -63,7 +63,7 @@ class _DashboardState extends State<Dashboard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TaskProvider>().fetchTasks();
       // context.read<ClassScheduleProvider>().fetchClassSchedules(selectedSemesterId: 1);
-      context.read<EventsProvider>().fetchEvents();
+      context.read<EventsProvider>().fetchUpcomingEvents();
       context.read<ActivityProvider>().fetchActivity();
       context.read<GoalProvider>().fetchGoals();
     });
@@ -157,7 +157,7 @@ class _DashboardState extends State<Dashboard> {
                       color: const Color(0xFF7DCFB6),
                       icon: Icons.event,
                       title: 'Events',
-                      subtitle: '${eventsProvider.events.length} events',
+                      subtitle: '${eventsProvider.upcomingEvents.length} events',
                       onPressed: () {
                         Navigator.push(
                           context,

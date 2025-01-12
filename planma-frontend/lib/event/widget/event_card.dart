@@ -46,9 +46,6 @@ class EventCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12.0),
           onTap: () {
-            // Navigate to the ViewEvent screen when tapped
-            print(
-                "Navigating to EventDetailScreen with eventId: ${event.eventId}");
             Navigator.push(
               context,
               MaterialPageRoute(

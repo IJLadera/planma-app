@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/attended_events_provider.dart';
 import 'package:planma_app/Providers/events_provider.dart';
 import 'package:planma_app/event/edit_event.dart';
 import 'package:planma_app/event/widget/event_detail_row.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/event/widget/widget.dart';
+import 'package:planma_app/models/attended_events_model.dart';
 import 'package:planma_app/models/events_model.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +25,7 @@ class EventDetailScreen extends StatefulWidget {
 class _EventDetailScreenState extends State<EventDetailScreen> {
   String selectedAttendance = 'Did Not Attend';
   late EventsProvider eventProvider;
+  bool isLoadingAttendance = true;
 
   // Function to determine color based on the selected value
   Color getColor(String value) {
@@ -35,6 +38,83 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         return Colors.green;
       default:
         return Colors.grey; // Default for unselected
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAttendanceStatus();
+  }
+
+  // Fetch attendance status and update the dropdown
+  void _initializeAttendanceStatus() async {
+    final provider =
+        Provider.of<AttendedEventsProvider>(context, listen: false);
+
+    try {
+      await provider.fetchAttendedEvents();
+
+      // Check if the event has an attendance record
+      final attendedEvent = provider.attendedEvents.firstWhere(
+        (attendedEvent) =>
+            attendedEvent.event?.eventId == widget.event.eventId &&
+            attendedEvent.date ==
+                DateFormat('yyyy-MM-dd').format(widget.event.scheduledDate),
+        orElse: () => AttendedEvent(
+          id: -1,
+          event: null,
+          date: '',
+          hasAttended: false,
+        ),
+      );
+
+      if (attendedEvent.id != -1) {
+        setState(() {
+          selectedAttendance =
+              attendedEvent.hasAttended ? 'Attended' : 'Did Not Attend';
+        });
+      } else {
+        print('No attendance record found for this event yet (Not an error).');
+      }
+    } catch (error) {
+      print('Error fetching attendance status: $error');
+    } finally {
+      setState(() {
+        isLoadingAttendance = false; // Attendance data is now loaded
+      });
+    }
+  }
+
+  void _handleAttendanceChange(String? newValue) async {
+    if (newValue != null) {
+      setState(() {
+        selectedAttendance = newValue; // Update UI
+      });
+
+      // Convert selectedAttendance to a boolean
+      bool hasAttended = newValue == 'Attended';
+
+      try {
+        final provider =
+            Provider.of<AttendedEventsProvider>(context, listen: false);
+        await provider.markAttendance(
+          eventId: widget.event.eventId!,
+          date: widget.event.scheduledDate,
+          hasAttended: hasAttended,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Attendance marked as $newValue'),
+          ),
+        );
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update attendance: $error'),
+          ),
+        );
+      }
     }
   }
 
@@ -93,9 +173,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       final event = eventProvider.events.firstWhere(
         (event) => event.eventId == widget.event.eventId,
       );
-      print("event.eventId: ${event.eventId}");
-      print("widget.eventId: ${widget.event.eventId}");
-      print("widget.event: ${widget.event}");
 
       if (event.eventId == null) {
         return Scaffold(
@@ -184,34 +261,35 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
                   const Divider(),
                   SizedBox(height: 16),
-                  // Dropdown for attendance
-                  Text(
-                    'Attendance',
-                    style: GoogleFonts.openSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  CustomWidgets.dropwDownForAttendance(
-                    label: 'Attendance',
-                    value: selectedAttendance,
-                    items: ['Did Not Attend', 'Excused', 'Attended'],
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          selectedAttendance = newValue; // Update the value
-                        });
-                      }
-                    },
-                    backgroundColor: Color(0XFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: CustomWidgets.getColor(
-                        selectedAttendance), // Use getColor as a static method
-                    borderRadius: 8.0,
-                    fontSize: 14.0,
-                  ),
+                  // Show a loading indicator while attendance is being fetched
+                  isLoadingAttendance
+                      ? Center(child: CircularProgressIndicator())
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Attendance',
+                              style: GoogleFonts.openSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            CustomWidgets.dropwDownForAttendance(
+                              label: 'Attendance',
+                              value: selectedAttendance,
+                              items: ['Did Not Attend', 'Attended'],
+                              onChanged: _handleAttendanceChange,
+                              backgroundColor: Color(0XFFF5F5F5),
+                              labelColor: Colors.black,
+                              textColor:
+                                  CustomWidgets.getColor(selectedAttendance),
+                              borderRadius: 8.0,
+                              fontSize: 14.0,
+                            ),
+                          ],
+                        ),
                   SizedBox(height: 16),
                 ],
               ),

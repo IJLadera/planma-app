@@ -3,26 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:planma_app/models/events_model.dart'; // Import the Event model
-
+import 'package:planma_app/models/events_model.dart';
 
 class EventsProvider with ChangeNotifier {
+  List<Event> _upcomingEvents = [];
+  List<Event> _pastEvents = [];
   List<Event> _events = [];
   String? _accessToken;
 
+  List<Event> get upcomingEvents => _upcomingEvents;
+  List<Event> get pastEvents => _pastEvents;
   List<Event> get events => _events;
   String? get accessToken => _accessToken;
 
-  
-
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  // Fetch events list
-  Future<void> fetchEvents() async {
+  // Fetch upcoming events list
+  Future<void> fetchUpcomingEvents() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${baseUrl}events/");
-    
+
+    final url = Uri.parse("${baseUrl}events/upcoming_events/");
+
     try {
       final response = await http.get(
         url,
@@ -30,19 +32,61 @@ class EventsProvider with ChangeNotifier {
           'Authorization': 'Bearer $_accessToken',
         },
       );
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        _events = data.map((eventJson) => Event.fromJson(eventJson)).toList();
-        notifyListeners();
+        final newEvents =
+            data.map((eventJson) => Event.fromJson(eventJson)).toList();
+
+        // Merge new events into the master list
+        _events.addAll(newEvents.where((newEvent) => !_events.any(
+            (existingEvent) => existingEvent.eventId == newEvent.eventId)));
+
+        _sortEvents(); // Reorganize events
       } else {
-        throw Exception('Failed to fetch Events. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch Events. Status Code: ${response.statusCode}');
       }
     } catch (error) {
       rethrow;
     }
   }
-    // Delete a Event
+
+  // Fetch past events list
+  Future<void> fetchPastEvents() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}events/past_events/");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final newEvents =
+            data.map((eventJson) => Event.fromJson(eventJson)).toList();
+
+        // Merge new events into the master list
+        _events.addAll(newEvents.where((newEvent) => !_events.any(
+            (existingEvent) => existingEvent.eventId == newEvent.eventId)));
+
+        _sortEvents(); // Reorganize events
+      } else {
+        throw Exception(
+            'Failed to fetch Events. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  // Delete a Event
   Future<void> deleteEvent(int eventId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -58,8 +102,8 @@ class EventsProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _events
-            .removeWhere((schedule) => schedule.eventId == eventId);
+        _events.removeWhere((event) => event.eventId == eventId);
+        _sortEvents(); // Reorganize events
         notifyListeners();
       } else {
         throw Exception(
@@ -67,22 +111,8 @@ class EventsProvider with ChangeNotifier {
       }
     } catch (error) {
       rethrow;
-    }    
+    }
   }
-
-  // Utility method to format TimeOfDay to HH:mm:ss
-  String _formatTimeOfDay(TimeOfDay time) {
-    final now = DateTime.now();
-    final dateTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      time.hour,
-      time.minute,
-    );
-    return DateFormat('HH:mm:ss').format(dateTime);
-  }
-
 
   //add a event
   Future<void> addEvent({
@@ -99,12 +129,13 @@ class EventsProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
 
     bool isConflict = _events.any((schedule) =>
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isConflict) {
       throw Exception(
@@ -112,11 +143,11 @@ class EventsProvider with ChangeNotifier {
     }
 
     bool isDuplicate = _events.any((schedule) =>
-      schedule.eventName == eventName &&
-      schedule.eventDesc == eventDesc &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.eventName == eventName &&
+        schedule.eventDesc == eventDesc &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isDuplicate) {
       throw Exception(
@@ -143,9 +174,9 @@ class EventsProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 201) {
-        final newSchedule = Event.fromJson(json.decode(response.body));
-        _events.add(newSchedule);
-        notifyListeners();
+        final newEvent = Event.fromJson(json.decode(response.body));
+        _events.add(newEvent);
+        _sortEvents(); // Reorganize events
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
@@ -157,16 +188,13 @@ class EventsProvider with ChangeNotifier {
       } else {
         throw Exception('Failed to add event: ${response.body}');
       }
-
     } catch (error) {
       print('Add event error: $error');
       throw Exception('Error adding event: $error');
     }
-
   }
 
-
-   // Edit a event
+  // Edit a event
   Future<void> updateEvent({
     required int eventId,
     required String eventName,
@@ -182,13 +210,14 @@ class EventsProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
 
     bool isConflict = _events.any((schedule) =>
-      schedule.eventId != eventId &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.eventId != eventId &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isConflict) {
       throw Exception(
@@ -196,11 +225,11 @@ class EventsProvider with ChangeNotifier {
     }
 
     bool isDuplicate = _events.any((schedule) =>
-      schedule.eventName == eventName &&
-      schedule.eventDesc == eventDesc &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.eventName == eventName &&
+        schedule.eventDesc == eventDesc &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isDuplicate) {
       throw Exception(
@@ -208,15 +237,6 @@ class EventsProvider with ChangeNotifier {
     }
 
     final url = Uri.parse("${baseUrl}events/$eventId/");
-
-    print('FROM PROVIDER:');
-    print('Event Name: $eventName');
-    print('Event Description: $eventDesc');
-    print ('Location: $location');
-    print('Scheduled Date: $formattedScheduledDate');
-    print('Start Time: $formattedStartTime');
-    print('End Time: $formattedEndTime');
-    print ('EventType: $eventType');
 
     try {
       final response = await http.put(
@@ -237,12 +257,11 @@ class EventsProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final updatedSchedule = Event.fromJson(json.decode(response.body));
-        final index = _events
-            .indexWhere((schedule) => schedule.eventId == eventId);
+        final updatedEvent = Event.fromJson(json.decode(response.body));
+        final index = _events.indexWhere((event) => event.eventId == eventId);
         if (index != -1) {
-          _events[index] = updatedSchedule;
-          notifyListeners();
+          _events[index] = updatedEvent;
+          _sortEvents(); // Reorganize events
         }
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
@@ -263,7 +282,44 @@ class EventsProvider with ChangeNotifier {
 
   void resetState() {
     _events = [];
+    _sortEvents();
+  }
+
+  // Utility method to format TimeOfDay to HH:mm:ss
+  String _formatTimeOfDay(TimeOfDay time) {
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
+    return DateFormat('HH:mm:ss').format(dateTime);
+  }
+
+  // Utility method to sort events if it is upcoming or past.
+  void _sortEvents() {
+    final now = DateTime.now();
+
+    _upcomingEvents = _events
+        .where((event) =>
+            event.scheduledDate.isAfter(now) ||
+            _isSameDay(event.scheduledDate, now))
+        .toList();
+
+    _pastEvents = _events
+        .where((event) =>
+            event.scheduledDate.isBefore(now) &&
+            !_isSameDay(event.scheduledDate, now))
+        .toList();
+
     notifyListeners();
   }
-}
 
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+}
