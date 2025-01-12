@@ -32,10 +32,12 @@ class ByDateView extends StatelessWidget {
             !task.scheduledDate
                 .isAtSameMomentAs(today.add(const Duration(days: 1)));
       }).toList(),
-      "Future": tasksView
-          .where((task) => task.scheduledDate
-              .isAfter(today.add(Duration(days: 7 - today.weekday))))
-          .toList(),
+      "Future": tasksView.where((task) {
+        final weekEnd = today.add(Duration(days: 7 - today.weekday));
+        return task.scheduledDate.isAfter(weekEnd) &&
+            !task.scheduledDate
+                .isAtSameMomentAs(today.add(const Duration(days: 1)));
+      }).toList(),
     };
 
     return ListView(
