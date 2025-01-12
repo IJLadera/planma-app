@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
-class EditProfileScreen extends StatelessWidget {
+class EditProfileScreen extends StatefulWidget {
   final String username;
   final String firstName;
   final String lastName;
-  final _formKey = GlobalKey<FormState>();
 
   EditProfileScreen({
     super.key,
@@ -17,10 +18,63 @@ class EditProfileScreen extends StatelessWidget {
   });
 
   @override
+  _EditProfileScreenState createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _chooseImage(BuildContext context, ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+    Navigator.pop(context); // Close the bottom sheet after selection
+  }
+
+  void _showImagePickerOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.photo_camera),
+                title: Text(
+                  'Take Photo',
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                  ),
+                ),
+                onTap: () => _chooseImage(context, ImageSource.camera),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text(
+                  'Choose from Gallery',
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                  ),
+                ),
+                onTap: () => _chooseImage(context, ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final usernameController = TextEditingController(text: username);
-    final firstNameController = TextEditingController(text: firstName);
-    final lastNameController = TextEditingController(text: lastName);
+    final usernameController = TextEditingController(text: widget.username);
+    final firstNameController = TextEditingController(text: widget.firstName);
+    final lastNameController = TextEditingController(text: widget.lastName);
 
     return Scaffold(
       appBar: AppBar(
@@ -53,20 +107,21 @@ class EditProfileScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.yellow,
-                    child: Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Colors.black,
-                    ),
+                    backgroundImage: _image != null ? FileImage(_image!) : null,
+                    child: _image == null
+                        ? Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.black,
+                          )
+                        : null,
                   ),
                   CircleAvatar(
                     radius: 16,
                     backgroundColor: Color(0xFF173F70),
                     child: IconButton(
                       icon: Icon(Icons.edit, size: 16, color: Colors.white),
-                      onPressed: () {
-                        // Handle edit profile picture
-                      },
+                      onPressed: () => _showImagePickerOptions(context),
                     ),
                   ),
                 ],

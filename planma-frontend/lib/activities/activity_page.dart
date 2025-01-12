@@ -3,6 +3,7 @@ import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:planma_app/activities/by_date_view.dart';
 import 'package:planma_app/activities/create_activity.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/activities/widget/history_activity.dart';
 import 'package:planma_app/activities/widget/search_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -16,19 +17,19 @@ class ActivityPage extends StatefulWidget {
 class _ActivityPageState extends State<ActivityPage> {
   bool isByDate = true;
 
-
   @override
   void initState() {
     super.initState();
-    final activityProvider = Provider.of<ActivityProvider>(context, listen: false);
+    final activityProvider =
+        Provider.of<ActivityProvider>(context, listen: false);
     // Automatically fetch activitys when screen loads
     activityProvider.fetchActivity();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<ActivityProvider>(builder: (context, activityProvider, child) {
+    return Consumer<ActivityProvider>(
+        builder: (context, activityProvider, child) {
       return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -37,6 +38,21 @@ class _ActivityPageState extends State<ActivityPage> {
                 fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
           ),
           backgroundColor: Color(0xFFFFFFFF),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: IconButton(
+                icon: Icon(Icons.history, color: Color(0xFF173F70), size: 28.0),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HistoryActivityScreen()),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -71,22 +87,34 @@ class _ActivityPageState extends State<ActivityPage> {
                       ),
                     ],
                   ),
+                  IconButton(
+                    icon: Icon(Icons.history,
+                        color: Color(0xFF173F70), size: 28.0),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HistoryActivityScreen()),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
             Expanded(
               child: activityProvider.activity.isEmpty
-                ? Center(
-                  child: Text(
-                    'No activity added yet',
-                    style: GoogleFonts.openSans(
-                      fontSize: 16,
-                      color: Colors.black,
+                  ? Center(
+                      child: Text(
+                        'No activity added yet',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    )
+                  : ByDateView(
+                      activityView: activityProvider.activity,
                     ),
-                  ),
-                )
-              : ByDateView(activityView: activityProvider.activity,
-              ),
             )
           ],
         ),
@@ -94,7 +122,8 @@ class _ActivityPageState extends State<ActivityPage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const AddActivityScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const AddActivityScreen()),
             );
           },
           backgroundColor: const Color(0xFF173F70),
