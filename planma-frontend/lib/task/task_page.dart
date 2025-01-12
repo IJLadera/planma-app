@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/task/create_task.dart';
+import 'package:planma_app/task/widget/history_task.dart';
 import 'package:planma_app/task/widget/search_bar.dart';
 import 'package:provider/provider.dart';
 import 'by_date_view.dart';
@@ -30,13 +31,27 @@ class _TasksPageState extends State<TasksPage> {
     return Consumer<TaskProvider>(builder: (context, taskProvider, child) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(
-            'Tasks',
-            style: GoogleFonts.openSans(
-                fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
-          ),
-          backgroundColor: Color(0xFFFFFFFF),
-        ),
+            title: Text(
+              'Tasks',
+              style: GoogleFonts.openSans(
+                  fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+            ),
+            backgroundColor: Color(0xFFFFFFFF),
+            actions: [
+              Padding(
+                  padding: const EdgeInsets.only(right: 20.0),
+                  child: IconButton(
+                    icon: Icon(Icons.history,
+                        color: Color(0xFF173F70), size: 28.0),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HistoryTaskScreen()),
+                      );
+                    },
+                  ))
+            ]),
         body: Column(
           children: [
             Padding(
@@ -70,23 +85,34 @@ class _TasksPageState extends State<TasksPage> {
                       ),
                     ],
                   ),
+                  IconButton(
+                    icon: Icon(Icons.history,
+                        color: Color(0xFF173F70), size: 28.0),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HistoryTaskScreen()),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
             Expanded(
               child: taskProvider.tasks.isEmpty
-                ? Center(
-                  child: Text(
-                    'No tasks added yet',
-                    style: GoogleFonts.openSans(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                )
-              : isByDate
-                ? ByDateView(tasksView: taskProvider.tasks)
-                : BySubjectView(tasksView: taskProvider.tasks),
+                  ? Center(
+                      child: Text(
+                        'No tasks added yet',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    )
+                  : isByDate
+                      ? ByDateView(tasksView: taskProvider.tasks)
+                      : BySubjectView(tasksView: taskProvider.tasks),
             ),
           ],
         ),
