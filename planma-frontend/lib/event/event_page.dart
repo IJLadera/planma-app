@@ -19,8 +19,8 @@ class _EventsPageState extends State<EventsPage> {
   void initState() {
     super.initState();
     final eventProvider = Provider.of<EventsProvider>(context, listen: false);
-    // Automatically fetch tasks when screen loads
-    eventProvider.fetchEvents();
+    // Automatically fetch events when screen loads
+    eventProvider.fetchUpcomingEvents();
   }
 
   @override
@@ -34,20 +34,6 @@ class _EventsPageState extends State<EventsPage> {
                 fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
           ),
           backgroundColor: Color(0xFFFFFFFF),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20.0),
-              child: IconButton(
-                icon: Icon(Icons.history, color: Color(0xFF173F70), size: 28.0),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HistoryEventScreen()),
-                  );
-                },
-              ),
-            ),
-          ],
         ),
         body: Column(children: [
           Padding(
@@ -71,7 +57,7 @@ class _EventsPageState extends State<EventsPage> {
             ),
           ),
           Expanded(
-            child: eventProvider.events.isEmpty
+            child: eventProvider.upcomingEvents.isEmpty
                 ? Center(
                     child: Text(
                       'No events found',
@@ -82,7 +68,7 @@ class _EventsPageState extends State<EventsPage> {
                     ),
                   )
                 : ByDateView(
-                    eventsView: eventProvider.events,
+                    eventsView: eventProvider.upcomingEvents,
                   ),
           ),
         ]),

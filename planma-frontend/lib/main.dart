@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/attended_events_provider.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/goal_schedule_provider.dart';
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => EventsProvider()),
         ChangeNotifierProvider(create: (context) => TaskProvider()),
         ChangeNotifierProvider(create: (context) => GoalScheduleProvider()),
+        ChangeNotifierProvider(create: (context) => AttendedEventsProvider()),
         ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
       ],
       child: MaterialApp(

@@ -334,10 +334,14 @@ class AttendedEventViewSet(viewsets.ModelViewSet):
             )
 
             if not created:
+                # Update the existing attendance record
+                attendance.has_attended = has_attended
+                attendance.save()
                 return Response(
-                    {'message': 'Attendance already marked for this event.'},
+                    {'message': 'Attendance updated successfully.'},
                     status=status.HTTP_200_OK
                 )
+
 
             # Serialize and return the new attendance
             serializer = self.get_serializer(attendance)
