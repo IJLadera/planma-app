@@ -3,7 +3,7 @@ import 'package:planma_app/event/create_event.dart';
 import 'package:planma_app/event/widget/by_date_view.dart';
 import 'package:planma_app/Providers/events_provider.dart';
 import 'package:planma_app/event/widget/history_event.dart';
-import 'package:planma_app/goals/widget/search_bar.dart';
+import 'package:planma_app/event/widget/search_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -49,7 +49,8 @@ class _EventsPageState extends State<EventsPage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HistoryEventScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => HistoryEventScreen()),
                     );
                   },
                 ),

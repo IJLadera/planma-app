@@ -153,7 +153,7 @@ class CustomWidgets {
     Color labelColor = Colors.black,
     Color textColor = Colors.black,
     double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(12),
+    EdgeInsets contentPadding = const EdgeInsets.all(100),
     double fontSize = 14.0,
     TextStyle? textStyle,
   }) {
@@ -161,6 +161,10 @@ class CustomWidgets {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(
+          color: Colors.black,
+          width: 1,
+        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(

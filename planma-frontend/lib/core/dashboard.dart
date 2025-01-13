@@ -135,13 +135,15 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 15),
                   Consumer2<ClassScheduleProvider, SemesterProvider>(
-                    builder: (context, classScheduleProvider, semesterProvider, _) => MenuButtonWidget(
+                    builder:
+                        (context, classScheduleProvider, semesterProvider, _) =>
+                            MenuButtonWidget(
                       color: const Color(0xFFFFE1BF),
                       icon: Icons.description,
                       title: 'Class Schedule',
                       subtitle: semesterProvider.semesters.isEmpty
-                            ? "0 classes"
-                            : '${classScheduleProvider.classSchedules.length} classes',
+                          ? "0 classes"
+                          : '${classScheduleProvider.classSchedules.length} classes',
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -157,7 +159,8 @@ class _DashboardState extends State<Dashboard> {
                       color: const Color(0xFF7DCFB6),
                       icon: Icons.event,
                       title: 'Events',
-                      subtitle: '${eventsProvider.upcomingEvents.length} events',
+                      subtitle:
+                          '${eventsProvider.upcomingEvents.length} events',
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -172,7 +175,8 @@ class _DashboardState extends State<Dashboard> {
                       color: const Color(0xFFFBA2A2),
                       icon: Icons.accessibility,
                       title: 'Activities',
-                      subtitle: '${activityProvider.activity.length} activities',
+                      subtitle:
+                          '${activityProvider.activity.length} activities',
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -199,17 +203,18 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
-                      color: Color(0xFF535D88),
-                      icon: FontAwesomeIcons.moon,
-                      title: 'Sleep',
-                      subtitle: '',
-                      onPressed: () {
-                        Navigator.push(
+                    color: Color(0xFF535D88),
+                    icon: FontAwesomeIcons.moon,
+                    title: 'Sleep',
+                    subtitle: '',
+                    onPressed: () {
+                      Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => TimerPage(themeColor: Color(0xFF535D88)))
-                        );
-                      },
-                    ),
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  TimerPage(themeColor: Color(0xFF535D88))));
+                    },
+                  ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(
                       color: Color(0xFF537488),
@@ -233,7 +238,7 @@ class _DashboardState extends State<Dashboard> {
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         child: Container(
-          height: 60.0, // Adjusted height for better appearance
+          height: 10.0,
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(30.0),
@@ -246,12 +251,13 @@ class _DashboardState extends State<Dashboard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.home),
+                  icon: const Icon(Icons.home, size: 40),
                   color: Color(0xFF173F70),
                   onPressed: () {},
                 ),
                 IconButton(
-                  icon: const Icon(Icons.calendar_today),
+                  icon: const Icon(Icons.calendar_month, size: 40),
+                  color: Color(0xFF173F70),
                   onPressed: () {
                     Navigator.push(
                       context,

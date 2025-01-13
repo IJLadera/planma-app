@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/Providers/time_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class StopwatchPage extends StatefulWidget {
   const StopwatchPage({super.key});
@@ -20,7 +21,13 @@ class _StopwatchPageState extends State<StopwatchPage> {
       onWillPop: () async => !disableBackButton,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Stopwatch"),
+          title: Text(
+            "Stopwatch",
+            style: GoogleFonts.openSans(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           leading: disableBackButton
               ? null
               : IconButton(
@@ -105,6 +112,9 @@ class _StopwatchPageState extends State<StopwatchPage> {
                         SnackBar(
                           content: Text(
                             "Time saved: ${_formatTime(timeProvider.elapsedTime)}",
+                            style: GoogleFonts.openSans(
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       );
@@ -126,9 +136,9 @@ class _StopwatchPageState extends State<StopwatchPage> {
                 ],
               ),
               const SizedBox(height: 30),
-              const Text(
+              Text(
                 "Recorded Times:",
-                style: TextStyle(
+                style: GoogleFonts.openSans(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),

@@ -59,8 +59,7 @@ class TaskCard extends StatelessWidget {
           child: Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color:
-                    Color(0xFFC0D7F3).withOpacity(0.6), 
+                color: Color(0xFFC0D7F3).withOpacity(0.6),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -71,7 +70,7 @@ class TaskCard extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              TimerPage(themeColor: Colors.blueAccent),
+                              TimerPage(themeColor: Color(0xFF50B6FF)),
                         ),
                       );
                     },

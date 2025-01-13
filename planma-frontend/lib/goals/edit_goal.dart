@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
