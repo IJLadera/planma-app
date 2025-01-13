@@ -4,6 +4,7 @@ import 'package:planma_app/Providers/time_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:planma_app/reports/report_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TimerPage extends StatefulWidget {
   final Color themeColor;
@@ -30,14 +31,20 @@ class _TimerPageState extends State<TimerPage> {
 
     return WillPopScope(
       onWillPop: () async {
-        // Prevent back navigation when the stopwatch is running or timer is running
         return !disableBackButton;
       },
       child: Scaffold(
         backgroundColor: widget.themeColor.withOpacity(0.1),
         appBar: AppBar(
           backgroundColor: widget.themeColor,
-          title: const Text("Timer & Stopwatch"),
+          title: Text(
+            "Timer & Stopwatch",
+            style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Colors.white, // Adjust the color based on your app theme
+            ),
+          ),
           leading: disableBackButton
               ? null
               : IconButton(
@@ -50,7 +57,7 @@ class _TimerPageState extends State<TimerPage> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              // Toggle Buttons for Timer/Stopwatch
+              SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ToggleButtons(
@@ -65,14 +72,23 @@ class _TimerPageState extends State<TimerPage> {
                   borderRadius: BorderRadius.circular(10),
                   selectedColor: Colors.white,
                   fillColor: widget.themeColor,
-                  children: const [
+                  children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text("Timer"),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      child: Text(
+                        "Timer",
+                        style: GoogleFonts.openSans(
+                            fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text("Stopwatch"),
+                      child: Text(
+                        "Stopwatch",
+                        style: GoogleFonts.openSans(
+                            fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
                     ),
                   ],
                 ),
@@ -132,7 +148,7 @@ class _TimerPageState extends State<TimerPage> {
                 onTap: () => _showTimePicker(context, timeProvider),
                 child: Text(
                   _formatTime(timeProvider.remainingTime),
-                  style: const TextStyle(
+                  style: GoogleFonts.openSans(
                     fontWeight: FontWeight.bold,
                     fontSize: 45,
                   ),
@@ -140,7 +156,7 @@ class _TimerPageState extends State<TimerPage> {
               ),
             ],
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 60),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -213,7 +229,13 @@ class _TimerPageState extends State<TimerPage> {
               children: [
                 Icon(Icons.save, color: Colors.white),
                 const SizedBox(height: 4),
-                Text("Save", style: TextStyle(color: Colors.white)),
+                Text(
+                  "Save",
+                  style: GoogleFonts.openSans(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
               ],
             ),
           ),
@@ -307,7 +329,14 @@ class _TimerPageState extends State<TimerPage> {
       padding: const EdgeInsets.all(16.0),
       height: 200,
       child: _recordedTimes.isEmpty
-          ? const Center(child: Text("No recorded times"))
+          ? Center(
+              child: Text(
+                "No recorded times",
+                style: GoogleFonts.openSans(
+                  fontSize: 14,
+                ),
+              ),
+            )
           : ListView.builder(
               itemCount: _recordedTimes.length,
               itemBuilder: (context, index) {

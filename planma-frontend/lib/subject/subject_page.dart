@@ -187,8 +187,8 @@ class _ClassScheduleState extends State<ClassSchedule> {
                           ),
                           IconButton(
                             icon: Icon(
-                              Icons.calendar_today,
-                              size: 18.0,
+                              Icons.calendar_month,
+                              size: 25.0,
                             ),
                             tooltip: 'View Semester',
                             onPressed: () {
@@ -204,7 +204,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
                             icon: const Icon(
                               Icons.filter_list,
                               color: Colors.black,
-                              size: 18.0,
+                              size: 25.0,
                             ),
                             onSelected: (value) {
                               setState(() {
@@ -263,8 +263,10 @@ class _ClassScheduleState extends State<ClassSchedule> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final semesterProvider = Provider.of<SemesterProvider>(context, listen: false);
-          final classScheduleProvider = Provider.of<ClassScheduleProvider>(context, listen: false);
+          final semesterProvider =
+              Provider.of<SemesterProvider>(context, listen: false);
+          final classScheduleProvider =
+              Provider.of<ClassScheduleProvider>(context, listen: false);
 
           Navigator.push(
             context,

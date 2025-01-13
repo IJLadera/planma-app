@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class CustomSearchBar extends StatelessWidget {
   const CustomSearchBar({super.key});
@@ -10,17 +11,24 @@ class CustomSearchBar extends StatelessWidget {
       child: TextField(
         decoration: InputDecoration(
           hintText: 'Search',
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide.none,
+          hintStyle: GoogleFonts.openSans(
+            // Apply Open Sans to the hint text
+            fontSize: 16,
+            color: Colors.grey,
           ),
-          filled: true,
-          fillColor: Colors.grey[200],
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: const BorderSide(
+                color: Colors.black,
+                width: 1,
+              )),
         ),
-        onChanged: (value) {
-          // TODO: Implement search functionality by filtering the goals list.
-        },
+        style: GoogleFonts.openSans(
+          // Apply Open Sans to the input text
+          fontSize: 16,
+          color: Colors.black,
+        ),
       ),
     );
   }

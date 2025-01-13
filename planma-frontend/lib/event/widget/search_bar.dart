@@ -18,8 +18,11 @@ class CustomSearchBar extends StatelessWidget {
           ),
           prefixIcon: const Icon(Icons.search),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+              borderRadius: BorderRadius.circular(20),
+              borderSide: const BorderSide(
+                color: Colors.black,
+                width: 1,
+              )),
         ),
         style: GoogleFonts.openSans(
           // Apply Open Sans to the input text
