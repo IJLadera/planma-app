@@ -142,6 +142,80 @@ class ActivityViewSet(viewsets.ModelViewSet):
                 {'error': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+# Activity Time Log
+class ActivityTimeLogViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = ActivityLogSerializer
+
+    def get_queryset(self):
+        # Filter logged activities based on the logged-in user
+        return ActivityTimeLog.objects.filter(activity_id__student_id=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def log_time(self, request):
+        data = request.data
+
+        activity_id = data.get('activity_id')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        duration = data.get('duration')
+        date_logged = data.get('date_logged')
+
+        # Validate input
+        if not all([activity_id, start_time, end_time, duration, date_logged]):
+            return Response(
+                {'error': 'Missing fields.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Validate the activity exists
+            activity = CustomActivity.objects.get(activity_id=activity_id, student_id=request.user)
+
+            # Check if a time log already exists for the same activity and date
+            existing_log = ActivityTimeLog.objects.filter(
+                activity_id=activity,
+                date_logged=date_logged
+            ).first()
+
+            if existing_log:
+                return Response(
+                    {'error': 'A time log for this activity and date already exists.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Convert duration from string to timedelta
+            hours, minutes, seconds = map(int, duration.split(':'))
+            duration_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+
+            # Create the time log
+            log = ActivityTimeLog.objects.create(
+                activity_id=activity,
+                start_time=start_time,
+                end_time=end_time,
+                duration=duration_timedelta,
+                date_logged=date_logged
+            )
+
+            # Update the activity status to "Completed"
+            activity.status = "Completed"
+            activity.save()
+
+            # Serialize and return the created time log
+            serializer = self.get_serializer(log)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomActivity.DoesNotExist:
+            return Response(
+                {'error': 'Activity not found or not associated with the logged-in user.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
@@ -384,65 +458,6 @@ class AttendedEventViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
-#below is the Activity Log view
-
-class LogActivityListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = ActivityLogSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class LogActivityDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        act = CustomActivity.objects.get(activity_id = pk)
-        actlog = ActivityLog.objects.filter(activity_id = act)
-        serializer = CustomActivitySerializer(actlog, many = True)
-        
-        return Response(serializer.data)
-    
-class LogActivityDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deleteactlog = ActivityLog.objects.get(act_log_id = pk)
-            
-            deleteactlog.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except ActivityLog.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class LogActivityUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        actlogid= ActivityLog.objects.get(act_log_id = pk)
-        
-        serializer = ActivityLogSerializer(instance=actlogid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
 #User Preferences
 class UserPreferenceView(viewsets.ModelViewSet):
     serializer_class = UserPrefSerializer  
@@ -455,9 +470,6 @@ class UserPreferenceView(viewsets.ModelViewSet):
         serializer.save(student_id=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        """
-        Override create to ensure a custom response structure.
-        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -465,9 +477,6 @@ class UserPreferenceView(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     def update(self, request, *args, **kwargs):
-        """
-        Override update to ensure the user can only edit their own preferences.
-        """
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
 
@@ -484,9 +493,6 @@ class UserPreferenceView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
-        """
-        Override destroy to ensure the user can only delete their own preferences.
-        """
         instance = self.get_object()
 
         # Ensure the logged-in user is the owner of the preference
@@ -502,66 +508,6 @@ class UserPreferenceView(viewsets.ModelViewSet):
             status=status.HTTP_204_NO_CONTENT
         )
 
-    
-# Class Attended
-
-class AttClassListCreateView(APIView):
-    
-    permission_classes = [permissions.AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = AttendedClassSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class AttClassDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        cusclass = CustomClass.objects.get(classsched_id = pk)
-        attclass = AttendedClass.objects.filter(classsched_id = cusclass)
-        serializer = UserPrefSerializer(attclass, many = True)
-        
-        return Response(serializer.data)
-    
-class AttClassDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
-        try:
-            
-            deleteattclass = AttendedClass.objects.get(att_class_id = pk)
-            
-            deleteattclass.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except AttendedClass.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
-
-class AttClassUpdateView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        classid= AttendedClass.objects.get(att_class_id = pk)
-        
-        serializer = AttendedClassSerializer(instance=classid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
-# OLANGO VIEWS
 # User/Student
 class CustomUserViewSet(UserViewSet):
     def create(self, request, *args, **kwargs):
@@ -887,6 +833,90 @@ class SemesterViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+# Class Attendance
+class AttendedClassViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = AttendedClassSerializer
+
+    def get_queryset(self):
+        # Filter attended classes based on the logged-in user
+        return AttendedClass.objects.filter(classched_id__student_id=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def mark_attendance(self, request):
+        data = request.data
+
+        classsched_id = data.get('classsched_id')
+        date = data.get('date')
+        status = data.get('status')
+
+        # Validate input
+        if not all([classsched_id, date]):
+            return Response(
+                {'error': 'classsched_id and date are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Validate the class exists
+            classes = CustomClassSchedule.objects.get(classsched_id=classsched_id, student_id=request.user)
+
+            # Check if attendance already exists for the class
+            attendance, created = AttendedClass.objects.get_or_create(
+                classsched_id=classes,
+                date=date,
+                status=status
+            )
+
+            if not created:
+                # Update the existing attendance record
+                attendance.status = status
+                attendance.save()
+                return Response(
+                    {'message': 'Attendance updated successfully.'},
+                    status=status.HTTP_200_OK
+                )
+
+            # Serialize and return the new attendance
+            serializer = self.get_serializer(attendance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomClassSchedule.DoesNotExist:
+            return Response(
+                {'error': 'ClassSchedule not found or not associated with the logged-in user.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        status = data.get('status', None)
+        if status is None:
+            return Response(
+                {'error': 'status field is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Update the attendance status
+            instance.status = status
+            instance.save()
+
+            # Serialize and return the updated data
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # Task
 class TaskViewSet(viewsets.ModelViewSet):
@@ -1046,6 +1076,80 @@ class TaskViewSet(viewsets.ModelViewSet):
                 {'error': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+# Task Time Log
+class TaskTimeLogViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = TaskLogSerializer
+
+    def get_queryset(self):
+        # Filter logged tasks based on the logged-in user
+        return TaskTimeLog.objects.filter(task_id__student_id=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def log_time(self, request):
+        data = request.data
+
+        task_id = data.get('task_id')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        duration = data.get('duration')
+        date_logged = data.get('date_logged')
+
+        # Validate input
+        if not all([task_id, start_time, end_time, duration, date_logged]):
+            return Response(
+                {'error': 'Missing fields.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Validate the task exists
+            task = CustomTask.objects.get(task_id=task_id, student_id=request.user)
+
+            # Check if a time log already exists for the same task and date
+            existing_log = TaskTimeLog.objects.filter(
+                task_id=task,
+                date_logged=date_logged
+            ).first()
+
+            if existing_log:
+                return Response(
+                    {'error': 'A time log for this task and date already exists.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Convert duration from string to timedelta
+            hours, minutes, seconds = map(int, duration.split(':'))
+            duration_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+
+            # Create the time log
+            log = TaskTimeLog.objects.create(
+                task_id=task,
+                start_time=start_time,
+                end_time=end_time,
+                duration=duration_timedelta,
+                date_logged=date_logged
+            )
+
+            # Update the task status to "Completed"
+            task.status = "Completed"
+            task.save()
+
+            # Serialize and return the created time log
+            serializer = self.get_serializer(log)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomTask.DoesNotExist:
+            return Response(
+                {'error': 'Task not found or not associated with the logged-in user.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # Goals
 class GoalViewSet(viewsets.ModelViewSet):
@@ -1066,10 +1170,7 @@ class GoalViewSet(viewsets.ModelViewSet):
         target_hours = data.get('target_hours')
         goal_type = data.get('goal_type')
         semester_id = data.get('semester_id')
-        student_id = request.user.student_id  # Authenticated user
-
-        # print(f"Authenticated User: {request.user}")
-        # print(f"Student ID: {student_id}")
+        student_id = request.user.student_id
 
         # Validate input
         if not all([goal_name, goal_desc, timeframe, target_hours, goal_type]):
@@ -1247,6 +1348,7 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
                 scheduled_date=scheduled_date,
                 scheduled_start_time=scheduled_start_time,
                 scheduled_end_time=scheduled_end_time,
+                status='Pending',
             )
 
             # Serialize and return the created data
@@ -1323,123 +1425,143 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-#Might delete
 # Goal Progress
-
-class GoalProgressListCreateView(APIView):
-    
+class GoalProgressViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    def post(self, request):
+    serializer_class = GoalProgressSerializer
+
+    def get_queryset(self):
+        # Filter logged goal sessions based on the logged-in user
+        return GoalProgress.objects.filter(goal_id__student_id=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def log_time(self, request):
         data = request.data
-        serializer = GoalProgressSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
-        
-class GoalProgressDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
 
-    def get(self,request,pk):
-        
-        goal = Goals.objects.get(goal_id = pk)
-        goalprog = GoalProgress.objects.filter(student_id = goal)
-        serializer = GoalProgressSerializer(goalprog, many = True)
-        
-        return Response(serializer.data)
-    
-class GoalProgressDeleteView(APIView):
+        goal_id = data.get('goal_id')
+        goalschedule_id = data.get('goalschedule_id')
+        session_date = data.get('session_date')
+        session_start_time = data.get('session_start_time')
+        session_end_time = data.get('session_end_time')
+        session_duration = data.get('session_duration')
 
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
+        # Validate input
+        if not all([goal_id, goalschedule_id, session_date, session_start_time, session_end_time, session_duration]):
+            return Response(
+                {'error': 'Missing fields.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         try:
+            # Validate the goal and goal schedule exists
+            goal = Goals.objects.get(goal_id=goal_id, student_id=request.user)
+            schedule = GoalSchedule.objects.get(goalschedule_id=goalschedule_id, goal_id=goal)
+
+            # Check if a time log already exists for the same goal schedule and date
+            existing_log = GoalProgress.objects.filter(
+                goal_id=goal,
+                goalschedule_id=schedule,
+                session_date=session_date
+            ).first()
+
+            if existing_log:
+                return Response(
+                    {'error': 'A time log for this goal schedule and date already exists.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
-            deletegoals = GoalProgress.objects.get(goalprogress_id = pk)
-            
-            deletegoals.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except GoalProgress.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+            # Convert duration from string to timedelta
+            hours, minutes, seconds = map(int, session_duration.split(':'))
+            duration_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
-class GoalProgressUpdateView(APIView):
+            # Check if attendance already exists for the event
+            log = GoalProgress.objects.create(
+                goal_id=goal,
+                goalschedule_id=schedule,
+                session_date=session_date,
+                session_start_time=session_start_time,
+                session_end_time=session_end_time,
+                session_duration=duration_timedelta
+            )
 
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        goalid= GoalProgress.objects.get(goalprogress_id = pk)
-        
-        serializer = GoalProgressSerializer(instance=goalid, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            # Update the goal schedule status to "Completed"
+            schedule.status = "Completed"
+            schedule.save()
 
+            # Serialize and return the new attendance
+            serializer = self.get_serializer(log)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
-
+        except Goals.DoesNotExist:
+            return Response(
+                {'error': 'Goal not found or not associated with the logged-in user.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except GoalSchedule.DoesNotExist:
+            return Response(
+                {'error': 'Goal schedule not found or not associated with the logged-in user.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 #Sleep
-class SleepLogListCreateView(APIView):
-    
+class SleepLogViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
-    def post(self, request):
+    serializer_class = SleepLogSerializer
+
+    def get_queryset(self):
+        # Filter logged sleep sessions based on the logged-in user
+        return SleepLog.objects.filter(student_id=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def log_time(self, request):
         data = request.data
-        serializer = SleepLogSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({**serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        # Set the student_id field to the authenticated user on creation
+
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        duration = data.get('duration')
+        date_logged = data.get('date_logged')
+        student_id = request.user.student_id
+
+        # Validate input
+        if not all([start_time, end_time, duration, date_logged]):
+            return Response(
+                {'error': 'Missing fields.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-class SleepLogDetailView(APIView):
-   
-    permission_classes = [permissions.AllowAny]
-
-    def get(self,request,pk):
-        
-        user = CustomUser.objects.get(student_id = pk)
-        sleep = CustomTask.objects.filter(student_id = user)
-        serializer = CustomTaskSerializer(sleep, many = True)
-
-        return Response(serializer.data)
-    
-class SleepLogDeleteView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-    
-    def delete(self,request,pk):
         try:
-            
-            deletegoals = SleepLog.objects.get(goalschedule_id = pk)
-            
-            deletegoals.delete()
-            
-            return Response({"message : Post deleted Successfully"}, status=status.HTTP_200_OK)
-        except SleepLog.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
 
-class SleepLogUpdateView(APIView):
+            hours, minutes, seconds = map(int, duration.split(':'))
+            duration_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
-    permission_classes = [permissions.AllowAny]
-    
-    def put(self, request, pk):
-        data= request.data
-        sleeplog= SleepLog.objects.get(sleep_log_id = pk)
-        
-        serializer = GoalScheduleSerializer(instance=sleeplog, data=data)
-        if serializer.is_valid():
-            
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            # Create Sleep Log
+            sleep = SleepLog.objects.create(
+                student_id=student,
+                start_time=start_time,
+                end_time=end_time,
+                duration=duration_timedelta,
+                date_logged=date_logged
+            )
+
+            # Serialize and return the created data
+            serializer = self.get_serializer(sleep)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Authenticated user not found in CustomUser table.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
