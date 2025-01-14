@@ -50,11 +50,12 @@ class CustomActivitySerializer(serializers.ModelSerializer):
         read_only_fields = ['student_id']
         
 class ActivityLogSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = ActivityLog
-        fields = ['act_log_id', 'activity_id', 'start_time', 
-                  'end_time', 'duration', 'date_logged']
+    activity_id = CustomActivitySerializer()
 
+    class Meta: 
+        model = ActivityTimeLog
+        fields = ['activity_log_id', 'activity_id', 'start_time', 
+                  'end_time', 'duration', 'date_logged']
 
 class UserPrefSerializer(serializers.ModelSerializer):
     class Meta: 
@@ -62,7 +63,6 @@ class UserPrefSerializer(serializers.ModelSerializer):
         fields = ['pref_id', 'usual_sleep_time', 'usual_wake_time', 
                   'reminder_offset_time', 'student_id']
         read_only_fields = ['student_id']
-
         
 class CustomSemesterSerializer(serializers.ModelSerializer):
     student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
@@ -99,10 +99,12 @@ class CustomClassScheduleSerializer(serializers.ModelSerializer):
         read_only_fields = ['classsched_id']
 
 class AttendedClassSerializer(serializers.ModelSerializer):
+    classsched_id = CustomClassScheduleSerializer()
+
     class Meta: 
         model = AttendedClass
         fields = ['att_class_id', 'classsched_id', 'date', 
-                  'isExcused', 'hasAttended']
+                  'status']
         
 class CustomTaskSerializer(serializers.ModelSerializer):
     subject_id = CustomSubjectSerializer()
@@ -117,6 +119,16 @@ class CustomTaskSerializer(serializers.ModelSerializer):
             'status', 'subject_id', 'student_id'
         ]
         read_only_fields = ['student_id']
+
+class TaskLogSerializer(serializers.ModelSerializer):
+    task_id = CustomTaskSerializer()
+
+    class Meta:
+        model = TaskTimeLog
+        fields = [
+            'task_log_id', 'task_id', 'start_time', 
+            'end_time', 'duration', 'date_logged'
+        ]
                 
 class GoalsSerializer(serializers.ModelSerializer):
     semester_id = CustomSemesterSerializer()
@@ -128,23 +140,29 @@ class GoalsSerializer(serializers.ModelSerializer):
                   'timeframe', 'goal_desc', 'goal_type',
                   'student_id', 'semester_id']
         read_only_fields = ['student_id']
-        
-class GoalProgressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GoalProgress
-        fields = ['goalprogress_id', 'goal_id', 'scheduled_start_time'
-                  'scheduled_end_time', 'session_duration']
-        
+
 class GoalScheduleSerializer(serializers.ModelSerializer):
     goal_id = GoalsSerializer()
 
     class Meta:
         model = GoalSchedule
         fields = ['goalschedule_id', 'goal_id', 'scheduled_date','scheduled_start_time',
-                  'scheduled_end_time']
+                  'scheduled_end_time', 'status']
         read_only_fields = ['goal_id']
+        
+class GoalProgressSerializer(serializers.ModelSerializer):
+    goal_id = GoalsSerializer()
+
+
+    class Meta:
+        model = GoalProgress
+        fields = ['goalprogress_id', 'goal_id', 'goalschedule_id', 
+                  'session_date', 'session_start_time', 'session_end_time', 
+                  'session_duration']
 
 class SleepLogSerializer(serializers.ModelSerializer):
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
     class Meta:
         model = SleepLog
         fields = ['sleep_log_id', 'student_id', 'start_time',

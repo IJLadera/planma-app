@@ -6,11 +6,6 @@ import uuid
 from django.conf import settings
 from django_enumfield import enum
 
-# class EnumFields(enum.Enum):
-#     PENDING = 0
-#     IN_PROGRESS = 1
-#     COMPLETED = 2
-
 class AppUserManager(BaseUserManager):
     def create_user(self,firstname, lastname, email, username, password=None):
             if not email:
@@ -24,8 +19,7 @@ class AppUserManager(BaseUserManager):
             user.set_password(password)
             user.save()
 
-            return user
-        
+            return user  
         
     def create_superuser(self, firstname, lastname, email, username, password=None):
             if not email:
@@ -43,8 +37,6 @@ class AppUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser,PermissionsMixin):
-    
-    
     student_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     firstname = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
@@ -52,7 +44,6 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     username = models.CharField(max_length=50)
     password=models.CharField(max_length=288)
     is_staff=models.BooleanField(default=False)
-    
 
     is_active = models.BooleanField(default=True)
 
@@ -64,11 +55,9 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
 
     def str(self):
         return self.email
-    
 
 
 class CustomEvents(models.Model):
-    
      # Primary Key
     event_id = models.AutoField(primary_key=True)
     
@@ -79,7 +68,7 @@ class CustomEvents(models.Model):
     scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
-    event_type = models.CharField(max_length=50)  # You can input the type of event, which can vary alot
+    event_type = models.CharField(max_length=50)
     # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
         CustomUser,
@@ -89,28 +78,27 @@ class CustomEvents(models.Model):
     def __str__(self):
         return self.event_name
 
+
 class AttendedEvents(models.Model):
-    
      # Primary Key
     att_events_id = models.AutoField(primary_key=True)
-    
-    # Attended Events Details
-    # Foreign Key
+
+    # Foreign Key to CustomEvents model
     event_id = models.ForeignKey(
-    CustomEvents,  # This links to your custom user model
+    CustomEvents,
     on_delete=models.CASCADE,
     related_name='att_Ev', db_column="event_id"
     )
     date = models.DateField()
-    has_attended = models.BooleanField()  # True and False
+    has_attended = models.BooleanField()
+
+
 class CustomActivity(models.Model):
-    
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
         ('In Progress', 'In Progress'),
         ('Completed', 'Completed'),
     ]
-    
      # Primary Key
     activity_id = models.AutoField(primary_key=True)
     
@@ -121,32 +109,31 @@ class CustomActivity(models.Model):
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
     status =  models.CharField(max_length=50, choices=STATUS_CHOICES)
-    # Foreign Key
+    # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
-        CustomUser,  # This links to your custom user model
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='activity', db_column='student_id'
     )
     def __str__(self):
         return self.activity_name
     
-class ActivityLog(models.Model):
+
+class ActivityTimeLog(models.Model):
+    # Primary Key
+    activity_log_id = models.AutoField(primary_key=True)
     
-     # Primary Key
-    act_log_id = models.AutoField(primary_key=True)
-    
-    # Activity Details
-    # Foreign Key
+    # Foreign Key to CustomActivity model
     activity_id = models.ForeignKey(
-        CustomActivity,  # This links to your custom user model
+        CustomActivity,
         on_delete=models.CASCADE,
         related_name='actlog', db_column='activity_id'
     )
     start_time = models.TimeField()
     end_time = models.TimeField()
-    #duration = models.DurationField()
-    duration = models.TimeField() # Struggling in determining whether this should be a time field or a duration field
+    duration = models.DurationField()
     date_logged = models.DateField()
+
 
 class UserPref(models.Model):
     # Primary Key
@@ -156,8 +143,9 @@ class UserPref(models.Model):
     usual_sleep_time = models.TimeField(default="23:00")
     usual_wake_time = models.TimeField(default="07:00")
     reminder_offset_time = models.DurationField()
+    # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
-        CustomUser,  # This links to your custom user model
+        CustomUser, 
         on_delete=models.CASCADE,
         related_name='userpref',
         db_column='student_id',
@@ -181,7 +169,7 @@ class UserPref(models.Model):
         verbose_name = "User Preference"
         verbose_name_plural = "User Preferences"
 
-#Semester
+
 class CustomSemester(models.Model):
     YEAR_LEVEL_CHOICES = [
         ('1st Year', '1st Year'),
@@ -190,12 +178,10 @@ class CustomSemester(models.Model):
         ('4th Year', '4th Year'),
         ('5th Year', '5th Year'),
     ]
-
     SEMESTER_CHOICES = [
         ('1st Semester', '1st Semester'),
         ('2nd Semester', '2nd Semester'),
-    ]
-        
+    ]   
     # Primary Key
     semester_id = models.AutoField(primary_key=True)
 
@@ -206,8 +192,9 @@ class CustomSemester(models.Model):
     semester = models.CharField(max_length=12, choices=SEMESTER_CHOICES)
     sem_start_date = models.DateField()
     sem_end_date = models.DateField()
+    # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
-        CustomUser,  # This links to your custom user model
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='semesters', db_column='student_id'
     )
@@ -215,7 +202,7 @@ class CustomSemester(models.Model):
     def __str__(self):
         return f"{self.acad_year_start}-{self.acad_year_end} {self.semester}"
 
-#Class Schedule
+
 class CustomSubject(models.Model):
     #Primary Key
     subject_id = models.AutoField(primary_key=True)
@@ -223,13 +210,15 @@ class CustomSubject(models.Model):
     # Subject Details
     subject_code = models.CharField(max_length=20,)
     subject_title = models.CharField(max_length=255)
+    # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
-        CustomUser,  # This links to your custom user model
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='subjects', db_column='student_id'
     )
+    # Foreign Key to CustomSemester model
     semester_id = models.ForeignKey(
-        CustomSemester,  # This links to your custom semester model
+        CustomSemester,
         on_delete=models.CASCADE,
         related_name='subsems', db_column='semester_id'
     )
@@ -246,8 +235,9 @@ class CustomClassSchedule(models.Model):
     classsched_id = models.AutoField(primary_key=True)
 
     # Class Details
+    # Foreign Key to CustomSubject model
     subject = models.ForeignKey(
-        CustomSubject,  # This links to your CustomSubject model
+        CustomSubject,
         on_delete=models.CASCADE,
         related_name='classes', db_column='subject_id'
     )
@@ -255,8 +245,9 @@ class CustomClassSchedule(models.Model):
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
     room = models.CharField(max_length=75)
+    # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
-        CustomUser,  # This links to your custom user model
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='scheduled_classes', db_column='student_id'
     )
@@ -272,28 +263,30 @@ class CustomClassSchedule(models.Model):
 
 
 class AttendedClass(models.Model):
-
+    STATUS_CHOICES = [
+        ('Did Not Attend', 'Did Not Attend'),
+        ('Excused', 'Excused'),
+        ('Attended', 'Attended'),
+    ]
     # Primary Key
     att_class_id = models.AutoField(primary_key=True)
 
     # Class Details
-    classched_id = models.ForeignKey(
-        CustomClassSchedule,  # This links to your custom class model
+    classsched_id = models.ForeignKey(
+        CustomClassSchedule,
         on_delete=models.CASCADE,
         related_name='attendedclass', db_column='classsched_id'
     )
     date = models.DateField()
-    isExcused = models.BooleanField(default=False)
-    hasAttended = models.BooleanField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+
 
 class CustomTask(models.Model):
-    
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
         ('In Progress', 'In Progress'),
         ('Completed', 'Completed'),
     ]
-    
     # Primary Key
     task_id = models.AutoField(primary_key=True)
     
@@ -305,8 +298,9 @@ class CustomTask(models.Model):
     scheduled_end_time = models.TimeField()
     deadline = models.DateTimeField()
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    # Foreign Key to CustomSubject model
     subject_id = models.ForeignKey(
-        CustomSubject,  # This links to your CustomSubject model
+        CustomSubject,
         on_delete=models.CASCADE,
         related_name='subject', db_column='subject_id'
     )
@@ -319,20 +313,35 @@ class CustomTask(models.Model):
 
     def __str__(self):
         return self.task_name
+    
+
+class TaskTimeLog(models.Model):
+    # Primary Key
+    task_log_id = models.AutoField(primary_key=True)
+
+    # Task Time Log Details
+    # Foreign Key to CustomTask model
+    task_id = models.ForeignKey(
+        CustomTask,
+        on_delete=models.CASCADE,
+        related_name='tasklog', db_column='task_id'
+    )
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    duration = models.DurationField()
+    date_logged = models.DateField()
+
 
 class Goals(models.Model):
-
     TYPE_CHOICES = [
         ('Academic', 'Academic'),
         ('Personal', 'Personal'),
     ]
-
     TIMEFRAME_CHOICES = [
         ('Daily', 'Daily'),
         ('Weekly', 'Weekly'),
         ('Monthly', 'Monthly'),
     ]
-
     # Primary Key
     goal_id = models.AutoField(primary_key=True)
 
@@ -342,13 +351,15 @@ class Goals(models.Model):
     timeframe = models.CharField(max_length=20, choices=TIMEFRAME_CHOICES)
     goal_desc = models.TextField()
     goal_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
+    # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
-        CustomUser,  # This links to your custom class model
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='goals', db_column='student_id'
     )
+    # Foreign Key to CustomSemester model
     semester_id = models.ForeignKey(
-        CustomSemester,  # This links to your custom user model
+        CustomSemester,
         on_delete=models.CASCADE,
         related_name='goalsems', db_column='semester_id',
         null=True,
@@ -358,50 +369,62 @@ class Goals(models.Model):
     def __str__(self):
         return self.goal_name
 
-class GoalProgress(models.Model):
-    
-    # Primary Key
-    goalprogress_id = models.AutoField(primary_key=True)
-
-    # Goal Progress Details
-    goal_id = models.ForeignKey(
-        Goals,  # This links to your custom class model
-        on_delete=models.CASCADE,
-        related_name='goalprog', db_column='goal_id'
-    )
-    scheduled_start_time = models.TimeField()
-    scheduled_end_time = models.TimeField()
-    session_duration = models.TimeField()
-
 
 class GoalSchedule(models.Model):
-    
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+    ]
     # Primary Key
     goalschedule_id = models.AutoField(primary_key=True)
 
     # Goal Progress Details
+    # Foreign Key to Goals model
     goal_id = models.ForeignKey(
-        Goals,  # This links to your custom class model
+        Goals,
         on_delete=models.CASCADE,
         related_name='goalsched', db_column='goal_id'
     )
     scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
+
+
+class GoalProgress(models.Model):
+    # Primary Key
+    goalprogress_id = models.AutoField(primary_key=True)
+
+    # Goal Progress Details
+    # Foreign Key to Goals model
+    goal_id = models.ForeignKey(
+        Goals,
+        on_delete=models.CASCADE,
+        related_name='goalprog', db_column='goal_id'
+    )
+    goalschedule_id = models.ForeignKey(
+        GoalSchedule,
+        on_delete=models.CASCADE,
+        related_name='progresslogs', db_column='goalschedule_id',
+    )
+    session_date = models.DateField()
+    session_start_time = models.TimeField()
+    session_end_time = models.TimeField()
+    session_duration = models.DurationField() 
+
 
 class SleepLog(models.Model):
-
     # Primary Key
     sleep_log_id = models.AutoField(primary_key=True)
 
     # Sleep Details
+    # Foreign Key to CustomUser model
     student_id = models.ForeignKey(
-        CustomUser,  # This links to your custom class model
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='sleep', db_column='student_id'
     )
     start_time = models.TimeField()
     end_time = models.TimeField()
-    duration = models.TimeField()
+    duration = models.DurationField()
     date_logged = models.DateField()
-
