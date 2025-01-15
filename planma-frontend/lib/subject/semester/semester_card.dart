@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/semester/edit_semester.dart';
+import 'package:provider/provider.dart';
 
 class SemesterCard extends StatelessWidget {
   final Map<String, dynamic> semester; // Change type to Map<String, dynamic>
@@ -9,6 +11,37 @@ class SemesterCard extends StatelessWidget {
     super.key,
     required this.semester,
   });
+
+  void _handleDelete(BuildContext context) async {
+    final provider = Provider.of<SemesterProvider>(context, listen: false);
+    final isConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Event'),
+        content: const Text('Are you sure you want to delete this event?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (isConfirmed == true) {
+      provider.deleteSemester(semester['semester_id']);
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,14 +102,14 @@ class SemesterCard extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => EditSemesterScreen()));
+                        builder: (context) => EditSemesterScreen(semester: semester,)));
               },
             ),
             IconButton(
               icon: Icon(Icons.delete,
                   color:
                       Color(0xFF840000)), // Delete icon with the correct color
-              onPressed: () {},
+              onPressed: () => _handleDelete(context),
             ),
           ],
         ),
