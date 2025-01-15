@@ -832,6 +832,43 @@ class SemesterViewSet(viewsets.ModelViewSet):
                 {'error': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+
+        acad_year_start = data.get('acad_year_start')
+        acad_year_end = data.get('acad_year_end')
+        year_level = data.get('year_level')
+        semester = data.get('semester')
+        sem_start_date = data.get('sem_start_date')
+        sem_end_date = data.get('sem_end_date')
+
+        if not all([acad_year_start, acad_year_end, year_level, semester, sem_start_date, sem_end_date]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+
+        
+            instance.acad_year_start = acad_year_start
+            instance.acad_year_end = acad_year_end
+            instance.year_level = year_level
+            instance.semester = semester
+            instance.sem_start_date = sem_start_date
+            instance.sem_end_date = sem_end_date
+            instance.save()
+
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ValidationError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+
 
 # Class Attendance
 class AttendedClassViewSet(viewsets.ModelViewSet):

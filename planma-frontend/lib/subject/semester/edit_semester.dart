@@ -6,7 +6,10 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class EditSemesterScreen extends StatefulWidget {
-  const EditSemesterScreen({super.key});
+  final Map<String, dynamic> semester;
+
+
+  const EditSemesterScreen({super.key, required this.semester});
 
   @override
   _EditSemesterScreenState createState() => _EditSemesterScreenState();
@@ -109,7 +112,8 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
     }
 
     try {
-      await provider.addSemester(
+      await provider.editSemester(
+        semesterId: widget.semester['semester_id'],
         acadYearStart: int.parse(_selectedStartYear!),
         acadYearEnd: int.parse(_selectedEndYear!),
         yearLevel: _selectedYearLevel!,
@@ -118,12 +122,12 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
         selectedEndDate: endDate!,
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semester added successfully!')),
+        const SnackBar(content: Text('Semester edit successfully!')),
       );
       Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add semester: $error')),
+        SnackBar(content: Text('Failed to edit semester: $error')),
       );
     }
   }
