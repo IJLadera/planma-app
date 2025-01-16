@@ -522,7 +522,25 @@ class CustomUserViewSet(UserViewSet):
     def get_user_from_request(self, data):
         from django.contrib.auth import get_user_model
         User = get_user_model()
-        return User.objects.get(email=data.get("email"))
+        try:
+            return User.objects.get(email=data.get("email"))
+        except (ObjectDoesNotExist, TypeError):
+            return None
+    
+    @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated])
+    def update_profile(self, request):
+        """
+        Update user profile, including profile_picture.
+        """
+        user = request.user
+        serializer = CustomUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            if 'profile_picture' in request.FILES:  # Handle file upload
+                user.profile_picture = request.FILES['profile_picture']
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 # Class Schedule & Subject
 class ClassScheduleViewSet(viewsets.ModelViewSet):

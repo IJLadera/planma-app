@@ -9,11 +9,11 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         fields = ('student_id', 'email', 'password', 'firstname', 'lastname', 'username')
 
 class CustomUserSerializer(UserSerializer):
+    profile_picture = serializers.ImageField(required=False, allow_null=True)
+
     class Meta(UserSerializer.Meta):
         model = CustomUser
-        fields = ('student_id', 'username', 'firstname', 'lastname')
-
-
+        fields = ('student_id', 'username', 'firstname', 'lastname', 'profile_picture')  
 
 
 class CustomEventSerializer(serializers.ModelSerializer):
