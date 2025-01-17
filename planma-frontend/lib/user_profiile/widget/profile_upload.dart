@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageUpload extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class ImageUpload extends StatefulWidget {
 class _ImageUploadState extends State<ImageUpload> {
   final ImagePicker _picker = ImagePicker();
   XFile? _image;
+  bool _isLoading = false;
 
   Future<void> _chooseImageFromCamera() async {
     try {
@@ -19,7 +21,7 @@ class _ImageUploadState extends State<ImageUpload> {
         setState(() {
           _image = pickedFile;
         });
-        _uploadImage(File(_image!.path));
+        await _uploadImage(File(_image!.path));
       }
     } catch (e) {
       _showMessage('Failed to capture image: $e');
@@ -33,7 +35,7 @@ class _ImageUploadState extends State<ImageUpload> {
         setState(() {
           _image = pickedFile;
         });
-        _uploadImage(File(_image!.path));
+        await _uploadImage(File(_image!.path));
       }
     } catch (e) {
       _showMessage('Failed to pick image: $e');
@@ -41,23 +43,50 @@ class _ImageUploadState extends State<ImageUpload> {
   }
 
   Future<void> _uploadImage(File imageFile) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? accessToken = prefs.getString('access');
+      
+      if (accessToken == null) {
+        _showMessage('Access token is missing!');
+        return;
+      }
+
       var uri = Uri.parse(
-          'https://example.com/upload'); // Replace with your API endpoint
-      var request = http.MultipartRequest('POST', uri);
-      request.files.add(
-        await http.MultipartFile.fromPath('image', imageFile.path),
-      );
+          'https://localhost:8000/users/update_profile');
+      var request = http.MultipartRequest('PUT', uri)
+        ..headers['Authorization'] = 'Bearer $accessToken'; // Pass the token
+      request.files.add(await http.MultipartFile.fromPath('profile_picture', imageFile.path));
 
       var response = await request.send();
+      
       if (response.statusCode == 200) {
+        var responseData = await http.Response.fromStream(response);
+        // Assuming the response contains the image URL or success data
+        String imageUrl = responseData.body;  // Update based on your API response format
+        
+        // Save the image URL in SharedPreferences
+        prefs.setString('profilePicture', imageUrl);
+
         _showMessage('Image uploaded successfully');
+        setState(() {
+          _isLoading = false;
+        });
       } else {
-        _showMessage(
-            'Failed to upload image. Status code: ${response.statusCode}');
+        _showMessage('Failed to upload image. Status code: ${response.statusCode}');
+        setState(() {
+          _isLoading = false;
+        });
       }
     } catch (e) {
       _showMessage('Error during upload: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -92,6 +121,11 @@ class _ImageUploadState extends State<ImageUpload> {
                   File(_image!.path),
                   height: 200,
                 ),
+              ),
+            if (_isLoading)
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: CircularProgressIndicator(),
               ),
           ],
         ),
