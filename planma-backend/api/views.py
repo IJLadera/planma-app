@@ -519,13 +519,10 @@ class CustomUserViewSet(UserViewSet):
             response.data['access'] = str(refresh.access_token)
         return response
 
-    def get_user_from_request(self, data):
+    def get_user_from_request(self, data):  
         from django.contrib.auth import get_user_model
         User = get_user_model()
-        try:
-            return User.objects.get(email=data.get("email"))
-        except (ObjectDoesNotExist, TypeError):
-            return None
+        return User.objects.get(email=data.get("email"))
     
     @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated])
     def update_profile(self, request):
@@ -540,6 +537,7 @@ class CustomUserViewSet(UserViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     
 # Class Schedule & Subject
