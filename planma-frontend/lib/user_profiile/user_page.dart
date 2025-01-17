@@ -9,6 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
 
@@ -26,7 +28,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   ];
   // String? _selectedTime; // Default value for the dropdown
   String? reminderOffsetTime;
-  File? _image; 
+  File? _image;
   final ImagePicker _picker = ImagePicker();
 
   String formatReminderOffset(String time) {
@@ -62,6 +64,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         );
       }
     });
+  }
+
+  Future<void> _loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final imagePath = prefs.getString('profileImagePath');
+    if (imagePath != null) {
+      setState(() {
+        _image = File(imagePath);
+      });
+    }
   }
 
   Future<void> _showTimePickerDialog(
@@ -297,11 +309,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);  // Store the picked image
+        _image = File(pickedFile.path); // Store the picked image
       });
+
+      // Save the image path using SharedPreferences or your preferred method
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('profileImagePath', pickedFile.path);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -333,24 +348,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            GestureDetector(
-              child: Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.yellow,
-                    backgroundImage: _image != null ? FileImage(_image!) : null,
-                    child: _image == null
-                        ? Icon(
-                            Icons.person,
-                            size: 50,
-                            color: Colors.black,
-                          )
-                        : null,
-                  ),
-                ],
-              ),
+            Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.yellow,
+                  backgroundImage: _image != null ? FileImage(_image!) : null,
+                  child: _image == null
+                      ? Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.black,
+                        )
+                      : null,
+                ),
+              ],
             ),
             SizedBox(height: 10),
             Text(
