@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/goals/view_goal_session.dart';
 import 'package:planma_app/models/goal_schedules_model.dart';
+import 'package:planma_app/timer/clock.dart';
 
 class GoalSessionCard extends StatelessWidget {
   final GoalSchedule session;
@@ -50,18 +51,22 @@ class GoalSessionCard extends StatelessWidget {
           child: Row(
             children: [
               // Play Icon
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF173F70), // Icon background color
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: const Icon(
-                  Icons.play_arrow,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
+              GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ClockScreen(themeColor: Color(0xFFB480F3), title: "Goal Session"),
+                        ),
+                      );
+                    },
+                    child: const Icon(
+                      Icons.play_circle_fill, // Time icon
+                      size: 28, // Slightly larger icon size
+                      color: Color(0xFF173F70), // Icon color
+                    ),
+                  ),
               const SizedBox(width: 12),
               // Vertical Divider
               Container(width: 1.5, height: 40, color: Colors.grey),
