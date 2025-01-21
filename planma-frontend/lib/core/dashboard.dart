@@ -15,7 +15,7 @@ import 'package:planma_app/goals/goal_page.dart';
 import 'package:planma_app/reports/report_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
-import 'package:planma_app/timer/countdown/countdown_timer.dart';
+import 'package:planma_app/timer/clock.dart';
 import 'package:planma_app/timetable/calendar.dart';
 import 'package:planma_app/user_profiile/user_page.dart';
 import 'package:provider/provider.dart';
@@ -212,7 +212,7 @@ class _DashboardState extends State<Dashboard> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  TimerPage(themeColor: Color(0xFF535D88))));
+                                  ClockScreen(themeColor: Color(0xFF535D88), title: "Sleep",)));
                     },
                   ),
                   const SizedBox(height: 15),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:planma_app/activities/view_activity.dart';
-import 'package:planma_app/timer/countdown/countdown_timer.dart';
+import 'package:planma_app/timer/clock.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/models/activity_model.dart';
 
@@ -72,7 +72,7 @@ class ActivityCard extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            const TimerPage(themeColor: Color(0xFFFBA2A2)),
+                            ClockScreen(themeColor: Color(0xFFFBA2A2), title: "Activity"),
                       ),
                     );
                   },

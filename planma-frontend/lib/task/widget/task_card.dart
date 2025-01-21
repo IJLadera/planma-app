@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:planma_app/models/tasks_model.dart';
-import 'package:planma_app/timer/countdown/countdown_timer.dart'; // Import TimerPage
-import 'package:planma_app/task/view_task.dart'; // Import ViewTask
+import 'package:planma_app/timer/clock.dart';
+import 'package:planma_app/task/view_task.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class TaskCard extends StatelessWidget {
@@ -70,7 +70,7 @@ class TaskCard extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              TimerPage(themeColor: Color(0xFF50B6FF)),
+                              ClockScreen(themeColor: Color(0xFF50B6FF), title: "Task"),
                         ),
                       );
                     },

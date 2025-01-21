@@ -10,9 +10,10 @@ import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/authentication/splash_screen.dart';
 import 'package:planma_app/core/dashboard.dart';
+import 'package:planma_app/timer/stopwatch_provider.dart';
+import 'package:planma_app/timer/timer_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/authentication/log_in.dart';
-import 'package:planma_app/Providers/time_provider.dart';
 import 'package:planma_app/Providers/user_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:planma_app/Providers/events_provider.dart';
@@ -28,7 +29,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => TimeProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => UserProfileProvider()),
         ChangeNotifierProvider(create: (context) => ActivityProvider()),
@@ -40,6 +40,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => GoalScheduleProvider()),
         ChangeNotifierProvider(create: (context) => AttendedEventsProvider()),
         ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
+        ChangeNotifierProvider(create: (context) => TimerProvider()),
+        ChangeNotifierProvider(create: (context) => StopwatchProvider()),
       ],
       child: MaterialApp(
           // home: SleepWakeSetupScreen(),
