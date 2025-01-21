@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/sleep_provider.dart';
+import 'package:provider/provider.dart';
 
 class TimerProvider with ChangeNotifier{
   // Timer state variables
@@ -57,10 +59,38 @@ class TimerProvider with ChangeNotifier{
   }
 
   // Save and print the time spent
-  void saveTimeSpent() {
+  void saveTimeSpent(BuildContext context) async {
     stopTimer(); // Ensure the timer is stopped
     print("Time spent: $timeSpent seconds");
-    // You can save `timeSpent` to persistent storage or database here
+    
+    final sleepLogProvider = Provider.of<SleepLogProvider>(context, listen: false);
+
+    final duration = Duration(seconds: timeSpent);
+    final now = DateTime.now();
+    final startTime = now.subtract(duration);
+    final endTime = now;
+
+    print('Start Time: $startTime');
+    print('End Time: $endTime');
+    print('Duration: $duration');
+    print('Date Logged: $now');
+
+    try {
+      await sleepLogProvider.addSleepLog(
+        startTime: startTime, 
+        endTime: endTime, 
+        duration: duration, 
+        dateLogged: now
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sleep log saved successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save sleep log: $e')),
+    );
+    }
   }
 
   // Dispose the timer when the provider is no longer used
