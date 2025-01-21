@@ -5,6 +5,7 @@ import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/goal_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/Providers/sleep_provider.dart';
 import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
         ChangeNotifierProvider(create: (context) => TimerProvider()),
         ChangeNotifierProvider(create: (context) => StopwatchProvider()),
+        ChangeNotifierProvider(create: (context) => SleepLogProvider()),
       ],
       child: MaterialApp(
           // home: SleepWakeSetupScreen(),

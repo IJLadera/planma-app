@@ -106,7 +106,7 @@ class _TimerWidgetState extends State<TimerWidget> {
               ),
               TextButton(
                 onPressed: () {
-                  timerProvider.saveTimeSpent(); // Save time spent
+                  timerProvider.saveTimeSpent(context); // Save time spent
                   timerProvider.resetTimer();
                   Navigator.of(context).pop(); // Close the dialog after saving
                 },
