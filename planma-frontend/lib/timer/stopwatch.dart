@@ -86,7 +86,7 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
               ),
               TextButton(
                 onPressed: () {
-                  stopwatchProvider.saveTimeLog(); // Save the time log
+                  stopwatchProvider.saveTimeLog(context); // Save the time log
                   stopwatchProvider.resetStopwatch(); // Reset the stopwatch
                   Navigator.of(context).pop(); // Close the dialog after saving
                 },
