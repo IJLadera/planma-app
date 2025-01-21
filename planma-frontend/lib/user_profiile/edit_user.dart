@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String username;
@@ -25,6 +27,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   File? _image;
   final ImagePicker _picker = ImagePicker();
+  bool _isLoading = false;
 
   Future<void> _chooseImage(BuildContext context, ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -47,9 +50,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 leading: Icon(Icons.photo_camera),
                 title: Text(
                   'Take Photo',
-                  style: GoogleFonts.openSans(
-                    fontSize: 14,
-                  ),
+                  style: GoogleFonts.openSans(fontSize: 14),
                 ),
                 onTap: () => _chooseImage(context, ImageSource.camera),
               ),
@@ -57,9 +58,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 leading: Icon(Icons.photo_library),
                 title: Text(
                   'Choose from Gallery',
-                  style: GoogleFonts.openSans(
-                    fontSize: 14,
-                  ),
+                  style: GoogleFonts.openSans(fontSize: 14),
                 ),
                 onTap: () => _chooseImage(context, ImageSource.gallery),
               ),
@@ -67,6 +66,61 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _uploadProfile(File? imageFile, String firstName,
+      String lastName, String username) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? accessToken = prefs.getString('access');
+
+      if (accessToken == null) {
+        _showMessage('Access token is missing!');
+        return;
+      }
+
+      final uri = Uri.parse("http://127.0.0.1:8000/api/users/update_profile/");
+      var request = http.MultipartRequest('PUT', uri)
+        ..headers['Authorization'] = 'Bearer $accessToken'
+        ..fields['firstname'] = firstName
+        ..fields['lastname'] = lastName
+        ..fields['username'] = username;
+
+      if (imageFile != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'profile_picture', imageFile.path));
+      }
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        _showMessage('Profile updated successfully!');
+        Navigator.pop(context, {
+          'username': username,
+          'firstName': firstName,
+          'lastName': lastName,
+        });
+      } else {
+        _showMessage(
+            'Failed to update profile. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showMessage('Error during upload: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -164,15 +218,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    context.read<UserProfileProvider>().updateUserProfile(
-                        firstNameController.text,
-                        lastNameController.text,
-                        usernameController.text);
-                    Navigator.pop(context, {
-                      'username': usernameController.text,
-                      'firstName': firstNameController.text,
-                      'lastName': lastNameController.text,
-                    });
+                    _uploadProfile(
+                      _image,
+                      firstNameController.text,
+                      lastNameController.text,
+                      usernameController.text,
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -182,13 +233,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(
-                  'Save Changes',
-                  style: GoogleFonts.openSans(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isLoading
+                    ? CircularProgressIndicator(
+                        color: Colors.white,
+                      )
+                    : Text(
+                        'Save Changes',
+                        style: GoogleFonts.openSans(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ],
           ),
