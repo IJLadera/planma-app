@@ -26,7 +26,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   ];
   // String? _selectedTime; // Default value for the dropdown
   String? reminderOffsetTime;
-  File? _image;
+  File? _image; 
   final ImagePicker _picker = ImagePicker();
 
   String formatReminderOffset(String time) {
@@ -292,6 +292,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       },
     );
   }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);  // Store the picked image
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
