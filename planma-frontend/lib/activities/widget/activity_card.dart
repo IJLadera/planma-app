@@ -71,15 +71,15 @@ class ActivityCard extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            ClockScreen(themeColor: Color(0xFFFBA2A2), title: "Activity"),
+                        builder: (context) => ClockScreen(
+                            themeColor: Color(0xFFFBA2A2), title: "Activity"),
                       ),
                     );
                   },
                   child: const Icon(
                     Icons.play_circle_fill,
                     color: Color(0xFF173F70),
-                    size: 28,
+                    size: 40,
                   ),
                 ),
                 const SizedBox(width: 12),

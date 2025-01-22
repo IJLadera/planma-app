@@ -13,15 +13,13 @@ class StopwatchWidget extends StatefulWidget {
 }
 
 class _StopwatchWidgetState extends State<StopwatchWidget> {
-  
   @override
   Widget build(BuildContext context) {
     final stopwatchProvider = Provider.of<StopwatchProvider>(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Text(
             _formatTime(stopwatchProvider.elapsedTime),
@@ -30,59 +28,88 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
               fontSize: 45,
             ),
           ),
-          const SizedBox(height: 30),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  if (stopwatchProvider.isRunning) {
-                    stopwatchProvider.stopStopwatch();
-                    _showSaveConfirmationDialog(context, stopwatchProvider);
-                  } else {
-                    stopwatchProvider.startStopwatch();
-                  }
-                },
-                child: Container(
-                  height: 50,
-                  width: 50,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.themeColor,
-                  ),
-                  child: Icon(
-                    stopwatchProvider.isRunning ? Icons.stop : Icons.play_arrow,
-                    size: 40,
-                    color: Colors.white,
-                  ),
-                ),
+          const SizedBox(height: 100),
+          GestureDetector(
+            onTap: () {
+              if (stopwatchProvider.isRunning) {
+                stopwatchProvider.stopStopwatch();
+                _showSaveConfirmationDialog(context, stopwatchProvider);
+              } else {
+                stopwatchProvider.startStopwatch();
+              }
+            },
+            child: Container(
+              height: 60,
+              width: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: widget.themeColor,
               ),
-              const SizedBox(width: 20),
-            ],
+              child: Icon(
+                stopwatchProvider.isRunning ? Icons.stop : Icons.play_arrow,
+                size: 50,
+                color: Colors.white,
+              ),
+            ),
           ),
-          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
   // Helper Methods
-  void _showSaveConfirmationDialog(BuildContext context, StopwatchProvider stopwatchProvider) {
+  void _showSaveConfirmationDialog(
+      BuildContext context, StopwatchProvider stopwatchProvider) {
     if (stopwatchProvider.elapsedTime > 0) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Confirm Save'),
-            content: Text(
-                'Are you sure you want to save the time log? The stopwatch stopped at ${_formatTime(stopwatchProvider.elapsedTime)}'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            title: Text(
+              'Confirm Save',
+              style: GoogleFonts.openSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFF173F70),
+              ),
+            ),
+            content: RichText(
+              text: TextSpan(
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+                children: [
+                  const TextSpan(
+                      text:
+                          'Are you sure you want to save the time log? The stopwatch stopped at '),
+                  TextSpan(
+                    text: _formatTime(stopwatchProvider.elapsedTime),
+                    style: GoogleFonts.openSans(
+                      fontWeight: FontWeight.bold,
+                      color:
+                          Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog without saving
+                  Navigator.of(context)
+                      .pop(); // Close the dialog without saving
                   stopwatchProvider.startStopwatch(); // Resume the stopwatch
                 },
-                child: Text('Cancel'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Color(0xFFEF4738),
+                  textStyle: GoogleFonts.openSans(
+                      fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () {
@@ -90,7 +117,14 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
                   stopwatchProvider.resetStopwatch(); // Reset the stopwatch
                   Navigator.of(context).pop(); // Close the dialog after saving
                 },
-                child: Text('Save'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Color(0xFF173F70),
+                  textStyle: GoogleFonts.openSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                child: const Text('Save'),
               ),
             ],
           );
