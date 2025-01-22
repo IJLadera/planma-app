@@ -69,14 +69,14 @@ class TaskCard extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              ClockScreen(themeColor: Color(0xFF50B6FF), title: "Task"),
+                          builder: (context) => ClockScreen(
+                              themeColor: Color(0xFF50B6FF), title: "Task"),
                         ),
                       );
                     },
                     child: const Icon(
                       Icons.play_circle_fill, // Time icon
-                      size: 28, // Slightly larger icon size
+                      size: 40, // Slightly larger icon size
                       color: Color(0xFF173F70), // Icon color
                     ),
                   ),

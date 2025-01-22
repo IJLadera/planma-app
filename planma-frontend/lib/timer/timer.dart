@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/timer/timer_provider.dart';
 import 'package:provider/provider.dart';
@@ -50,7 +49,7 @@ class _TimerWidgetState extends State<TimerWidget> {
               ),
             ],
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: 120),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -65,15 +64,15 @@ class _TimerWidgetState extends State<TimerWidget> {
                   }
                 },
                 child: Container(
-                  height: 50,
-                  width: 50,
+                  height: 60,
+                  width: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: widget.themeColor,
                   ),
                   child: Icon(
                     timerProvider.isRunning ? Icons.stop : Icons.play_arrow,
-                    size: 40,
+                    size: 50,
                     color: Colors.white,
                   ),
                 ),
@@ -87,30 +86,71 @@ class _TimerWidgetState extends State<TimerWidget> {
   }
 
   // Helper Methods
-  void _showSaveConfirmationDialog(BuildContext context, TimerProvider timerProvider) {
+  void _showSaveConfirmationDialog(
+      BuildContext context, TimerProvider timerProvider) {
     if (timerProvider.remainingTime > 0) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Confirm Save'),
-            content: Text(
-                'Are you sure you want to save the time log? The timer stopped at ${_formatTime(timerProvider.remainingTime)}'),
+            title: Text(
+              'Confirm Save',
+              style: GoogleFonts.openSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFF173F70),
+              ),
+            ),
+            content: RichText(
+              text: TextSpan(
+                style: GoogleFonts.openSans(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+                children: [
+                  const TextSpan(
+                    text:
+                        'Are you sure you want to save the time log? The timer stopped at ',
+                  ),
+                  TextSpan(
+                    text: _formatTime(timerProvider.remainingTime),
+                    style: GoogleFonts.openSans(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                   timerProvider.startTimer(); // Continue the timer
                 },
-                child: Text('Cancel'),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.openSans(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Color(0xFFEF4738),
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () {
                   timerProvider.saveTimeSpent(context); // Save time spent
-                  timerProvider.resetTimer();
+                  timerProvider.resetTimer(); // Reset the timer
                   Navigator.of(context).pop(); // Close the dialog after saving
                 },
-                child: Text('Save'),
+                child: Text(
+                  'Save',
+                  style: GoogleFonts.openSans(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Color(0xFF173F70),
+                  ),
+                ),
               ),
             ],
           );
@@ -148,4 +188,3 @@ class _TimerWidgetState extends State<TimerWidget> {
     return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
   }
 }
-
