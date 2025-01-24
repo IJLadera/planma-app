@@ -21,6 +21,26 @@ class ActivityViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return CustomActivity.objects.filter(student_id=self.request.user)
+    
+    @action(detail=False, methods=['get'])
+    def pending_activities(self, request):
+        # Get activities that are still pending
+        activities = CustomActivity.objects.filter(
+            student_id=request.user.student_id,
+            status='Pending'
+        )
+        serializer = self.get_serializer(activities, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def completed_activities(self, request):
+        # Get activities that have been completed
+        activities = CustomActivity.objects.filter(
+            student_id=request.user.student_id,
+            status='Completed'
+        )
+        serializer = self.get_serializer(activities, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
     def add_activity(self, request):
@@ -979,6 +999,26 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Filter tasks based on the logged-in user
         return CustomTask.objects.filter(student_id=self.request.user)
+    
+    @action(detail=False, methods=['get'])
+    def pending_tasks(self, request):
+        #Get tasks that are still pending
+        tasks = CustomTask.objects.filter(
+            student_id=request.user.student_id,
+            status='Pending'
+        )
+        serializer = self.get_serializer(tasks, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def completed_tasks(self, request):
+        #Get tasks that have been completed
+        tasks = CustomTask.objects.filter(
+            student_id=request.user.student_id,
+            status='Completed'
+        )
+        serializer = self.get_serializer(tasks, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
     def add_task(self, request):

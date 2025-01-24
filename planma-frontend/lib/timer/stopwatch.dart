@@ -1,21 +1,41 @@
 import 'package:flutter/cupertino.dart';
+import 'package:planma_app/Providers/activity_log_provider.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/goal_progress_provider.dart';
+import 'package:planma_app/Providers/sleep_provider.dart';
+import 'package:planma_app/Providers/task_log_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
+import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/timer/stopwatch_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class StopwatchWidget extends StatefulWidget {
   final Color themeColor;
-  const StopwatchWidget({super.key, required this.themeColor});
+  final ClockContext clockContext;
+  final dynamic record;
+  const StopwatchWidget(
+    {super.key, 
+    required this.themeColor,
+    required this.clockContext,
+    this.record
+  });
 
   @override
   State<StopwatchWidget> createState() => _StopwatchWidgetState();
 }
 
 class _StopwatchWidgetState extends State<StopwatchWidget> {
-  
   @override
   Widget build(BuildContext context) {
+    final sleepLogProvider = context.read<SleepLogProvider>();
+    final taskTimeLogProvider = context.read<TaskTimeLogProvider>();
+    final activityTimeLogProvider = context.read<ActivityTimeLogProvider>();
+    final goalProgressProvider = context.read<GoalProgressProvider>();
+
+    final taskProvider = context.read<TaskProvider>();
+    final activityProvider = context.read<ActivityProvider>();
+
     final stopwatchProvider = Provider.of<StopwatchProvider>(context);
 
     return Padding(
@@ -38,7 +58,16 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
                 onTap: () {
                   if (stopwatchProvider.isRunning) {
                     stopwatchProvider.stopStopwatch();
-                    _showSaveConfirmationDialog(context, stopwatchProvider);
+                    // Show Save Confirmation Dialog after stopping the stopwatch
+                    _showSaveConfirmationDialog(
+                        context, 
+                        stopwatchProvider,
+                        sleepLogProvider,
+                        taskTimeLogProvider,
+                        activityTimeLogProvider,
+                        goalProgressProvider,
+                        taskProvider,
+                        activityProvider);
                   } else {
                     stopwatchProvider.startStopwatch();
                   }
@@ -67,7 +96,15 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
   }
 
   // Helper Methods
-  void _showSaveConfirmationDialog(BuildContext context, StopwatchProvider stopwatchProvider) {
+  void _showSaveConfirmationDialog(
+      BuildContext context, 
+      StopwatchProvider stopwatchProvider,
+      SleepLogProvider sleepLogProvider,
+      TaskTimeLogProvider taskTimeLogProvider,
+      ActivityTimeLogProvider activityTimeLogProvider,
+      GoalProgressProvider goalProgressProvider,
+      TaskProvider taskProvider,
+      ActivityProvider activityProvider) {
     if (stopwatchProvider.elapsedTime > 0) {
       showDialog(
         context: context,
@@ -85,10 +122,22 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
                 child: Text('Cancel'),
               ),
               TextButton(
-                onPressed: () {
-                  stopwatchProvider.saveTimeLog(context); // Save the time log
+                onPressed: () async {
+                  await Future.microtask(() {
+                    stopwatchProvider.saveTimeLog(
+                      clockContext: widget.clockContext,
+                      record: widget.record,
+                      sleepLogProvider: sleepLogProvider,
+                      taskTimeLogProvider: taskTimeLogProvider,
+                      activityTimeLogProvider: activityTimeLogProvider,
+                      goalProgressProvider: goalProgressProvider,
+                      taskProvider: taskProvider,
+                      activityProvider: activityProvider
+                    ); // Save time spent
+                  });
                   stopwatchProvider.resetStopwatch(); // Reset the stopwatch
-                  Navigator.of(context).pop(); // Close the dialog after saving
+                  safePop(context); // Close dialog after saving
+                  safePop(context); // Close Clock Screen after saving
                 },
                 child: Text('Save'),
               ),
@@ -96,6 +145,12 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
           );
         },
       );
+    }
+  }
+
+  void safePop(BuildContext context) {
+    if (Navigator.canPop(context)) {
+      Navigator.of(context).pop();
     }
   }
 

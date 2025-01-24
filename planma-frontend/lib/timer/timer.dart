@@ -1,13 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/Providers/activity_log_provider.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/goal_progress_provider.dart';
+import 'package:planma_app/Providers/sleep_provider.dart';
+import 'package:planma_app/Providers/task_log_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
+import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/timer/timer_provider.dart';
 import 'package:provider/provider.dart';
 
 class TimerWidget extends StatefulWidget {
   final Color themeColor;
-  const TimerWidget({super.key, required this.themeColor});
+  final ClockContext clockContext;
+  final dynamic record;
+
+  const TimerWidget({
+    super.key,
+    required this.themeColor,
+    required this.clockContext,
+    this.record,
+  });
 
   @override
   State<TimerWidget> createState() => _TimerWidgetState();
@@ -16,7 +30,15 @@ class TimerWidget extends StatefulWidget {
 class _TimerWidgetState extends State<TimerWidget> {
   @override
   Widget build(BuildContext context) {
-    final timerProvider = Provider.of<TimerProvider>(context);
+    final sleepLogProvider = context.read<SleepLogProvider>();
+    final taskTimeLogProvider = context.read<TaskTimeLogProvider>();
+    final activityTimeLogProvider = context.read<ActivityTimeLogProvider>();
+    final goalProgressProvider = context.read<GoalProgressProvider>();
+
+    final taskProvider = context.read<TaskProvider>();
+    final activityProvider = context.read<ActivityProvider>();
+
+    final timerProvider = context.read<TimerProvider>();
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -59,7 +81,15 @@ class _TimerWidgetState extends State<TimerWidget> {
                   if (timerProvider.isRunning) {
                     timerProvider.stopTimer(); // Stop the timer
                     // Show Save Confirmation Dialog after stopping the timer
-                    _showSaveConfirmationDialog(context, timerProvider);
+                    _showSaveConfirmationDialog(
+                        context,
+                        timerProvider,
+                        sleepLogProvider,
+                        taskTimeLogProvider,
+                        activityTimeLogProvider,
+                        goalProgressProvider,
+                        taskProvider,
+                        activityProvider);
                   } else {
                     timerProvider.startTimer(); // Start the timer
                   }
@@ -87,7 +117,15 @@ class _TimerWidgetState extends State<TimerWidget> {
   }
 
   // Helper Methods
-  void _showSaveConfirmationDialog(BuildContext context, TimerProvider timerProvider) {
+  void _showSaveConfirmationDialog(
+      BuildContext context,
+      TimerProvider timerProvider,
+      SleepLogProvider sleepLogProvider,
+      TaskTimeLogProvider taskTimeLogProvider,
+      ActivityTimeLogProvider activityTimeLogProvider,
+      GoalProgressProvider goalProgressProvider,
+      TaskProvider taskProvider,
+      ActivityProvider activityProvider) {
     if (timerProvider.remainingTime > 0) {
       showDialog(
         context: context,
@@ -105,10 +143,22 @@ class _TimerWidgetState extends State<TimerWidget> {
                 child: Text('Cancel'),
               ),
               TextButton(
-                onPressed: () {
-                  timerProvider.saveTimeSpent(context); // Save time spent
+                onPressed: () async {
+                  await Future.microtask(() {
+                    timerProvider.saveTimeSpent(
+                      clockContext: widget.clockContext,
+                      record: widget.record,
+                      sleepLogProvider: sleepLogProvider,
+                      taskTimeLogProvider: taskTimeLogProvider,
+                      activityTimeLogProvider: activityTimeLogProvider,
+                      goalProgressProvider: goalProgressProvider,
+                      taskProvider: taskProvider,
+                      activityProvider: activityProvider
+                    ); // Save time spent
+                  });
                   timerProvider.resetTimer();
-                  Navigator.of(context).pop(); // Close the dialog after saving
+                  safePop(context); // Close dialog after saving
+                  safePop(context); // Close Clock Screen after saving
                 },
                 child: Text('Save'),
               ),
@@ -141,6 +191,12 @@ class _TimerWidgetState extends State<TimerWidget> {
     );
   }
 
+  void safePop(BuildContext context) {
+    if (Navigator.canPop(context)) {
+      Navigator.of(context).pop();
+    }
+  }
+
   String _formatTime(int totalSeconds) {
     int hours = totalSeconds ~/ 3600;
     int minutes = (totalSeconds % 3600) ~/ 60;
@@ -148,4 +204,3 @@ class _TimerWidgetState extends State<TimerWidget> {
     return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
   }
 }
-

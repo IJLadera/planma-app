@@ -23,7 +23,7 @@ class _TasksPageState extends State<TasksPage> {
     super.initState();
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     // Automatically fetch tasks when screen loads
-    taskProvider.fetchTasks();
+    taskProvider.fetchPendingTasks();
   }
 
   @override
@@ -31,27 +31,13 @@ class _TasksPageState extends State<TasksPage> {
     return Consumer<TaskProvider>(builder: (context, taskProvider, child) {
       return Scaffold(
         appBar: AppBar(
-            title: Text(
-              'Tasks',
-              style: GoogleFonts.openSans(
-                  fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
-            ),
-            backgroundColor: Color(0xFFFFFFFF),
-            actions: [
-              Padding(
-                  padding: const EdgeInsets.only(right: 20.0),
-                  child: IconButton(
-                    icon: Icon(Icons.history,
-                        color: Color(0xFF173F70), size: 28.0),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => HistoryTaskScreen()),
-                      );
-                    },
-                  ))
-            ]),
+          title: Text(
+            'Tasks',
+            style: GoogleFonts.openSans(
+                fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+          ),
+          backgroundColor: Color(0xFFFFFFFF),
+        ),
         body: Column(
           children: [
             Padding(
@@ -100,7 +86,7 @@ class _TasksPageState extends State<TasksPage> {
               ),
             ),
             Expanded(
-              child: taskProvider.tasks.isEmpty
+              child: taskProvider.pendingTasks.isEmpty
                   ? Center(
                       child: Text(
                         'No tasks added yet',
@@ -111,8 +97,8 @@ class _TasksPageState extends State<TasksPage> {
                       ),
                     )
                   : isByDate
-                      ? ByDateView(tasksView: taskProvider.tasks)
-                      : BySubjectView(tasksView: taskProvider.tasks),
+                      ? ByDateView(tasksView: taskProvider.pendingTasks)
+                      : BySubjectView(tasksView: taskProvider.pendingTasks),
             ),
           ],
         ),

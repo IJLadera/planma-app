@@ -72,14 +72,14 @@ class _HistoryEventScreenState extends State<HistoryEventScreen> {
                           ),
                         ),
                         title: Text(
-                          event.eventName, // Use event's title
+                          event.eventName,
                           style: GoogleFonts.openSans(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         subtitle: Text(
-                          'Event Date: $formattedDate', // Use event's scheduled date
+                          'Event Date: $formattedDate',
                           style: GoogleFonts.openSans(color: Colors.grey),
                         ),
                         trailing: Icon(Icons.chevron_right, color: Colors.grey),

@@ -2,24 +2,24 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:planma_app/models/sleep_log_model.dart';
+import 'package:planma_app/models/goal_progress_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SleepLogProvider with ChangeNotifier {
-  List<SleepLog> _sleepLogs = [];
+class GoalProgressProvider with ChangeNotifier {
+  List<GoalProgress> _goalProgressLogs = [];
   String? _accessToken;
 
-  List<SleepLog> get sleepLogs => _sleepLogs;
+  List<GoalProgress> get goalProgressLogs => _goalProgressLogs;
   String? get accessToken => _accessToken;
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  // Fetch all sleep log records
-  Future<void> fetchSleepLogs () async {
+  //Fetch all goal progress logs
+  Future<void> fetchGoalProgressLogs () async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}sleep-logs/");
+    final url = Uri.parse("${baseUrl}goal-progress/");
 
     try {
       final response = await http.get(
@@ -33,25 +33,27 @@ class SleepLogProvider with ChangeNotifier {
         final List<dynamic> data = json.decode(response.body);
         // print(data);
 
-        // Parse the response body as a list of sleep logs
-        _sleepLogs =
-            data.map((item) => SleepLog.fromJson(item)).toList();
+        // Parse the response body as a list of goal progress logs
+        _goalProgressLogs =
+            data.map((item) => GoalProgress.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception(
-            'Failed to fetch sleep logs. Status Code: ${response.statusCode}');
+            'Failed to fetch goal progress logs. Status Code: ${response.statusCode}');
       }
     } catch (error) {
-      print("Error fetching sleep logs: $error");
+      print("Error fetching goal progress logs: $error");
     }
   }
 
-  // Add sleep log
-  Future<void> addSleepLog({
+  // Add goal progress log
+  Future<void> addGoalProgressLog({
+    required int goalId,
+    required int goalScheduleId,
     required DateTime startTime,
     required DateTime endTime,
     required Duration duration,
-    required DateTime dateLogged,
+    required DateTime dateLogged, 
   }) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -61,7 +63,7 @@ class SleepLogProvider with ChangeNotifier {
     String formattedDuration = _formatDuration(duration);
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(dateLogged);
 
-    final url = Uri.parse("${baseUrl}sleep-logs/log_time/");
+    final url = Uri.parse("${baseUrl}goal-progress/log_time/");
 
     try {
       final response = await http.post(
@@ -71,37 +73,39 @@ class SleepLogProvider with ChangeNotifier {
           'Content-Type': 'application/json',
         },
         body: json.encode({
-          'start_time': formattedStartTime,
-          'end_time': formattedEndTime,
-          'duration': formattedDuration,
-          'date_logged': formattedScheduledDate,
+          'goal_id': goalId,
+          'goalschedule_id': goalScheduleId,
+          'session_start_time': formattedStartTime,
+          'session_end_time': formattedEndTime,
+          'session_duration': formattedDuration,
+          'session_date': formattedScheduledDate,
         }),
       );
 
       if (response.statusCode == 201) {
-        final newLog = SleepLog.fromJson(json.decode(response.body));
-        _sleepLogs.add(newLog);
+        final newLog = GoalProgress.fromJson(json.decode(response.body));
+        _goalProgressLogs.add(newLog);
         notifyListeners();
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate sleep log detected.') {
-          throw Exception('Duplicate sleep log detected on the server.');
+        if (responseBody['error'] == 'Duplicate goal progress log detected.') {
+          throw Exception('Duplicate goal progress log detected on the server.');
         } else {
-          throw Exception('Error adding sleep log: ${response.body}');
+          throw Exception('Error adding goal progress log: ${response.body}');
         }
       } else {
-        throw Exception('Failed to add sleep log: ${response.body}');
+        throw Exception('Failed to add goal progress log: ${response.body}');
       }
 
     } catch (error) {
-      print('Add sleep log error: $error');
-      throw Exception('Error adding sleep log: $error');
+      print('Add goal progress log error: $error');
+      throw Exception('Error adding goal progress log: $error');
     }
   }
 
   void resetState() {
-    _sleepLogs = [];
+    _goalProgressLogs = [];
     notifyListeners();
   }
 

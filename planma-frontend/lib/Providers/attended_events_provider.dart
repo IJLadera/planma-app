@@ -81,4 +81,9 @@ class AttendedEventsProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  void resetState() {
+    _attendedEvents = [];
+    notifyListeners();
+  }
 }

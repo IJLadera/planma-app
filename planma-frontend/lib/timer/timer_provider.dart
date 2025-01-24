@@ -1,9 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/activity_log_provider.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/goal_progress_provider.dart';
 import 'package:planma_app/Providers/sleep_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:planma_app/Providers/task_log_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
+import 'package:planma_app/models/clock_type.dart';
 
-class TimerProvider with ChangeNotifier{
+class TimerProvider with ChangeNotifier {
   // Timer state variables
   int defaultInitialTime = 3600; // Default initial time in seconds
   int remainingTime = 3600; // Time in seconds
@@ -35,7 +40,8 @@ class TimerProvider with ChangeNotifier{
 
   // Start the timer
   void startTimer() {
-    if (isRunning || remainingTime <= 0) return; // Prevent multiple timers or starting when time is 0
+    if (isRunning || remainingTime <= 0)
+      return; // Prevent multiple timers or starting when time is 0
     _isRunning = true;
     notifyListeners(); // Notify immediately to update the UI
 
@@ -59,37 +65,90 @@ class TimerProvider with ChangeNotifier{
   }
 
   // Save and print the time spent
-  void saveTimeSpent(BuildContext context) async {
+  void saveTimeSpent({
+    required ClockContext clockContext,
+    required dynamic record,
+    required SleepLogProvider sleepLogProvider,
+    required TaskTimeLogProvider taskTimeLogProvider,
+    required ActivityTimeLogProvider activityTimeLogProvider,
+    required GoalProgressProvider goalProgressProvider,
+    required TaskProvider taskProvider,
+    required ActivityProvider activityProvider
+  }) async {
     stopTimer(); // Ensure the timer is stopped
     print("Time spent: $timeSpent seconds");
-    
-    final sleepLogProvider = Provider.of<SleepLogProvider>(context, listen: false);
 
     final duration = Duration(seconds: timeSpent);
     final now = DateTime.now();
     final startTime = now.subtract(duration);
     final endTime = now;
 
-    print('Start Time: $startTime');
-    print('End Time: $endTime');
-    print('Duration: $duration');
-    print('Date Logged: $now');
-
     try {
-      await sleepLogProvider.addSleepLog(
-        startTime: startTime, 
-        endTime: endTime, 
-        duration: duration, 
-        dateLogged: now
-      );
+      switch (clockContext.type) {
+        // If Timer is for Sleep
+        case ClockContextType.sleep:
+          await sleepLogProvider.addSleepLog(
+              startTime: startTime,
+              endTime: endTime,
+              duration: duration,
+              dateLogged: now
+          );
+          print("Sleep log successfully saved");
+          break;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sleep log saved successfully!')),
-      );
+        // If Timer is for Task
+        case ClockContextType.task:
+          if (record.taskId == null) {
+            throw ArgumentError("Task ID must be provided for task logs.");
+          }
+          await taskTimeLogProvider.addTaskTimeLog(
+              taskId: record.taskId,
+              startTime: startTime,
+              endTime: endTime,
+              duration: duration,
+              dateLogged: now
+          );
+          // Update task status in the TaskProvider
+          taskProvider.updateTaskStatus(record.taskId, "Completed");
+          print("Task log successfully saved");
+          break;
+
+        // If Timer is for Activity
+        case ClockContextType.activity:
+          if (record.activityId == null) {
+            throw ArgumentError(
+                "Activity ID must be provided for activity logs.");
+          }
+          await activityTimeLogProvider.addActivityTimeLog(
+              activityId: record.activityId,
+              startTime: startTime,
+              endTime: endTime,
+              duration: duration,
+              dateLogged: now
+          );
+          // Update activity status in the ActivityProvider
+          activityProvider.updateActivityStatus(record.activityId, "Completed");
+          print("Activity log successfully saved");
+          break;
+
+        // If Timer is for Goal
+        case ClockContextType.goal:
+          if (record.goal!.goalId == null || record.goalScheduleId == null) {
+            throw ArgumentError(
+                "Goal ID or Goal Schedule ID must be provided for goal session logs.");
+          }
+          await goalProgressProvider.addGoalProgressLog(
+              goalId: record.goal!.goalId,
+              goalScheduleId: record.goalScheduleId,
+              startTime: startTime,
+              endTime: endTime,
+              duration: duration,
+              dateLogged: now
+          );
+          break;
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save sleep log: $e')),
-    );
+      print("Error: $e");
     }
   }
 

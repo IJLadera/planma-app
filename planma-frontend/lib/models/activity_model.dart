@@ -5,7 +5,7 @@ class Activity {
   final DateTime scheduledDate;
   final String scheduledStartTime;
   final String scheduledEndTime;
-  final String? status;
+  String? status;
 
   Activity({
     this.activityId,
