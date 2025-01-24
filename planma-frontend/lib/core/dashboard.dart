@@ -211,8 +211,10 @@ class _DashboardState extends State<Dashboard> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  ClockScreen(themeColor: Color(0xFF535D88), title: "Sleep",)));
+                              builder: (context) => ClockScreen(
+                                    themeColor: Color(0xFF535D88),
+                                    title: "Sleep",
+                                  )));
                     },
                   ),
                   const SizedBox(height: 15),
@@ -253,7 +255,12 @@ class _DashboardState extends State<Dashboard> {
                 IconButton(
                   icon: const Icon(Icons.home, size: 40),
                   color: Color(0xFF173F70),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Dashboard()),
+                    );
+                  },
                 ),
                 IconButton(
                   icon: const Icon(Icons.calendar_month, size: 40),
