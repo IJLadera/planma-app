@@ -23,7 +23,7 @@ class _ActivityPageState extends State<ActivityPage> {
     final activityProvider =
         Provider.of<ActivityProvider>(context, listen: false);
     // Automatically fetch activitys when screen loads
-    activityProvider.fetchActivity();
+    activityProvider.fetchPendingActivities();
   }
 
   @override
@@ -38,21 +38,6 @@ class _ActivityPageState extends State<ActivityPage> {
                 fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
           ),
           backgroundColor: Color(0xFFFFFFFF),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20.0),
-              child: IconButton(
-                icon: Icon(Icons.history, color: Color(0xFF173F70), size: 28.0),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => HistoryActivityScreen()),
-                  );
-                },
-              ),
-            ),
-          ],
         ),
         body: Column(
           children: [
@@ -102,7 +87,7 @@ class _ActivityPageState extends State<ActivityPage> {
               ),
             ),
             Expanded(
-              child: activityProvider.activity.isEmpty
+              child: activityProvider.pendingActivities.isEmpty
                   ? Center(
                       child: Text(
                         'No activity added yet',
@@ -113,7 +98,7 @@ class _ActivityPageState extends State<ActivityPage> {
                       ),
                     )
                   : ByDateView(
-                      activityView: activityProvider.activity,
+                      activityView: activityProvider.pendingActivities,
                     ),
             )
           ],

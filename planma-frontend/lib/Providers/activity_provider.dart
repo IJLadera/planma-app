@@ -6,20 +6,24 @@ import 'package:planma_app/models/activity_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ActivityProvider with ChangeNotifier {
-  List<Activity> _activity = [];
+  List<Activity> _pendingActivities = [];
+  List<Activity> _completedActivities = [];
+  List<Activity> _activities = [];
   String? _accessToken;
 
-  List<Activity> get activity => _activity;
+  List<Activity> get pendingActivities => _pendingActivities;
+  List<Activity> get completedActivities => _completedActivities;
+  List<Activity> get activity => _activities;
   String? get accessToken => _accessToken;
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  //Fetch all activities
-  Future<void> fetchActivity () async {
+  // Fetch pending activities list
+  Future<void> fetchPendingActivities () async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}activities/");
+    final url = Uri.parse("${baseUrl}activities/pending_activities/");
 
     try {
       final response = await http.get(
@@ -31,22 +35,74 @@ class ActivityProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        // print(data);
-
-        // Parse the response body as a list of class schedules
-        _activity =
-            data.map((item) => Activity.fromJson(item)).toList();
-        notifyListeners();
+        final newActivities = data.map((item) => Activity.fromJson(item)).toList();
+        
+        // Merge new activities into the master list
+        _activities.addAll(newActivities.where((newActivity) => !_activities.any(
+              (existingActivity) => existingActivity.activityId == newActivity.activityId)));
+            
+        _sortActivities(); // Reorganize activities
       } else {
         throw Exception(
-            'Failed to fetch Activities. Status Code: ${response.statusCode}');
+            'Failed to fetch activities. Status Code: ${response.statusCode}');
       }
     } catch (error) {
       print("Error fetching activities: $error");
     }
   }
 
-  //Add a Activity
+  // Fetch pending activities list
+  Future<void> fetchCompletedActivities () async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}activities/completed_activities/");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final newActivities = data.map((item) => Activity.fromJson(item)).toList();
+        
+        // Merge new activities into the master list
+        _activities.addAll(newActivities.where((newActivity) => !_activities.any(
+              (existingActivity) => existingActivity.activityId == newActivity.activityId)));
+            
+        _sortActivities(); // Reorganize activities
+      } else {
+        throw Exception(
+            'Failed to fetch activities. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print("Error fetching activities: $error");
+    }
+  }
+  
+  // Update activity status dynamically
+  void updateActivityStatus(int activityId, String newStatus) {
+    // Find the activity in the pending list
+    final activityIndex = _pendingActivities.indexWhere((activity) => activity.activityId == activityId);
+    if (activityIndex != -1) {
+      final activity = _pendingActivities[activityIndex];
+      activity.status = newStatus;
+
+      // Move activity from pending to completed if status is "Completed"
+      if (newStatus == "Completed") {
+        _completedActivities.add(activity);
+        _pendingActivities.removeAt(activityIndex);
+      }
+
+      notifyListeners();
+    }
+  }
+
+  // Add a Activity
   Future<void> addActivity({
     required String activityName,
     required String activityDesc,
@@ -61,7 +117,7 @@ class ActivityProvider with ChangeNotifier {
     String formattedEndTime = _formatTimeOfDay(endTime);
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
 
-    bool isConflict = _activity.any((schedule) =>
+    bool isConflict = _activities.any((schedule) =>
       schedule.scheduledDate == scheduledDate &&
       schedule.scheduledStartTime == formattedStartTime &&
       schedule.scheduledEndTime == formattedEndTime);
@@ -71,7 +127,7 @@ class ActivityProvider with ChangeNotifier {
           'Activity schedule conflict detected. Please modify your entry.');
     }
 
-    bool isDuplicate = _activity.any((schedule) =>
+    bool isDuplicate = _activities.any((schedule) =>
       schedule.activityName == activityName &&
       schedule.activityDescription == activityDesc &&
       schedule.scheduledDate == scheduledDate &&
@@ -102,8 +158,8 @@ class ActivityProvider with ChangeNotifier {
 
       if (response.statusCode == 201) {
         final newSchedule = Activity.fromJson(json.decode(response.body));
-        _activity.add(newSchedule);
-        notifyListeners();
+        _activities.add(newSchedule);
+        _sortActivities();
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
@@ -138,7 +194,7 @@ class ActivityProvider with ChangeNotifier {
     String formattedEndTime = _formatTimeOfDay(endTime);
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
 
-    bool isConflict = _activity.any((schedule) =>
+    bool isConflict = _activities.any((schedule) =>
       schedule.activityId != activityId &&
       schedule.scheduledDate == scheduledDate &&
       schedule.scheduledStartTime == formattedStartTime &&
@@ -149,7 +205,7 @@ class ActivityProvider with ChangeNotifier {
           'Activity schedule conflict detected. Please modify your entry.');
     }
 
-    bool isDuplicate = _activity.any((schedule) =>
+    bool isDuplicate = _activities.any((schedule) =>
       schedule.activityName == activityName &&
       schedule.activityDescription == activityDesc &&
       schedule.scheduledDate == scheduledDate &&
@@ -162,13 +218,6 @@ class ActivityProvider with ChangeNotifier {
     }
 
     final url = Uri.parse("${baseUrl}activities/$activityId/");
-
-    print('FROM PROVIDER:');
-    print('activity Name: $activityName');
-    print('activity Description: $activityDesc');
-    print('Scheduled Date: $formattedScheduledDate');
-    print('Start Time: $formattedStartTime');
-    print('End Time: $formattedEndTime');
 
     try {
       final response = await http.put(
@@ -188,11 +237,11 @@ class ActivityProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final updatedSchedule = Activity.fromJson(json.decode(response.body));
-        final index = _activity
+        final index = _activities
             .indexWhere((schedule) => schedule.activityId == activityId);
         if (index != -1) {
-          _activity[index] = updatedSchedule;
-          notifyListeners();
+          _activities[index] = updatedSchedule;
+          _sortActivities();
         }
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
@@ -227,8 +276,8 @@ class ActivityProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _activity
-            .removeWhere((schedule) => schedule.activityId == activityId);
+        _activities.removeWhere((schedule) => schedule.activityId == activityId);
+        _sortActivities();
         notifyListeners();
       } else {
         throw Exception(
@@ -237,6 +286,11 @@ class ActivityProvider with ChangeNotifier {
     } catch (error) {
       rethrow;
     }    
+  }
+  
+  void resetState() {
+    _activities = [];
+    notifyListeners();
   }
 
   // Utility method to format TimeOfDay to HH:mm:ss
@@ -252,8 +306,18 @@ class ActivityProvider with ChangeNotifier {
     return DateFormat('HH:mm:ss').format(dateTime);
   }
 
-  void resetState() {
-    _activity = [];
+  // Utility method to sort activities if it is pending or completed.
+  void _sortActivities() {
+    _pendingActivities = _activities
+        .where((activity) =>
+            activity.status == 'Pending')
+        .toList();
+
+    _completedActivities = _activities
+        .where((activity) =>
+            activity.status == 'Completed')
+        .toList();
+
     notifyListeners();
   }
 }

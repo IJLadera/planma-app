@@ -12,6 +12,7 @@ import 'package:planma_app/core/widget/button_sheet.dart';
 import 'package:planma_app/core/widget/menu_button.dart';
 import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/goals/goal_page.dart';
+import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/reports/report_page.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
@@ -61,10 +62,10 @@ class _DashboardState extends State<Dashboard> {
 
     // Fetch data for all relevant providers when the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TaskProvider>().fetchTasks();
+      context.read<TaskProvider>().fetchPendingTasks();
       // context.read<ClassScheduleProvider>().fetchClassSchedules(selectedSemesterId: 1);
       context.read<EventsProvider>().fetchUpcomingEvents();
-      context.read<ActivityProvider>().fetchActivity();
+      context.read<ActivityProvider>().fetchPendingActivities();
       context.read<GoalProvider>().fetchGoals();
     });
   }
@@ -124,7 +125,7 @@ class _DashboardState extends State<Dashboard> {
                       color: const Color(0xFF50B6FF),
                       icon: Icons.check_circle,
                       title: 'Tasks',
-                      subtitle: '${taskProvider.tasks.length} tasks',
+                      subtitle: '${taskProvider.pendingTasks.length} tasks',
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -176,7 +177,7 @@ class _DashboardState extends State<Dashboard> {
                       icon: Icons.accessibility,
                       title: 'Activities',
                       subtitle:
-                          '${activityProvider.activity.length} activities',
+                          '${activityProvider.pendingActivities.length} activities',
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -211,10 +212,14 @@ class _DashboardState extends State<Dashboard> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ClockScreen(
-                                    themeColor: Color(0xFF535D88),
+                              builder: (context) =>
+                                  ClockScreen(
+                                    themeColor: Color(0xFF535D88), 
                                     title: "Sleep",
-                                  )));
+                                    clockContext: ClockContext(type: ClockContextType.sleep),
+                                  ),
+                          ),
+                      );
                     },
                   ),
                   const SizedBox(height: 15),

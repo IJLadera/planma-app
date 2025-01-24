@@ -2,24 +2,24 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:planma_app/models/sleep_log_model.dart';
+import 'package:planma_app/models/task_time_log_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SleepLogProvider with ChangeNotifier {
-  List<SleepLog> _sleepLogs = [];
+class TaskTimeLogProvider with ChangeNotifier {
+  List<TaskTimeLog> _taskTimeLogs = [];
   String? _accessToken;
 
-  List<SleepLog> get sleepLogs => _sleepLogs;
+  List<TaskTimeLog> get taskTimeLogs => _taskTimeLogs;
   String? get accessToken => _accessToken;
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  // Fetch all sleep log records
-  Future<void> fetchSleepLogs () async {
+  //Fetch all task time logs
+  Future<void> fetchTaskTimeLogs () async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}sleep-logs/");
+    final url = Uri.parse("${baseUrl}task-logs/");
 
     try {
       final response = await http.get(
@@ -33,25 +33,26 @@ class SleepLogProvider with ChangeNotifier {
         final List<dynamic> data = json.decode(response.body);
         // print(data);
 
-        // Parse the response body as a list of sleep logs
-        _sleepLogs =
-            data.map((item) => SleepLog.fromJson(item)).toList();
+        // Parse the response body as a list of task time logs
+        _taskTimeLogs =
+            data.map((item) => TaskTimeLog.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception(
-            'Failed to fetch sleep logs. Status Code: ${response.statusCode}');
+            'Failed to fetch task time logs. Status Code: ${response.statusCode}');
       }
     } catch (error) {
-      print("Error fetching sleep logs: $error");
+      print("Error fetching task time logs: $error");
     }
   }
 
-  // Add sleep log
-  Future<void> addSleepLog({
+  // Add task time log
+  Future<void> addTaskTimeLog({
+    required int taskId,
     required DateTime startTime,
     required DateTime endTime,
     required Duration duration,
-    required DateTime dateLogged,
+    required DateTime dateLogged, 
   }) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -61,7 +62,7 @@ class SleepLogProvider with ChangeNotifier {
     String formattedDuration = _formatDuration(duration);
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(dateLogged);
 
-    final url = Uri.parse("${baseUrl}sleep-logs/log_time/");
+    final url = Uri.parse("${baseUrl}task-logs/log_time/");
 
     try {
       final response = await http.post(
@@ -71,6 +72,7 @@ class SleepLogProvider with ChangeNotifier {
           'Content-Type': 'application/json',
         },
         body: json.encode({
+          'task_id': taskId,
           'start_time': formattedStartTime,
           'end_time': formattedEndTime,
           'duration': formattedDuration,
@@ -79,29 +81,29 @@ class SleepLogProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 201) {
-        final newLog = SleepLog.fromJson(json.decode(response.body));
-        _sleepLogs.add(newLog);
+        final newLog = TaskTimeLog.fromJson(json.decode(response.body));
+        _taskTimeLogs.add(newLog);
         notifyListeners();
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate sleep log detected.') {
-          throw Exception('Duplicate sleep log detected on the server.');
+        if (responseBody['error'] == 'Duplicate task time log detected.') {
+          throw Exception('Duplicate task time log detected on the server.');
         } else {
-          throw Exception('Error adding sleep log: ${response.body}');
+          throw Exception('Error adding task time log: ${response.body}');
         }
       } else {
-        throw Exception('Failed to add sleep log: ${response.body}');
+        throw Exception('Failed to add task time log: ${response.body}');
       }
 
     } catch (error) {
-      print('Add sleep log error: $error');
-      throw Exception('Error adding sleep log: $error');
+      print('Add task time log error: $error');
+      throw Exception('Error adding task time log: $error');
     }
   }
 
   void resetState() {
-    _sleepLogs = [];
+    _taskTimeLogs = [];
     notifyListeners();
   }
 

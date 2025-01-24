@@ -210,4 +210,9 @@ class GoalProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  void resetState() {
+    _goals = [];
+    notifyListeners();
+  }
 }

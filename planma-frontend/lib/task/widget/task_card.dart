@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/models/tasks_model.dart';
 import 'package:planma_app/timer/clock.dart';
 import 'package:planma_app/task/view_task.dart';
@@ -69,8 +70,13 @@ class TaskCard extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ClockScreen(
-                              themeColor: Color(0xFF50B6FF), title: "Task"),
+                          builder: (context) =>
+                              ClockScreen(
+                                themeColor: Color(0xFF50B6FF), 
+                                title: "Task",
+                                clockContext: ClockContext(type: ClockContextType.task),
+                                record: task,
+                              ),
                         ),
                       );
                     },
