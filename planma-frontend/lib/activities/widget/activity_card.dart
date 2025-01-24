@@ -85,7 +85,7 @@ class ActivityCard extends StatelessWidget {
                   child: const Icon(
                     Icons.play_circle_fill,
                     color: Color(0xFF173F70),
-                    size: 28,
+                    size: 40,
                   ),
                 ),
                 const SizedBox(width: 12),

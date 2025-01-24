@@ -9,6 +9,7 @@ import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/timer/stopwatch_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class StopwatchWidget extends StatefulWidget {
   final Color themeColor;
@@ -38,10 +39,9 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
 
     final stopwatchProvider = Provider.of<StopwatchProvider>(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Text(
             _formatTime(stopwatchProvider.elapsedTime),
@@ -73,24 +73,22 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
                   }
                 },
                 child: Container(
-                  height: 50,
-                  width: 50,
+                  height: 60,
+                  width: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: widget.themeColor,
                   ),
                   child: Icon(
                     stopwatchProvider.isRunning ? Icons.stop : Icons.play_arrow,
-                    size: 40,
+                    size: 50,
                     color: Colors.white,
                   ),
                 ),
               ),
-              const SizedBox(width: 20),
             ],
           ),
-          const SizedBox(height: 20),
-        ],
+        ]
       ),
     );
   }
@@ -110,16 +108,51 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Confirm Save'),
-            content: Text(
-                'Are you sure you want to save the time log? The stopwatch stopped at ${_formatTime(stopwatchProvider.elapsedTime)}'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            title: Text(
+              'Confirm Save',
+              style: GoogleFonts.openSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFF173F70),
+              ),
+            ),
+            content: RichText(
+              text: TextSpan(
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+                children: [
+                  const TextSpan(
+                      text:
+                          'Are you sure you want to save the time log? The stopwatch stopped at '),
+                  TextSpan(
+                    text: _formatTime(stopwatchProvider.elapsedTime),
+                    style: GoogleFonts.openSans(
+                      fontWeight: FontWeight.bold,
+                      color:
+                          Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog without saving
+                  Navigator.of(context)
+                      .pop(); // Close the dialog without saving
                   stopwatchProvider.startStopwatch(); // Resume the stopwatch
                 },
-                child: Text('Cancel'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Color(0xFFEF4738),
+                  textStyle: GoogleFonts.openSans(
+                      fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () async {
@@ -139,7 +172,14 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
                   safePop(context); // Close dialog after saving
                   safePop(context); // Close Clock Screen after saving
                 },
-                child: Text('Save'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Color(0xFF173F70),
+                  textStyle: GoogleFonts.openSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                child: const Text('Save'),
               ),
             ],
           );

@@ -34,11 +34,12 @@ class _ClockScreenState extends State<ClockScreen> {
     super.initState();
     // Reset the timer when the screen is opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
-        final timerProvider = Provider.of<TimerProvider>(context, listen: false);
-        timerProvider.resetTimer();
+      final timerProvider = Provider.of<TimerProvider>(context, listen: false);
+      timerProvider.resetTimer();
 
-        final stopwatchProvider = Provider.of<StopwatchProvider>(context, listen: false);
-        stopwatchProvider.resetStopwatch();
+      final stopwatchProvider =
+          Provider.of<StopwatchProvider>(context, listen: false);
+      stopwatchProvider.resetStopwatch();
     });
   }
 
@@ -60,14 +61,34 @@ class _ClockScreenState extends State<ClockScreen> {
     final shouldExit = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Confirm Exit"),
-        content: Text(isTimer
-            ? "The timer is running. Are you sure you want to exit?"
-            : "The stopwatch is running. Are you sure you want to exit?"),
+        title: Text(
+          "Confirm Exit",
+          style: GoogleFonts.openSans(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            color: Colors.black87,
+          ),
+        ),
+        content: Text(
+          isTimer
+              ? "The timer is running. Are you sure you want to exit?"
+              : "The stopwatch is running. Are you sure you want to exit?",
+          style: GoogleFonts.openSans(
+            fontSize: 14,
+            color: Colors.black54,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false), // Cancel
-            child: const Text("Cancel"),
+            child: Text(
+              "Cancel",
+              style: GoogleFonts.openSans(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Color(0xFF173F70),
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -79,7 +100,14 @@ class _ClockScreenState extends State<ClockScreen> {
               }
               Navigator.of(context).pop(true); // Confirm exit
             },
-            child: const Text("Exit"),
+            child: Text(
+              "Exit",
+              style: GoogleFonts.openSans(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Color(0xFFEF4738),
+              ),
+            ),
           ),
         ],
       ),
@@ -92,9 +120,9 @@ class _ClockScreenState extends State<ClockScreen> {
     final timerProvider = Provider.of<TimerProvider>(context);
     final stopwatchProvider = Provider.of<StopwatchProvider>(context);
     final activeProvider = isTimerMode ? timerProvider : stopwatchProvider;
-     final isClockRunning = (activeProvider is TimerProvider)
-      ? (activeProvider as TimerProvider).isRunning
-      : (activeProvider as StopwatchProvider).isRunning;
+    final isClockRunning = (activeProvider is TimerProvider)
+        ? (activeProvider as TimerProvider).isRunning
+        : (activeProvider as StopwatchProvider).isRunning;
 
     return WillPopScope(
       onWillPop: () => _onWillPop(activeProvider),
@@ -106,14 +134,14 @@ class _ClockScreenState extends State<ClockScreen> {
             style: GoogleFonts.openSans(
               fontWeight: FontWeight.bold,
               fontSize: 20,
-              color: Colors.white,
+              color: Color(0xFF173F70),
             ),
           ),
         ),
         body: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ToggleButtons(
@@ -128,16 +156,20 @@ class _ClockScreenState extends State<ClockScreen> {
                   borderRadius: BorderRadius.circular(10),
                   selectedColor: Colors.white,
                   fillColor: widget.themeColor,
-                  color: isClockRunning ? Colors.grey : Colors.black, // Change color when running
-                  disabledColor: Colors.grey, // Grey out the buttons when clock is running
+                  color: isClockRunning
+                      ? Colors.grey
+                      : Colors.black, // Change color when running
+                  disabledColor: Colors.grey,
+                  selectedBorderColor: Color(0xFF173F70),
+                  borderWidth: 0.5,
                   children: [
                     Padding(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                          EdgeInsets.symmetric(horizontal: 13, vertical: 10),
                       child: Text(
                         "Timer",
                         style: GoogleFonts.openSans(
-                            fontSize: 14, fontWeight: FontWeight.w500),
+                            fontSize: 14, color: Color(0xFF173F70)),
                       ),
                     ),
                     Padding(
@@ -145,12 +177,13 @@ class _ClockScreenState extends State<ClockScreen> {
                       child: Text(
                         "Stopwatch",
                         style: GoogleFonts.openSans(
-                            fontSize: 14, fontWeight: FontWeight.w500),
+                            fontSize: 14, color: Color(0xFF173F70)),
                       ),
                     ),
                   ],
                 ),
               ),
+              SizedBox(height: 80),
               // Conditionally Render Timer or Stopwatch
               isTimerMode
                   ? TimerWidget(
@@ -163,7 +196,7 @@ class _ClockScreenState extends State<ClockScreen> {
                       clockContext: widget.clockContext,
                       record: widget.record,
                     ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 80),
             ],
           ),
         ),

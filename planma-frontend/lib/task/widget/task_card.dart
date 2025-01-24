@@ -82,7 +82,7 @@ class TaskCard extends StatelessWidget {
                     },
                     child: const Icon(
                       Icons.play_circle_fill, // Time icon
-                      size: 28, // Slightly larger icon size
+                      size: 40, // Slightly larger icon size
                       color: Color(0xFF173F70), // Icon color
                     ),
                   ),
