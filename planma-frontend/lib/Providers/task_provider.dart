@@ -7,20 +7,24 @@ import 'package:planma_app/models/tasks_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TaskProvider with ChangeNotifier {
+  List<Task> _pendingTasks = [];
+  List<Task> _completedTasks = [];
   List<Task> _tasks = [];
   String? _accessToken;
 
+  List<Task> get pendingTasks => _pendingTasks;
+  List<Task> get completedTasks => _completedTasks;
   List<Task> get tasks => _tasks;
   String? get accessToken => _accessToken;
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  //Fetch all tasks
-  Future<void> fetchTasks () async {
+  // Fetch pending tasks list
+  Future<void> fetchPendingTasks () async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}tasks/");
+    final url = Uri.parse("${baseUrl}tasks/pending_tasks/");
 
     try {
       final response = await http.get(
@@ -32,22 +36,74 @@ class TaskProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        // print(data);
+        final newTasks = data.map((item) => Task.fromJson(item)).toList();
 
-        // Parse the response body as a list of class schedules
-        _tasks =
-            data.map((item) => Task.fromJson(item)).toList();
-        notifyListeners();
+        // Merge new tasks into the master list
+        _tasks.addAll(newTasks.where((newTask) => !_tasks.any(
+              (existingTask) => existingTask.taskId == newTask.taskId)));
+
+        _sortTasks(); // Reorganize tasks
       } else {
         throw Exception(
-            'Failed to fetch class schedules. Status Code: ${response.statusCode}');
+            'Failed to fetch tasks. Status Code: ${response.statusCode}');
       }
     } catch (error) {
-      print("Error fetching class schedules: $error");
+      print("Error fetching tasks: $error");
     }
   }
 
-  //Add a task
+  //Fetch completed tasks list
+  Future<void> fetchCompletedTasks () async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}tasks/completed_tasks/");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final newTasks = data.map((item) => Task.fromJson(item)).toList();
+
+        //Merge new tasks into the master list
+        _tasks.addAll(newTasks.where((newTask) => !_tasks.any(
+              (existingTask) => existingTask.taskId == newTask.taskId)));
+
+        _sortTasks(); // Reorganize tasks
+      } else {
+        throw Exception(
+            'Failed to fetch tasks. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print("Error fetching tasks: $error");
+    }
+  }
+
+  // Update task status dynamically
+  void updateTaskStatus(int taskId, String newStatus) {
+    // Find the task in the pending list
+    final taskIndex = _pendingTasks.indexWhere((task) => task.taskId == taskId);
+    if (taskIndex != -1) {
+      final task = _pendingTasks[taskIndex];
+      task.status = newStatus;
+
+      // Move task from pending to completed if status is "Completed"
+      if (newStatus == "Completed") {
+        _completedTasks.add(task);
+        _pendingTasks.removeAt(taskIndex);
+      }
+
+      notifyListeners();
+    }
+  }
+
+  // Add a task
   Future<void> addTask({
     required String taskName,
     required String taskDesc,
@@ -111,7 +167,7 @@ class TaskProvider with ChangeNotifier {
       if (response.statusCode == 201) {
         final newSchedule = Task.fromJson(json.decode(response.body));
         _tasks.add(newSchedule);
-        notifyListeners();
+        _sortTasks();
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
@@ -200,7 +256,7 @@ class TaskProvider with ChangeNotifier {
             .indexWhere((schedule) => schedule.taskId == taskId);
         if (index != -1) {
           _tasks[index] = updatedSchedule;
-          notifyListeners();
+          _sortTasks();
         }
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
@@ -235,8 +291,8 @@ class TaskProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _tasks
-            .removeWhere((schedule) => schedule.taskId == taskId);
+        _tasks.removeWhere((schedule) => schedule.taskId == taskId);
+        _sortTasks();
         notifyListeners();
       } else {
         throw Exception(
@@ -263,5 +319,20 @@ class TaskProvider with ChangeNotifier {
       time.minute,
     );
     return DateFormat('HH:mm:ss').format(dateTime);
+  }
+
+  // Utility method to sort activities if it is pending or completed.
+  void _sortTasks() {
+    _pendingTasks = _tasks
+        .where((task) =>
+            task.status == 'Pending')
+        .toList();
+
+    _completedTasks = _tasks
+        .where((task) =>
+            task.status == 'Completed')
+        .toList();
+
+    notifyListeners();
   }
 }

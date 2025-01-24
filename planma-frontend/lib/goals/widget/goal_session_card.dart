@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/goals/view_goal_session.dart';
+import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/models/goal_schedules_model.dart';
 import 'package:planma_app/timer/clock.dart';
 
@@ -57,7 +58,11 @@ class GoalSessionCard extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              ClockScreen(themeColor: Color(0xFFB480F3), title: "Goal Session"),
+                              ClockScreen(
+                                themeColor: Color(0xFFB480F3), 
+                                title: "Goal Session",
+                                clockContext: ClockContext(type: ClockContextType.goal),
+                                record: session,),
                         ),
                       );
                     },

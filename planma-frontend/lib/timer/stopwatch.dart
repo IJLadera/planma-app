@@ -1,4 +1,11 @@
 import 'package:flutter/cupertino.dart';
+import 'package:planma_app/Providers/activity_log_provider.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/goal_progress_provider.dart';
+import 'package:planma_app/Providers/sleep_provider.dart';
+import 'package:planma_app/Providers/task_log_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
+import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/timer/stopwatch_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +13,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 class StopwatchWidget extends StatefulWidget {
   final Color themeColor;
-  const StopwatchWidget({super.key, required this.themeColor});
+  final ClockContext clockContext;
+  final dynamic record;
+  const StopwatchWidget(
+    {super.key, 
+    required this.themeColor,
+    required this.clockContext,
+    this.record
+  });
 
   @override
   State<StopwatchWidget> createState() => _StopwatchWidgetState();
@@ -15,6 +29,14 @@ class StopwatchWidget extends StatefulWidget {
 class _StopwatchWidgetState extends State<StopwatchWidget> {
   @override
   Widget build(BuildContext context) {
+    final sleepLogProvider = context.read<SleepLogProvider>();
+    final taskTimeLogProvider = context.read<TaskTimeLogProvider>();
+    final activityTimeLogProvider = context.read<ActivityTimeLogProvider>();
+    final goalProgressProvider = context.read<GoalProgressProvider>();
+
+    final taskProvider = context.read<TaskProvider>();
+    final activityProvider = context.read<ActivityProvider>();
+
     final stopwatchProvider = Provider.of<StopwatchProvider>(context);
 
     return Center(
@@ -28,38 +50,59 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
               fontSize: 45,
             ),
           ),
-          const SizedBox(height: 100),
-          GestureDetector(
-            onTap: () {
-              if (stopwatchProvider.isRunning) {
-                stopwatchProvider.stopStopwatch();
-                _showSaveConfirmationDialog(context, stopwatchProvider);
-              } else {
-                stopwatchProvider.startStopwatch();
-              }
-            },
-            child: Container(
-              height: 60,
-              width: 60,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: widget.themeColor,
+          const SizedBox(height: 30),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  if (stopwatchProvider.isRunning) {
+                    stopwatchProvider.stopStopwatch();
+                    // Show Save Confirmation Dialog after stopping the stopwatch
+                    _showSaveConfirmationDialog(
+                        context, 
+                        stopwatchProvider,
+                        sleepLogProvider,
+                        taskTimeLogProvider,
+                        activityTimeLogProvider,
+                        goalProgressProvider,
+                        taskProvider,
+                        activityProvider);
+                  } else {
+                    stopwatchProvider.startStopwatch();
+                  }
+                },
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.themeColor,
+                  ),
+                  child: Icon(
+                    stopwatchProvider.isRunning ? Icons.stop : Icons.play_arrow,
+                    size: 50,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-              child: Icon(
-                stopwatchProvider.isRunning ? Icons.stop : Icons.play_arrow,
-                size: 50,
-                color: Colors.white,
-              ),
-            ),
+            ],
           ),
-        ],
+        ]
       ),
     );
   }
 
   // Helper Methods
   void _showSaveConfirmationDialog(
-      BuildContext context, StopwatchProvider stopwatchProvider) {
+      BuildContext context, 
+      StopwatchProvider stopwatchProvider,
+      SleepLogProvider sleepLogProvider,
+      TaskTimeLogProvider taskTimeLogProvider,
+      ActivityTimeLogProvider activityTimeLogProvider,
+      GoalProgressProvider goalProgressProvider,
+      TaskProvider taskProvider,
+      ActivityProvider activityProvider) {
     if (stopwatchProvider.elapsedTime > 0) {
       showDialog(
         context: context,
@@ -112,10 +155,22 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: () {
-                  stopwatchProvider.saveTimeLog(context); // Save the time log
+                onPressed: () async {
+                  await Future.microtask(() {
+                    stopwatchProvider.saveTimeLog(
+                      clockContext: widget.clockContext,
+                      record: widget.record,
+                      sleepLogProvider: sleepLogProvider,
+                      taskTimeLogProvider: taskTimeLogProvider,
+                      activityTimeLogProvider: activityTimeLogProvider,
+                      goalProgressProvider: goalProgressProvider,
+                      taskProvider: taskProvider,
+                      activityProvider: activityProvider
+                    ); // Save time spent
+                  });
                   stopwatchProvider.resetStopwatch(); // Reset the stopwatch
-                  Navigator.of(context).pop(); // Close the dialog after saving
+                  safePop(context); // Close dialog after saving
+                  safePop(context); // Close Clock Screen after saving
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: Color(0xFF173F70),
@@ -130,6 +185,12 @@ class _StopwatchWidgetState extends State<StopwatchWidget> {
           );
         },
       );
+    }
+  }
+
+  void safePop(BuildContext context) {
+    if (Navigator.canPop(context)) {
+      Navigator.of(context).pop();
     }
   }
 

@@ -8,7 +8,7 @@ class Task {
   final String scheduledStartTime;
   final String scheduledEndTime;
   final DateTime deadline;
-  final String? status;
+  String? status;
   final Subject? subject;
 
   Task({

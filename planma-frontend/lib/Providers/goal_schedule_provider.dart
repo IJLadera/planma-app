@@ -255,6 +255,11 @@ class GoalScheduleProvider extends ChangeNotifier {
     }    
   }
 
+  void resetState() {
+    _goalschedules = [];
+    notifyListeners();
+  }
+
   // Utility method to format TimeOfDay to HH:mm:ss
   String _formatTimeOfDay(TimeOfDay time) {
     final now = DateTime.now();

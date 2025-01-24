@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/timer/stopwatch.dart';
 import 'package:planma_app/timer/stopwatch_provider.dart';
 import 'package:planma_app/timer/timer.dart';
@@ -10,7 +11,16 @@ import 'package:provider/provider.dart';
 class ClockScreen extends StatefulWidget {
   final Color themeColor;
   final String title;
-  const ClockScreen({super.key, required this.themeColor, required this.title});
+  final ClockContext clockContext;
+  final dynamic record;
+
+  const ClockScreen({
+    super.key, 
+    required this.themeColor, 
+    required this.title, 
+    required this.clockContext, 
+    this.record
+  });
 
   @override
   State<ClockScreen> createState() => _ClockScreenState();
@@ -178,9 +188,13 @@ class _ClockScreenState extends State<ClockScreen> {
               isTimerMode
                   ? TimerWidget(
                       themeColor: widget.themeColor,
+                      clockContext: widget.clockContext,
+                      record: widget.record,
                     )
                   : StopwatchWidget(
                       themeColor: widget.themeColor,
+                      clockContext: widget.clockContext,
+                      record: widget.record,
                     ),
               const SizedBox(height: 80),
             ],
