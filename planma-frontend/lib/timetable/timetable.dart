@@ -19,7 +19,7 @@ class Timetable extends StatelessWidget {
               details.appointments!.isNotEmpty) {
             final Appointment appointment = details.appointments![0];
             _showClassDetails(context, appointment);
-          } 
+          }
         },
       ),
     );
@@ -73,7 +73,7 @@ class Timetable extends StatelessWidget {
                 children: [
                   const Icon(Icons.book, color: Colors.blueAccent),
                   const SizedBox(width: 10),
-                  Expanded( 
+                  Expanded(
                     child: Text(
                       appointment.subject,
                       style: Theme.of(context).textTheme.bodyLarge,
