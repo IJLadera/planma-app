@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 class EditSemesterScreen extends StatefulWidget {
   final Map<String, dynamic> semester;
 
-
   const EditSemesterScreen({super.key, required this.semester});
 
   @override
@@ -96,6 +95,29 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
   }
 
 //changes to edit
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize values from the provided semester data
+    _selectedStartYear = widget.semester['acad_year_start']?.toString();
+    _selectedEndYear = widget.semester['acad_year_end']?.toString();
+    _selectedYearLevel = widget.semester['year_level'];
+    _selectedSemester = widget.semester['semester'];
+
+    // Parse and format the start and end dates
+    if (widget.semester['sem_start_date'] != null) {
+      startDate = DateTime.parse(widget.semester['sem_start_date']);
+      startDateController.text = DateFormat('dd MMMM yyyy').format(startDate!);
+    }
+
+    if (widget.semester['sem_end_date'] != null) {
+      endDate = DateTime.parse(widget.semester['sem_end_date']);
+      endDateController.text = DateFormat('dd MMMM yyyy').format(endDate!);
+    }
+  }
+
   void _submitSemester(BuildContext context) async {
     final provider = Provider.of<SemesterProvider>(context, listen: false);
 
