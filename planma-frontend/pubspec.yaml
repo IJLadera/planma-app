@@ -50,6 +50,11 @@ dependencies:
   jwt_decode: ^0.3.1
   dropdown_button2: ^2.3.9
   syncfusion_flutter_charts: ^27.2.2
+  dependencies:
+  
+  # Notifications
+  push: ^3.3.3
+  flutter_local_notifications: ^17.1.0
 
 dev_dependencies:
   flutter_test:
