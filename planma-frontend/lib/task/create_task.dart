@@ -50,10 +50,13 @@ class _CreateTaskState extends State<AddTaskScreen> {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm().parse(controller.text); // Parse time from "h:mm a" format
-        initialTime = TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
+        final parsedTime = DateFormat.jm()
+            .parse(controller.text); // Parse time from "h:mm a" format
+        initialTime =
+            TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime = TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime =
+            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
       }
     } else {
       initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
@@ -93,7 +96,8 @@ class _CreateTaskState extends State<AddTaskScreen> {
 
   void _submitTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
-    final subjects = Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
+    final subjects =
+        Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
 
     String taskName = _taskNameController.text.trim();
     String taskDescription = _descriptionController.text.trim();
@@ -124,21 +128,26 @@ class _CreateTaskState extends State<AddTaskScreen> {
       return;
     }
 
-    final selectedSubject = subjects.firstWhere((subject) => subject.subjectId == _subject);
+    final selectedSubject =
+        subjects.firstWhere((subject) => subject.subjectId == _subject);
 
     try {
       await provider.addTask(
-          taskName: taskName,
-          taskDesc: taskDescription,
-          scheduledDate: _scheduledDate!,
-          startTime: startTime,
-          endTime: endTime,
-          deadline: _deadline!,
-          subject: selectedSubject,);
+        taskName: taskName,
+        taskDesc: taskDescription,
+        scheduledDate: _scheduledDate!,
+        startTime: startTime,
+        endTime: endTime,
+        deadline: _deadline!,
+        subject: selectedSubject,
+      );
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Task added successfully!')),
+        SnackBar(
+          content: const Text('Task added successfully!'),
+          duration: const Duration(seconds: 3),
+        ),
       );
 
       Navigator.pop(context);
@@ -286,9 +295,9 @@ class _CreateTaskState extends State<AddTaskScreen> {
                     items: Provider.of<ClassScheduleProvider>(context)
                         .subjects
                         .map((subject) => DropdownMenuItem(
-                            value: subject.subjectId,
-                            child: Text(subject.subjectCode),
-                          ))
+                              value: subject.subjectId,
+                              child: Text(subject.subjectCode),
+                            ))
                         .toList(),
                     onChanged: (int? value) {
                       setState(() {
