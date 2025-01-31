@@ -31,6 +31,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   String? selectedSemester;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -70,10 +71,27 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+  final List<Widget> _screens = [
+    Dashboard(),
+    CustomCalendar(),
+  ];
+
+  void _onItemTapped(int index) {
+    if (index == 2) {
+      // Open BottomSheet instead of switching screen
+      BottomSheetWidget.show(context);
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'Hello, ${context.watch<UserProfileProvider>().username}',
           style: GoogleFonts.openSans(
@@ -210,15 +228,15 @@ class _DashboardState extends State<Dashboard> {
                     subtitle: '',
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  ClockScreen(
-                                    themeColor: Color(0xFF535D88), 
-                                    title: "Sleep",
-                                    clockContext: ClockContext(type: ClockContextType.sleep),
-                                  ),
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ClockScreen(
+                            themeColor: Color(0xFF535D88),
+                            title: "Sleep",
+                            clockContext:
+                                ClockContext(type: ClockContextType.sleep),
                           ),
+                        ),
                       );
                     },
                   ),
