@@ -29,6 +29,21 @@ class TimerWidget extends StatefulWidget {
 
 class _TimerWidgetState extends State<TimerWidget> {
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final timerProvider = context.read<TimerProvider>();
+      if (widget.record != null) {
+        timerProvider.setInitialTimeFromRecord(
+          widget.record.scheduledStartTime,
+          widget.record.scheduledEndTime,
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final sleepLogProvider = context.read<SleepLogProvider>();
     final taskTimeLogProvider = context.read<TaskTimeLogProvider>();
