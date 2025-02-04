@@ -53,10 +53,13 @@ class _EditTask extends State<EditTask> {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm().parse(controller.text); // Parse time from "h:mm a" format
-        initialTime = TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
+        final parsedTime = DateFormat.jm()
+            .parse(controller.text); // Parse time from "h:mm a" format
+        initialTime =
+            TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime = TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime =
+            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
       }
     } else {
       initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
@@ -159,7 +162,8 @@ class _EditTask extends State<EditTask> {
 
   void _editTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
-    final subjects = Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
+    final subjects =
+        Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
 
     String taskName = _taskNameController.text.trim();
     String taskDescription = _descriptionController.text.trim();
@@ -205,30 +209,89 @@ class _EditTask extends State<EditTask> {
     print('Deadline: $_deadline');
     print('Subject: $_subject');
 
-    final selectedSubject = subjects.firstWhere((subject) => subject.subjectId == _subject);
+    final selectedSubject =
+        subjects.firstWhere((subject) => subject.subjectId == _subject);
 
     try {
       print('Starting to update task...');
       await provider.updateTask(
-          taskId: widget.task.taskId!,
-          taskName: taskName,
-          taskDesc: taskDescription,
-          scheduledDate: _scheduledDate!,
-          startTime: startTime,
-          endTime: endTime,
-          deadline: _deadline!,
-          subject: selectedSubject,);
+        taskId: widget.task.taskId!,
+        taskName: taskName,
+        taskDesc: taskDescription,
+        scheduledDate: _scheduledDate!,
+        startTime: startTime,
+        endTime: endTime,
+        deadline: _deadline!,
+        subject: selectedSubject,
+      );
       print('Task updated successfully!');
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Task updated successfully!')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Task updated successfully!',
+                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3), // Controls visibility time
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 50,
+            right: 50,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 10,
+        ),
       );
 
       Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update task: $error')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error,
+              color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                //Prevents text overflow
+                child: Text(
+                  'Failed to update task: $error',
+                  style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                )
+              )
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 50,
+            right: 50,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Colors.red,
+          elevation: 10,
+        ),
       );
     }
   }
@@ -328,9 +391,9 @@ class _EditTask extends State<EditTask> {
                     items: Provider.of<ClassScheduleProvider>(context)
                         .subjects
                         .map((subject) => DropdownMenuItem(
-                            value: subject.subjectId,
-                            child: Text(subject.subjectCode),
-                          ))
+                              value: subject.subjectId,
+                              child: Text(subject.subjectCode),
+                            ))
                         .toList(),
                     onChanged: (int? value) {
                       setState(() {

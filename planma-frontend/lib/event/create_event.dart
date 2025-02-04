@@ -46,10 +46,13 @@ class _AddEventScreen extends State<AddEventScreen> {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm().parse(controller.text); // Parse time from "h:mm a" format
-        initialTime = TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
+        final parsedTime = DateFormat.jm()
+            .parse(controller.text); // Parse time from "h:mm a" format
+        initialTime =
+            TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime = TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime =
+            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
       }
     } else {
       initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
@@ -109,14 +112,22 @@ class _AddEventScreen extends State<AddEventScreen> {
         endTimeString.isEmpty ||
         _selectedEventType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields!')),
+        SnackBar(
+            content: Text(
+          'Please fill in all fields!',
+          style: GoogleFonts.openSans(fontSize: 14),
+        )),
       );
       return;
     }
 
     if (!_isValidTimeRange(startTime!, endTime!)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Start Time must be before End Time.')),
+        SnackBar(
+            content: Text(
+          'Start Time must be before End Time.',
+          style: GoogleFonts.openSans(fontSize: 14),
+        )),
       );
       return;
     }
@@ -134,7 +145,33 @@ class _AddEventScreen extends State<AddEventScreen> {
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('event added successfully!')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Event created successfully!',
+                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 50,
+            right: 50,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 10,
+        ),
       );
 
       Navigator.pop(context);
@@ -142,7 +179,39 @@ class _AddEventScreen extends State<AddEventScreen> {
       _clearFields();
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add event (1): $error')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error,
+                  color: Colors.white, size: 24), // Error icon
+              const SizedBox(width: 8),
+              Expanded(
+                // Prevents text overflow
+                child: Text(
+                  'Failed to add event (1): $error',
+                  style:
+                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+                  overflow: TextOverflow.ellipsis, // Handles long errors
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
+            left: 50,
+            right: 50,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Square shape
+          ),
+          backgroundColor: Colors.red, // Error background color
+          elevation: 10, // Adds shadow
+        ),
       );
     }
   }

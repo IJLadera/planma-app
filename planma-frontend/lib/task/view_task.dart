@@ -27,12 +27,20 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final isConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: const Text('Are you sure you want to delete this task?'),
+        title: Text(
+          'Delete Task',
+          style: GoogleFonts.openSans(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+        ),
+        content: Text('Are you sure you want to delete this task?',
+            style:
+                GoogleFonts.openSans(fontSize: 16, color: Color(0xFF1D4E89))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel',
+                style: GoogleFonts.openSans(
+                    fontSize: 16, color: Color(0xFF1D4E89))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -41,7 +49,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('Delete'),
+            child: Text(
+              'Delete',
+              style:
+                  GoogleFonts.openSans(fontSize: 16, color: Color(0xFF1D4E89)),
+            ),
           ),
         ],
       ),
@@ -50,6 +62,33 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     if (isConfirmed == true) {
       provider.deleteTask(widget.task.taskId!);
       Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 24),
+            const SizedBox(width: 8),
+            Text(
+              'Deleted Task successfully',
+              style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+            )
+          ],
+        ),
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height * 0.4,
+          left: 50,
+          right: 50,
+          top: 100,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+        elevation: 10,
+      ));
     }
   }
 
@@ -76,7 +115,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   String _formatDeadline(DateTime date) {
-    return DateFormat('dd MMMM yyyy - hh:mm a').format(date); // Example: 18 December 2024 - 12:00 AM
+    return DateFormat('dd MMMM yyyy - hh:mm a')
+        .format(date); // Example: 18 December 2024 - 12:00 AM
   }
 
   @override
@@ -118,10 +158,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               onPressed: () async {
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => 
-                      EditTask(task: task)
-                  ),
+                  MaterialPageRoute(builder: (context) => EditTask(task: task)),
                 );
               },
             ),
@@ -154,15 +191,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 children: [
                   TaskDetailRow(title: 'Name:', detail: task.taskName),
                   const Divider(),
-                  TaskDetailRow(title: 'Description:', detail: task.taskDescription),
+                  TaskDetailRow(
+                      title: 'Description:', detail: task.taskDescription),
                   const Divider(),
                   TaskDetailRow(title: 'Date:', detail: formattedScheduledDate),
                   const Divider(),
-                  TaskDetailRow(title: 'Time:', detail: '$startTime - $endTime'),
+                  TaskDetailRow(
+                      title: 'Time:', detail: '$startTime - $endTime'),
                   const Divider(),
                   TaskDetailRow(title: 'Deadline:', detail: formattedDeadline),
                   const Divider(),
-                  TaskDetailRow(title: 'Subject:', detail: task.subject?.subjectTitle),
+                  TaskDetailRow(
+                      title: 'Subject:', detail: task.subject?.subjectTitle),
                   const Divider(),
                 ],
               ),
