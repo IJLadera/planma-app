@@ -56,17 +56,41 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     final isConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Subject'),
-        content: const Text('Are you sure you want to delete this subject?'),
+        title: Text(
+          'Delete Subject',
+          style: GoogleFonts.openSans(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+        ),
+        content: Text(
+          'Are you sure you want to delete this subject?',
+          style: GoogleFonts.openSans(
+            fontSize: 16,
+            color: Color(0xFF1D4E89),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.openSans(
+                fontSize: 16,
+                color: Color(0xFF1D4E89),
+              ),
+            ),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete',
-                style: TextStyle(color: Color(0xFFEF4738))),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: Text(
+              'Delete',
+              style:
+                  GoogleFonts.openSans(fontSize: 16, color: Color(0xFF1D4E89)),
+            ),
           ),
         ],
       ),

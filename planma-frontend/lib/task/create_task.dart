@@ -145,8 +145,31 @@ class _CreateTaskState extends State<AddTaskScreen> {
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Task added successfully!'),
+          content: Row(
+            mainAxisSize: MainAxisSize.min, // Make the row compact
+            mainAxisAlignment: MainAxisAlignment.center, // Center the content
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Task created successfully!',
+                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+              ),
+            ],
+          ),
           duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4, // Move to middle
+            left: 50,
+            right: 50,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Make it a square
+          ),
+          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 10, // Add shadow for better visibility
         ),
       );
 
@@ -155,7 +178,39 @@ class _CreateTaskState extends State<AddTaskScreen> {
       _clearFields();
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add task (1): $error')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error,
+                  color: Colors.white, size: 24), // Error icon
+              const SizedBox(width: 8),
+              Expanded(
+                // Prevents text overflow
+                child: Text(
+                  'Failed to add task (1): $error',
+                  style:
+                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+                  overflow: TextOverflow.ellipsis, // Handles long errors
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
+            left: 50,
+            right: 50,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Square shape
+          ),
+          backgroundColor: Colors.red, // Error background color
+          elevation: 10, // Adds shadow
+        ),
       );
     }
   }
