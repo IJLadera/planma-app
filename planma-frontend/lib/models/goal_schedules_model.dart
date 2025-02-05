@@ -6,6 +6,7 @@ class GoalSchedule {
   final String scheduledDate;
   final String scheduledStartTime;
   final String scheduledEndTime;
+  String? status;
 
   GoalSchedule({
     this.goalScheduleId,
@@ -13,6 +14,7 @@ class GoalSchedule {
     required this.scheduledDate,
     required this.scheduledStartTime,
     required this.scheduledEndTime,
+    this.status,
   });
 
   factory GoalSchedule.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class GoalSchedule {
       scheduledDate: json['scheduled_date'] ?? '',
       scheduledStartTime: json['scheduled_start_time'] ?? '',
       scheduledEndTime: json['scheduled_end_time'] ?? '',
+      status: json['status'] ?? 'Pending',
     );
   }
 
@@ -34,6 +37,7 @@ class GoalSchedule {
       'scheduled_date': scheduledDate,
       'scheduled_start_time': scheduledStartTime,
       'scheduled_end_time': scheduledEndTime,
+      'status': status,
     };
   }
 }

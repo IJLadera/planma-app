@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/Providers/goal_progress_provider.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/goals/widget/search_bar.dart';
 import 'package:planma_app/goals/create_goal.dart';
@@ -16,30 +17,48 @@ class GoalPage extends StatefulWidget {
 
 class _GoalPageState extends State<GoalPage> {
   List<Goal> filteredGoals = [];
+  Map<int, double> progressData = {}; // Map for storing progress per goal ID
 
   @override
   void initState() {
     super.initState();
-    final goalProvider = Provider.of<GoalProvider>(context, listen: false);
-
-    goalProvider.fetchGoals().then((_) {
-      setState(() {
-        filteredGoals = goalProvider.goals; // Initialize with all goals
-      });
-    });
+    _fetchAllData();
   }
 
-  void _filterGoals(String query) {
+  Future<void> _fetchAllData() async {
     final goalProvider = Provider.of<GoalProvider>(context, listen: false);
-    final results = goalProvider.goals
-        .where(
-          (goal) => goal.goalName.toLowerCase().contains(query.toLowerCase()),
-        )
-        .toList();
+    final progressProvider = Provider.of<GoalProgressProvider>(context, listen: false);
+
+    await goalProvider.fetchGoals();
+    for (var goal in goalProvider.goals) {
+      try {
+        await progressProvider.fetchGoalProgressPerGoal(goal);
+        final progress = progressProvider.computeProgress(
+            goal.goalId!, goal.targetHours, goal.timeframe);
+        setState(() {
+          progressData[goal.goalId!] = progress;
+        });
+      } catch (e) {
+        print('Error fetching progress for goal ${goal.goalId}: $e');
+      }
+    }
+
     setState(() {
-      filteredGoals = results;
+      filteredGoals = goalProvider.goals;
     });
   }
+
+  // void _filterGoals(String query) {
+  //   final goalProvider = Provider.of<GoalProvider>(context, listen: false);
+  //   final results = goalProvider.goals
+  //       .where(
+  //         (goal) => goal.goalName.toLowerCase().contains(query.toLowerCase()),
+  //       )
+  //       .toList();
+  //   setState(() {
+  //     filteredGoals = results;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +94,8 @@ class _GoalPageState extends State<GoalPage> {
                       itemCount: filteredGoals.length,
                       itemBuilder: (context, index) {
                         final goal = filteredGoals[index];
-                        return GoalCard(goal: goal);
+                        final progress = progressData[goal.goalId] ?? 0.0;
+                        return GoalCard(goal: goal, progress: progress);
                       },
                     )
                   : Center(

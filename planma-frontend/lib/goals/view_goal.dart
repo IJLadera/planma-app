@@ -60,7 +60,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
   Future<void> _fetchGoalSessions() async {
     final scheduleProvider =
         Provider.of<GoalScheduleProvider>(context, listen: false);
-    await scheduleProvider.fetchGoalSchedulesPerGoal(widget.goal.goalId!);
+    await scheduleProvider.fetchPendingGoalSchedules(widget.goal.goalId!);
   }
 
   void _handleDelete(BuildContext context) async {
@@ -103,7 +103,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
       final goal =
           goalProvider.goals.firstWhere((g) => g.goalId == widget.goal.goalId);
 
-      final sessions = scheduleProvider.goalschedules
+      final sessions = scheduleProvider.pendingGoalschedules
           .where((s) => s.goal?.goalId == widget.goal.goalId)
           .toList();
 

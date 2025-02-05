@@ -6,6 +6,7 @@ import 'package:planma_app/Providers/events_provider.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/Providers/task_provider.dart';
+import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/activities/activity_page.dart';
 import 'package:planma_app/core/widget/button_sheet.dart';
@@ -68,6 +69,7 @@ class _DashboardState extends State<Dashboard> {
       context.read<EventsProvider>().fetchUpcomingEvents();
       context.read<ActivityProvider>().fetchPendingActivities();
       context.read<GoalProvider>().fetchGoals();
+      context.read<UserPreferencesProvider>().fetchUserPreferences();
     });
   }
 
@@ -221,24 +223,28 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  MenuButtonWidget(
-                    color: Color(0xFF535D88),
-                    icon: FontAwesomeIcons.moon,
-                    title: 'Sleep',
-                    subtitle: '',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ClockScreen(
-                            themeColor: Color(0xFF535D88),
-                            title: "Sleep",
-                            clockContext:
-                                ClockContext(type: ClockContextType.sleep),
+                  Consumer<UserPreferencesProvider>(
+                    builder: (context, userPreferencesProvider, _) =>
+                        MenuButtonWidget(
+                      color: Color(0xFF535D88),
+                      icon: FontAwesomeIcons.moon,
+                      title: 'Sleep',
+                      subtitle: '',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ClockScreen(
+                              themeColor: Color(0xFF535D88),
+                              title: "Sleep",
+                              clockContext:
+                                  ClockContext(type: ClockContextType.sleep),
+                              record: userPreferencesProvider.userPreferences[0],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: 15),
                   MenuButtonWidget(

@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/Providers/activity_log_provider.dart';
 import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:planma_app/Providers/goal_progress_provider.dart';
+import 'package:planma_app/Providers/goal_schedule_provider.dart';
 import 'package:planma_app/Providers/sleep_provider.dart';
 import 'package:planma_app/Providers/task_log_provider.dart';
 import 'package:planma_app/Providers/task_provider.dart';
@@ -28,6 +31,9 @@ class TimerWidget extends StatefulWidget {
 }
 
 class _TimerWidgetState extends State<TimerWidget> {
+  String? startTime;
+  String? endTime;
+
   @override
   void initState() {
     super.initState();
@@ -35,9 +41,21 @@ class _TimerWidgetState extends State<TimerWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final timerProvider = context.read<TimerProvider>();
       if (widget.record != null) {
+        switch (widget.clockContext.type) {
+          case ClockContextType.sleep:
+            startTime = widget.record.usualSleepTime;
+            endTime = widget.record.usualWakeTime;
+            print("Sleep Clock Detected");
+            break;
+          case ClockContextType.task || ClockContextType.activity || ClockContextType.goal:
+            print("Record: ${jsonEncode(widget.record)}");
+            startTime = widget.record.scheduledStartTime;
+            endTime = widget.record.scheduledEndTime;
+            print("Task OR Activity OR Goal Clock Detected");
+            break;
+        }
         timerProvider.setInitialTimeFromRecord(
-          widget.record.scheduledStartTime,
-          widget.record.scheduledEndTime,
+          startTime!, endTime!,
         );
       }
     });
@@ -52,6 +70,7 @@ class _TimerWidgetState extends State<TimerWidget> {
 
     final taskProvider = context.read<TaskProvider>();
     final activityProvider = context.read<ActivityProvider>();
+    final goalScheduleProvider = context.read<GoalScheduleProvider>();
 
     final timerProvider = context.read<TimerProvider>();
 
@@ -104,7 +123,8 @@ class _TimerWidgetState extends State<TimerWidget> {
                         activityTimeLogProvider,
                         goalProgressProvider,
                         taskProvider,
-                        activityProvider);
+                        activityProvider,
+                        goalScheduleProvider);
                   } else {
                     timerProvider.startTimer(); // Start the timer
                   }
@@ -140,7 +160,8 @@ class _TimerWidgetState extends State<TimerWidget> {
       ActivityTimeLogProvider activityTimeLogProvider,
       GoalProgressProvider goalProgressProvider,
       TaskProvider taskProvider,
-      ActivityProvider activityProvider) {
+      ActivityProvider activityProvider,
+      GoalScheduleProvider goalScheduleProvider) {
     if (timerProvider.remainingTime > 0) {
       showDialog(
         context: context,
@@ -201,7 +222,8 @@ class _TimerWidgetState extends State<TimerWidget> {
                       activityTimeLogProvider: activityTimeLogProvider,
                       goalProgressProvider: goalProgressProvider,
                       taskProvider: taskProvider,
-                      activityProvider: activityProvider
+                      activityProvider: activityProvider,
+                      goalScheduleProvider: goalScheduleProvider
                     ); // Save time spent
                   });
                   timerProvider.resetTimer();

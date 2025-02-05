@@ -6,9 +6,13 @@ import 'package:planma_app/models/goal_schedules_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GoalScheduleProvider extends ChangeNotifier {
+  List<GoalSchedule> _pendingGoalschedules = [];
+  List<GoalSchedule> _completedGoalschedules = [];
   List<GoalSchedule> _goalschedules = [];
   String? _accessToken;
 
+  List<GoalSchedule> get pendingGoalschedules => _pendingGoalschedules;
+  List<GoalSchedule> get completedGoalschedules => _completedGoalschedules;
   List<GoalSchedule> get goalschedules => _goalschedules;
   String? get accessToken => _accessToken;
 
@@ -75,6 +79,90 @@ class GoalScheduleProvider extends ChangeNotifier {
     }
   }
 
+  // Fetch pending goal schedules per goal
+  Future<void> fetchPendingGoalSchedules (int goalId) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}goal-schedules/pending_goal_schedules/?goal_id=$goalId");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final newSchedules = data.map((item) => GoalSchedule.fromJson(item)).toList();
+
+        // Merge new schedules into the master list
+        _goalschedules.addAll(newSchedules.where((newSchedule) => !_goalschedules.any(
+              (existingSchedule) => existingSchedule.goalScheduleId == newSchedule.goalScheduleId)));
+
+        _sortGoalSchedules(); // Reorganize goal schedules
+      } else {
+        throw Exception(
+            'Failed to fetch goal schedules. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print("Error fetching goal schedules: $error");
+    }
+  }
+
+  // Fetch completed goal schedules per goal
+  Future<void> fetchCompletedGoalSchedules (int goalId) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}goal-schedules/completed_goal_schedules/?goal_id=$goalId");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final newSchedules = data.map((item) => GoalSchedule.fromJson(item)).toList();
+
+        // Merge new schedules into the master list
+        _goalschedules.addAll(newSchedules.where((newSchedule) => !_goalschedules.any(
+              (existingSchedule) => existingSchedule.goalScheduleId == newSchedule.goalScheduleId)));
+
+        _sortGoalSchedules(); // Reorganize goal schedules
+      } else {
+        throw Exception(
+            'Failed to fetch goal schedules. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print("Error fetching goal schedules: $error");
+    }
+  }
+
+  // Update goal schedule status dynamically
+  void updateGoalScheduleStatus(int goalScheduleId, String newStatus) {
+    // Find the goal schedule in the pending list
+    final scheduleIndex = _pendingGoalschedules.indexWhere((schedule) => schedule.goalScheduleId == goalScheduleId);
+    if (scheduleIndex != -1) {
+      final schedule = _pendingGoalschedules[scheduleIndex];
+      schedule.status = newStatus;
+
+      // Move goal schedule from pending to completed if status is "Completed"
+      if (newStatus == "Completed") {
+        _completedGoalschedules.add(schedule);
+        _pendingGoalschedules.removeAt(scheduleIndex);
+      }
+
+      notifyListeners();
+    }
+  }
+
   //Add a goal schedule
   Future<void> addGoalSchedule({
     required int goalId,
@@ -130,7 +218,7 @@ class GoalScheduleProvider extends ChangeNotifier {
       if (response.statusCode == 201) {
         final newSchedule = GoalSchedule.fromJson(json.decode(response.body));
         _goalschedules.add(newSchedule);
-        notifyListeners();
+        _sortGoalSchedules();
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
@@ -208,7 +296,7 @@ class GoalScheduleProvider extends ChangeNotifier {
             .indexWhere((schedule) => schedule.goalScheduleId == goalScheduleId);
         if (index != -1) {
           _goalschedules[index] = updatedSchedule;
-          notifyListeners();
+          _sortGoalSchedules();
         }
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
@@ -245,6 +333,7 @@ class GoalScheduleProvider extends ChangeNotifier {
       if (response.statusCode == 204) {
         _goalschedules
             .removeWhere((schedule) => schedule.goalScheduleId == goalScheduleId);
+        _sortGoalSchedules();
         notifyListeners();
       } else {
         throw Exception(
@@ -271,5 +360,20 @@ class GoalScheduleProvider extends ChangeNotifier {
       time.minute,
     );
     return DateFormat('HH:mm:ss').format(dateTime);
+  }
+
+  // Utility method to sort activities if it is pending or completed.
+  void _sortGoalSchedules() {
+    _pendingGoalschedules = _goalschedules
+        .where((schedule) =>
+            schedule.status == 'Pending')
+        .toList();
+
+    _completedGoalschedules = _goalschedules
+        .where((schedule) =>
+            schedule.status == 'Completed')
+        .toList();
+
+    notifyListeners();
   }
 }
