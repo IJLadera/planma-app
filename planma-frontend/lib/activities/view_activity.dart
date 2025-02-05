@@ -27,12 +27,28 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
     final isConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Activity'),
-        content: const Text('Are you sure you want to delete this activity?'),
+        title: Text(
+          'Delete Activity',
+          style: GoogleFonts.openSans(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+        ),
+        content: Text(
+          'Are you sure you want to delete this activity?',
+          style: GoogleFonts.openSans(
+            fontSize: 16,
+            color: Color(0xFF1D4E89),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.openSans(
+                fontSize: 16,
+                color: Color(0xFF1D4E89),
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -41,7 +57,13 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('Delete'),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.openSans(
+                fontSize: 16,
+                color: Color(0xFF1D4E89),
+              ),
+            ),
           ),
         ],
       ),
@@ -124,7 +146,9 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => EditActivity(activity: activity,)),
+                      builder: (context) => EditActivity(
+                            activity: activity,
+                          )),
                 );
               },
             ),
