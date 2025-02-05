@@ -105,13 +105,19 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Attendance marked as $newValue'),
+            content: Text(
+              'Attendance marked as $newValue',
+              style: GoogleFonts.openSans(fontSize: 14),
+            ),
           ),
         );
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update attendance: $error'),
+            content: Text(
+              'Failed to update attendance: $error',
+              style: GoogleFonts.openSans(fontSize: 14),
+            ),
           ),
         );
       }
@@ -123,12 +129,28 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final isConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Event'),
-        content: const Text('Are you sure you want to delete this event?'),
+        title: Text(
+          'Delete Event',
+          style: GoogleFonts.openSans(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+        ),
+        content: Text(
+          'Are you sure you want to delete this event?',
+          style: GoogleFonts.openSans(
+            fontSize: 14,
+            color: Color(0xFF1D4E89),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.openSans(
+                fontSize: 16,
+                color: Color(0xFF1D4E89),
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -137,7 +159,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('Delete'),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.openSans(
+                fontSize: 16,
+                color: Color(0xFF1D4E89),
+              ),
+            ),
           ),
         ],
       ),

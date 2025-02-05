@@ -45,10 +45,13 @@ class _EditActivity extends State<EditActivity> {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm().parse(controller.text); // Parse time from "h:mm a" format
-        initialTime = TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
+        final parsedTime = DateFormat.jm()
+            .parse(controller.text); // Parse time from "h:mm a" format
+        initialTime =
+            TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime = TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime =
+            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
       }
     } else {
       initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
@@ -69,7 +72,8 @@ class _EditActivity extends State<EditActivity> {
 
   TimeOfDay? _stringToTimeOfDay(String timeString) {
     try {
-      final format = RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
+      final format =
+          RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
       final match = format.firstMatch(timeString.trim());
 
       if (match == null) {
@@ -80,7 +84,9 @@ class _EditActivity extends State<EditActivity> {
       final minute = int.parse(match.group(2)!);
       final period = match.group(3)!.toLowerCase();
 
-      final adjustedHour = (period == 'pm' && hour != 12) ? hour + 12 : (hour == 12 && period == 'am' ? 0 : hour);
+      final adjustedHour = (period == 'pm' && hour != 12)
+          ? hour + 12
+          : (hour == 12 && period == 'am' ? 0 : hour);
 
       return TimeOfDay(hour: adjustedHour, minute: minute);
     } catch (e) {
@@ -108,16 +114,19 @@ class _EditActivity extends State<EditActivity> {
     return DateFormat.jm().format(dateTime); // Requires intl package
   }
 
-
   @override
   void initState() {
     super.initState();
 
     // Pre-fill fields with current activity details
-    _activityNameController = TextEditingController(text: widget.activity.activityName);
-    _activityDescriptionController = TextEditingController(text: widget.activity.activityDescription);
-    _startTimeController = TextEditingController(text: _formatTimeForDisplay(widget.activity.scheduledStartTime));
-    _endTimeController = TextEditingController(text: _formatTimeForDisplay(widget.activity.scheduledEndTime));
+    _activityNameController =
+        TextEditingController(text: widget.activity.activityName);
+    _activityDescriptionController =
+        TextEditingController(text: widget.activity.activityDescription);
+    _startTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.activity.scheduledStartTime));
+    _endTimeController = TextEditingController(
+        text: _formatTimeForDisplay(widget.activity.scheduledEndTime));
 
     print(_formatTimeForDisplay(widget.activity.scheduledStartTime));
     print(_formatTimeForDisplay(widget.activity.scheduledEndTime));
@@ -143,20 +152,30 @@ class _EditActivity extends State<EditActivity> {
     print('formatted: $startTime');
     print('formatted: $endTime');
 
-    if (activityName.isEmpty || 
+    if (activityName.isEmpty ||
         activityDescription.isEmpty ||
         _scheduledDate == null ||
         startTimeString.isEmpty ||
         endTimeString.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields!')),
+        SnackBar(
+          content: Text(
+            'Please fill in all fields!',
+            style: GoogleFonts.openSans(fontSize: 16),
+          ),
+        ),
       );
       return;
     }
 
     if (!_isValidTimeRange(startTime!, endTime!)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Start Time must be before End Time.')),
+        SnackBar(
+          content: Text(
+            'Start Time must be before End Time.',
+            style: GoogleFonts.openSans(fontSize: 16),
+          ),
+        ),
       );
       return;
     }
@@ -171,31 +190,88 @@ class _EditActivity extends State<EditActivity> {
     try {
       print('Starting to update activity...');
       await provider.updateActivity(
-        activityId: widget.activity.activityId!, 
-        activityName: activityName, 
-        activityDesc: activityDescription, 
-        scheduledDate: _scheduledDate!, 
-        startTime: startTime, 
-        endTime: endTime, 
+        activityId: widget.activity.activityId!,
+        activityName: activityName,
+        activityDesc: activityDescription,
+        scheduledDate: _scheduledDate!,
+        startTime: startTime,
+        endTime: endTime,
       );
       print('activity updated successfully!');
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('activity updated successfully!')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Activity updated successfully!',
+                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 50,
+            right: 50,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 10,
+        ),
       );
 
-      Navigator.pop(context);      
+      Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update activity: $error')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                // Prevents text overflow
+                child: Text(
+                  'Failed to update activity (1): $error',
+                  style:
+                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 50,
+            right: 50,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Colors.red,
+          elevation: 10,
+        ),
       );
     }
   }
 
   bool _isValidTimeRange(TimeOfDay startTime, TimeOfDay endTime) {
-  return startTime.hour < endTime.hour ||
-      (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
+    return startTime.hour < endTime.hour ||
+        (startTime.hour == endTime.hour && startTime.minute < endTime.minute);
   }
 
   @override
@@ -301,7 +377,6 @@ class _EditActivity extends State<EditActivity> {
         ));
   }
 
-
   @override
   void dispose() {
     // Dispose controllers and clean up listeners
@@ -313,5 +388,4 @@ class _EditActivity extends State<EditActivity> {
     // Always call super.dispose()
     super.dispose();
   }
-  
 }
