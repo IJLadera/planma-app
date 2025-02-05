@@ -1401,7 +1401,35 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = GoalScheduleSerializer
 
     def get_queryset(self):
-        return GoalSchedule.objects.filter(goal_id__student_id=self.request.user)
+        # Filter goal schedule based on the logged-in user
+        queryset = GoalSchedule.objects.filter(goal_id__student_id=self.request.user)
+
+        # Apply goal_id filtering if provided in query params
+        goal_id = self.request.query_params.get('goal_id')
+        if goal_id:
+            queryset = queryset.filter(goal_id=goal_id)
+
+        return queryset
+    
+    @action(detail=False, methods=['get'])
+    def pending_goal_schedules(self, request):
+        # Get goal schedules that are still pending
+        schedules = GoalSchedule.objects.filter(
+            goal_id__student_id=request.user.student_id,
+            status='Pending'
+        )
+        serializer = self.get_serializer(schedules, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def completed_goal_schedules(self, request):
+        # Get goal schedules that have been completed
+        schedules = GoalSchedule.objects.filter(
+            goal_id__student_id=request.user.student_id,
+            status='Completed'
+        )
+        serializer = self.get_serializer(schedules, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
     def add_schedule(self, request):
@@ -1525,7 +1553,24 @@ class GoalProgressViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter logged goal sessions based on the logged-in user
-        return GoalProgress.objects.filter(goal_id__student_id=self.request.user)
+        queryset = GoalProgress.objects.filter(goal_id__student_id=self.request.user)
+
+        # Apply goal_id and date_logged filtering if provided in query params
+        goal_id = self.request.query_params.get('goal_id')
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        # Filter based on provided parameters
+        if goal_id:
+            queryset = queryset.filter(goal_id=goal_id)
+        if start_date and end_date:
+            queryset = queryset.filter(session_date__range=[start_date, end_date])
+        elif start_date:
+            queryset = queryset.filter(session_date__gte=start_date)
+        elif end_date:
+            queryset = queryset.filter(session_date__lte=end_date)
+
+        return queryset
     
     @action(detail=False, methods=['post'])
     def log_time(self, request):

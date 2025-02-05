@@ -4,7 +4,7 @@ class UserPreferences {
   final String usualWakeTime;
   final String reminderOffsetTime;
 
-  UserPreferences ({
+  UserPreferences({
     this.prefId,
     required this.usualSleepTime,
     required this.usualWakeTime,
@@ -12,13 +12,13 @@ class UserPreferences {
   });
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
-  return UserPreferences(
-    prefId: json['pref_id'] as int?,
-    usualSleepTime: json['usual_sleep_time'] ?? '00:00',
-    usualWakeTime: json['usual_wake_time'] ?? '00:00',
-    reminderOffsetTime: json['reminder_offset_time'] ?? '00:00',
-  );
-}
+    return UserPreferences(
+      prefId: json['pref_id'] as int?,
+      usualSleepTime: json['usual_sleep_time'] ?? '00:00',
+      usualWakeTime: json['usual_wake_time'] ?? '00:00',
+      reminderOffsetTime: json['reminder_offset_time'] ?? '00:00',
+    );
+  }
 
   // Convert a Task instance to JSON
   Map<String, dynamic> toJson() {

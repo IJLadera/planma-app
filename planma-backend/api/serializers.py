@@ -152,7 +152,7 @@ class GoalScheduleSerializer(serializers.ModelSerializer):
         
 class GoalProgressSerializer(serializers.ModelSerializer):
     goal_id = GoalsSerializer()
-
+    goalschedule_id = GoalScheduleSerializer()
 
     class Meta:
         model = GoalProgress

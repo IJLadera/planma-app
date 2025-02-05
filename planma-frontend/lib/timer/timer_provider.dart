@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/activity_log_provider.dart';
 import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:planma_app/Providers/goal_progress_provider.dart';
+import 'package:planma_app/Providers/goal_schedule_provider.dart';
 import 'package:planma_app/Providers/sleep_provider.dart';
 import 'package:planma_app/Providers/task_log_provider.dart';
 import 'package:planma_app/Providers/task_provider.dart';
@@ -20,6 +22,31 @@ class TimerProvider with ChangeNotifier {
 
   // Timer instance
   Timer? _timer;
+
+  // Set initial time based on set scheduled start and end time
+  void setInitialTimeFromRecord(String scheduledStartTime, String scheduledEndTime) {
+    try {
+      final startTime = DateFormat("HH:mm:ss").parse(scheduledStartTime);
+      var endTime = DateFormat("HH:mm:ss").parse(scheduledEndTime);
+
+      // Handle overnight crossing (e.g., 22:00 -> 06:00)
+      if (endTime.isBefore(startTime)) {
+        endTime = endTime.add(Duration(days: 1));
+      }
+
+      final duration = endTime.difference(startTime).inSeconds;
+      if (duration > 0) {
+        initialTime = duration;
+        remainingTime = duration;
+      } else {
+        initialTime = 0;
+        remainingTime = 0;
+      }
+      notifyListeners();
+    } catch (e) {
+      print("Error parsing time: $e");
+    }
+  }
 
   // Reset timer to its default value
   void resetTimer() {
@@ -73,7 +100,8 @@ class TimerProvider with ChangeNotifier {
     required ActivityTimeLogProvider activityTimeLogProvider,
     required GoalProgressProvider goalProgressProvider,
     required TaskProvider taskProvider,
-    required ActivityProvider activityProvider
+    required ActivityProvider activityProvider,
+    required GoalScheduleProvider goalScheduleProvider
   }) async {
     stopTimer(); // Ensure the timer is stopped
     print("Time spent: $timeSpent seconds");
@@ -145,6 +173,9 @@ class TimerProvider with ChangeNotifier {
               duration: duration,
               dateLogged: now
           );
+          // Update goal schedule status in the GoalScheduleProvider
+          goalScheduleProvider.updateGoalScheduleStatus(record.goalScheduleId, "Completed");
+          print("Goal session log successfully saved");
           break;
       }
     } catch (e) {

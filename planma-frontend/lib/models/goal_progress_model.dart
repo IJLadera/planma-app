@@ -24,10 +24,12 @@ class GoalProgress {
     return GoalProgress(
       goalProgressId: json['goalprogress_id'] as int?,
       goalId: json['goal_id'] != null ? Goal.fromJson(json['goal_id']) : null,
-      goalScheduleId: json['goalschedule_id'] != null ? GoalSchedule.fromJson(json['goalschedule_id']) : null,
+      goalScheduleId: json['goalschedule_id'] != null
+          ? GoalSchedule.fromJson(json['goalschedule_id'])
+          : null,
       startTime: json['session_start_time'] ?? '',
-      endTime: json['session_end_time'] ?? '', 
-      duration: json['session_duration'] ?? 0, 
+      endTime: json['session_end_time'] ?? '',
+      duration: json['session_duration'] ?? '',
       dateLogged: json['session_date'] ?? '',
     );
   }
