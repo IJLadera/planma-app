@@ -105,6 +105,7 @@ class AttendedClassSerializer(serializers.ModelSerializer):
         model = AttendedClass
         fields = ['att_class_id', 'classsched_id', 'date', 
                   'status']
+        read_only_fields = ['att_class_id']
         
 class CustomTaskSerializer(serializers.ModelSerializer):
     subject_id = CustomSubjectSerializer()

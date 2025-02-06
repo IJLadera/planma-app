@@ -1,5 +1,6 @@
 from datetime import timedelta
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
 import uuid
@@ -278,8 +279,11 @@ class AttendedClass(models.Model):
         on_delete=models.CASCADE,
         related_name='attendedclass', db_column='classsched_id'
     )
-    date = models.DateField()
+    attendance_date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+
+    class Meta:
+        unique_together = ('classsched_id', 'attendance_date')
 
 
 class CustomTask(models.Model):

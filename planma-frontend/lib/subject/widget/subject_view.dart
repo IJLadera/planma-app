@@ -126,26 +126,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
         builder: (context, classScheduleProvider, child) {
       final schedule = classScheduleProvider.classSchedules.firstWhere(
         (schedule) =>
-            schedule.classschedId == widget.classSchedule.classschedId,
-        orElse: () => ClassSchedule(
-          classschedId: -1, // Indicate an invalid or default ID
-          subjectCode: 'N/A',
-          subjectTitle: 'No Title',
-          semesterId: 0,
-          dayOfWeek: 'N/A',
-          scheduledStartTime: '00:00',
-          scheduledEndTime: '00:00',
-          room: 'No Room',
-        ),
+            schedule.classschedId == widget.classSchedule.classschedId
       );
-
-      // Check if the returned schedule is the default one
-      if (schedule.classschedId == -1) {
-        return Scaffold(
-          appBar: AppBar(title: Text('Subject Details')),
-          body: Center(child: Text('Schedule not found')),
-        );
-      }
 
       final startTime = _formatTimeForDisplay(schedule.scheduledStartTime);
       final endTime = _formatTimeForDisplay(schedule.scheduledEndTime);

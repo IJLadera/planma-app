@@ -913,20 +913,27 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter attended classes based on the logged-in user
-        return AttendedClass.objects.filter(classched_id__student_id=self.request.user)
+        queryset = AttendedClass.objects.filter(classched_id__student_id=self.request.user)
+
+        # Apply classsched_id filtering if provided in query params
+        classsched_id = self.request.query_params.get('classsched_id')
+        if classsched_id:
+            queryset = queryset.filter(classsched_id=classsched_id)
+
+        return queryset
     
     @action(detail=False, methods=['post'])
     def mark_attendance(self, request):
         data = request.data
 
         classsched_id = data.get('classsched_id')
-        date = data.get('date')
+        attendance_date = data.get('attendance_date')
         status = data.get('status')
 
         # Validate input
-        if not all([classsched_id, date]):
+        if not all([classsched_id, attendance_date]):
             return Response(
-                {'error': 'classsched_id and date are required.'},
+                {'error': 'classsched_id and attendance_date are required.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -937,7 +944,7 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
             # Check if attendance already exists for the class
             attendance, created = AttendedClass.objects.get_or_create(
                 classsched_id=classes,
-                date=date,
+                attendance_date=attendance_date,
                 status=status
             )
 
