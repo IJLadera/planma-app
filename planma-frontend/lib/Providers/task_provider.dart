@@ -20,7 +20,7 @@ class TaskProvider with ChangeNotifier {
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
   // Fetch pending tasks list
-  Future<void> fetchPendingTasks () async {
+  Future<void> fetchPendingTasks() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
@@ -39,8 +39,8 @@ class TaskProvider with ChangeNotifier {
         final newTasks = data.map((item) => Task.fromJson(item)).toList();
 
         // Merge new tasks into the master list
-        _tasks.addAll(newTasks.where((newTask) => !_tasks.any(
-              (existingTask) => existingTask.taskId == newTask.taskId)));
+        _tasks.addAll(newTasks.where((newTask) => !_tasks
+            .any((existingTask) => existingTask.taskId == newTask.taskId)));
 
         _sortTasks(); // Reorganize tasks
       } else {
@@ -53,7 +53,7 @@ class TaskProvider with ChangeNotifier {
   }
 
   //Fetch completed tasks list
-  Future<void> fetchCompletedTasks () async {
+  Future<void> fetchCompletedTasks() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
@@ -72,8 +72,8 @@ class TaskProvider with ChangeNotifier {
         final newTasks = data.map((item) => Task.fromJson(item)).toList();
 
         //Merge new tasks into the master list
-        _tasks.addAll(newTasks.where((newTask) => !_tasks.any(
-              (existingTask) => existingTask.taskId == newTask.taskId)));
+        _tasks.addAll(newTasks.where((newTask) => !_tasks
+            .any((existingTask) => existingTask.taskId == newTask.taskId)));
 
         _sortTasks(); // Reorganize tasks
       } else {
@@ -118,13 +118,15 @@ class TaskProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String formattedDeadline = DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedDeadline =
+        DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
 
     bool isConflict = _tasks.any((schedule) =>
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isConflict) {
       throw Exception(
@@ -132,13 +134,13 @@ class TaskProvider with ChangeNotifier {
     }
 
     bool isDuplicate = _tasks.any((schedule) =>
-      schedule.taskName == taskName &&
-      schedule.taskDescription == taskDesc &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime &&
-      schedule.deadline == deadline &&
-      schedule.subject?.subjectId == subject.subjectId);
+        schedule.taskName == taskName &&
+        schedule.taskDescription == taskDesc &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime &&
+        schedule.deadline == deadline &&
+        schedule.subject?.subjectId == subject.subjectId);
 
     if (isDuplicate) {
       throw Exception(
@@ -171,7 +173,10 @@ class TaskProvider with ChangeNotifier {
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate task entry detected.') {
+        if (responseBody['error_type'] == 'overlap') {
+          throw Exception(
+              'Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] == 'Duplicate task entry detected.') {
           throw Exception('Duplicate task entry detected on the server.');
         } else {
           throw Exception('Error adding task: ${response.body}');
@@ -179,10 +184,9 @@ class TaskProvider with ChangeNotifier {
       } else {
         throw Exception('Failed to add task: ${response.body}');
       }
-
     } catch (error) {
-      print('Add task error: $error');
-      throw Exception('Error adding task: $error');
+      print(error);
+      throw Exception('sError adding task: $error');
     }
   }
 
@@ -202,14 +206,16 @@ class TaskProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String formattedDeadline = DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedDeadline =
+        DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
 
     bool isConflict = _tasks.any((schedule) =>
-      schedule.taskId != taskId &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.taskId != taskId &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isConflict) {
       throw Exception(
@@ -217,13 +223,13 @@ class TaskProvider with ChangeNotifier {
     }
 
     bool isDuplicate = _tasks.any((schedule) =>
-      schedule.taskName == taskName &&
-      schedule.taskDescription == taskDesc &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime &&
-      schedule.deadline == deadline &&
-      schedule.subject?.subjectId == subject.subjectId);
+        schedule.taskName == taskName &&
+        schedule.taskDescription == taskDesc &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime &&
+        schedule.deadline == deadline &&
+        schedule.subject?.subjectId == subject.subjectId);
 
     if (isDuplicate) {
       throw Exception(
@@ -252,8 +258,8 @@ class TaskProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final updatedSchedule = Task.fromJson(json.decode(response.body));
-        final index = _tasks
-            .indexWhere((schedule) => schedule.taskId == taskId);
+        final index =
+            _tasks.indexWhere((schedule) => schedule.taskId == taskId);
         if (index != -1) {
           _tasks[index] = updatedSchedule;
           _sortTasks();
@@ -261,16 +267,19 @@ class TaskProvider with ChangeNotifier {
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate task entry detected.') {
+        if (responseBody['error_type'] == 'overlap') {
+          throw Exception(
+              'Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] == 'Duplicate task entry detected.') {
           throw Exception('Duplicate task entry detected on the server.');
         } else {
-          throw Exception('Error updating task: ${response.body}');
+          throw Exception('Error adding task: ${response.body}');
         }
       } else {
         throw Exception('Failed to update task: ${response.body}');
       }
     } catch (error) {
-      print('Update task error: $error');
+      print(error);
       throw Exception('Error updating task: $error');
     }
   }
@@ -300,7 +309,7 @@ class TaskProvider with ChangeNotifier {
       }
     } catch (error) {
       rethrow;
-    }    
+    }
   }
 
   void resetState() {
@@ -323,15 +332,10 @@ class TaskProvider with ChangeNotifier {
 
   // Utility method to sort activities if it is pending or completed.
   void _sortTasks() {
-    _pendingTasks = _tasks
-        .where((task) =>
-            task.status == 'Pending')
-        .toList();
+    _pendingTasks = _tasks.where((task) => task.status == 'Pending').toList();
 
-    _completedTasks = _tasks
-        .where((task) =>
-            task.status == 'Completed')
-        .toList();
+    _completedTasks =
+        _tasks.where((task) => task.status == 'Completed').toList();
 
     notifyListeners();
   }

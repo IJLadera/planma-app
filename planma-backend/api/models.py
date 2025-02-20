@@ -1,5 +1,6 @@
 from datetime import timedelta
 from django.db import models
+from django.forms import ValidationError
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
@@ -77,6 +78,12 @@ class CustomEvents(models.Model):
         on_delete=models.CASCADE,
         related_name='events', db_column="student_id"
     )
+
+    def delete(self, *args, **kwargs):
+        # Manually delete related ScheduleEntry before deleting this task
+        ScheduleEntry.objects.filter(category_type='Event', reference_id=self.event_id).delete()
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return self.event_name
 
@@ -117,6 +124,12 @@ class CustomActivity(models.Model):
         on_delete=models.CASCADE,
         related_name='activity', db_column='student_id'
     )
+
+    def delete(self, *args, **kwargs):
+        # Manually delete related ScheduleEntry before deleting this task
+        ScheduleEntry.objects.filter(category_type='Activity', reference_id=self.activity_id).delete()
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return self.activity_name
     
@@ -316,6 +329,11 @@ class CustomTask(models.Model):
         related_name='tasks', db_column="student_id"
     )
 
+    def delete(self, *args, **kwargs):
+        # Manually delete related ScheduleEntry before deleting this task
+        ScheduleEntry.objects.filter(category_type='Task', reference_id=self.task_id).delete()
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return self.task_name
     
@@ -433,3 +451,29 @@ class SleepLog(models.Model):
     end_time = models.TimeField()
     duration = models.DurationField()
     date_logged = models.DateField()
+
+
+class ScheduleEntry(models.Model):
+    CATEGORY_CHOICES = [
+        ('Task', 'Task'),
+        ('Class', 'Class'),
+        ('Event', 'Event'),
+        ('Activity', 'Activity'),
+        ('Goal', 'Goal'),
+    ]
+    # Primary Key
+    entry_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    category_type = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    reference_id = models.IntegerField()
+    # Foreign Key to CustomUser model
+    student_id = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='entry', db_column='student_id'
+    )
+    scheduled_date = models.DateField()
+    scheduled_start_time = models.TimeField()
+    scheduled_end_time = models.TimeField()
+
+    class Meta:
+        unique_together = ('student_id', 'scheduled_date', 'scheduled_start_time', 'scheduled_end_time', 'category_type', 'reference_id')

@@ -222,8 +222,11 @@ class GoalScheduleProvider extends ChangeNotifier {
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate goal schedule entry detected.') {
-          throw Exception('Duplicate goal schedule entry detected on the server.');
+        if (responseBody['error_type'] == 'overlap') {
+          throw Exception(
+              'Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] == 'Duplicate goal schedule detected.') {
+          throw Exception('Duplicate goal schedule detected on the server.');
         } else {
           throw Exception('Error adding goal schedule: ${response.body}');
         }
@@ -301,10 +304,13 @@ class GoalScheduleProvider extends ChangeNotifier {
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate goal schedule entry detected.') {
-          throw Exception('Duplicate goal schedule entry detected on the server.');
+        if (responseBody['error_type'] == 'overlap') {
+          throw Exception(
+              'Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] == 'Duplicate goal schedule detected.') {
+          throw Exception('Duplicate goal schedule detected on the server.');
         } else {
-          throw Exception('Error updating goal schedule: ${response.body}');
+          throw Exception('Error adding goal schedule: ${response.body}');
         }
       } else {
         throw Exception('Failed to update goal schedule: ${response.body}');

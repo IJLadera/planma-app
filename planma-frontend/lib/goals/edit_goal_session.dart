@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/goal_schedule_provider.dart';
 import 'package:planma_app/models/goal_schedules_model.dart';
 import 'package:provider/provider.dart';
-import 'package:planma_app/task/widget/widgets.dart';
+import 'package:planma_app/goals/widget/widget.dart';
 
 class EditGoalSession extends StatefulWidget {
   final GoalSchedule session;
@@ -109,14 +109,48 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     super.dispose();
   }
 
+  // Helper function to create snackbars
+  SnackBar _buildSnackBar(
+      {required IconData icon,
+      required String text,
+      required Color backgroundColor}) {
+    return SnackBar(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).size.height * 0.4,
+        left: 50,
+        right: 50,
+        top: 100,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: backgroundColor,
+      elevation: 10,
+    );
+  }
+
   void _editGoalSession(BuildContext context) async {
     final provider = Provider.of<GoalScheduleProvider>(context, listen: false);
 
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
-
-    print(startTimeString);
-    print(endTimeString);
 
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
@@ -138,6 +172,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     }
 
     try {
+      print('Starting to update goal schedule...');
       await provider.updateGoalSchedule(
         goalScheduleId: widget.session.goalScheduleId!, 
         goalId: widget.session.goal!.goalId!, 
@@ -145,17 +180,36 @@ class _EditGoalSessionState extends State<EditGoalSession> {
         startTime: startTime, 
         endTime: endTime
       );
-      print('Goal schedule updated successfully!');
 
-      // After validation and adding logic
+      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Goal schedule updated successfully!')),
+        _buildSnackBar(
+          icon: Icons.check_circle,
+          text: 'Goal schedule updated successfully!',
+          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+        ),
       );
 
       Navigator.pop(context);
     } catch (error) {
+      String errorMessage = 'Failed to update goal schedule';
+
+      if (error.toString().contains('Scheduling overlap')) {
+        errorMessage =
+            'Scheduling overlap: This time slot is already occupied.';
+      } else if (error.toString().contains('Duplicate goal schedule entry detected')) {
+        errorMessage = 'Duplicate goal schedule entry: This goal schedule already exists.';
+      } else {
+        errorMessage = 'Failed to update goal schedule: $error';
+      }
+
+      // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update goal schedule: $error')),
+        _buildSnackBar(
+          icon: Icons.error,
+          text: errorMessage,
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

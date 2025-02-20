@@ -86,6 +86,43 @@ class _AddActivityState extends State<AddActivityScreen> {
     }
   }
 
+  // Helper function to create snackbars
+  SnackBar _buildSnackBar(
+      {required IconData icon,
+      required String text,
+      required Color backgroundColor}) {
+    return SnackBar(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).size.height * 0.4,
+        left: 50,
+        right: 50,
+        top: 100,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: backgroundColor,
+      elevation: 10,
+    );
+  }
+
   void _createActivity(BuildContext context) async {
     final provider = Provider.of<ActivityProvider>(context, listen: false);
 
@@ -134,73 +171,35 @@ class _AddActivityState extends State<AddActivityScreen> {
           startTime: startTime,
           endTime: endTime);
 
-      // After validation and adding logic
+      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'Activity added successfully!',
-                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+        _buildSnackBar(
+          icon: Icons.check_circle,
+          text: 'Activity created successfully!',
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
         ),
       );
 
       Navigator.pop(context);
-      // Clear fields after adding
       _clearFields();
     } catch (error) {
+      String errorMessage = 'Failed to create activity';
+
+      if (error.toString().contains('Scheduling overlap')) {
+        errorMessage =
+            'Scheduling overlap: This time slot is already occupied.';
+      } else if (error.toString().contains('Duplicate activity entry detected')) {
+        errorMessage = 'Duplicate activity entry: This activity already exists.';
+      } else {
+        errorMessage = 'Failed to create activity: $error';
+      }
+
+      // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                // Prevents text overflow
-                child: Text(
-                  'Failed to add activity (1): $error',
-                  style:
-                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+        _buildSnackBar(
+          icon: Icons.error,
+          text: errorMessage,
           backgroundColor: Colors.red,
-          elevation: 10,
         ),
       );
     }

@@ -94,6 +94,43 @@ class _CreateTaskState extends State<AddTaskScreen> {
     }
   }
 
+  // Helper function to create snackbars
+  SnackBar _buildSnackBar(
+      {required IconData icon,
+      required String text,
+      required Color backgroundColor}) {
+    return SnackBar(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).size.height * 0.4,
+        left: 50,
+        right: 50,
+        top: 100,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: backgroundColor,
+      elevation: 10,
+    );
+  }
+
   void _submitTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
     final subjects =
@@ -142,74 +179,35 @@ class _CreateTaskState extends State<AddTaskScreen> {
         subject: selectedSubject,
       );
 
-      // After validation and adding logic
+      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min, // Make the row compact
-            mainAxisAlignment: MainAxisAlignment.center, // Center the content
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'Task created successfully!',
-                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4, // Move to middle
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Make it a square
-          ),
+        _buildSnackBar(
+          icon: Icons.check_circle,
+          text: 'Task created successfully!',
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10, // Add shadow for better visibility
         ),
       );
 
       Navigator.pop(context);
-      // Clear fields after adding
       _clearFields();
     } catch (error) {
+      String errorMessage = 'Failed to create task';
+
+      if (error.toString().contains('Scheduling overlap')) {
+        errorMessage =
+            'Scheduling overlap: This time slot is already occupied.';
+      } else if (error.toString().contains('Duplicate task entry detected')) {
+        errorMessage = 'Duplicate task entry: This task already exists.';
+      } else {
+        errorMessage = 'Failed to create task: $error';
+      }
+
+      // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error,
-                  color: Colors.white, size: 24), // Error icon
-              const SizedBox(width: 8),
-              Expanded(
-                // Prevents text overflow
-                child: Text(
-                  'Failed to add task (1): $error',
-                  style:
-                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-                  overflow: TextOverflow.ellipsis, // Handles long errors
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10, // Adds shadow
+        _buildSnackBar(
+          icon: Icons.error,
+          text: errorMessage,
+          backgroundColor: Colors.red,
         ),
       );
     }

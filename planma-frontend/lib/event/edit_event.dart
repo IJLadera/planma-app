@@ -120,7 +120,7 @@ class _EditEvent extends State<EditEvent> {
   void initState() {
     super.initState();
 
-    // Pre-fill fields with current task details
+    // Pre-fill fields with current event details
     _eventNameController = TextEditingController(text: widget.event.eventName);
     _descriptionController =
         TextEditingController(text: widget.event.eventDesc);
@@ -138,6 +138,43 @@ class _EditEvent extends State<EditEvent> {
     _selectedEventType = widget.event.eventType;
   }
 
+  // Helper function to create snackbars
+  SnackBar _buildSnackBar(
+      {required IconData icon,
+      required String text,
+      required Color backgroundColor}) {
+    return SnackBar(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).size.height * 0.4,
+        left: 50,
+        right: 50,
+        top: 100,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: backgroundColor,
+      elevation: 10,
+    );
+  }
+
   void _editEvent(BuildContext context) async {
     final provider = Provider.of<EventsProvider>(context, listen: false);
 
@@ -147,15 +184,9 @@ class _EditEvent extends State<EditEvent> {
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
-    print(startTimeString);
-    print(endTimeString);
-
     // Convert String  to TimeOfDay
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
-
-    print('formatted: $startTime');
-    print('formatted: $endTime');
 
     if (eventName.isEmpty ||
         eventDesc.isEmpty ||
@@ -185,16 +216,8 @@ class _EditEvent extends State<EditEvent> {
       return;
     }
 
-    // print('FROM UI:');
-    // print('Event Name: $eventName');
-    // print('event Description: $eventDesc');
-    // print('location: $location');
-    // print('Scheduled Date: $_scheduledDate');
-    // print('Start Time: $startTime');
-    // print('End Time: $endTime');
-    // print('eventType: $_selectedEventType');
-
     try {
+      print('Starting to update event...');
       await provider.updateEvent(
         eventId: widget.event.eventId!,
         eventName: eventName,
@@ -205,74 +228,35 @@ class _EditEvent extends State<EditEvent> {
         endTime: endTime,
         eventType: _selectedEventType!,
       );
-      print('Event updated successfully!');
 
-      // After validation and adding logic
+      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'Event updated successfully!',
-                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+        _buildSnackBar(
+          icon: Icons.check_circle,
+          text: 'Event updated successfully!',
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
         ),
       );
 
       Navigator.pop(context);
     } catch (error) {
+      String errorMessage = 'Failed to update event';
+
+      if (error.toString().contains('Scheduling overlap')) {
+        errorMessage =
+            'Scheduling overlap: This time slot is already occupied.';
+      } else if (error.toString().contains('Duplicate event entry detected')) {
+        errorMessage = 'Duplicate event entry: This event already exists.';
+      } else {
+        errorMessage = 'Failed to update event: $error';
+      }
+
+      // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error,
-                  color: Colors.white, size: 24), // Error icon
-              const SizedBox(width: 8),
-              Expanded(
-                // Prevents text overflow
-                child: Text(
-                  'Failed to update event (1): $error',
-                  style:
-                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-                  overflow: TextOverflow.ellipsis, // Handles long errors
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10, // Adds shadow
+        _buildSnackBar(
+          icon: Icons.error,
+          text: errorMessage,
+          backgroundColor: Colors.red,
         ),
       );
     }

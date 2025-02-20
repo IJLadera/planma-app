@@ -163,7 +163,10 @@ class ActivityProvider with ChangeNotifier {
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate activity entry detected.') {
+        if (responseBody['error_type'] == 'overlap') {
+          throw Exception(
+              'Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] == 'Duplicate activity entry detected.') {
           throw Exception('Duplicate activity entry detected on the server.');
         } else {
           throw Exception('Error adding activity: ${response.body}');
@@ -246,10 +249,13 @@ class ActivityProvider with ChangeNotifier {
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate activity entry detected.') {
+        if (responseBody['error_type'] == 'overlap') {
+          throw Exception(
+              'Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] == 'Duplicate activity entry detected.') {
           throw Exception('Duplicate activity entry detected on the server.');
         } else {
-          throw Exception('Error updating activity: ${response.body}');
+          throw Exception('Error adding activity: ${response.body}');
         }
       } else {
         throw Exception('Failed to update activity: ${response.body}');

@@ -160,6 +160,43 @@ class _EditTask extends State<EditTask> {
     });
   }
 
+  // Helper function to create snackbars
+  SnackBar _buildSnackBar(
+      {required IconData icon,
+      required String text,
+      required Color backgroundColor}) {
+    return SnackBar(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).size.height * 0.4,
+        left: 50,
+        right: 50,
+        top: 100,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: backgroundColor,
+      elevation: 10,
+    );
+  }
+
   void _editTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
     final subjects =
@@ -170,15 +207,9 @@ class _EditTask extends State<EditTask> {
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
-    print(startTimeString);
-    print(endTimeString);
-
     // Convert String  to TimeOfDay
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
-
-    print('formatted: $startTime');
-    print('formatted: $endTime');
 
     if (taskName.isEmpty ||
         taskDescription.isEmpty ||
@@ -200,15 +231,6 @@ class _EditTask extends State<EditTask> {
       return;
     }
 
-    print('FROM UI:');
-    print('Task Name: $taskName');
-    print('Task Description: $taskDescription');
-    print('Scheduled Date: $_scheduledDate');
-    print('Start Time: $startTime');
-    print('End Time: $endTime');
-    print('Deadline: $_deadline');
-    print('Subject: $_subject');
-
     final selectedSubject =
         subjects.firstWhere((subject) => subject.subjectId == _subject);
 
@@ -224,73 +246,35 @@ class _EditTask extends State<EditTask> {
         deadline: _deadline!,
         subject: selectedSubject,
       );
-      print('Task updated successfully!');
 
-      // After validation and adding logic
+      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'Task updated successfully!',
-                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3), // Controls visibility time
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+        _buildSnackBar(
+          icon: Icons.check_circle,
+          text: 'Task updated successfully!',
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
         ),
       );
 
       Navigator.pop(context);
     } catch (error) {
+      String errorMessage = 'Failed to update task';
+
+      if (error.toString().contains('Scheduling overlap')) {
+        errorMessage =
+            'Scheduling overlap: This time slot is already occupied.';
+      } else if (error.toString().contains('Duplicate task entry detected')) {
+        errorMessage = 'Duplicate task entry: This task already exists.';
+      } else {
+        errorMessage = 'Failed to update task: $error';
+      }
+
+      // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error,
-              color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                //Prevents text overflow
-                child: Text(
-                  'Failed to update task: $error',
-                  style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
-                )
-              )
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+        _buildSnackBar(
+          icon: Icons.error,
+          text: errorMessage,
           backgroundColor: Colors.red,
-          elevation: 10,
         ),
       );
     }
