@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/edit_subject.dart';
+import 'package:planma_app/subject/widget/attendance_history.dart';
 import 'package:planma_app/subject/widget/subject_detail_row.dart';
 import 'package:planma_app/models/class_schedules_model.dart';
 import 'package:planma_app/subject/widget/widget.dart';
@@ -125,12 +126,13 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     return Consumer<ClassScheduleProvider>(
         builder: (context, classScheduleProvider, child) {
       final schedule = classScheduleProvider.classSchedules.firstWhere(
-        (schedule) =>
-            schedule.classschedId == widget.classSchedule.classschedId
-      );
+          (schedule) =>
+              schedule.classschedId == widget.classSchedule.classschedId);
 
       final startTime = _formatTimeForDisplay(schedule.scheduledStartTime);
       final endTime = _formatTimeForDisplay(schedule.scheduledEndTime);
+      String currentDay = DateFormat('EEEE').format(DateTime.now());
+      bool isTodayClassDay = currentDay == schedule.dayOfWeek;
 
       return Scaffold(
         backgroundColor: Colors.white,
@@ -200,24 +202,73 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                       title: 'Room:',
                       detail: schedule.room.isNotEmpty ? schedule.room : 'N/A'),
                   const Divider(),
+                  const SizedBox(height: 30),
+                  if (isTodayClassDay) ...[
+                    Center(
+                      child: Text(
+                        "Today's Attendance",
+                        style: GoogleFonts.openSans(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Color(0xFF173F70)),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    CustomWidgets.dropwDownForAttendance(
+                      label: 'Attendance',
+                      value: selectedAttendance,
+                      items: ['Did Not Attend', 'Excused', 'Attended'],
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            selectedAttendance = newValue;
+                          });
+                        }
+                      },
+                      backgroundColor: Color(0XFFF5F5F5),
+                      labelColor: Colors.black,
+                      textColor: CustomWidgets.getColor(selectedAttendance),
+                      borderRadius: 8.0,
+                      fontSize: 14.0,
+                    ),
+                  ],
                   const SizedBox(height: 20),
-                  CustomWidgets.dropwDownForAttendance(
-                    label: 'Attendance',
-                    value: selectedAttendance,
-                    items: ['Did Not Attend', 'Excused', 'Attended'],
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          selectedAttendance = newValue; // Update the value
-                        });
-                      }
-                    },
-                    backgroundColor: Color(0XFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: CustomWidgets.getColor(
-                        selectedAttendance), // Use getColor as a static method
-                    borderRadius: 8.0,
-                    fontSize: 14.0,
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ClassAttendanceHistoryScreen(
+                                    classSchedule: widget.classSchedule,
+                                    attendanceRecords: [
+                                      {
+                                        "date": "08 February 2025",
+                                        "status": selectedAttendance
+                                      },
+                                      {
+                                        "date": "05 February 2025",
+                                        "status": "Attended"
+                                      },
+                                      {
+                                        "date": "04 February 2025",
+                                        "status": "Excused"
+                                      },
+                                    ],
+                                  )),
+                        );
+                      },
+                      child: Text(
+                        "See Attendance History",
+                        style: GoogleFonts.openSans(
+                          fontSize: 14,
+                          color: Color(0xFF173F70),
+                          decoration:
+                              TextDecoration.underline, // Adds underline
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

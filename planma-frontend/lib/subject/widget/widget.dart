@@ -161,10 +161,6 @@ class CustomWidgets {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: Colors.black,
-          width: 1,
-        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
@@ -338,5 +334,103 @@ class CustomWidgets {
       default:
         return Color(0xFFF5F5F5);
     }
+  }
+
+  static Widget buildAttendanceItem(String date, String status) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            date,
+            style: GoogleFonts.openSans(fontSize: 14, color: Colors.black),
+          ),
+          Text(
+            status,
+            style: GoogleFonts.openSans(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: getStatusColor(status),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Color getStatusColor(String status) {
+    switch (status) {
+      case "Did Not Attend":
+        return Colors.red;
+      case "Attended":
+        return Colors.green;
+      case "Excused":
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  static Widget buildAttendanceItemDropdown(String date, String status,
+      {ValueChanged<String?>? onChanged}) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.symmetric(vertical: 3, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            date,
+            style: GoogleFonts.openSans(fontSize: 14, color: Colors.black),
+          ),
+          onChanged != null
+              ? DropdownButton2<String>(
+                  value: status,
+                  underline: SizedBox(),
+                  buttonStyleData: ButtonStyleData(
+                    height: 40,
+                    width: 150,
+                  ),
+                  dropdownStyleData: DropdownStyleData(
+                    maxHeight: 200,
+                    width: 150,
+                  ),
+                  onChanged: onChanged,
+                  items: ["Attended", "Did Not Attend", "Excused"]
+                      .map((String status) {
+                    return DropdownMenuItem<String>(
+                      value: status,
+                      child: Text(
+                        status,
+                        style: GoogleFonts.openSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: getStatusColor(status),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                )
+              : Text(
+                  status,
+                  style: GoogleFonts.openSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: getStatusColor(status),
+                  ),
+                ),
+        ],
+      ),
+    );
   }
 }
