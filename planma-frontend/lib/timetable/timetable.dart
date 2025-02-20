@@ -1,27 +1,218 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/schedule_entry_provider.dart';
+import 'package:planma_app/models/schedule_entry_model.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class Timetable extends StatelessWidget {
+class Timetable extends StatefulWidget {
   const Timetable({super.key});
 
   @override
+  State<Timetable> createState() => _TimetableState();
+}
+
+class _TimetableState extends State<Timetable> {
+  late CalendarController _calendarController;
+  String _headerText = '';
+  int _daysInView = 7;
+  List<Appointment> _appointments = [];
+  late _AppointmentDataSource _dataSource;
+
+  @override
+  void initState() {
+    super.initState();
+    _calendarController = CalendarController();
+    _updateHeaderText(DateTime.now());
+    _loadScheduleEntries();
+  }
+
+  void _updateHeaderText(DateTime date) {
+    if (mounted) {
+      setState(() {
+        _headerText = DateFormat('MMMM yyyy').format(date);
+      });
+    }
+  }
+
+  void _changeCalendarView(CalendarView view, int days) {
+    setState(() {
+      _calendarController.view = view;
+      _daysInView = days;
+    });
+  }
+
+  Future<void> _loadScheduleEntries() async {
+    final provider = Provider.of<ScheduleEntryProvider>(context, listen: false);
+    await provider.fetchScheduleEntries();
+
+    List<Appointment> tempAppointments = [];
+
+    for (var entry in provider.scheduleEntries) {
+      String name = "Unknown";
+
+      if (entry.categoryType == "Event") {
+        name = await provider.fetchEventName(entry.referenceId);
+      } else if (entry.categoryType == "Task") {
+        name = await provider.fetchTaskName(entry.referenceId);
+      } else if (entry.categoryType == "Activity") {
+        name = await provider.fetchActivityName(entry.referenceId);
+      } else if (entry.categoryType == "Goal") {
+        name = await provider.fetchGoalName(entry.referenceId);
+      }
+
+      tempAppointments.add(Appointment(
+        startTime: DateTime.parse(
+          '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledStartTime}'),
+        endTime: DateTime.parse(
+          '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}'),
+        subject: name,
+        color: _getCategoryColor(entry.categoryType),
+      ));
+    }
+
+    setState(() {
+      _appointments = tempAppointments;
+      _dataSource = _AppointmentDataSource(_appointments);
+    });
+  }
+
+  List<Appointment> getAppointmentsFromScheduleEntries(
+      List<ScheduleEntry> entries) {
+    return entries.map((entry) {
+      DateTime startDateTime = DateTime.parse(
+          '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledStartTime}');
+      DateTime endDateTime = DateTime.parse(
+          '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}');
+
+      return Appointment(
+        startTime: startDateTime,
+        endTime: endDateTime,
+        subject: entry.categoryType, // You can customize this
+        color: _getCategoryColor(entry.categoryType),
+        notes: entry.entryId, // Store the entry ID for reference
+      );
+    }).toList();
+  }
+
+  Color _getCategoryColor(String categoryType) {
+    switch (categoryType) {
+      case "Task":
+        return Color(0xFF0095FF);
+      case "Class":
+        return Color(0xFFFFBB70);
+      case "Event":
+        return Color(0xFF30BB90);
+      case "Activity":
+        return Color(0xFFFF5656);
+      case "Goal":
+        return Color(0xFFB480F3);
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SfCalendar(
-        view: CalendarView.week,
-        dataSource: ClassScheduleDataSource(getWeeklyClasses()),
-        timeSlotViewSettings: const TimeSlotViewSettings(
-          startHour: 6,
-          endHour: 24,
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        // Custom Header with centered text and left kebab menu
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+          color: Colors.white,
+          child: Row(
+            children: [
+              // Kebab Menu
+              PopupMenuButton<int>(
+                icon: const Icon(Icons.more_vert, color: Color(0xFF173F70)),
+                onSelected: (int value) {
+                  if (value == 1) {
+                    _changeCalendarView(CalendarView.day, 1);
+                  } else if (value == 2) {
+                    _changeCalendarView(CalendarView.week, 3);
+                  } else if (value == 3) {
+                    _changeCalendarView(CalendarView.week, 7);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 1, child: Text("Day View")),
+                  const PopupMenuItem(value: 2, child: Text("3-Day View")),
+                  const PopupMenuItem(value: 3, child: Text("Week View")),
+                ],
+              ),
+              // Centered Header Title
+              Expanded(
+                child: Text(
+                  _headerText,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.openSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF173F70),
+                  ),
+                ),
+              ),
+              // Invisible Placeholder to balance the Row layout
+              const SizedBox(width: 40),
+            ],
+          ),
         ),
-        onTap: (CalendarTapDetails details) {
-          if (details.appointments != null &&
-              details.appointments!.isNotEmpty) {
-            final Appointment appointment = details.appointments![0];
-            _showClassDetails(context, appointment);
-          }
-        },
-      ),
+        // Timetable
+        Expanded(
+          child: SfCalendar(
+            controller: _calendarController,
+            view: CalendarView.week,
+            dataSource: _AppointmentDataSource(_appointments),
+            timeSlotViewSettings: TimeSlotViewSettings(
+              startHour: 0,
+              endHour: 24,
+              timeTextStyle: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF8F9BB3),
+                fontWeight: FontWeight.w500,
+              ),
+              timeIntervalHeight: 60,
+              timeRulerSize: 80,
+              numberOfDaysInView: _daysInView,
+              dayFormat: 'EEE',
+            ),
+            cellBorderColor: Color(0xFF8F9BB3),
+            headerHeight: 0,
+            viewHeaderHeight: 75,
+            viewHeaderStyle: ViewHeaderStyle(
+              // backgroundColor: Colors.white,
+              dateTextStyle: GoogleFonts.openSans(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF173F70),
+              ),
+              dayTextStyle: GoogleFonts.openSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF8F9BB3),
+              ),
+            ),
+            todayHighlightColor: Color(0xFF1D4E89),
+            onViewChanged: (ViewChangedDetails details) {
+              if (details.visibleDates.isNotEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _updateHeaderText(
+                      details.visibleDates[details.visibleDates.length ~/ 2]);
+                });
+              }
+            },
+            onTap: (CalendarTapDetails details) {
+              if (details.appointments != null &&
+                  details.appointments!.isNotEmpty) {
+                final Appointment appointment = details.appointments![0];
+                _showClassDetails(context, appointment);
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -65,7 +256,7 @@ class Timetable extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Class Details',
+                'Details',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 16),
@@ -115,59 +306,59 @@ class Timetable extends StatelessWidget {
   }
 }
 
-List<Appointment> getWeeklyClasses() {
-  final List<Appointment> classes = <Appointment>[];
-  final DateTime today = DateTime.now();
+// List<Appointment> getWeeklyClasses() {
+//   final List<Appointment> classes = <Appointment>[];
+//   final DateTime today = DateTime.now();
 
-  classes.addAll(_createRecurringClass(
-    subject: 'Subject 1',
-    startTime: getNextWeekday(today, DateTime.monday, 9),
-    endTime: getNextWeekday(today, DateTime.monday, 11),
-    weeks: 4,
-    color: Colors.blueAccent,
-  ));
+//   classes.addAll(_createRecurringClass(
+//     subject: 'Subject 1',
+//     startTime: getNextWeekday(today, DateTime.monday, 9),
+//     endTime: getNextWeekday(today, DateTime.monday, 11),
+//     weeks: 4,
+//     color: Colors.blueAccent,
+//   ));
 
-  classes.addAll(_createRecurringClass(
-    subject: 'Subject 2',
-    startTime: getNextWeekday(today, DateTime.monday, 14),
-    endTime: getNextWeekday(today, DateTime.monday, 16),
-    weeks: 4,
-    color: Colors.purple,
-  ));
+//   classes.addAll(_createRecurringClass(
+//     subject: 'Subject 2',
+//     startTime: getNextWeekday(today, DateTime.monday, 14),
+//     endTime: getNextWeekday(today, DateTime.monday, 16),
+//     weeks: 4,
+//     color: Colors.purple,
+//   ));
 
-  classes.addAll(_createRecurringClass(
-    subject: 'Subject 3',
-    startTime: getNextWeekday(today, DateTime.tuesday, 10),
-    endTime: getNextWeekday(today, DateTime.tuesday, 12),
-    weeks: 4,
-    color: Colors.green,
-  ));
+//   classes.addAll(_createRecurringClass(
+//     subject: 'Subject 3',
+//     startTime: getNextWeekday(today, DateTime.tuesday, 10),
+//     endTime: getNextWeekday(today, DateTime.tuesday, 12),
+//     weeks: 4,
+//     color: Colors.green,
+//   ));
 
-  return classes;
-}
+//   return classes;
+// }
 
-List<Appointment> _createRecurringClass({
-  required String subject,
-  required DateTime startTime,
-  required DateTime endTime,
-  required int weeks,
-  required Color color,
-}) {
-  List<Appointment> recurringClasses = [];
-  for (int i = 0; i < weeks; i++) {
-    DateTime start =
-        startTime.add(Duration(days: i * 7)); // Add 7 days for each week
-    DateTime end = endTime.add(Duration(days: i * 7));
+// List<Appointment> _createRecurringClass({
+//   required String subject,
+//   required DateTime startTime,
+//   required DateTime endTime,
+//   required int weeks,
+//   required Color color,
+// }) {
+//   List<Appointment> recurringClasses = [];
+//   for (int i = 0; i < weeks; i++) {
+//     DateTime start =
+//         startTime.add(Duration(days: i * 7)); // Add 7 days for each week
+//     DateTime end = endTime.add(Duration(days: i * 7));
 
-    recurringClasses.add(Appointment(
-      startTime: start,
-      endTime: end,
-      subject: subject,
-      color: color,
-    ));
-  }
-  return recurringClasses;
-}
+//     recurringClasses.add(Appointment(
+//       startTime: start,
+//       endTime: end,
+//       subject: subject,
+//       color: color,
+//     ));
+//   }
+//   return recurringClasses;
+// }
 
 DateTime getNextWeekday(DateTime startDate, int weekday, int hour) {
   final int daysToAdd = (weekday - startDate.weekday + 7) % 7;
@@ -175,8 +366,8 @@ DateTime getNextWeekday(DateTime startDate, int weekday, int hour) {
   return DateTime(nextDate.year, nextDate.month, nextDate.day, hour);
 }
 
-class ClassScheduleDataSource extends CalendarDataSource {
-  ClassScheduleDataSource(List<Appointment> source) {
+class _AppointmentDataSource extends CalendarDataSource {
+  _AppointmentDataSource(List<Appointment> source) {
     appointments = source;
   }
 }

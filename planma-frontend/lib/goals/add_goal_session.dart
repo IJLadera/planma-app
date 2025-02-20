@@ -83,6 +83,43 @@ class _AddGoalSession extends State<AddGoalSession> {
     }
   }
 
+  // Helper function to create snackbars
+  SnackBar _buildSnackBar(
+      {required IconData icon,
+      required String text,
+      required Color backgroundColor}) {
+    return SnackBar(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).size.height * 0.4,
+        left: 50,
+        right: 50,
+        top: 100,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: backgroundColor,
+      elevation: 10,
+    );
+  }
+
   void _submitForm(BuildContext context) async {
     final provider = Provider.of<GoalScheduleProvider>(context, listen: false);
 
@@ -91,13 +128,6 @@ class _AddGoalSession extends State<AddGoalSession> {
 
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
-
-    print("Goal ID: ${widget.goalId}");
-    print("Session Date: $_scheduledDate");
-    print("Session Start: $startTimeString");
-    print("Session End: $endTimeString");
-    print("Session Start Formatted: $startTime");
-    print("Session End Formatted: $endTime");
 
     if (_scheduledDate == null ||
         startTimeString.isEmpty ||
@@ -124,18 +154,36 @@ class _AddGoalSession extends State<AddGoalSession> {
         endTime: endTime,
       );
 
-      // Show success message
+      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Goal schedule added successfully!')),
+        _buildSnackBar(
+          icon: Icons.check_circle,
+          text: 'Goal schedule created successfully!',
+          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+        ),
       );
 
-      // Navigate back or clear fields (depends on use case)
       Navigator.pop(context);
       _clearFields();
     } catch (error) {
-      // Handle errors from the provider
+      String errorMessage = 'Failed to create goal schedule';
+
+      if (error.toString().contains('Scheduling overlap')) {
+        errorMessage =
+            'Scheduling overlap: This time slot is already occupied.';
+      } else if (error.toString().contains('Duplicate goal schedule entry detected')) {
+        errorMessage = 'Duplicate goal schedule entry: This goal schedule already exists.';
+      } else {
+        errorMessage = 'Failed to create goal schedule: $error';
+      }
+
+      // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $error')),
+        _buildSnackBar(
+          icon: Icons.error,
+          text: errorMessage,
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import *
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from .models import CustomUser
+from django.db.models import Q
+from django.db import transaction
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
@@ -168,3 +170,38 @@ class SleepLogSerializer(serializers.ModelSerializer):
         model = SleepLog
         fields = ['sleep_log_id', 'student_id', 'start_time',
                   'end_time', 'duration', 'date_logged']
+        
+class ScheduleEntrySerializer(serializers.ModelSerializer):
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
+    class Meta:
+        model = ScheduleEntry
+        fields = ['entry_id', 'category_type', 'reference_id', 'student_id',
+                  'scheduled_date', 'scheduled_start_time', 'scheduled_end_time']
+        
+    def get_reference(self, obj):
+        CATEGORY_MODELS = {
+            "Task": CustomTask,
+            "Class": CustomClassSchedule,
+            "Event": CustomEvents,
+            "Activity": CustomActivity,
+            "Goal": GoalSchedule,
+        }
+        model = CATEGORY_MODELS.get(obj.category_type)
+        if model:
+            try:
+                instance = model.objects.get(pk=obj.reference_id)
+                return self.get_category_serializer(obj.category_type)(instance).data
+            except model.DoesNotExist:
+                return None
+        return None
+
+    def get_category_serializer(self, category_type):
+        CATEGORY_SERIALIZERS = {
+            "Task": CustomTaskSerializer,
+            "Class": CustomClassScheduleSerializer,
+            "Event": CustomEventSerializer,
+            "Activity": CustomActivitySerializer,
+            "Goal": GoalScheduleSerializer,
+        }
+        return CATEGORY_SERIALIZERS.get(category_type)

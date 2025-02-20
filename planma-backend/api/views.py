@@ -58,9 +58,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
         if not all([activity_name, activity_desc, scheduled_date, start_time, end_time]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
 
-
         try:
-
             # Fetch the CustomUser instance
             student = CustomUser.objects.get(student_id=student_id)
 
@@ -77,6 +75,17 @@ class ActivityViewSet(viewsets.ModelViewSet):
                     {'error': 'Conflicting activity schedule detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Check for overlapping schedules
+            overlapping_schedules = ScheduleEntry.objects.filter(
+                student_id=student,
+                scheduled_date=scheduled_date
+            ).filter(
+                Q(scheduled_start_time__lt=end_time, scheduled_end_time__gt=start_time)
+            )
+
+            if overlapping_schedules.exists():
+                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create Activity
             activity = CustomActivity.objects.create(
@@ -88,6 +97,17 @@ class ActivityViewSet(viewsets.ModelViewSet):
                 status='Pending',
                 student_id=student,
             )
+
+            # Create ScheduleEntry
+            ScheduleEntry.objects.create(
+                category_type='Activity',
+                reference_id=activity.activity_id,  # FK reference to the created activity
+                student_id=student,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time
+            )
+            print(f"ScheduleEntry created successfully!")
 
             # Serialize and return the created data
             serializer = self.get_serializer(activity)
@@ -142,6 +162,19 @@ class ActivityViewSet(viewsets.ModelViewSet):
                     {'error': 'Conflicting activity schedule detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Check for overlapping schedules
+            overlapping_schedules = ScheduleEntry.objects.filter(
+                student_id=instance.student_id,
+                scheduled_date=scheduled_date
+            ).filter(
+                Q(scheduled_start_time__lt=end_time, scheduled_end_time__gt=start_time)
+            ).exclude(
+                Q(category_type='Activity') & Q(reference_id=instance.activity_id)  # Exclude the current activity entry
+            )
+
+            if overlapping_schedules.exists():
+                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Update the activity instance
             instance.activity_name = activity_name
@@ -150,6 +183,18 @@ class ActivityViewSet(viewsets.ModelViewSet):
             instance.scheduled_start_time = start_time
             instance.scheduled_end_time = end_time
             instance.save()
+
+            # Update the related ScheduleEntry
+            schedule_entry = ScheduleEntry.objects.filter(
+                category_type='Activity',
+                reference_id=instance.activity_id
+            ).first()
+
+            if schedule_entry:
+                schedule_entry.scheduled_date = scheduled_date
+                schedule_entry.scheduled_start_time = start_time
+                schedule_entry.scheduled_end_time = end_time
+                schedule_entry.save()
 
             # Serialize and return the updated data
             serializer = self.get_serializer(instance)
@@ -279,9 +324,6 @@ class EventViewSet(viewsets.ModelViewSet):
         event_type = data.get('event_type')
         student_id = request.user.student_id  # Authenticated user
 
-        # print(f"Authenticated User: {request.user}")
-        # print(f"Student ID: {student_id}")
-
         # Validate input
         if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -290,7 +332,7 @@ class EventViewSet(viewsets.ModelViewSet):
             # Fetch the CustomUser instance
             student = CustomUser.objects.get(student_id=student_id)
 
-            # Check for conflicting task schedule
+            # Check for conflicting event schedule
             duplicate = CustomEvents.objects.filter(
                 Q(scheduled_date=scheduled_date) &
                 Q(scheduled_start_time=start_time) &
@@ -303,6 +345,17 @@ class EventViewSet(viewsets.ModelViewSet):
                     {'error': 'Conflicting event schedule detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Check for overlapping schedules
+            overlapping_schedules = ScheduleEntry.objects.filter(
+                student_id=student,
+                scheduled_date=scheduled_date
+            ).filter(
+                Q(scheduled_start_time__lt=end_time, scheduled_end_time__gt=start_time)
+            )
+
+            if overlapping_schedules.exists():
+                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create Events
             event = CustomEvents.objects.create(
@@ -315,6 +368,17 @@ class EventViewSet(viewsets.ModelViewSet):
                 event_type=event_type,
                 student_id=student,
             )
+
+            # Create ScheduleEntry
+            ScheduleEntry.objects.create(
+                category_type='Event',
+                reference_id=event.event_id,  # FK reference to the created event
+                student_id=student,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time
+            )
+            print(f"ScheduleEntry created successfully!")
 
             # Serialize and return the created data
             serializer = self.get_serializer(event)
@@ -370,6 +434,19 @@ class EventViewSet(viewsets.ModelViewSet):
                     {'error': 'Conflicting task schedule detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Check for overlapping schedules
+            overlapping_schedules = ScheduleEntry.objects.filter(
+                student_id=instance.student_id,
+                scheduled_date=scheduled_date
+            ).filter(
+                Q(scheduled_start_time__lt=end_time, scheduled_end_time__gt=start_time)
+            ).exclude(
+                Q(category_type='Event') & Q(reference_id=instance.event_id)  # Exclude the current event entry
+            )
+
+            if overlapping_schedules.exists():
+                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Update the task instance
             instance.event_name = event_name
@@ -380,6 +457,18 @@ class EventViewSet(viewsets.ModelViewSet):
             instance.scheduled_end_time = end_time
             instance.event_type = event_type
             instance.save()
+
+            # Update the related ScheduleEntry
+            schedule_entry = ScheduleEntry.objects.filter(
+                category_type='Event',
+                reference_id=instance.event_id
+            ).first()
+
+            if schedule_entry:
+                schedule_entry.scheduled_date = scheduled_date
+                schedule_entry.scheduled_start_time = start_time
+                schedule_entry.scheduled_end_time = end_time
+                schedule_entry.save()
 
             # Serialize and return the updated data
             serializer = self.get_serializer(instance)
@@ -1061,7 +1150,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             # Fetch the CustomUser instance
             student = CustomUser.objects.get(student_id=student_id)
 
-            # Check for conflicting task schedule
+            # Check for duplicate task schedule
             duplicate = CustomTask.objects.filter(
                 Q(scheduled_date=scheduled_date) &
                 Q(scheduled_start_time=start_time) &
@@ -1074,6 +1163,17 @@ class TaskViewSet(viewsets.ModelViewSet):
                     {'error': 'Conflicting task schedule detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Check for overlapping schedules
+            overlapping_schedules = ScheduleEntry.objects.filter(
+                student_id=student,
+                scheduled_date=scheduled_date
+            ).filter(
+                Q(scheduled_start_time__lt=end_time, scheduled_end_time__gt=start_time)
+            )
+
+            if overlapping_schedules.exists():
+                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create Task
             task = CustomTask.objects.create(
@@ -1087,6 +1187,17 @@ class TaskViewSet(viewsets.ModelViewSet):
                 subject_id=subject,
                 student_id=student,
             )
+
+            # Create ScheduleEntry
+            ScheduleEntry.objects.create(
+                category_type='Task',
+                reference_id=task.task_id,  # FK reference to the created task
+                student_id=student,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=start_time,
+                scheduled_end_time=end_time
+            )
+            print(f"ScheduleEntry created successfully!")
 
             # Serialize and return the created data
             serializer = self.get_serializer(task)
@@ -1154,6 +1265,19 @@ class TaskViewSet(viewsets.ModelViewSet):
                     {'error': 'Conflicting task schedule detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Check for overlapping schedules
+            overlapping_schedules = ScheduleEntry.objects.filter(
+                student_id=instance.student_id,
+                scheduled_date=scheduled_date
+            ).filter(
+                Q(scheduled_start_time__lt=end_time, scheduled_end_time__gt=start_time)
+            ).exclude(
+                Q(category_type='Task') & Q(reference_id=instance.task_id)  # Exclude the current task entry
+            )
+
+            if overlapping_schedules.exists():
+                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Update the task instance
             instance.task_name = task_name
@@ -1164,6 +1288,18 @@ class TaskViewSet(viewsets.ModelViewSet):
             instance.deadline = deadline
             instance.subject_id = subject
             instance.save()
+
+            # Update the related ScheduleEntry
+            schedule_entry = ScheduleEntry.objects.filter(
+                category_type='Task',
+                reference_id=instance.task_id
+            ).first()
+
+            if schedule_entry:
+                schedule_entry.scheduled_date = scheduled_date
+                schedule_entry.scheduled_start_time = start_time
+                schedule_entry.scheduled_end_time = end_time
+                schedule_entry.save()
 
             # Serialize and return the updated data
             serializer = self.get_serializer(instance)
@@ -1456,6 +1592,8 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
             # Fetch the CustomUser instance
             goal = get_object_or_404(Goals, goal_id=goal_id)
 
+            student = CustomUser.objects.get(student_id=request.user.student_id)
+
             # Check for duplicate goal instance
             duplicate = GoalSchedule.objects.filter(
                 Q(goal_id=goal) &
@@ -1469,6 +1607,17 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
                     {'error': 'Duplicate goal instance detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Check for overlapping schedules
+            overlapping_schedules = ScheduleEntry.objects.filter(
+                student_id=student,
+                scheduled_date=scheduled_date
+            ).filter(
+                Q(scheduled_start_time__lt=scheduled_end_time, scheduled_end_time__gt=scheduled_start_time)
+            )
+
+            if overlapping_schedules.exists():
+                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create Goal Schedule
             goalSchedule = GoalSchedule.objects.create(
@@ -1478,6 +1627,17 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
                 scheduled_end_time=scheduled_end_time,
                 status='Pending',
             )
+
+            # Create ScheduleEntry
+            ScheduleEntry.objects.create(
+                category_type='Goal',
+                reference_id=goalSchedule.goalschedule_id,  # FK reference to the created goal schedule
+                student_id=student,
+                scheduled_date=scheduled_date,
+                scheduled_start_time=scheduled_start_time,
+                scheduled_end_time=scheduled_end_time
+            )
+            print(f"ScheduleEntry created successfully!")
 
             # Serialize and return the created data
             serializer = self.get_serializer(goalSchedule)
@@ -1519,6 +1679,8 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
             # Fetch the CustomUser instance
             goal = get_object_or_404(Goals, goal_id=goal_id)
 
+            student = CustomUser.objects.get(student_id=request.user.student_id)
+
             # Check for duplicate goal instance
             duplicate = GoalSchedule.objects.filter(
                 Q(goal_id=goal) &
@@ -1534,12 +1696,37 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            # Check for overlapping schedules
+            overlapping_schedules = ScheduleEntry.objects.filter(
+                student_id=student,
+                scheduled_date=scheduled_date
+            ).filter(
+                Q(scheduled_start_time__lt=scheduled_end_time, scheduled_end_time__gt=scheduled_start_time)
+            ).exclude(
+                Q(category_type='Goal') & Q(reference_id=instance.goalschedule_id)  # Exclude the current goal schedule entry
+            )
+
+            if overlapping_schedules.exists():
+                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
+
             # Update the task instance
             instance.goal_id = goal
             instance.scheduled_date = scheduled_date
             instance.scheduled_start_time = scheduled_start_time
             instance.scheduled_end_time = scheduled_end_time
             instance.save()
+
+            # Update the related ScheduleEntry
+            schedule_entry = ScheduleEntry.objects.filter(
+                category_type='Goal',
+                reference_id=instance.goalschedule_id
+            ).first()
+
+            if schedule_entry:
+                schedule_entry.scheduled_date = scheduled_date
+                schedule_entry.scheduled_start_time = scheduled_start_time
+                schedule_entry.scheduled_end_time = scheduled_end_time
+                schedule_entry.save()
 
             # Serialize and return the updated data
             serializer = self.get_serializer(instance)
@@ -1710,3 +1897,16 @@ class SleepLogViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+
+# Schedule Entry
+class ScheduleEntryViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = ScheduleEntrySerializer
+
+    def get_queryset(self):
+        return ScheduleEntry.objects.filter(student_id=self.request.user)
+    
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.get_queryset()
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return Response(serializer.data)

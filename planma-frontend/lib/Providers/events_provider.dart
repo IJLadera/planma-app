@@ -180,7 +180,10 @@ class EventsProvider with ChangeNotifier {
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate event entry detected.') {
+        if (responseBody['error_type'] == 'overlap') {
+          throw Exception(
+              'Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] == 'Duplicate event entry detected.') {
           throw Exception('Duplicate event entry detected on the server.');
         } else {
           throw Exception('Error adding event: ${response.body}');
@@ -266,10 +269,13 @@ class EventsProvider with ChangeNotifier {
       } else if (response.statusCode == 400) {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
-        if (responseBody['error'] == 'Duplicate event entry detected.') {
-          throw Exception('Duplicate Event entry detected on the server.');
+        if (responseBody['error_type'] == 'overlap') {
+          throw Exception(
+              'Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] == 'Duplicate event entry detected.') {
+          throw Exception('Duplicate event entry detected on the server.');
         } else {
-          throw Exception('Error updating Event: ${response.body}');
+          throw Exception('Error adding event: ${response.body}');
         }
       } else {
         throw Exception('Failed to update Event: ${response.body}');

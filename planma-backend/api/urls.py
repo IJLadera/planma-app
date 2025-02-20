@@ -21,6 +21,7 @@ router.register(r'attended-classes', AttendedClassViewSet, basename='attendedcla
 router.register(r'sleep-logs', SleepLogViewSet, basename='sleeplog')
 router.register(r'userprefs', UserPreferenceView, basename='userpref')
 router.register(r'users', CustomUserViewSet, basename='user')
+router.register(r'schedule', ScheduleEntryViewSet, basename='schedule')
 
 urlpatterns = [
     path ('djoser/', include ('djoser.urls')),

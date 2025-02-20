@@ -134,6 +134,43 @@ class _EditActivity extends State<EditActivity> {
     _scheduledDate = widget.activity.scheduledDate;
   }
 
+  // Helper function to create snackbars
+  SnackBar _buildSnackBar(
+      {required IconData icon,
+      required String text,
+      required Color backgroundColor}) {
+    return SnackBar(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).size.height * 0.4,
+        left: 50,
+        right: 50,
+        top: 100,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: backgroundColor,
+      elevation: 10,
+    );
+  }
+
   void _editActivity(BuildContext context) async {
     final provider = Provider.of<ActivityProvider>(context, listen: false);
 
@@ -142,15 +179,9 @@ class _EditActivity extends State<EditActivity> {
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
-    print(startTimeString);
-    print(endTimeString);
-
     // Convert String  to TimeOfDay
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
-
-    print('formatted: $startTime');
-    print('formatted: $endTime');
 
     if (activityName.isEmpty ||
         activityDescription.isEmpty ||
@@ -180,13 +211,6 @@ class _EditActivity extends State<EditActivity> {
       return;
     }
 
-    print('FROM UI:');
-    print('activity Name: $activityName');
-    print('activity Description: $activityDescription');
-    print('Scheduled Date: $_scheduledDate');
-    print('Start Time: $startTime');
-    print('End Time: $endTime');
-
     try {
       print('Starting to update activity...');
       await provider.updateActivity(
@@ -197,73 +221,35 @@ class _EditActivity extends State<EditActivity> {
         startTime: startTime,
         endTime: endTime,
       );
-      print('activity updated successfully!');
 
-      // After validation and adding logic
+      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'Activity updated successfully!',
-                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+        _buildSnackBar(
+          icon: Icons.check_circle,
+          text: 'Activity updated successfully!',
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
         ),
       );
 
       Navigator.pop(context);
     } catch (error) {
+      String errorMessage = 'Failed to update activity';
+
+      if (error.toString().contains('Scheduling overlap')) {
+        errorMessage =
+            'Scheduling overlap: This time slot is already occupied.';
+      } else if (error.toString().contains('Duplicate activity entry detected')) {
+        errorMessage = 'Duplicate activity entry: This activity already exists.';
+      } else {
+        errorMessage = 'Failed to update activity: $error';
+      }
+
+      // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                // Prevents text overflow
-                child: Text(
-                  'Failed to update activity (1): $error',
-                  style:
-                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+        _buildSnackBar(
+          icon: Icons.error,
+          text: errorMessage,
           backgroundColor: Colors.red,
-          elevation: 10,
         ),
       );
     }
