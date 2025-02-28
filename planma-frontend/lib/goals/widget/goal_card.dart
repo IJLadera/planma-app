@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:planma_app/Providers/goal_progress_provider.dart';
 import 'package:planma_app/goals/view_goal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/models/goals_model.dart';
-import 'package:provider/provider.dart';
 
 class GoalCard extends StatelessWidget {
   final Goal goal;
@@ -40,7 +38,7 @@ class GoalCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFD7C0F3).withOpacity(0.6),
+        color: const Color(0xFFD7C0F3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -113,4 +111,3 @@ class GoalCard extends StatelessWidget {
     );
   }
 }
-

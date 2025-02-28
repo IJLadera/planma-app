@@ -48,7 +48,12 @@ class _SignUpState extends State<SignUp> {
     if (_formKey.currentState!.validate()) {
       // Perform sign-up logic (e.g., API call)
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Signing up...")),
+        SnackBar(
+          content: Text(
+            "Signing up...",
+            style: GoogleFonts.openSans(fontSize: 14),
+          ),
+        ),
       );
 
       final authService = AuthService();
@@ -63,7 +68,12 @@ class _SignUpState extends State<SignUp> {
       if (response != null && response["error"] == null) {
         // Sign-up successful, navigate to the login page
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Account created successfully!")),
+          SnackBar(
+            content: Text(
+              "Account created successfully!",
+              style: GoogleFonts.openSans(fontSize: 14),
+            ),
+          ),
         );
         context.read<UserProvider>().init(
               userName: emailController.text,
@@ -80,7 +90,12 @@ class _SignUpState extends State<SignUp> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response?["error"] ?? "Unknown error")),
+          SnackBar(
+            content: Text(
+              response?["error"] ?? "Unknown error",
+              style: GoogleFonts.openSans(fontSize: 14),
+            ),
+          ),
         );
       }
     }
@@ -165,8 +180,17 @@ class _SignUpState extends State<SignUp> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        validator: (value) =>
-                            value!.isEmpty ? 'Please enter your email' : null,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Email is required';
+                          }
+                          final emailRegex = RegExp(
+                              r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                          if (!emailRegex.hasMatch(value)) {
+                            return 'Enter a valid email address';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
@@ -221,6 +245,22 @@ class _SignUpState extends State<SignUp> {
                           }
                           if (value != passwordController.text) {
                             return 'Passwords do not match';
+                          }
+                          if (value == null || value.isEmpty) {
+                            return 'Password is required';
+                          }
+                          if (value.length < 8) {
+                            return 'Password must be at least 8 characters long';
+                          }
+                          // if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                          //   return 'Password must have at least one uppercase letter';
+                          // }
+                          if (!RegExp(r'[0-9]').hasMatch(value)) {
+                            return 'Password must have at least one number';
+                          }
+                          if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
+                              .hasMatch(value)) {
+                            return 'Password must have at least one special character';
                           }
                           return null;
                         },

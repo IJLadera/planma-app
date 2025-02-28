@@ -11,7 +11,9 @@ class BottomSheetWidget {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25.0),
+        ),
       ),
       isScrollControlled:
           true, // Allows the bottom sheet to expand when content is long
@@ -19,21 +21,22 @@ class BottomSheetWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
           child: SingleChildScrollView(
-            // Makes the content scrollable
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Centered "Add" label
                 Center(
                   child: Text(
                     "Add",
                     style: GoogleFonts.openSans(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF173F70)),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF173F70),
+                    ),
                   ),
                 ),
+
                 SizedBox(height: 16),
+
                 // Task button
                 _buildBottomSheetButton(
                   context,
@@ -46,6 +49,8 @@ class BottomSheetWidget {
                     );
                   },
                 ),
+
+                Divider(thickness: 1, color: Color(0xFF173F70)),
 
                 // Class Schedule button
                 _buildBottomSheetButton(
@@ -60,6 +65,8 @@ class BottomSheetWidget {
                   },
                 ),
 
+                Divider(thickness: 1, color: Color(0xFF173F70)),
+
                 // Event button
                 _buildBottomSheetButton(
                   context,
@@ -72,6 +79,8 @@ class BottomSheetWidget {
                     );
                   },
                 ),
+
+                Divider(thickness: 1, color: Color(0xFF173F70)),
 
                 // Activity button
                 _buildBottomSheetButton(
@@ -86,6 +95,10 @@ class BottomSheetWidget {
                     );
                   },
                 ),
+
+                Divider(thickness: 0.5, color: Color(0xFF173F70)),
+
+                // Goal button
                 _buildBottomSheetButton(
                   context,
                   label: "Goal",
@@ -123,11 +136,6 @@ class BottomSheetWidget {
           ),
           onTap: onPressed,
         ),
-        if (label != "Add") // Exclude divider below "Add"
-          Divider(
-            thickness: 0.5,
-            color: Color(0xFF173F70),
-          ),
       ],
     );
   }

@@ -22,7 +22,6 @@ class SubjectDetailRow extends StatelessWidget {
             child: Text(
               title,
               style: GoogleFonts.openSans(
-                fontWeight: FontWeight.bold,
                 fontSize: 14,
                 color: Color(0xFF173F70),
               ),
@@ -34,6 +33,7 @@ class SubjectDetailRow extends StatelessWidget {
               detail,
               style: GoogleFonts.openSans(
                 color: Color(0xFF173F70),
+                fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
             ),

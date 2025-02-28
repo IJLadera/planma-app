@@ -23,7 +23,6 @@ class GoalDetailRow extends StatelessWidget {
               label,
               style: GoogleFonts.openSans(
                 fontSize: 14,
-                fontWeight: FontWeight.bold,
                 color: Color(0xFF173F70),
               ),
             ),
@@ -35,6 +34,7 @@ class GoalDetailRow extends StatelessWidget {
               style: GoogleFonts.openSans(
                 fontSize: 14,
                 color: Color(0xFF173F70),
+                fontWeight: FontWeight.bold,
               ),
             ),
           )

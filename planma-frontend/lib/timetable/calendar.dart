@@ -102,15 +102,15 @@ class _CalendarViewState extends State<CustomCalendar> {
   Color _getCategoryColor(String categoryType) {
     switch (categoryType) {
       case "Task":
-        return Color(0xFF0095FF);
+        return Color(0xFFC0D7F3);
       case "Class":
-        return Color(0xFFFFBB70);
+        return Color(0xFFFFE1BF);
       case "Event":
-        return Color(0xFF30BB90);
+        return Color(0xFFACEFDB);
       case "Activity":
-        return Color(0xFFFF5656);
+        return Color(0xFFFBA2A2);
       case "Goal":
-        return Color(0xFFB480F3);
+        return Color(0xFFD7C0F3);
       default:
         return Colors.grey;
     }
@@ -153,6 +153,7 @@ class _CalendarViewState extends State<CustomCalendar> {
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                       color: Color(0xFF173F70),
+                      backgroundColor: Colors.white,
                     ),
                   ),
                 ),
@@ -379,8 +380,7 @@ class _CalendarViewState extends State<CustomCalendar> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             elevation: 3,
-                            color: _getCategoryColor(event[
-                                "categoryType"]!),
+                            color: _getCategoryColor(event["categoryType"]!),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Column(
@@ -396,7 +396,8 @@ class _CalendarViewState extends State<CustomCalendar> {
                                   ),
                                   SizedBox(height: 4),
                                   Text(
-                                    event["timeRange"]!, // Replace with actual details if available
+                                    event[
+                                        "timeRange"]!, // Replace with actual details if available
                                     style: GoogleFonts.openSans(
                                       fontSize: 14,
                                       color: Colors.grey[700],

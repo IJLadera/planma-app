@@ -22,7 +22,6 @@ class TaskDetailRow extends StatelessWidget {
             child: Text(
               title,
               style: GoogleFonts.openSans(
-                fontWeight: FontWeight.bold,
                 color: const Color(0xFF173F70),
                 fontSize: 14,
               ),
@@ -35,6 +34,7 @@ class TaskDetailRow extends StatelessWidget {
               style: GoogleFonts.openSans(
                 color: const Color(0xFF173F70),
                 fontSize: 14,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
