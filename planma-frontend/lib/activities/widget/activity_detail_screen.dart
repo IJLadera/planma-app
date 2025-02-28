@@ -24,8 +24,8 @@ class ActivityDetailsScreen extends StatelessWidget {
             child: Text(
               title,
               style: GoogleFonts.openSans(
-                fontWeight: FontWeight.bold,
                 color: Color(0xFF173F70),
+                fontSize: 14,
               ),
             ),
           ),
@@ -35,6 +35,8 @@ class ActivityDetailsScreen extends StatelessWidget {
               detail,
               style: GoogleFonts.openSans(
                 color: Color(0xFF173F70),
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
             ),
           ),

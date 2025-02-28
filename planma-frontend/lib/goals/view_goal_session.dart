@@ -10,8 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 class GoalSessionDetailScreen extends StatefulWidget {
   final GoalSchedule session;
 
-  const GoalSessionDetailScreen(
-      {super.key, required this.session});
+  const GoalSessionDetailScreen({super.key, required this.session});
 
   @override
   State<GoalSessionDetailScreen> createState() =>
@@ -139,7 +138,7 @@ class _GoalSessionDetailScreenState extends State<GoalSessionDetailScreen> {
                   ),
                   const Divider(),
                   GoalDetailRow(
-                    label: 'Scheduled Date:',
+                    label: 'Scheduled   Date:',
                     detail: DateFormat('dd MMMM yyyy')
                         .format(DateTime.parse(session.scheduledDate))
                         .toString(),

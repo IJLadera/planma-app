@@ -64,9 +64,9 @@ class _TimetableState extends State<Timetable> {
 
       tempAppointments.add(Appointment(
         startTime: DateTime.parse(
-          '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledStartTime}'),
+            '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledStartTime}'),
         endTime: DateTime.parse(
-          '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}'),
+            '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}'),
         subject: name,
         color: _getCategoryColor(entry.categoryType),
       ));
@@ -148,10 +148,10 @@ class _TimetableState extends State<Timetable> {
                   _headerText,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.openSans(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF173F70),
-                  ),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF173F70),
+                      backgroundColor: Colors.white),
                 ),
               ),
               // Invisible Placeholder to balance the Row layout
@@ -162,6 +162,7 @@ class _TimetableState extends State<Timetable> {
         // Timetable
         Expanded(
           child: SfCalendar(
+            backgroundColor: Colors.white,
             controller: _calendarController,
             view: CalendarView.week,
             dataSource: _AppointmentDataSource(_appointments),
@@ -257,7 +258,10 @@ class _TimetableState extends State<Timetable> {
               const SizedBox(height: 16),
               Text(
                 'Details',
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: GoogleFonts.openSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF173F70)),
               ),
               const SizedBox(height: 16),
               Row(
@@ -267,7 +271,8 @@ class _TimetableState extends State<Timetable> {
                   Expanded(
                     child: Text(
                       appointment.subject,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: GoogleFonts.openSans(
+                          fontSize: 18, color: Color(0xFF173F70)),
                     ),
                   ),
                 ],
@@ -280,7 +285,8 @@ class _TimetableState extends State<Timetable> {
                   Expanded(
                     child: Text(
                       '${appointment.startTime.toString().substring(11, 16)} - ${appointment.endTime.toString().substring(11, 16)}',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: GoogleFonts.openSans(
+                          fontSize: 18, color: Color(0xFF173F70)),
                     ),
                   ),
                 ],
@@ -293,7 +299,8 @@ class _TimetableState extends State<Timetable> {
                   Expanded(
                     child: Text(
                       dayName,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: GoogleFonts.openSans(
+                          fontSize: 18, color: Color(0xFF173F70)),
                     ),
                   ),
                 ],

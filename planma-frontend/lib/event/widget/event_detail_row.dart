@@ -22,7 +22,6 @@ class EventDetailRow extends StatelessWidget {
             child: Text(
               title,
               style: GoogleFonts.openSans(
-                fontWeight: FontWeight.bold,
                 color: Color(0xFF173F70),
                 fontSize: 14,
               ),
@@ -35,6 +34,7 @@ class EventDetailRow extends StatelessWidget {
               style: GoogleFonts.openSans(
                 color: Color(0xFF173F70),
                 fontSize: 14,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
