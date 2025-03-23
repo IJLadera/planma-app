@@ -16,7 +16,7 @@ class ScheduleEntryProvider with ChangeNotifier {
   Future<void> fetchScheduleEntries() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    
+
     final url = Uri.parse("${baseUrl}schedule/");
 
     try {
@@ -29,10 +29,12 @@ class ScheduleEntryProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        _scheduleEntries = data.map((item) => ScheduleEntry.fromJson(item)).toList();
+        _scheduleEntries =
+            data.map((item) => ScheduleEntry.fromJson(item)).toList();
         notifyListeners();
       } else {
-        throw Exception('Failed to fetch schedule entries. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch schedule entries. Status Code: ${response.statusCode}');
       }
     } catch (error) {
       print("Error fetching schedule entries: $error");
@@ -42,7 +44,7 @@ class ScheduleEntryProvider with ChangeNotifier {
   Future<String> fetchEventName(int referenceId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    
+
     final url = Uri.parse("${baseUrl}events/$referenceId/");
 
     try {
@@ -65,10 +67,10 @@ class ScheduleEntryProvider with ChangeNotifier {
     }
   }
 
-  Future<String> fetchTaskName(int referenceId) async {
+  Future<Map<String, dynamic>> fetchTaskDetails(int referenceId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    
+
     final url = Uri.parse("${baseUrl}tasks/$referenceId/");
 
     try {
@@ -81,20 +83,29 @@ class ScheduleEntryProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        return data["task_name"];
+        return {
+          "task_name": data["task_name"],
+          "status": data["status"] ?? "Pending", // Default to "Pending" if null
+        };
       } else {
-        return "Unknown Task";
+        return {
+          "task_name": "Unknown Task",
+          "status": "Unknown Status",
+        };
       }
     } catch (error) {
-      print("Error fetching task name: $error");
-      return "Unknown Task";
+      print("Error fetching task details: $error");
+      return {
+        "task_name": "Unknown Task",
+        "status": "Unknown Status",
+      };
     }
   }
 
-  Future<String> fetchActivityName(int referenceId) async {
+  Future<Map<String, dynamic>> fetchActivityDetails(int referenceId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    
+
     final url = Uri.parse("${baseUrl}activities/$referenceId/");
 
     try {
@@ -107,20 +118,29 @@ class ScheduleEntryProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        return data["activity_name"];
+        return {
+          "activity_name": data["activity_name"],
+          "status": data["status"] ?? "Pending", // Default to "Pending" if null
+        };
       } else {
-        return "Unknown Activity";
+        return {
+          "activity_name": "Unknown Activity",
+          "status": "Unknown Status",
+        };
       }
     } catch (error) {
-      print("Error fetching activity name: $error");
-      return "Unknown Activity";
+      print("Error fetching task details: $error");
+      return {
+        "activity_name": "Unknown Task",
+        "status": "Unknown Status",
+      };
     }
   }
 
-  Future<String> fetchGoalName(int referenceId) async {
+  Future<Map<String, dynamic>> fetchGoalDetails(int referenceId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    
+
     final url = Uri.parse("${baseUrl}goal-schedules/$referenceId/");
 
     try {
@@ -133,13 +153,24 @@ class ScheduleEntryProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        return data["goal_id"]['goal_name'];
+        return {
+          "goal_name": data["goal_id"]?["goal_name"] ?? "Unknown Goal",
+          "status": data.containsKey("status")
+              ? data["status"]
+              : "Pending", // Default to "Pending" if null
+        };
       } else {
-        return "Unknown Goal";
+        return {
+          "goal_name": "Unknown Goal",
+          "status": "Unknown Status",
+        };
       }
     } catch (error) {
-      print("Error fetching Goal name: $error");
-      return "Unknown Goal";
+      print("Error fetching Goal details: $error");
+      return {
+        "goal_name": "Unknown Goal",
+        "status": "Unknown Status",
+      };
     }
   }
 }

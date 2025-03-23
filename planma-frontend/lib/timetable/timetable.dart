@@ -26,6 +26,7 @@ class _TimetableState extends State<Timetable> {
     _calendarController = CalendarController();
     _updateHeaderText(DateTime.now());
     _loadScheduleEntries();
+    _dataSource = _AppointmentDataSource([]);
   }
 
   void _updateHeaderText(DateTime date) {
@@ -51,15 +52,30 @@ class _TimetableState extends State<Timetable> {
 
     for (var entry in provider.scheduleEntries) {
       String name = "Unknown";
+      String status = "Pending";
 
       if (entry.categoryType == "Event") {
         name = await provider.fetchEventName(entry.referenceId);
       } else if (entry.categoryType == "Task") {
-        name = await provider.fetchTaskName(entry.referenceId);
+        Map<String, dynamic> taskDetails =
+            await provider.fetchTaskDetails(entry.referenceId);
+        name = taskDetails["task_name"] ?? "Unknown";
+        status = taskDetails["status"] ?? "Pending";
       } else if (entry.categoryType == "Activity") {
-        name = await provider.fetchActivityName(entry.referenceId);
+        Map<String, dynamic> activityDetails =
+            await provider.fetchActivityDetails(entry.referenceId);
+        name = activityDetails["activity_name"] ?? "Unknown";
+        status = activityDetails["status"] ?? "Pending";
       } else if (entry.categoryType == "Goal") {
-        name = await provider.fetchGoalName(entry.referenceId);
+        Map<String, dynamic> goalDetails =
+            await provider.fetchGoalDetails(entry.referenceId);
+        name = goalDetails["goal_name"] ?? "Unknown";
+        status = goalDetails["status"] ?? "Pending";
+      }
+
+      Color appointmentColor = _getCategoryColor(entry.categoryType);
+      if (status == "Completed") {
+        appointmentColor = appointmentColor.withOpacity(0.4);
       }
 
       tempAppointments.add(Appointment(
@@ -68,7 +84,8 @@ class _TimetableState extends State<Timetable> {
         endTime: DateTime.parse(
             '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}'),
         subject: name,
-        color: _getCategoryColor(entry.categoryType),
+        color: appointmentColor,
+        notes: status,
       ));
     }
 
@@ -165,7 +182,16 @@ class _TimetableState extends State<Timetable> {
             backgroundColor: Colors.white,
             controller: _calendarController,
             view: CalendarView.week,
-            dataSource: _AppointmentDataSource(_appointments),
+            dataSource: _appointments.isNotEmpty
+                ? _dataSource
+                : _AppointmentDataSource([]),
+            appointmentBuilder: (context, calendarAppointmentDetails) {
+              if (_appointments.isEmpty) {
+                return Container();
+              }
+              return _dataSource.buildAppointmentWidget(
+                  context, calendarAppointmentDetails);
+            },
             timeSlotViewSettings: TimeSlotViewSettings(
               startHour: 0,
               endHour: 24,
@@ -376,5 +402,34 @@ DateTime getNextWeekday(DateTime startDate, int weekday, int hour) {
 class _AppointmentDataSource extends CalendarDataSource {
   _AppointmentDataSource(List<Appointment> source) {
     appointments = source;
+  }
+
+  @override
+  Widget buildAppointmentWidget(
+      BuildContext context, CalendarAppointmentDetails details) {
+    final Appointment appointment = details.appointments.first;
+
+    // Check if task is completed
+    bool isCompleted = appointment.notes == "Completed";
+
+    return Container(
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: appointment.color,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        appointment.subject, // Keep raw name, apply styling below
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          decoration: isCompleted
+              ? TextDecoration.lineThrough
+              : TextDecoration.none, // ✅ Strikethrough for completed tasks
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }
