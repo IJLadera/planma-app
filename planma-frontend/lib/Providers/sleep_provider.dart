@@ -15,11 +15,11 @@ class SleepLogProvider with ChangeNotifier {
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
   // Fetch all sleep log records
-  Future<void> fetchSleepLogs () async {
+  Future<void> fetchSleepLogs ({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}sleep-logs/");
+    final url = Uri.parse("${baseUrl}sleep-logs/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(

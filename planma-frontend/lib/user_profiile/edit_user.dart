@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,12 +13,14 @@ class EditProfileScreen extends StatefulWidget {
   final String username;
   final String firstName;
   final String lastName;
+  final String? profilePictureUrl;
 
   EditProfileScreen({
     super.key,
     required this.username,
     required this.firstName,
     required this.lastName,
+    this.profilePictureUrl,
   });
 
   @override
@@ -26,17 +30,55 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   File? _image;
+  Uint8List? _webImage; // Store image in memory for Web
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
+
+  late String? _initialProfilePicture;
+  String? initProfilePictureFullUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialProfilePicture = widget.profilePictureUrl;
+
+    // Ensure the URL is absolute
+    String getFullImageUrl(String? url) {
+      if (url == null || url.isEmpty) return '';
+      return url.startsWith('http') ? url : 'http://127.0.0.1:8000$url';
+    }
+
+    initProfilePictureFullUrl = getFullImageUrl(_initialProfilePicture);
+  }
+
+  ImageProvider<Object>? getImageProvider() {
+    if (_webImage != null) {
+      return MemoryImage(_webImage!);
+    } else if (_image != null) {
+      return FileImage(_image!);
+    } else if (initProfilePictureFullUrl != null) {
+      return NetworkImage(initProfilePictureFullUrl!);
+    }
+    return null;
+  }
 
   Future<void> _chooseImage(BuildContext context, ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
     if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
+      if (kIsWeb) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _webImage = bytes; // Store for web use
+          _initialProfilePicture = null; // Override existing profile picture
+        });
+      } else {
+        setState(() {
+          _image = File(pickedFile.path);
+          _initialProfilePicture = null; // Override existing profile picture
+        });
+      }
     }
-    Navigator.pop(context); // Close the bottom sheet after selection
+    Navigator.pop(context);
   }
 
   void _showImagePickerOptions(BuildContext context) {
@@ -66,61 +108,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         );
       },
-    );
-  }
-
-  Future<void> _uploadProfile(File? imageFile, String firstName,
-      String lastName, String username) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? accessToken = prefs.getString('access');
-
-      if (accessToken == null) {
-        _showMessage('Access token is missing!');
-        return;
-      }
-
-      final uri = Uri.parse("http://127.0.0.1:8000/api/users/update_profile/");
-      var request = http.MultipartRequest('PUT', uri)
-        ..headers['Authorization'] = 'Bearer $accessToken'
-        ..fields['firstname'] = firstName
-        ..fields['lastname'] = lastName
-        ..fields['username'] = username;
-
-      if (imageFile != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-            'profile_picture', imageFile.path));
-      }
-
-      var response = await request.send();
-
-      if (response.statusCode == 200) {
-        _showMessage('Profile updated successfully!');
-        Navigator.pop(context, {
-          'username': username,
-          'firstName': firstName,
-          'lastName': lastName,
-        });
-      } else {
-        _showMessage(
-            'Failed to update profile. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      _showMessage('Error during upload: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
     );
   }
 
@@ -161,13 +148,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.yellow,
-                    backgroundImage: _image != null ? FileImage(_image!) : null,
-                    child: _image == null
-                        ? Icon(
-                            Icons.person,
-                            size: 50,
-                            color: Colors.black,
-                          )
+                    backgroundImage: getImageProvider(),
+                    child: (getImageProvider() == null)
+                        ? Icon(Icons.person, size: 50, color: Colors.black)
                         : null,
                   ),
                   CircleAvatar(
@@ -218,12 +201,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    _uploadProfile(
-                      _image,
-                      firstNameController.text,
-                      lastNameController.text,
-                      usernameController.text,
-                    );
+                    XFile? imageFile;
+
+                    if (kIsWeb && _webImage != null) {
+                      imageFile = XFile.fromData(_webImage!);
+                    } else if (_image != null) {
+                      imageFile = XFile(_image!.path);
+                    }
+                    
+                    context.read<UserProfileProvider>().updateUserProfile(firstNameController.text, lastNameController.text, usernameController.text, imageFile: imageFile); 
+                    Navigator.pop(context, {
+                      'username': usernameController.text,
+                      'firstName': firstNameController.text,
+                      'lastName': lastNameController.text,
+                    });
                   }
                 },
                 style: ElevatedButton.styleFrom(

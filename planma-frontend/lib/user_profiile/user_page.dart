@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/user_profiile/edit_user.dart';
-import 'package:planma_app/user_profiile/widget/profile_upload.dart';
 import 'package:planma_app/user_profiile/widget/widget.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,8 +26,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   ];
   // String? _selectedTime; // Default value for the dropdown
   String? reminderOffsetTime;
-  File? _image;
-  final ImagePicker _picker = ImagePicker();
 
   String formatReminderOffset(String time) {
     final parts = time.split(':'); // Split "01:00:00" into ["01", "00", "00"]
@@ -54,7 +50,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 CustomWidget.parseTimeOfDay(userPreferences[0].usualWakeTime);
             reminderOffsetTime =
                 formatReminderOffset(userPreferences[0].reminderOffsetTime);
-            print('Reminder Time: $reminderOffsetTime');
+            // print('Reminder Time: $reminderOffsetTime');
           });
         }
       } catch (error) {
@@ -64,16 +60,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         );
       }
     });
-  }
-
-  Future<void> _loadProfileImage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final imagePath = prefs.getString('profileImagePath');
-    if (imagePath != null) {
-      setState(() {
-        _image = File(imagePath);
-      });
-    }
   }
 
   Future<void> _showTimePickerDialog(
@@ -305,25 +291,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path); // Store the picked image
-      });
-
-      // Save the image path using SharedPreferences or your preferred method
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString('profileImagePath', pickedFile.path);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     String? username = context.watch<UserProfileProvider>().username;
     String? firstName = context.watch<UserProfileProvider>().firstName;
     String? lastName = context.watch<UserProfileProvider>().lastName;
+    String? profilePictureUrl = context.watch<UserProfileProvider>().profilePicture;
     final userPreferencesProvider = context.watch<UserPreferencesProvider>();
+
+    // Ensure the URL is absolute
+    String getFullImageUrl(String? url) {
+      if (url == null || url.isEmpty) return '';
+      return url.startsWith('http') ? url : 'http://127.0.0.1:8000$url';
+    }
+
+    String profilePictureFullUrl = getFullImageUrl(profilePictureUrl);
 
     return Scaffold(
       appBar: AppBar(
@@ -354,13 +336,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.yellow,
-                  backgroundImage: _image != null ? FileImage(_image!) : null,
-                  child: _image == null
-                      ? Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.black,
-                        )
+                  backgroundImage: profilePictureFullUrl.isNotEmpty 
+                      ? NetworkImage(profilePictureFullUrl) 
+                      : null,
+                  child: profilePictureUrl == null || profilePictureUrl.isEmpty
+                      ? Icon(Icons.person, size: 50, color: Colors.black)
                       : null,
                 ),
               ],
@@ -391,6 +371,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       username: username!,
                       firstName: firstName!,
                       lastName: lastName!,
+                      profilePictureUrl: profilePictureUrl,
                     ),
                   ),
                 );
@@ -400,6 +381,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     username = updatedData['username'];
                     firstName = updatedData['firstName'];
                     lastName = updatedData['lastName'];
+                    profilePictureUrl = updatedData['profile_picture'];
                   });
                 }
               },

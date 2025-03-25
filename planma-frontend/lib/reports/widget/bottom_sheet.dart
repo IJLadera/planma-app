@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class BottomSheetWidget extends StatelessWidget {
   final Function(String) onCategorySelected;
@@ -39,14 +40,17 @@ class BottomSheetWidget extends StatelessWidget {
             Center(
               child: Text(
                 "Categories",
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: GoogleFonts.openSans(
+                  fontSize: 18, 
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF173F70),
+                ),
               ),
             ),
             const SizedBox(height: 16),
             _buildRadioTile(
-              title: "Task",
-              value: "Task",
+              title: "Tasks",
+              value: "Tasks",
               onChanged: (value) {
                 onCategorySelected(
                     value!); // Pass the selected category to the callback
@@ -54,8 +58,8 @@ class BottomSheetWidget extends StatelessWidget {
               },
             ),
             _buildRadioTile(
-              title: "Event",
-              value: "Event",
+              title: "Events",
+              value: "Events",
               onChanged: (value) {
                 onCategorySelected(value!);
                 Navigator.pop(context);
@@ -107,17 +111,23 @@ class BottomSheetWidget extends StatelessWidget {
     return Column(
       children: [
         RadioListTile<String>(
-          title: Text(title),
+          contentPadding: EdgeInsets.zero,
+          // visualDensity: VisualDensity(horizontal: -4, vertical: -4), // Compress further
+          title: Text(
+            title,
+            style: GoogleFonts.openSans(
+              fontSize: 16,
+              color: Color(0xFF173F70),
+            ),
+          ),
           value: value,
           groupValue: initialSelection,
           onChanged: onChanged,
           controlAffinity: ListTileControlAffinity.trailing,
+          activeColor: Color(0xFF1D4E89),
         ),
         if (title != "Sleep") // No divider below the last option
-          Divider(
-            thickness: 1,
-            color: Colors.grey.shade300,
-          ),
+          const Divider(height: 0.5, thickness: 1,),
       ],
     );
   }

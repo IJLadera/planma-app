@@ -215,7 +215,16 @@ class ActivityTimeLogViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter logged activities based on the logged-in user
-        return ActivityTimeLog.objects.filter(activity_id__student_id=self.request.user)
+        queryset = ActivityTimeLog.objects.filter(activity_id__student_id=self.request.user)
+
+        # Apply date_logged filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(date_logged__range=[start_date, end_date])
+
+        return queryset
     
     @action(detail=False, methods=['post'])
     def log_time(self, request):
@@ -488,7 +497,16 @@ class AttendedEventViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter attended events based on the logged-in user
-        return AttendedEvents.objects.filter(event_id__student_id=self.request.user)
+        queryset = AttendedEvents.objects.filter(event_id__student_id=self.request.user)
+
+        # Apply date filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(date__range=[start_date, end_date])
+
+        return queryset
     
     @action(detail=False, methods=['post'])
     def mark_attendance(self, request):
@@ -633,16 +651,20 @@ class CustomUserViewSet(UserViewSet):
         User = get_user_model()
         return User.objects.get(email=data.get("email"))
     
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        """Custom override for /users/me/ to include profile_picture"""
+        serializer = CustomUserSerializer(request.user, context={"request": request})
+        return Response(serializer.data)
+    
     @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated])
     def update_profile(self, request):
-        """
-        Update user profile, including profile_picture.
-        """
         user = request.user
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             if 'profile_picture' in request.FILES:  # Handle file upload
                 user.profile_picture = request.FILES['profile_picture']
+                user.save()
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1320,7 +1342,16 @@ class TaskTimeLogViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter logged tasks based on the logged-in user
-        return TaskTimeLog.objects.filter(task_id__student_id=self.request.user)
+        queryset = TaskTimeLog.objects.filter(task_id__student_id=self.request.user)
+    
+        # Apply date_logged filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(date_logged__range=[start_date, end_date])
+
+        return queryset
     
     @action(detail=False, methods=['post'])
     def log_time(self, request):
@@ -1847,7 +1878,16 @@ class SleepLogViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter logged sleep sessions based on the logged-in user
-        return SleepLog.objects.filter(student_id=self.request.user)
+        queryset = SleepLog.objects.filter(student_id=self.request.user)
+
+        # Apply date_logged filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(date_logged__range=[start_date, end_date])
+
+        return queryset
     
     @action(detail=False, methods=['post'])
     def log_time(self, request):
