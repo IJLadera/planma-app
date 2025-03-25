@@ -66,7 +66,7 @@ class CustomEvents(models.Model):
     
     # Event Details
     event_name = models.CharField(max_length=255)
-    event_desc = models.TextField()
+    event_desc = models.TextField(null=True, blank=True)
     location = models.TextField()
     scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
@@ -113,7 +113,7 @@ class CustomActivity(models.Model):
     
     # Activity Details
     activity_name = models.CharField(max_length=255)
-    activity_desc = models.TextField()
+    activity_desc = models.TextField(null=True, blank=True)
     scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
@@ -310,7 +310,7 @@ class CustomTask(models.Model):
     
     # Task Details
     task_name = models.CharField(max_length=255)
-    task_desc = models.TextField()
+    task_desc = models.TextField(null=True, blank=True)
     scheduled_date = models.DateField()
     scheduled_start_time = models.TimeField()
     scheduled_end_time = models.TimeField()
@@ -372,7 +372,7 @@ class Goals(models.Model):
     goal_name = models.CharField(max_length=100)
     target_hours = models.IntegerField()
     timeframe = models.CharField(max_length=20, choices=TIMEFRAME_CHOICES)
-    goal_desc = models.TextField()
+    goal_desc = models.TextField(null=True, blank=True)
     goal_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
     # Foreign Key to CustomUser model
     student_id = models.ForeignKey(

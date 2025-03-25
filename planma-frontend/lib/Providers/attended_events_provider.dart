@@ -14,11 +14,13 @@ class AttendedEventsProvider with ChangeNotifier {
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
-  Future<void> fetchAttendedEvents() async {
+  Future<void> fetchAttendedEvents({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}attended-events/");
+    final url = Uri.parse(startDate != null && endDate != null
+        ? "${baseUrl}attended-events/?start_date=$startDate&end_date=$endDate"
+        : "${baseUrl}attended-events/");
 
     try {
       final response = await http.get(
@@ -30,7 +32,8 @@ class AttendedEventsProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        _attendedEvents = data.map((item) => AttendedEvent.fromJson(item)).toList();
+        _attendedEvents =
+            data.map((item) => AttendedEvent.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception('Failed to load attended events');
@@ -49,7 +52,7 @@ class AttendedEventsProvider with ChangeNotifier {
     _accessToken = sharedPreferences.getString("access");
 
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(date);
-    
+
     final url = Uri.parse("${baseUrl}attended-events/mark_attendance/");
 
     try {
@@ -67,7 +70,8 @@ class AttendedEventsProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 201) {
-        final newAttendance = AttendedEvent.fromJson(json.decode(response.body));
+        final newAttendance =
+            AttendedEvent.fromJson(json.decode(response.body));
         _attendedEvents.add(newAttendance);
         notifyListeners();
       } else if (response.statusCode == 200) {

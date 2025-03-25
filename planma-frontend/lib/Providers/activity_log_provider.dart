@@ -15,11 +15,11 @@ class ActivityTimeLogProvider with ChangeNotifier {
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
   //Fetch all activity time logs
-  Future<void> fetchActivityTimeLogs () async {
+  Future<void> fetchActivityTimeLogs ({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}activity-logs/");
+    final url = Uri.parse("${baseUrl}activity-logs/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(

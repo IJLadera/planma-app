@@ -91,6 +91,16 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    String? profilePictureUrl = context.watch<UserProfileProvider>().profilePicture;
+
+    // Ensure the URL is absolute
+    String getFullImageUrl(String? url) {
+      if (url == null || url.isEmpty) return '';
+      return url.startsWith('http') ? url : 'http://127.0.0.1:8000$url';
+    }
+
+    String profilePictureFullUrl = getFullImageUrl(profilePictureUrl);
+    
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -106,9 +116,14 @@ class _DashboardState extends State<Dashboard> {
         elevation: 2,
         actions: [
           IconButton(
-            icon: const CircleAvatar(
+            icon: CircleAvatar(
               backgroundColor: Colors.yellow,
-              child: Icon(Icons.person, color: Colors.black),
+              backgroundImage: profilePictureFullUrl.isNotEmpty
+                  ? NetworkImage(profilePictureFullUrl) 
+                  : null,
+              child: profilePictureUrl == null || profilePictureUrl.isEmpty
+                  ? Icon(Icons.person, color: Colors.black)
+                  : null,
             ),
             onPressed: () {
               Navigator.push(

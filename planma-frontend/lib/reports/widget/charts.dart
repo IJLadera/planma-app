@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:planma_app/reports/widget/class.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TaskCharts extends StatelessWidget {
   final bool isLoading;
+  final String timeFilter;
+  final DateTime selectedDate;
   final List<TaskTimeSpent> taskTimeSpent;
   final List<TaskTimeDistribution> taskTimeDistribution;
   final List<FinishedTask> taskFinished;
@@ -11,108 +15,185 @@ class TaskCharts extends StatelessWidget {
   const TaskCharts({
     super.key,
     required this.isLoading,
+    required this.timeFilter,
+    required this.selectedDate,
     required this.taskTimeSpent,
     required this.taskTimeDistribution,
     required this.taskFinished,
   });
 
+  List<String> generateXAxisLabels() {
+    // DateTime now = DateTime.now();
+    switch (timeFilter) {
+      case 'Day':
+        return [DateFormat('yyyy-MM-dd').format(selectedDate)];
+      case 'Week':
+        return List.generate(7, (index) {
+          DateTime day = selectedDate
+              .subtract(Duration(days: selectedDate.weekday - 1))
+              .add(Duration(days: index));
+          return DateFormat('EEE').format(day);
+        });
+      case 'Month':
+        int daysInMonth =
+            DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
+        return List.generate(
+            daysInMonth, (index) => (index + 1).toString().padLeft(2, '0'));
+      case 'Semester':
+        return ['H1', 'H2']; // Adjust based on semester
+      case 'Year':
+        return [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec'
+        ];
+      default:
+        return [];
+    }
+  }
+
+  List<TaskTimeSpent> fillMissingData(List<String> labels) {
+    Map<String, TaskTimeSpent> mappedData = {
+      for (var item in taskTimeSpent) item.day: item
+    };
+
+    double totalTimeSpent =
+        taskTimeSpent.isNotEmpty ? taskTimeSpent.first.totalTimeSpent : 0;
+
+    return labels.map((label) {
+      return mappedData[label] ?? TaskTimeSpent(label, 0, totalTimeSpent);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<String> xAxisLabels = generateXAxisLabels();
+    List<TaskTimeSpent> filledData = fillMissingData(xAxisLabels);
+
     return Column(
       children: [
         // Time Spent on Tasks Chart
-        ChartContainer(
+        ChartContainer2(
           title: 'Time Spent on Tasks',
           isLoading: isLoading,
+          subtitle: "Total Time Spent:",
+          subtitleValue:
+              "${filledData.isNotEmpty ? filledData.first.totalTimeSpent : 0} mins",
           child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(),
-            primaryYAxis: NumericAxis(
-              title: AxisTitle(text: 'Minutes'),
-              minimum: 0,
-              maximum: 50,
-              interval: 10,
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
             ),
-            series: <CartesianSeries>[
+            primaryYAxis: NumericAxis(
+              // title: AxisTitle(text: 'Minutes'),
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+              minimum: 0,
+              maximum: filledData
+                      .map((e) => e.minutes)
+                      .reduce((a, b) => a > b ? a : b) +
+                  10,
+            ),
+            series: <CartesianSeries<TaskTimeSpent, String>>[
               ColumnSeries<TaskTimeSpent, String>(
-                dataSource: taskTimeSpent,
+                dataSource: filledData,
                 xValueMapper: (TaskTimeSpent data, _) => data.day,
                 yValueMapper: (TaskTimeSpent data, _) => data.minutes,
                 color: Colors.blueGrey,
-                name: 'Time Spent',
               ),
             ],
-            legend: Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              alignment: ChartAlignment.center,
-              orientation: LegendItemOrientation.horizontal,
-              iconHeight: 15,
-              iconWidth: 15,
-              textStyle: TextStyle(fontSize: 14, color: Colors.black),
-            ),
           ),
         ),
         SizedBox(height: 16),
 
         // Task Time Distribution Chart
-        ChartContainer(
+        ChartContainer3(
           title: 'Task Time Distribution',
           isLoading: isLoading,
+          list: taskTimeDistribution,
           child: SfCircularChart(
+            margin: EdgeInsets.zero,
+            palette: <Color>[
+              Colors.red.shade400,
+              Colors.blue,
+              Colors.green.shade400,
+              Colors.amber,
+              Colors.purpleAccent
+            ],
             series: <CircularSeries>[
               DoughnutSeries<TaskTimeDistribution, String>(
-                dataSource: taskTimeDistribution,
-                xValueMapper: (TaskTimeDistribution data, _) => data.taskName,
+                dataSource: taskTimeDistribution.isNotEmpty
+                    ? taskTimeDistribution
+                    : [TaskTimeDistribution("No Data", 1)],
+                xValueMapper: (TaskTimeDistribution data, _) => data.subName,
                 yValueMapper: (TaskTimeDistribution data, _) => data.percentage,
-                pointColorMapper: (TaskTimeDistribution data, _) => data.color,
-                name: 'Task Time',
-                dataLabelSettings: DataLabelSettings(
-                  isVisible: true,
-                  labelPosition: ChartDataLabelPosition.outside,
-                  connectorLineSettings:
-                      ConnectorLineSettings(type: ConnectorType.curve),
-                ),
+                explodeAll: true,
+                pointColorMapper: (TaskTimeDistribution data, _) =>
+                    data.subName == "No Data" ? Colors.grey.shade300 : null,
               ),
             ],
-            legend: Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              alignment: ChartAlignment.center,
-              orientation: LegendItemOrientation.vertical,
-              iconHeight: 15,
-              iconWidth: 15,
-              textStyle: TextStyle(fontSize: 14, color: Colors.black),
-            ),
           ),
         ),
 
         const SizedBox(height: 16),
 
         // Tasks Finished Chart
-        ChartContainer(
+        ChartContainer2(
           title: 'Tasks Finished',
           isLoading: isLoading,
+          subtitle: "Total Tasks Finished:",
+          subtitleValue:
+              "${taskFinished.isNotEmpty ? taskFinished.first.totalTaskFinished : 0} tasks",
           child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(),
-            primaryYAxis: NumericAxis(title: AxisTitle(text: 'Tasks')),
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+              minimum: 0,
+              maximum: (taskFinished.isNotEmpty) ? null : 2,
+              interval:
+                  (taskFinished.isNotEmpty && taskFinished.length > 10) ? 5 : 1,
+            ),
             series: <CartesianSeries>[
               ColumnSeries<FinishedTask, String>(
                 dataSource: taskFinished,
-                xValueMapper: (FinishedTask data, _) => data.taskName,
+                xValueMapper: (FinishedTask data, _) => data.subName,
                 yValueMapper: (FinishedTask data, _) => data.count,
                 color: Colors.blueGrey,
-                name: 'Finished Tasks', // Set name for legend
               ),
             ],
-            legend: Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              alignment: ChartAlignment.center,
-              orientation: LegendItemOrientation.horizontal,
-              iconHeight: 15,
-              iconWidth: 15,
-              textStyle: TextStyle(fontSize: 14, color: Colors.black),
-            ),
           ),
         ),
       ],
@@ -138,73 +219,64 @@ class EventCharts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, Color> colorMap1 = {
+      "Attended": Colors.green.shade400,
+      "Did Not Attend": Colors.red.shade400,
+      "No Data": Colors.grey.shade300,
+    };
+
+    final Map<String, Color> colorMap2 = {
+      "Academic": Color(0xFFFBC62F),
+      "Personal": Color(0xFF00C7F2),
+      "No Data": Colors.grey.shade300,
+    };
+
     return Column(
       children: [
-        ChartContainer(
+        ChartContainer4(
           title: 'Attendance Summary',
           isLoading: isLoading,
+          list: eventAttendanceSummary,
+          colorMap: colorMap1,
           child: SfCircularChart(
+            margin: EdgeInsets.zero,
             series: <CircularSeries>[
-              DoughnutSeries<EventAttendancecSummary, String>(
-                dataSource: eventAttendanceSummary,
+              PieSeries<EventAttendancecSummary, String>(
+                dataSource: eventAttendanceSummary.isNotEmpty
+                    ? eventAttendanceSummary
+                    : [EventAttendancecSummary("No Data", 1)],
                 xValueMapper: (EventAttendancecSummary data, _) =>
                     data.attendance,
                 yValueMapper: (EventAttendancecSummary data, _) =>
                     data.attendanceCount,
                 pointColorMapper: (EventAttendancecSummary data, _) =>
-                    data.color,
-                dataLabelSettings: DataLabelSettings(
-                  isVisible: true, // Display data labels on segments
-                  labelPosition: ChartDataLabelPosition.outside,
-                  connectorLineSettings:
-                      ConnectorLineSettings(type: ConnectorType.curve),
-                ),
+                    colorMap1[data.attendance],
               ),
             ],
-            legend: Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              itemPadding: 10,
-              alignment: ChartAlignment.center,
-              orientation: LegendItemOrientation.horizontal,
-              iconHeight: 15,
-              iconWidth: 15,
-              textStyle: TextStyle(fontSize: 14, color: Colors.black),
-            ),
           ),
         ),
         SizedBox(height: 16),
 
         // Event Time Distribution Chart
-        ChartContainer(
+        ChartContainer4(
           title: 'Event Type Distribution',
           isLoading: isLoading,
+          list: eventTypeDistribution,
+          colorMap: colorMap2,
           child: SfCircularChart(
+            margin: EdgeInsets.only(),
             series: <CircularSeries>[
-              DoughnutSeries<EventTypeDistribution, String>(
-                dataSource: eventTypeDistribution,
+              PieSeries<EventTypeDistribution, String>(
+                dataSource: eventTypeDistribution.isNotEmpty
+                    ? eventTypeDistribution
+                    : [EventTypeDistribution("No Data", 1)],
                 xValueMapper: (EventTypeDistribution data, _) => data.eventType,
                 yValueMapper: (EventTypeDistribution data, _) =>
                     data.attendanceCount,
-                pointColorMapper: (EventTypeDistribution data, _) => data.color,
-                dataLabelSettings: DataLabelSettings(
-                  isVisible: true, // Display data labels on segments
-                  labelPosition: ChartDataLabelPosition.outside,
-                  connectorLineSettings:
-                      ConnectorLineSettings(type: ConnectorType.curve),
-                ),
+                pointColorMapper: (EventTypeDistribution data, _) =>
+                    colorMap2[data.eventType],
               ),
             ],
-            legend: Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              itemPadding: 10,
-              alignment: ChartAlignment.center,
-              orientation: LegendItemOrientation.horizontal,
-              iconHeight: 15,
-              iconWidth: 15,
-              textStyle: TextStyle(fontSize: 14, color: Colors.black),
-            ),
           ),
         ),
         SizedBox(height: 16),
@@ -214,37 +286,62 @@ class EventCharts extends StatelessWidget {
           title: 'Attendance Distribution',
           isLoading: isLoading,
           child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(),
-            primaryYAxis: NumericAxis(
-              minimum: 0,
-              maximum: 10,
-              interval: 2,
-              title: AxisTitle(text: 'Count'),
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
             ),
-            legend: Legend(isVisible: true),
-            tooltipBehavior: TooltipBehavior(enable: true),
+            primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+              minimum: 0,
+              maximum: (eventAttendanceDistribution.isNotEmpty) ? null : 2,
+              interval: eventAttendanceDistribution.isNotEmpty &&
+                      eventAttendanceDistribution
+                              .map((e) => e.attendedCount > e.didNotAttendCount
+                                  ? e.attendedCount
+                                  : e.didNotAttendCount)
+                              .reduce((a, b) => a > b ? a : b) >
+                          10
+                  ? 5
+                  : 1,
+            ),
+            legend: Legend(
+              isVisible: true, 
+              position: LegendPosition.bottom, 
+              textStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
             series: <CartesianSeries>[
               ColumnSeries<EventAttendanceDistribution, String>(
-                name: 'Academic',
+                name: 'Attended',
                 dataSource: eventAttendanceDistribution,
                 xValueMapper: (EventAttendanceDistribution data, _) =>
                     data.category,
                 yValueMapper: (EventAttendanceDistribution data, _) =>
-                    data.academicCount,
+                    data.attendedCount,
                 color: Color(0xFF32C652),
-                dataLabelSettings:
-                    DataLabelSettings(isVisible: true), // Display data labels
               ),
               ColumnSeries<EventAttendanceDistribution, String>(
-                name: 'Personal',
+                name: 'Did Not Attend',
                 dataSource: eventAttendanceDistribution,
                 xValueMapper: (EventAttendanceDistribution data, _) =>
                     data.category,
                 yValueMapper: (EventAttendanceDistribution data, _) =>
-                    data.personalCount,
+                    data.didNotAttendCount,
                 color: Color(0xFFEF4738),
-                dataLabelSettings:
-                    DataLabelSettings(isVisible: true), // Display data labels
               ),
             ],
           ),
@@ -270,70 +367,78 @@ class ClassScheduleCharts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, Color> colorMap = {
+      "Attended": Colors.green.shade400,
+      "Excused": Colors.blue.shade600,
+      "Did Not Attend": Colors.red.shade400,
+    };
+
     return Column(
       children: [
-        Align(
-          alignment: Alignment.centerLeft, // Aligns the text to the start
-          child: Text(
-            'Class Schedules',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(height: 16),
-        ChartContainer(
+        // Align(
+        //   alignment: Alignment.centerLeft, // Aligns the text to the start
+        //   child: Text(
+        //     'Class Schedules',
+        //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        //   ),
+        // ),
+        // SizedBox(height: 16),
+        ChartContainer4(
           title: 'Attendance Summary',
           isLoading: isLoading,
+          list: classAttendanceSummary,
+          colorMap: colorMap,
           child: SfCircularChart(
+            margin: EdgeInsets.zero,
             series: <CircularSeries>[
-              DoughnutSeries<ClassAttendanceSummary, String>(
+              PieSeries<ClassAttendanceSummary, String>(
                 dataSource: classAttendanceSummary,
                 xValueMapper: (ClassAttendanceSummary data, _) => data.category,
                 yValueMapper: (ClassAttendanceSummary data, _) =>
-                    data.percentage,
+                    data.count,
                 pointColorMapper: (ClassAttendanceSummary data, _) =>
-                    data.color,
-                dataLabelSettings: const DataLabelSettings(
-                  isVisible: true,
-                  labelPosition: ChartDataLabelPosition.outside,
-                  connectorLineSettings:
-                      ConnectorLineSettings(type: ConnectorType.curve),
-                ),
+                    colorMap[data.category],
               )
             ],
-            legend: Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              itemPadding: 10,
-              alignment: ChartAlignment.center,
-              orientation: LegendItemOrientation.horizontal,
-              iconHeight: 15,
-              iconWidth: 15,
-              textStyle: TextStyle(fontSize: 14, color: Colors.black),
-            ),
           ),
         ),
+        SizedBox(height: 16),
+
         ChartContainer(
             title: 'Attendance Distribution',
             isLoading: isLoading,
             child: SfCartesianChart(
-              primaryXAxis: CategoryAxis(),
-              primaryYAxis: NumericAxis(
-                minimum: 0,
-                maximum: 6,
-                interval: 2,
-              ),
-              legend: Legend(isVisible: true),
-              tooltipBehavior: TooltipBehavior(enable: true),
-              series: <CartesianSeries>[
-                ColumnSeries<ClassAttendanceDistribution, String>(
-                  name: 'Did Not Attend',
-                  dataSource: classAttendanceDistribution,
-                  xValueMapper: (ClassAttendanceDistribution data, _) =>
-                      data.subject,
-                  yValueMapper: (ClassAttendanceDistribution data, _) =>
-                      data.didNotAttend,
-                  color: Color(0xFFEF4738),
+              primaryXAxis: CategoryAxis(
+                labelPlacement: LabelPlacement.betweenTicks,
+                labelAlignment: LabelAlignment.center,
+                majorGridLines: const MajorGridLines(width: 0),
+                interval: 1,
+                labelStyle: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w400,
                 ),
+              ),
+              primaryYAxis: NumericAxis(
+                labelStyle: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w400,
+                ),
+                minimum: 0,
+                maximum: (classAttendanceDistribution.isNotEmpty) ? null : 2,
+                interval: 1,
+              ),
+              legend: Legend(
+                isVisible: true, 
+                position: LegendPosition.bottom,
+                textStyle: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              series: <CartesianSeries>[
                 ColumnSeries<ClassAttendanceDistribution, String>(
                   name: 'Attended',
                   dataSource: classAttendanceDistribution,
@@ -352,6 +457,15 @@ class ClassScheduleCharts extends StatelessWidget {
                       data.excused,
                   color: Color(0xFF3A82EF),
                 ),
+                ColumnSeries<ClassAttendanceDistribution, String>(
+                  name: 'Did Not Attend',
+                  dataSource: classAttendanceDistribution,
+                  xValueMapper: (ClassAttendanceDistribution data, _) =>
+                      data.subject,
+                  yValueMapper: (ClassAttendanceDistribution data, _) =>
+                      data.didNotAttend,
+                  color: Color(0xFFEF4738),
+                ),
               ],
             ))
       ],
@@ -363,49 +477,178 @@ class ClassScheduleCharts extends StatelessWidget {
 
 class ActivitiesChart extends StatelessWidget {
   final bool isLoading;
+  final String timeFilter;
+  final DateTime selectedDate;
   final List<ActivitiesTimeSpent> activitiesTimeSpent;
   final List<ActivitiesDone> activitiesDone;
 
   const ActivitiesChart({
     super.key,
     required this.isLoading,
+    required this.timeFilter,
+    required this.selectedDate,
     required this.activitiesTimeSpent,
     required this.activitiesDone,
   });
 
+  List<String> generateXAxisLabels() {
+    // DateTime now = DateTime.now();
+    switch (timeFilter) {
+      case 'Day':
+        return [DateFormat('yyyy-MM-dd').format(selectedDate)];
+      case 'Week':
+        return List.generate(7, (index) {
+          DateTime day = selectedDate
+              .subtract(Duration(days: selectedDate.weekday - 1))
+              .add(Duration(days: index));
+          return DateFormat('EEE').format(day);
+        });
+      case 'Month':
+        int daysInMonth =
+            DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
+        return List.generate(
+            daysInMonth, (index) => (index + 1).toString().padLeft(2, '0'));
+      case 'Semester':
+        return ['H1', 'H2']; // Adjust based on semester
+      case 'Year':
+        return [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec'
+        ];
+      default:
+        return [];
+    }
+  }
+
+  List<ActivitiesTimeSpent> fillMissingData1(List<String> labels) {
+    Map<String, ActivitiesTimeSpent> mappedData = {
+      for (var item in activitiesTimeSpent) item.day: item
+    };
+
+    double totalTimeSpent = activitiesTimeSpent.isNotEmpty
+        ? activitiesTimeSpent.first.totalTimeSpent
+        : 0;
+
+    return labels.map((label) {
+      return mappedData[label] ?? ActivitiesTimeSpent(label, 0, totalTimeSpent);
+    }).toList();
+  }
+
+  List<ActivitiesDone> fillMissingData2(List<String> labels) {
+    Map<String, ActivitiesDone> mappedData = {
+      for (var item in activitiesDone) item.day: item
+    };
+
+    int totalCount =
+        activitiesDone.isNotEmpty ? activitiesDone.first.totalActivityDone : 0;
+
+    return labels.map((label) {
+      return mappedData[label] ?? ActivitiesDone(label, 0, totalCount);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<String> xAxisLabels = generateXAxisLabels();
+    List<ActivitiesTimeSpent> filledData1 = fillMissingData1(xAxisLabels);
+    List<ActivitiesDone> filledData2 = fillMissingData2(xAxisLabels);
+
     return Column(
       children: [
-        ChartContainer(
+        // Time Spent on Activities Chart
+        ChartContainer2(
           title: 'Time Spent Distribution',
           isLoading: isLoading,
+          subtitle: "Total Time Spent:",
+          subtitleValue:
+              "${filledData1.isNotEmpty ? filledData1.first.totalTimeSpent : 0} mins",
           child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(),
-            primaryYAxis: NumericAxis(minimum: 0, maximum: 50, interval: 10),
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+              minimum: 0,
+              maximum: filledData1
+                      .map((e) => e.minutes)
+                      .reduce((a, b) => a > b ? a : b) +
+                  10,
+            ),
             series: <CartesianSeries>[
               ColumnSeries<ActivitiesTimeSpent, String>(
-                dataSource: activitiesTimeSpent,
+                dataSource: filledData1,
                 xValueMapper: (ActivitiesTimeSpent data, _) => data.day,
                 yValueMapper: (ActivitiesTimeSpent data, _) => data.minutes,
-                color: Color(0xFF537488),
+                color: Colors.blueGrey,
               )
             ],
           ),
         ),
         SizedBox(height: 16),
-        ChartContainer(
+
+        // Activities Done Chart
+        ChartContainer2(
           title: 'Activities Done',
           isLoading: isLoading,
+          subtitle: "Total Activities Done:",
+          subtitleValue:
+              "${filledData2.isNotEmpty ? filledData2.first.totalActivityDone : 0} activities",
           child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(),
-            primaryYAxis: NumericAxis(minimum: 0, maximum: 10, interval: 2),
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+              minimum: 0,
+              maximum: (filledData2.isNotEmpty) ? null : 2,
+              interval: (filledData2.isNotEmpty &&
+                      filledData2
+                              .map((e) => e.numTask)
+                              .reduce((a, b) => a > b ? a : b) >
+                          10)
+                  ? 5
+                  : 1,
+            ),
             series: <CartesianSeries>[
               ColumnSeries<ActivitiesDone, String>(
-                dataSource: activitiesDone,
+                dataSource: filledData2,
                 xValueMapper: (ActivitiesDone data, _) => data.day,
                 yValueMapper: (ActivitiesDone data, _) => data.numTask,
-                color: Color(0xFF537488),
+                color: Colors.blueGrey,
               )
             ],
           ),
@@ -417,45 +660,117 @@ class ActivitiesChart extends StatelessWidget {
 
 class GoalsCharts extends StatelessWidget {
   final bool isLoading;
+  final String timeFilter;
+  final DateTime selectedDate;
   final List<GoalTimeSpent> goalTimeSpent;
 
-  const GoalsCharts(
-      {super.key, required this.isLoading, required this.goalTimeSpent});
+  const GoalsCharts({
+    super.key, 
+    required this.isLoading, 
+    required this.timeFilter,
+    required this.selectedDate,
+    required this.goalTimeSpent,
+  });
+
+  List<String> generateXAxisLabels() {
+    // DateTime now = DateTime.now();
+    switch (timeFilter) {
+      case 'Day':
+        return [DateFormat('yyyy-MM-dd').format(selectedDate)];
+      case 'Week':
+        return List.generate(7, (index) {
+          DateTime day = selectedDate
+              .subtract(Duration(days: selectedDate.weekday - 1))
+              .add(Duration(days: index));
+          return DateFormat('EEE').format(day);
+        });
+      case 'Month':
+        int daysInMonth =
+            DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
+        return List.generate(
+            daysInMonth, (index) => (index + 1).toString().padLeft(2, '0'));
+      case 'Semester':
+        return ['H1', 'H2']; // Adjust based on semester
+      case 'Year':
+        return [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec'
+        ];
+      default:
+        return [];
+    }
+  }
+
+  List<GoalTimeSpent> fillMissingData(List<String> labels) {
+    Map<String, GoalTimeSpent> mappedData = {
+      for (var item in goalTimeSpent) item.day: item
+    };
+
+    // double totalTimeSpent =
+    //     goalTimeSpent.isNotEmpty ? goalTimeSpent.first.totalTimeSpent : 0;
+
+    return labels.map((label) {
+      return mappedData[label] ?? GoalTimeSpent(label, 0);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    List<String> xAxisLabels = generateXAxisLabels();
+    List<GoalTimeSpent> filledData = fillMissingData(xAxisLabels);
+
     return Column(
       children: [
-        ChartContainer(
+        ChartContainer2(
           title: 'Time Spent Distribution',
           isLoading: isLoading,
+          subtitle: "Total Time Spent:",
+          subtitleValue: "No logic yet",
           child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(),
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
             primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
               minimum: 0,
-              maximum: 50,
-              interval: 10,
+              maximum: filledData
+                      .map((e) => e.minutes)
+                      .reduce((a, b) => a > b ? a : b) +
+                  10,
             ),
             series: <CartesianSeries>[
               ColumnSeries<GoalTimeSpent, String>(
-                dataSource: goalTimeSpent,
+                dataSource: filledData,
                 xValueMapper: (GoalTimeSpent data, _) => data.day,
                 yValueMapper: (GoalTimeSpent data, _) => data.minutes,
                 color: Colors.blueGrey,
-                name: 'Time Spent',
               ),
             ],
-            legend: Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              alignment: ChartAlignment.center,
-              orientation: LegendItemOrientation.horizontal,
-              iconHeight: 15,
-              iconWidth: 15,
-              textStyle: TextStyle(fontSize: 14, color: Colors.black),
-            ),
           ),
         ),
+        SizedBox(height: 16),
       ],
     );
   }
@@ -463,68 +778,165 @@ class GoalsCharts extends StatelessWidget {
 
 class SleepCharts extends StatelessWidget {
   final bool isLoading;
+  final String timeFilter;
+  final DateTime selectedDate;
   final List<SleepDuration> sleepDuration;
+  final List<SleepRegularity> sleepRegularity;
 
-  const SleepCharts({super.key, required this.isLoading, required this.sleepDuration});
+  const SleepCharts({
+    super.key,
+    required this.isLoading,
+    required this.timeFilter,
+    required this.selectedDate,
+    required this.sleepDuration,
+    required this.sleepRegularity,
+  });
+
+  List<String> generateXAxisLabels() {
+    // DateTime now = DateTime.now();
+    switch (timeFilter) {
+      case 'Day':
+        return [DateFormat('yyyy-MM-dd').format(selectedDate)];
+      case 'Week':
+        return List.generate(7, (index) {
+          DateTime day = selectedDate
+              .subtract(Duration(days: selectedDate.weekday - 1))
+              .add(Duration(days: index));
+          return DateFormat('EEE').format(day);
+        });
+      case 'Month':
+        int daysInMonth =
+            DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
+        return List.generate(
+            daysInMonth, (index) => (index + 1).toString().padLeft(2, '0'));
+      case 'Semester':
+        return ['H1', 'H2']; // Adjust based on semester
+      case 'Year':
+        return [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec'
+        ];
+      default:
+        return [];
+    }
+  }
+
+  List<SleepDuration> fillMissingData(List<String> labels) {
+    Map<String, SleepDuration> mappedData = {
+      for (var item in sleepDuration) item.day: item
+    };
+
+    double averageHours =
+        sleepDuration.isNotEmpty ? sleepDuration.first.averageHours : 0;
+
+    return labels.map((label) {
+      return mappedData[label] ?? SleepDuration(label, 0, averageHours);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    List<String> xAxisLabels = generateXAxisLabels();
+    List<SleepDuration> filledData = fillMissingData(xAxisLabels);
+
     return Column(
       children: [
-        ChartContainer(
+        // Sleep Duration Chart
+        ChartContainer2(
           title: 'Sleep Duration',
           isLoading: isLoading,
+          subtitle: "Average Sleep Duration",
+          subtitleValue:
+              "${filledData.isNotEmpty ? filledData.first.averageHours : 0} hours",
           child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(),
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
             primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
               minimum: 0,
-              maximum: 10,
-              interval: 2,
+              maximum: (filledData.isNotEmpty) ? null : 2,
             ),
             series: <CartesianSeries>[
               ColumnSeries<SleepDuration, String>(
-                dataSource: sleepDuration,
+                dataSource: filledData,
                 xValueMapper: (SleepDuration data, _) => data.day,
                 yValueMapper: (SleepDuration data, _) => data.hours,
-                color: Color(0xFF537488),
-                name: 'Time Spent',
+                color: Colors.blueGrey,
               ),
             ],
           ),
         ),
         SizedBox(height: 16),
         ChartContainer(
-          title: 'Sleep Regularly',
+          title: 'Sleep Regularity',
           isLoading: isLoading,
           child: SfCartesianChart(
             plotAreaBorderWidth: 0,
             primaryXAxis: CategoryAxis(
-              labelStyle: const TextStyle(
-                fontSize: 12,
-              ),
               majorGridLines: const MajorGridLines(width: 0),
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
             ),
             primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
               labelFormat: '{value}:00',
-              minimum: 0,
-              maximum: 24,
-              interval: 4,
+              minimum: 20, // To allow proper wrap around (20 → 0 → 4)
+              maximum: 32, // 20:00 acts as the reference point
+              interval: 2,
               majorGridLines: const MajorGridLines(width: 0.5),
               axisLine: const AxisLine(width: 0),
             ),
             series: <CartesianSeries>[
-              ColumnSeries<SleepDuration, String>(
-                dataSource: sleepDuration,
-                xValueMapper: (SleepDuration data, _) => data.day,
-                yValueMapper: (SleepDuration data, _) => data.hours,
+              RangeColumnSeries<SleepRegularity, String>(
+                dataSource: sleepRegularity,
+                xValueMapper: (SleepRegularity data, _) => data.day,
+                lowValueMapper: (SleepRegularity data, _) =>
+                    _wrapTime(data.startTime),
+                highValueMapper: (SleepRegularity data, _) =>
+                    _wrapTime(data.endTime),
                 borderRadius: const BorderRadius.all(Radius.circular(4)),
                 width: 0.5,
                 color: Colors.blueGrey,
               )
             ],
           ),
-        ),
+        )
       ],
     );
+  }
+
+  /// Wraps time so that values from midnight (0:00 to 8:00) are displayed correctly.
+  double _wrapTime(double time) {
+    return (time < 20) ? time + 24 : time;
   }
 }
