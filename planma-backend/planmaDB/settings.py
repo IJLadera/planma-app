@@ -12,7 +12,20 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv
+from celery.schedules import crontab
+import environ
 import os
+
+load_dotenv()
+
+env = environ.Env(
+    # Set casting and default values if needed
+    DB_PORT=(int, 5432),  # Cast DB_PORT to int, default to 5432
+)
+
+# Read .env file (if it exists)
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,12 +53,17 @@ AUTH_USER_MODEL = "api.CustomUser"
 # Application definition
 
 INSTALLED_APPS = [
-    
+    'daphne',
+    'channels',
+    'channels_redis',
     'rest_framework',
     'rest_framework_simplejwt',
     'djoser',
     'corsheaders',
-    'api.apps.ApiConfig',
+    'django_celery_beat',
+
+    # 'api.apps.ApiConfig',
+    'api',
     
     'django_extensions',
     'django.contrib.admin',
@@ -54,8 +72,28 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
 ]
+
+WSGI_APPLICATION = 'planmaDB.wsgi.application'
+# Use ASGI instead of WSGI
+ASGI_APPLICATION = 'planmaDB.asgi.application'
+
+# Redis as channel layer (make sure Redis is installed and running)
+CHANNEL_LAYERS = {
+    'default': {
+        # 'BACKEND': 'channels_redis.core.InMemoryChannelLayer', 
+        # For production, use Redis:
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+        'CONFIG': {
+            # "hosts": [('127.0.0.1', 6379)],
+            # "hosts": [('localhost', 6379)],
+            "hosts": [("redis://127.0.0.1:6379/0")],
+        },
+    },
+}
 
 
 DJOSER = {
@@ -67,8 +105,6 @@ DJOSER = {
         # 'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     }
 }
-
-
 
 REST_FRAMEWORK={
     'DEFAULT_PERMISSION_CLASSES': (
@@ -89,8 +125,6 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'student_id',
     'USER_ID_CLAIM': 'user_id',
 }
-
-
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -122,8 +156,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'planmaDB.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -140,19 +172,10 @@ DATABASES = {
 }
 
 
-
-
-
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:52667",  # or whatever port your Flutter app uses
 #     "http://127.0.0.1:8000",  # also add this if needed
 # ]
-
-
-CORS_ORIGIN_ALLOW_ALL = True
-
-
-CORS_ALLOW_CREDENTIALS = True
 
 
 
@@ -181,7 +204,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Manila'
 
 USE_I18N = True
 
@@ -200,3 +224,48 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = 'Asia/Manila'
+CELERY_WORKER_POOL = 'solo'
+CELERY_WORKER_CONCURRENCY = 4
+CELERY_TASK_ANNOTATIONS = {
+    
+}
+
+CELERY_BEAT_SCHEDULE = {
+    'check-reminders-every-minute': {
+        'task': 'api.tasks.send_all_reminders',
+        'schedule': crontab(minute='*'),  # Every minute
+    }
+}
+
+# settings.py
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.channels': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
+    },
+}
+
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True

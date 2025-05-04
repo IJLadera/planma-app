@@ -4,6 +4,18 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from .models import CustomUser
 from django.db.models import Q
 from django.db import transaction
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+# Overriding the serializers
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        # Add user_id to response
+        # print('Responsess')
+        # print(self.user.student_id)
+        data['student_id'] = self.user.student_id
+        return data
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
