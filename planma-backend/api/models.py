@@ -79,6 +79,9 @@ class CustomEvents(models.Model):
         related_name='events', db_column="student_id"
     )
 
+    # New attribute for tracking reminder
+    reminder_sent = models.BooleanField(default=False)
+
     def delete(self, *args, **kwargs):
         # Manually delete related ScheduleEntry before deleting this task
         ScheduleEntry.objects.filter(category_type='Event', reference_id=self.event_id).delete()
@@ -125,6 +128,9 @@ class CustomActivity(models.Model):
         related_name='activity', db_column='student_id'
     )
 
+    # New attribute for tracking reminder
+    reminder_sent = models.BooleanField(default=False)
+
     def delete(self, *args, **kwargs):
         # Manually delete related ScheduleEntry before deleting this task
         ScheduleEntry.objects.filter(category_type='Activity', reference_id=self.activity_id).delete()
@@ -167,8 +173,11 @@ class UserPref(models.Model):
         db_index=True
     )
 
+    # New field to track the last sleep reminder date
+    last_sleep_reminder_date = models.DateField(null=True, blank=True)
+
     def __str__(self):
-        return f"User Preferences for {self.student_id.username}"
+        return f"User Preferences for {self.student_id.username} | Student ID: {self.student_id.student_id}"
 
     def clean(self):
         if self.usual_sleep_time >= self.usual_wake_time:
@@ -267,6 +276,9 @@ class CustomClassSchedule(models.Model):
         related_name='scheduled_classes', db_column='student_id'
     )
 
+    # Added this field to track send reminders for class schedules.
+    last_reminder_date = models.DateField(null=True, blank=True)
+
     class Meta:
         unique_together = ('subject', 'day_of_week', 'scheduled_start_time', 'scheduled_end_time', 'room', 'student_id')
 
@@ -329,6 +341,14 @@ class CustomTask(models.Model):
         related_name='tasks', db_column="student_id"
     )
 
+    """
+    Added reminder set:
+    This approach will check all users' tasks on every run of the scheduled task. 
+    If your application has many users, you might want to consider more advanced 
+    scheduling approaches, but this should work for a moderate number of users.
+    """
+    reminder_sent = models.BooleanField(default=False)
+
     def delete(self, *args, **kwargs):
         # Manually delete related ScheduleEntry before deleting this task
         ScheduleEntry.objects.filter(category_type='Task', reference_id=self.task_id).delete()
@@ -388,6 +408,9 @@ class Goals(models.Model):
         null=True,
         blank=True
     ) 
+
+    # New field for tracking reminders
+    last_reminder_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.goal_name

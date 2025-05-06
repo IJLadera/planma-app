@@ -10,10 +10,22 @@ from djoser.views import UserViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.timezone import make_aware, now
 
+from django.http import JsonResponse
+from datetime import datetime, timedelta
+
+# views.py
+# from djoser.views import TokenCreateView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from api.models import CustomUser
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 class ActivityViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]

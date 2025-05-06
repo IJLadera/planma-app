@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/logout_service.dart';
-import 'package:planma_app/authentication/log_in.dart';
+import 'package:planma_app/features/authentication/presentation/pages/log_in_page.dart';
 
 class CustomWidget {
   static Widget buildTimePickerField({
@@ -101,7 +101,7 @@ class CustomWidget {
     // Successful logout, navigate to login screen
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LogIn()),
+      MaterialPageRoute(builder: (context) => LogInPage()),
     );
 
     // if (response != null && response["error"] == null) {

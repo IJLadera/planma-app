@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:planma_app/Providers/user_provider.dart';
+import 'package:planma_app/features/authentication/presentation/providers/user_provider.dart';
 import 'package:planma_app/reports/reportservice.dart';
 import 'package:provider/provider.dart';
 import 'package:jwt_decode/jwt_decode.dart';

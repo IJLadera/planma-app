@@ -24,13 +24,13 @@ class ClassSchedule {
   // Factory method to create an instance from JSON
   factory ClassSchedule.fromJson(Map<String, dynamic> json) {
     return ClassSchedule(
-      classschedId: json['classsched_id'] as int?, 
+      classschedId: json['classsched_id'] as int?,
       subjectId: json['subject']['subject_id'] as int?,
-      subjectCode: json['subject']['subject_code'] ?? 'N/A', 
+      subjectCode: json['subject']['subject_code'] ?? 'N/A',
       subjectTitle: json['subject']['subject_title'] ?? 'N/A',
       semesterId: json['subject']['semester_id'] != null
-        ? json['subject']['semester_id']['semester_id'] ?? 0
-        : 0,
+          ? json['subject']['semester_id']['semester_id'] ?? 0
+          : 0,
       dayOfWeek: json['day_of_week'] ?? 'Unknown',
       scheduledStartTime: json['scheduled_start_time'] ?? '00:00',
       scheduledEndTime: json['scheduled_end_time'] ?? '00:00',
