@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
 import 'package:mime/mime.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfileProvider with ChangeNotifier {
@@ -26,13 +25,24 @@ class UserProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  UserProfileProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   // Fetch user profile
   Future<void> fetchUserProfile() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${baseUrl}users/me/");
+    final url = Uri.parse("${_baseApiUrl}/users/me/");
 
     try {
       final response = await http.get(
@@ -61,12 +71,10 @@ class UserProfileProvider with ChangeNotifier {
 
   // Update user profile
   Future<void> updateUserProfile(
-      String firstName, 
-      String lastName, 
-      String username,
+      String firstName, String lastName, String username,
       {XFile? imageFile}) async {
-    final url = Uri.parse("${baseUrl}users/update_profile/");
-    
+    final url = Uri.parse("${_baseApiUrl}users/update_profile/");
+
     try {
       var request = http.MultipartRequest("PUT", url);
       request.headers['Authorization'] = 'Bearer $_accessToken';
@@ -82,8 +90,8 @@ class UserProfileProvider with ChangeNotifier {
         if (kIsWeb) {
           print("bangpusi");
           Uint8List? bytes = await imageFile.readAsBytes();
-          String fileName = imageFile.name.isNotEmpty 
-              ? imageFile.name 
+          String fileName = imageFile.name.isNotEmpty
+              ? imageFile.name
               : "profile.jpg"; // Default name if missing
           String mimeType = lookupMimeType(imageFile.name) ?? 'image/jpeg';
 
@@ -93,8 +101,7 @@ class UserProfileProvider with ChangeNotifier {
           request.files.add(http.MultipartFile.fromBytes(
             'profile_picture',
             bytes,
-            filename: fileName, 
-            
+            filename: fileName,
           ));
         } else {
           if (!File(imageFile.path).existsSync()) {
@@ -103,9 +110,7 @@ class UserProfileProvider with ChangeNotifier {
           print("bangdik");
 
           request.files.add(await http.MultipartFile.fromPath(
-            'profile_picture', 
-            imageFile.path
-          ));
+              'profile_picture', imageFile.path));
         }
       }
 
@@ -124,10 +129,12 @@ class UserProfileProvider with ChangeNotifier {
         _firstName = data['firstname'];
         _lastName = data['lastname'];
         _username = data['username'];
-        _profilePicture = data['profile_picture']; // Update stored profile picture
+        _profilePicture =
+            data['profile_picture']; // Update stored profile picture
         notifyListeners();
       } else {
-        throw Exception('Failed to update profile. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to update profile. Status Code: ${response.statusCode}');
       }
     } catch (error) {
       rethrow;

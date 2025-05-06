@@ -8,11 +8,8 @@ import 'package:planma_app/goals/widget/widget.dart';
 
 class EditGoalSession extends StatefulWidget {
   final GoalSchedule session;
-  
-  const EditGoalSession({
-    super.key,
-    required this.session
-  });
+
+  const EditGoalSession({super.key, required this.session});
 
   @override
   State<EditGoalSession> createState() => _EditGoalSessionState();
@@ -93,7 +90,8 @@ class _EditGoalSessionState extends State<EditGoalSession> {
   @override
   void initState() {
     super.initState();
-    _goalNameController = TextEditingController(text: widget.session.goal?.goalName);
+    _goalNameController =
+        TextEditingController(text: widget.session.goal?.goalName);
     _startTimeController = TextEditingController(
         text: _formatTimeForDisplay(widget.session.scheduledStartTime));
     _endTimeController = TextEditingController(
@@ -174,12 +172,11 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     try {
       print('Starting to update goal schedule...');
       await provider.updateGoalSchedule(
-        goalScheduleId: widget.session.goalScheduleId!, 
-        goalId: widget.session.goal!.goalId!, 
-        scheduledDate: _scheduledDate!, 
-        startTime: startTime, 
-        endTime: endTime
-      );
+          goalScheduleId: widget.session.goalScheduleId!,
+          goalId: widget.session.goal!.goalId!,
+          scheduledDate: _scheduledDate!,
+          startTime: startTime,
+          endTime: endTime);
 
       // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
@@ -197,8 +194,11 @@ class _EditGoalSessionState extends State<EditGoalSession> {
       if (error.toString().contains('Scheduling overlap')) {
         errorMessage =
             'Scheduling overlap: This time slot is already occupied.';
-      } else if (error.toString().contains('Duplicate goal schedule entry detected')) {
-        errorMessage = 'Duplicate goal schedule entry: This goal schedule already exists.';
+      } else if (error
+          .toString()
+          .contains('Duplicate goal schedule entry detected')) {
+        errorMessage =
+            'Duplicate goal schedule entry: This goal schedule already exists.';
       } else {
         errorMessage = 'Failed to update goal schedule: $error';
       }
@@ -246,7 +246,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
                   _buildTitle('Goal Name'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                    _goalNameController, 
+                    _goalNameController,
                     'Goal Name',
                     readOnly: true,
                   ),
@@ -295,7 +295,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
               ),
               child: Text(
                 'Edit Goal Session',

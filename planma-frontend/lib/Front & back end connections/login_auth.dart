@@ -8,31 +8,29 @@ class AuthLogin {
     required String email,
     required String password,
   }) async {
-    final url = "${baseUrl}auth/jwt/create/"; 
+    final url = "${baseUrl}auth/jwt/create/";
 
-  try {
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": email,  // Ensure you're sending the correct key (username instead of email if needed)
-        "password": password
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email":
+              email, // Ensure you're sending the correct key (username instead of email if needed)
+          "password": password
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      jsonDecode(response.body);
-      
+      if (response.statusCode == 200) {
+        jsonDecode(response.body);
 
-      return jsonDecode(response.body); // Assuming JWT token is returned here
-    } else {
-      (response.body.toString());
-      return {
-        "error": jsonDecode(response.body) ?? "Failed to login"
-      };
+        return jsonDecode(response.body); // Assuming JWT token is returned here
+      } else {
+        (response.body.toString());
+        return {"error": jsonDecode(response.body) ?? "Failed to login"};
+      }
+    } catch (e) {
+      return {"error": "An error occurred: ${e.toString()}"};
     }
-  } catch (e) {
-    return {"error": "An error occurred: ${e.toString()}"};
   }
-}
 }

@@ -13,6 +13,7 @@ import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/timer/timer_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:planma_app/timer/widget/widget.dart';
 
 class TimerWidget extends StatefulWidget {
   final Color themeColor;
@@ -47,7 +48,9 @@ class _TimerWidgetState extends State<TimerWidget> {
             endTime = widget.record.usualWakeTime;
             print("Sleep Clock Detected");
             break;
-          case ClockContextType.task || ClockContextType.activity || ClockContextType.goal:
+          case ClockContextType.task ||
+                ClockContextType.activity ||
+                ClockContextType.goal:
             print("Record: ${jsonEncode(widget.record)}");
             startTime = widget.record.scheduledStartTime;
             endTime = widget.record.scheduledEndTime;
@@ -55,7 +58,8 @@ class _TimerWidgetState extends State<TimerWidget> {
             break;
         }
         timerProvider.setInitialTimeFromRecord(
-          startTime!, endTime!,
+          startTime!,
+          endTime!,
         );
       }
     });
@@ -215,20 +219,24 @@ class _TimerWidgetState extends State<TimerWidget> {
                 onPressed: () async {
                   await Future.microtask(() {
                     timerProvider.saveTimeSpent(
-                      clockContext: widget.clockContext,
-                      record: widget.record,
-                      sleepLogProvider: sleepLogProvider,
-                      taskTimeLogProvider: taskTimeLogProvider,
-                      activityTimeLogProvider: activityTimeLogProvider,
-                      goalProgressProvider: goalProgressProvider,
-                      taskProvider: taskProvider,
-                      activityProvider: activityProvider,
-                      goalScheduleProvider: goalScheduleProvider
-                    ); // Save time spent
+                        clockContext: widget.clockContext,
+                        record: widget.record,
+                        sleepLogProvider: sleepLogProvider,
+                        taskTimeLogProvider: taskTimeLogProvider,
+                        activityTimeLogProvider: activityTimeLogProvider,
+                        goalProgressProvider: goalProgressProvider,
+                        taskProvider: taskProvider,
+                        activityProvider: activityProvider,
+                        goalScheduleProvider:
+                            goalScheduleProvider); // Save time spent
                   });
+                  final formattedDuration =
+                      _formatTime(timerProvider.remainingTime);
+
                   timerProvider.resetTimer();
                   safePop(context); // Close dialog after saving
                   safePop(context); // Close Clock Screen after saving
+                  CustomWidgets.showTimerSavedPopup(context, formattedDuration);
                 },
                 child: Text(
                   'Save',

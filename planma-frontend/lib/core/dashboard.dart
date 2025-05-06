@@ -8,6 +8,7 @@ import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
+import 'package:planma_app/Providers/web_socket_provider.dart';
 import 'package:planma_app/activities/activity_page.dart';
 import 'package:planma_app/core/widget/button_sheet.dart';
 import 'package:planma_app/core/widget/menu_button.dart';
@@ -15,6 +16,7 @@ import 'package:planma_app/event/event_page.dart';
 import 'package:planma_app/goals/goal_page.dart';
 import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/reports/report_page.dart';
+import 'package:planma_app/services/v1_web_socket_service.dart';
 import 'package:planma_app/subject/subject_page.dart';
 import 'package:planma_app/task/task_page.dart';
 import 'package:planma_app/timer/clock.dart';
@@ -22,6 +24,7 @@ import 'package:planma_app/timetable/calendar.dart';
 import 'package:planma_app/user_profiile/user_page.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/widgets/reminder_notification.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -42,6 +45,10 @@ class _DashboardState extends State<Dashboard> {
     final classScheduleProvider =
         Provider.of<ClassScheduleProvider>(context, listen: false);
 
+    // final socketService = Provider.of<WebSocketService>(context, listen: false);
+    // socketService.disconnect();  // Disconnect WebSocket when widget is disposed
+    // super.dispose();
+    
     semesterProvider.fetchSemesters().then((_) {
       if (semesterProvider.semesters.isNotEmpty) {
         // Set the default selected semester
@@ -91,7 +98,8 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    String? profilePictureUrl = context.watch<UserProfileProvider>().profilePicture;
+    String? profilePictureUrl =
+        context.watch<UserProfileProvider>().profilePicture;
 
     // Ensure the URL is absolute
     String getFullImageUrl(String? url) {
@@ -100,7 +108,7 @@ class _DashboardState extends State<Dashboard> {
     }
 
     String profilePictureFullUrl = getFullImageUrl(profilePictureUrl);
-    
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -119,7 +127,7 @@ class _DashboardState extends State<Dashboard> {
             icon: CircleAvatar(
               backgroundColor: Colors.yellow,
               backgroundImage: profilePictureFullUrl.isNotEmpty
-                  ? NetworkImage(profilePictureFullUrl) 
+                  ? NetworkImage(profilePictureFullUrl)
                   : null,
               child: profilePictureUrl == null || profilePictureUrl.isEmpty
                   ? Icon(Icons.person, color: Colors.black)
@@ -134,152 +142,162 @@ class _DashboardState extends State<Dashboard> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Let's make a productive plan together",
-              style: GoogleFonts.openSans(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Menu',
-              style: GoogleFonts.openSans(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView(
-                children: [
-                  Consumer<TaskProvider>(
-                    builder: (context, taskProvider, _) => MenuButtonWidget(
-                      color: const Color(0xFF50B6FF),
-                      icon: Icons.check_circle,
-                      title: 'Tasks',
-                      subtitle: '${taskProvider.pendingTasks.length} tasks',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => TasksPage()),
-                        );
-                      },
-                    ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Let's make a productive plan together",
+                  style: GoogleFonts.openSans(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Menu',
+                  style: GoogleFonts.openSans(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 15),
-                  Consumer2<ClassScheduleProvider, SemesterProvider>(
-                    builder:
-                        (context, classScheduleProvider, semesterProvider, _) =>
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      Consumer<TaskProvider>(
+                        builder: (context, taskProvider, _) => MenuButtonWidget(
+                          color: const Color(0xFF50B6FF),
+                          icon: Icons.check_circle,
+                          title: 'Tasks',
+                          subtitle: '${taskProvider.pendingTasks.length} tasks',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TasksPage()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Consumer2<ClassScheduleProvider, SemesterProvider>(
+                        builder: (context, classScheduleProvider,
+                                semesterProvider, _) =>
                             MenuButtonWidget(
-                      color: const Color(0xFFFFE1BF),
-                      icon: Icons.description,
-                      title: 'Class Schedule',
-                      subtitle: semesterProvider.semesters.isEmpty
-                          ? "0 classes"
-                          : '${classScheduleProvider.classSchedules.length} classes',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ClassSchedule()),
-                        );
-                      },
-                    ),
+                          color: const Color(0xFFFFE1BF),
+                          icon: Icons.description,
+                          title: 'Class Schedule',
+                          subtitle: semesterProvider.semesters.isEmpty
+                              ? "0 classes"
+                              : '${classScheduleProvider.classSchedules.length} classes',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ClassSchedule()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Consumer<EventsProvider>(
+                        builder: (context, eventsProvider, _) =>
+                            MenuButtonWidget(
+                          color: const Color(0xFF7DCFB6),
+                          icon: Icons.event,
+                          title: 'Events',
+                          subtitle:
+                              '${eventsProvider.upcomingEvents.length} events',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => EventsPage()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Consumer<ActivityProvider>(
+                        builder: (context, activityProvider, _) =>
+                            MenuButtonWidget(
+                          color: const Color(0xFFFBA2A2),
+                          icon: Icons.accessibility,
+                          title: 'Activities',
+                          subtitle:
+                              '${activityProvider.pendingActivities.length} activities',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ActivityPage()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Consumer<GoalProvider>(
+                        builder: (context, goalProvider, _) => MenuButtonWidget(
+                          color: Color(0xFFD7C0F3),
+                          icon: FontAwesomeIcons.flag,
+                          title: 'Goals',
+                          subtitle: '${goalProvider.goals.length} goals',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => GoalPage()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Consumer<UserPreferencesProvider>(
+                        builder: (context, userPreferencesProvider, _) =>
+                            MenuButtonWidget(
+                          color: Color(0xFF535D88),
+                          icon: FontAwesomeIcons.moon,
+                          title: 'Sleep',
+                          subtitle: '',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ClockScreen(
+                                  themeColor: Color(0xFF535D88),
+                                  title: "Sleep",
+                                  clockContext: ClockContext(
+                                      type: ClockContextType.sleep),
+                                  record: userPreferencesProvider
+                                      .userPreferences[0],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      MenuButtonWidget(
+                          color: Color(0xFF537488),
+                          icon: Icons.bar_chart_outlined,
+                          title: 'Reports',
+                          subtitle: '',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ReportsPage()),
+                            );
+                          }),
+                      SizedBox(height: 50),
+                    ],
                   ),
-                  const SizedBox(height: 15),
-                  Consumer<EventsProvider>(
-                    builder: (context, eventsProvider, _) => MenuButtonWidget(
-                      color: const Color(0xFF7DCFB6),
-                      icon: Icons.event,
-                      title: 'Events',
-                      subtitle:
-                          '${eventsProvider.upcomingEvents.length} events',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => EventsPage()),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Consumer<ActivityProvider>(
-                    builder: (context, activityProvider, _) => MenuButtonWidget(
-                      color: const Color(0xFFFBA2A2),
-                      icon: Icons.accessibility,
-                      title: 'Activities',
-                      subtitle:
-                          '${activityProvider.pendingActivities.length} activities',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ActivityPage()),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Consumer<GoalProvider>(
-                    builder: (context, goalProvider, _) => MenuButtonWidget(
-                      color: Color(0xFFD7C0F3),
-                      icon: FontAwesomeIcons.flag,
-                      title: 'Goals',
-                      subtitle: '${goalProvider.goals.length} goals',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => GoalPage()),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Consumer<UserPreferencesProvider>(
-                    builder: (context, userPreferencesProvider, _) =>
-                        MenuButtonWidget(
-                      color: Color(0xFF535D88),
-                      icon: FontAwesomeIcons.moon,
-                      title: 'Sleep',
-                      subtitle: '',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ClockScreen(
-                              themeColor: Color(0xFF535D88),
-                              title: "Sleep",
-                              clockContext:
-                                  ClockContext(type: ClockContextType.sleep),
-                              record: userPreferencesProvider.userPreferences[0],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  MenuButtonWidget(
-                      color: Color(0xFF537488),
-                      icon: Icons.bar_chart_outlined,
-                      title: 'Reports',
-                      subtitle: '',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ReportsPage()),
-                        );
-                      }),
-                  SizedBox(height: 50),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),

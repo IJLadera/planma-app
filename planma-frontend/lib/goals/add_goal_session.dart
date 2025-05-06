@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/Providers/goal_schedule_provider.dart';
 import 'package:planma_app/goals/widget/widget.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class AddGoalSession extends StatefulWidget {
   final String goalName;
@@ -39,7 +40,7 @@ class _AddGoalSession extends State<AddGoalSession> {
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: initialDate ?? DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
@@ -53,13 +54,31 @@ class _AddGoalSession extends State<AddGoalSession> {
 
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
+    // Parse the existing time from the controller, or use a default time
+    TimeOfDay initialTime;
+    if (controller.text.isNotEmpty) {
+      try {
+        final parsedTime = DateFormat.jm()
+            .parse(controller.text); // Parse time from "h:mm a" format
+        initialTime =
+            TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
+      } catch (e) {
+        initialTime =
+            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+      }
+    } else {
+      initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
+    }
+
+    // Show the time picker with the initial time
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: initialTime,
     );
+
     if (picked != null) {
       setState(() {
-        controller.text = picked.format(context);
+        controller.text = picked.format(context); // Update the controller text
       });
     }
   }
@@ -171,8 +190,11 @@ class _AddGoalSession extends State<AddGoalSession> {
       if (error.toString().contains('Scheduling overlap')) {
         errorMessage =
             'Scheduling overlap: This time slot is already occupied.';
-      } else if (error.toString().contains('Duplicate goal schedule entry detected')) {
-        errorMessage = 'Duplicate goal schedule entry: This goal schedule already exists.';
+      } else if (error
+          .toString()
+          .contains('Duplicate goal schedule entry detected')) {
+        errorMessage =
+            'Duplicate goal schedule entry: This goal schedule already exists.';
       } else {
         errorMessage = 'Failed to create goal schedule: $error';
       }
