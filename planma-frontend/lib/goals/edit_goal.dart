@@ -109,13 +109,67 @@ class _EditGoal extends State<EditGoal> {
 
       // After validation and adding logic
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('goal added successfully!')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Text('Goal edited successfully',
+                  style:
+                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 10,
+        ),
       );
-
       Navigator.pop(context, true);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update class schedule: $error')),
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Failed to add class schedule 1: $error',
+                  style:
+                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Square shape
+          ),
+          backgroundColor: Colors.red, // Error background color
+          elevation: 10,
+        ),
       );
     }
   }

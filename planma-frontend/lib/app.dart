@@ -49,6 +49,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => GoalProgressProvider()),
         ChangeNotifierProvider(create: (context) => ScheduleEntryProvider()),
         ChangeNotifierProvider(create: (context) => WebSocketProvider()),
+        
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

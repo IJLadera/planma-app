@@ -156,26 +156,28 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
             mainAxisSize: MainAxisSize.min, // Make the row compact
             mainAxisAlignment: MainAxisAlignment.center, // Center the content
             children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const Icon(Icons.check_circle, color: Colors.green, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Semester updated successfully!',
                 style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
           duration: const Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4, // Move to middle
-            left: 50,
-            right: 50,
+          margin: EdgeInsets.symmetric(
+            horizontal:
+                MediaQuery.of(context).size.width * 0.1, // 10% on both sides
+            vertical: MediaQuery.of(context).size.height *
+                0.4, // Float at center height
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Make it a square
+            borderRadius: BorderRadius.circular(16), // Make it a square
           ),
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10, // Add shadow for better visibility
+          elevation: 12, // Add shadow for better visibility
         ),
       );
       Navigator.pop(context);
@@ -354,8 +356,8 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
                   backgroundColor: const Color(0xFF173F70),
                   padding: const EdgeInsets.symmetric(vertical: 20),
                 ),
-                child: const Text('Edit Semester',
-                    style: TextStyle(fontSize: 16, color: Colors.white)),
+                child: Text('Edit Semester',
+                    style: GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
               ),
             ),
           ],

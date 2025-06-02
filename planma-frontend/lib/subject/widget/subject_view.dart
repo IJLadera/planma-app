@@ -25,26 +25,30 @@ class SubjectDetailScreen extends StatefulWidget {
 class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   String selectedAttendance = 'Did Not Attend';
   String semesterDetails = 'Loading...';
-  late SemesterProvider semesterProvider;
 
   @override
   void initState() {
     super.initState();
-    semesterProvider = SemesterProvider();
-    _fetchSemesterDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final semesterProvider =
+          Provider.of<SemesterProvider>(context, listen: false);
+      _fetchSemesterDetails(semesterProvider);
+    });
   }
 
-  Future<void> _fetchSemesterDetails() async {
+  Future<void> _fetchSemesterDetails(SemesterProvider semesterProvider) async {
     print('Fetching semester with ID: ${widget.classSchedule.semesterId}');
     try {
       final semester = await semesterProvider
           .getSemesterDetails(widget.classSchedule.semesterId);
       print(semester);
+      if (!mounted) return;
       setState(() {
         semesterDetails =
             "${semester?['acad_year_start']} - ${semester?['acad_year_end']} ${semester?['semester']}";
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         semesterDetails = 'Error fetching semester details';
       });
