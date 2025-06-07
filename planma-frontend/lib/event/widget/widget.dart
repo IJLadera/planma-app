@@ -220,14 +220,38 @@ class CustomWidgets {
               ),
             );
           }).toList(),
+          selectedItemBuilder: (context) {
+            return items.map((item) {
+              return Row(
+                children: [
+                  Icon(
+                    Icons.label,
+                    size: 18,
+                    color: getColor(item),
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    item,
+                    style: GoogleFonts.openSans(
+                      color: getColor(item),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              );
+            }).toList();
+          },
           style: GoogleFonts.openSans(
             color: textColor,
             fontWeight: FontWeight.w500,
           ),
           iconStyleData: IconStyleData(
             icon: Icon(Icons.arrow_drop_down,
-                color: labelColor), // Custom arrow icon
+                color: value != null ? getColor(value) : labelColor), // Custom arrow icon
             iconSize: 24, // Adjust the arrow size
+          ),
+          buttonStyleData: ButtonStyleData(
+            height: 40,
           ),
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(

@@ -274,7 +274,6 @@ class _ClassScheduleState extends State<ClassSchedule> {
               builder: (context) => AddClassScreen(),
             ),
           ).then((createdClassSemesterId) {
-            print("Gae: $createdClassSemesterId");
             if (createdClassSemesterId != null) {
               // Fetch the semester details based on the returned semester_id
               final newSemester = semesterProvider.semesters.firstWhere(

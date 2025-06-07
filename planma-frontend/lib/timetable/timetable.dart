@@ -71,6 +71,8 @@ class _TimetableState extends State<Timetable> {
             await provider.fetchGoalDetails(entry.referenceId);
         name = goalDetails["goal_name"] ?? "Unknown";
         status = goalDetails["status"] ?? "Pending";
+      } else if (entry.categoryType == "Class") {
+        name = await provider.fetchClassDetails(entry.referenceId);
       }
 
       Color appointmentColor = _getCategoryColor(entry.categoryType);

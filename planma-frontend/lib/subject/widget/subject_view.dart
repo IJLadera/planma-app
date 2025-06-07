@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/attended_class_provider.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/models/attended_class_model.dart';
 import 'package:planma_app/subject/edit_subject.dart';
 import 'package:planma_app/subject/widget/attendance_history.dart';
 import 'package:planma_app/subject/widget/subject_detail_row.dart';
@@ -26,12 +28,19 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
   String selectedAttendance = 'Did Not Attend';
   String semesterDetails = 'Loading...';
   late SemesterProvider semesterProvider;
+  bool isLoadingAttendance = true;
 
   @override
   void initState() {
     super.initState();
     semesterProvider = SemesterProvider();
     _fetchSemesterDetails();
+    _initializeAttendanceStatus();
+
+    final attendanceProvider =
+        Provider.of<AttendedClassProvider>(context, listen: false);
+    attendanceProvider.fetchAttendedClassesPerClassSchedule(
+        widget.classSchedule.classschedId!);
   }
 
   Future<void> _fetchSemesterDetails() async {
@@ -51,7 +60,78 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     }
   }
 
-  // Handle delete functionality (stub for now)
+  void _initializeAttendanceStatus() async {
+    final provider = Provider.of<AttendedClassProvider>(context, listen: false);
+
+    try {
+      await provider.fetchAttendedClassesPerClassSchedule(
+          widget.classSchedule.classschedId!);
+
+      // Check if the class schedule has an attendance record of a specific date
+      final attendedClass = CustomWidgets.getTodaysAttendance(
+          provider.attendedClasses, widget.classSchedule);
+
+      if (attendedClass!.id != -1) {
+        setState(() {
+          selectedAttendance = attendedClass.status;
+        });
+      }
+    } catch (error) {
+      print('Error fetching attendance status: $error');
+    } finally {
+      setState(() {
+        isLoadingAttendance = false;
+      });
+    }
+  }
+
+  // Handle attendance functionality
+  void _handleAttendanceChange(String? newValue) async {
+    if (newValue != null) {
+      setState(() {
+        selectedAttendance = newValue;
+      });
+
+      final attendanceProvider =
+          Provider.of<AttendedClassProvider>(context, listen: false);
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      try {
+        final existingAttendance = CustomWidgets.getTodaysAttendance(
+            attendanceProvider.attendedClasses, widget.classSchedule);
+        final attendedDate = existingAttendance!.id != -1
+            ? DateTime.parse(existingAttendance.attendanceDate)
+            : today;
+
+        await attendanceProvider.markAttendance(
+          classScheduleId: widget.classSchedule.classschedId!,
+          attendedDate: attendedDate,
+          status: newValue,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Attendance marked as $newValue',
+              style: GoogleFonts.openSans(fontSize: 14),
+            ),
+          ),
+        );
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to update attendance: $error',
+              style: GoogleFonts.openSans(fontSize: 14),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  // Handle delete functionality
   void _handleDelete(BuildContext context) async {
     final provider = Provider.of<ClassScheduleProvider>(context, listen: false);
     final isConfirmed = await showDialog<bool>(
@@ -123,8 +203,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ClassScheduleProvider>(
-        builder: (context, classScheduleProvider, child) {
+    return Consumer2<ClassScheduleProvider, AttendedClassProvider>(
+        builder: (context, classScheduleProvider, attendanceProvider, child) {
       final schedule = classScheduleProvider.classSchedules.firstWhere(
           (schedule) =>
               schedule.classschedId == widget.classSchedule.classschedId);
@@ -204,27 +284,23 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                   const Divider(),
                   const SizedBox(height: 30),
                   if (isTodayClassDay) ...[
-                    Center(
-                      child: Text(
-                        "Today's Attendance",
-                        style: GoogleFonts.openSans(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Color(0xFF173F70)),
-                      ),
-                    ),
+                    isLoadingAttendance
+                        ? Center(child: CircularProgressIndicator())
+                        : Center(
+                            child: Text(
+                              "Today's Attendance",
+                              style: GoogleFonts.openSans(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(0xFF173F70)),
+                            ),
+                          ),
                     const SizedBox(height: 10),
                     CustomWidgets.dropwDownForAttendance(
                       label: 'Attendance',
                       value: selectedAttendance,
                       items: ['Did Not Attend', 'Excused', 'Attended'],
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            selectedAttendance = newValue;
-                          });
-                        }
-                      },
+                      onChanged: _handleAttendanceChange,
                       backgroundColor: Color(0XFFF5F5F5),
                       labelColor: Colors.black,
                       textColor: CustomWidgets.getColor(selectedAttendance),
@@ -239,33 +315,27 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  ClassAttendanceHistoryScreen(
-                                    classSchedule: widget.classSchedule,
-                                    attendanceRecords: [
-                                      {
-                                        "date": "08 February 2025",
-                                        "status": selectedAttendance
-                                      },
-                                      {
-                                        "date": "05 February 2025",
-                                        "status": "Attended"
-                                      },
-                                      {
-                                        "date": "04 February 2025",
-                                        "status": "Excused"
-                                      },
-                                    ],
-                                  )),
-                        );
+                            builder: (context) => ClassAttendanceHistoryScreen(
+                              classSchedule: widget.classSchedule,
+                              attendedClasses: attendanceProvider.attendedClasses,
+                              selectedAttendance: selectedAttendance,
+                              isTodayClassDay: isTodayClassDay,
+                            ),
+                          ),
+                        ).then((updatedAttendance) {
+                          if (updatedAttendance != null && updatedAttendance != selectedAttendance) {
+                            setState(() {
+                              selectedAttendance = updatedAttendance;
+                            });
+                          }
+                        });
                       },
                       child: Text(
                         "See Attendance History",
                         style: GoogleFonts.openSans(
                           fontSize: 14,
                           color: Color(0xFF173F70),
-                          decoration:
-                              TextDecoration.underline, // Adds underline
+                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ),

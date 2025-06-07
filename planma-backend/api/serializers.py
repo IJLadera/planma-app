@@ -105,7 +105,7 @@ class AttendedClassSerializer(serializers.ModelSerializer):
 
     class Meta: 
         model = AttendedClass
-        fields = ['att_class_id', 'classsched_id', 'date', 
+        fields = ['att_class_id', 'classsched_id', 'attendance_date', 
                   'status']
         read_only_fields = ['att_class_id']
         

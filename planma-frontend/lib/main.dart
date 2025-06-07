@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/Providers/activity_log_provider.dart';
 import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/attended_class_provider.dart';
 import 'package:planma_app/Providers/attended_events_provider.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/goal_progress_provider.dart';
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => TaskProvider()),
         ChangeNotifierProvider(create: (context) => GoalScheduleProvider()),
         ChangeNotifierProvider(create: (context) => AttendedEventsProvider()),
+        ChangeNotifierProvider(create: (context) => AttendedClassProvider()),
         ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
         ChangeNotifierProvider(create: (context) => TimerProvider()),
         ChangeNotifierProvider(create: (context) => StopwatchProvider()),

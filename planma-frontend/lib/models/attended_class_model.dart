@@ -13,6 +13,20 @@ class AttendedClass {
     required this.status,
   });
 
+  AttendedClass copyWith({
+    int? id,
+    ClassSchedule? classSchedule,
+    String? attendanceDate,
+    String? status,
+  }) {
+    return AttendedClass(
+      id: id ?? this.id, 
+      classSchedule: classSchedule ?? this.classSchedule, 
+      attendanceDate: attendanceDate ?? this.attendanceDate, 
+      status: status ?? this.status,
+    );
+  }
+
   factory AttendedClass.fromJson(Map<String, dynamic> json) {
     return AttendedClass(
       id: json['att_class_id'], 

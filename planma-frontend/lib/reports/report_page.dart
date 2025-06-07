@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/activity_log_provider.dart';
+import 'package:planma_app/Providers/attended_class_provider.dart';
 import 'package:planma_app/Providers/attended_events_provider.dart';
+import 'package:planma_app/Providers/goal_progress_provider.dart';
+import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/sleep_provider.dart';
 import 'package:planma_app/Providers/task_log_provider.dart';
 import 'package:planma_app/models/activity_time_log_model.dart';
+import 'package:planma_app/models/attended_class_model.dart';
 import 'package:planma_app/models/attended_events_model.dart';
+import 'package:planma_app/models/goal_progress_model.dart';
+import 'package:planma_app/models/goals_model.dart';
 import 'package:planma_app/models/sleep_log_model.dart';
 import 'package:planma_app/models/task_time_log_model.dart';
 import 'package:planma_app/reports/widget/bottom_sheet.dart';
@@ -46,6 +52,8 @@ class _ReportsPageState extends State<ReportsPage> {
   List<ActivitiesDone> activitiesDone = [];
   //Placeholder goals
   List<GoalTimeSpent> goalTimeSpent = [];
+  List<GoalTimeDistribution> goalTimeDistribution = [];
+  List<GoalCompletionCount> goalCompletionCount = [];
   //Placeholder sleep
   List<SleepDuration> sleepDuration = [];
   List<SleepRegularity> sleepRegularity = [];
@@ -59,28 +67,32 @@ class _ReportsPageState extends State<ReportsPage> {
 
   void _updateFormattedTimeFilter() {
     DateTime today = DateTime.now();
-    DateTime startOfWeek =
-        selectedDate.subtract(Duration(days: selectedDate.weekday - 1)); // Start of the week
+    DateTime startOfWeek = selectedDate.subtract(
+        Duration(days: selectedDate.weekday - 1)); // Start of the week
     DateTime endOfWeek =
         startOfWeek.add(const Duration(days: 6)); // End of the week
 
     switch (selectedTimeFilter) {
       case 'Day':
         formattedTimeFilter = DateFormat('MMMM d, yyyy').format(selectedDate);
-        canNavigateForward = selectedDate.isBefore(DateTime(today.year, today.month, today.day));
+        canNavigateForward =
+            selectedDate.isBefore(DateTime(today.year, today.month, today.day));
         break;
       case 'Week':
         formattedTimeFilter =
             '${DateFormat('MMMM d').format(startOfWeek)} — ${DateFormat('MMMM d, y').format(endOfWeek)}';
-        canNavigateForward = endOfWeek.isBefore(DateTime(today.year, today.month, today.day));
+        canNavigateForward =
+            endOfWeek.isBefore(DateTime(today.year, today.month, today.day));
         break;
       case 'Month':
         formattedTimeFilter = DateFormat('MMMM').format(selectedDate);
-        canNavigateForward = selectedDate.isBefore(DateTime(today.year, today.month, 1));
+        canNavigateForward =
+            selectedDate.isBefore(DateTime(today.year, today.month, 1));
         break;
       case 'Semester':
         formattedTimeFilter = DateFormat('MMMM yyyy').format(selectedDate);
-        canNavigateForward = selectedDate.isBefore(DateTime(today.year, today.month, 1));
+        canNavigateForward =
+            selectedDate.isBefore(DateTime(today.year, today.month, 1));
         break;
       case 'Year':
         formattedTimeFilter = DateFormat('yyyy').format(selectedDate);
@@ -101,13 +113,16 @@ class _ReportsPageState extends State<ReportsPage> {
             selectedDate = selectedDate.subtract(Duration(days: 7));
             break;
           case 'Month':
-            selectedDate = DateTime(selectedDate.year, selectedDate.month + direction, selectedDate.day);
+            selectedDate = DateTime(selectedDate.year,
+                selectedDate.month + direction, selectedDate.day);
             break;
           case 'Semester':
-            selectedDate = DateTime(selectedDate.year, selectedDate.month + (6 * direction), selectedDate.day);
+            selectedDate = DateTime(selectedDate.year,
+                selectedDate.month + (6 * direction), selectedDate.day);
             break;
-          case 'Year': 
-            selectedDate = DateTime(selectedDate.year + direction, selectedDate.month, selectedDate.day);
+          case 'Year':
+            selectedDate = DateTime(selectedDate.year + direction,
+                selectedDate.month, selectedDate.day);
             break;
         }
       } else if (direction == 1 && canNavigateForward) {
@@ -120,13 +135,16 @@ class _ReportsPageState extends State<ReportsPage> {
             selectedDate = selectedDate.add(Duration(days: 7 * direction));
             break;
           case 'Month':
-            selectedDate = DateTime(selectedDate.year, selectedDate.month + direction, selectedDate.day);
+            selectedDate = DateTime(selectedDate.year,
+                selectedDate.month + direction, selectedDate.day);
             break;
           case 'Semester':
-            selectedDate = DateTime(selectedDate.year, selectedDate.month + (6 * direction), selectedDate.day);
+            selectedDate = DateTime(selectedDate.year,
+                selectedDate.month + (6 * direction), selectedDate.day);
             break;
           case 'Year':
-            selectedDate = DateTime(selectedDate.year + direction, selectedDate.month, selectedDate.day);
+            selectedDate = DateTime(selectedDate.year + direction,
+                selectedDate.month, selectedDate.day);
             break;
         }
       }
@@ -136,152 +154,154 @@ class _ReportsPageState extends State<ReportsPage> {
   }
 
   Future<void> _fetchChartData() async {
-    // await Future.delayed(const Duration(seconds: 1), () {
     try {
       // Instantiation of Providers
       final taskLogProvider =
-        Provider.of<TaskTimeLogProvider>(context, listen: false);
-      final attendedEventsProvider = 
-        Provider.of<AttendedEventsProvider>(context, listen: false);
+          Provider.of<TaskTimeLogProvider>(context, listen: false);
+      final attendedEventsProvider =
+          Provider.of<AttendedEventsProvider>(context, listen: false);
+      final attendedClassProvider =
+          Provider.of<AttendedClassProvider>(context, listen: false);
       final activityLogProvider =
-        Provider.of<ActivityTimeLogProvider>(context, listen: false);
-      final sleepLogProvider = 
-        Provider.of<SleepLogProvider>(context, listen: false);
+          Provider.of<ActivityTimeLogProvider>(context, listen: false);
+      final goalProvider = Provider.of<GoalProvider>(context, listen: false);
+      final goalProgressProvider =
+          Provider.of<GoalProgressProvider>(context, listen: false);
+      final sleepLogProvider =
+          Provider.of<SleepLogProvider>(context, listen: false);
 
       // Instantiation of Placeholder Lists
       List<TaskTimeLog>? taskTimeLogs;
       List<AttendedEvent>? attendedEvents;
+      List<AttendedClass>? attendedClasses;
       List<ActivityTimeLog>? activityTimeLogs;
+      List<Goal>? goals;
+      List<GoalProgress>? goalProgressLogs;
       List<SleepLog>? sleepLogs;
 
       // ---------- Fetching of Records ----------
       switch (selectedCategory) {
         case 'Tasks':
           taskTimeLogs = await ReportsService.fetchTaskLogsOnce(
-            taskLogProvider: taskLogProvider, 
-            selectedTimeFilter: selectedTimeFilter,
-            selectedDate: selectedDate
-          );
+              taskLogProvider: taskLogProvider,
+              selectedTimeFilter: selectedTimeFilter,
+              selectedDate: selectedDate);
 
           // Process TaskTimeSpent
           taskTimeSpent = await ReportsService.fetchTaskTimeSpent(
-            taskTimeLogs: taskTimeLogs, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+              taskTimeLogs: taskTimeLogs,
+              selectedTimeFilter: selectedTimeFilter);
 
           // Process TaskTimeDistribution
           taskTimeDistribution = await ReportsService.fetchTaskTimeDistribution(
-            taskTimeLogs: taskTimeLogs, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+              taskTimeLogs: taskTimeLogs,
+              selectedTimeFilter: selectedTimeFilter);
 
           // Process TaskTimeDistribution
           taskFinished = await ReportsService.fetchTasksFinished(
-            taskTimeLogs: taskTimeLogs, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+              taskTimeLogs: taskTimeLogs,
+              selectedTimeFilter: selectedTimeFilter);
           break;
         case 'Events':
           attendedEvents = await ReportsService.fetchEventLogsOnce(
-            attendedEventsProvider: attendedEventsProvider, 
-            selectedTimeFilter: selectedTimeFilter,
-            selectedDate: selectedDate
-          );
+              attendedEventsProvider: attendedEventsProvider,
+              selectedTimeFilter: selectedTimeFilter,
+              selectedDate: selectedDate);
 
           // Process EventAttendanceSummary
-          eventAttendanceSummary = await ReportsService.fetchEventAttendanceSummary(
-            attendedEvents: attendedEvents, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+          eventAttendanceSummary =
+              await ReportsService.fetchEventAttendanceSummary(
+                  attendedEvents: attendedEvents,
+                  selectedTimeFilter: selectedTimeFilter);
 
           // Process EventTypeDistribution
-          eventTypeDistribution = await ReportsService.fetchEventTypeDistribution(
-            attendedEvents: attendedEvents, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+          eventTypeDistribution =
+              await ReportsService.fetchEventTypeDistribution(
+                  attendedEvents: attendedEvents,
+                  selectedTimeFilter: selectedTimeFilter);
 
           // Process EventAttendanceDistribution
-          eventAttendanceDistribution = await ReportsService.fetchEventAttendanceDistribution(
-            attendedEvents: attendedEvents, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+          eventAttendanceDistribution =
+              await ReportsService.fetchEventAttendanceDistribution(
+                  attendedEvents: attendedEvents,
+                  selectedTimeFilter: selectedTimeFilter);
           break;
         case 'Class Schedules':
-          // To be added
+          attendedClasses = await ReportsService.fetchClassLogsOnce(
+            attendedClassProvider: attendedClassProvider,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+          // Process ClassAttendanceSummary
+          classAttendanceSummary =
+              await ReportsService.fetchClassAttendanceSummary(
+            attendedClasses: attendedClasses,
+            selectedTimeFilter: selectedTimeFilter,
+          );
+
+          // Process ClassAttendanceDistribution
+          classAttendanceDistribution =
+              await ReportsService.fetchClassAttendanceDistribution(
+            attendedClasses: attendedClasses,
+            selectedTimeFilter: selectedTimeFilter,
+          );
           break;
         case 'Activities':
           activityTimeLogs = await ReportsService.fetchActivityLogsOnce(
-            activityLogProvider: activityLogProvider, 
-            selectedTimeFilter: selectedTimeFilter,
-            selectedDate: selectedDate
-          );
+              activityLogProvider: activityLogProvider,
+              selectedTimeFilter: selectedTimeFilter,
+              selectedDate: selectedDate);
 
           // Process ActivitiesTimeSpent
           activitiesTimeSpent = await ReportsService.fetchActivityTimeSpent(
-            activityTimeLogs: activityTimeLogs, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+              activityTimeLogs: activityTimeLogs,
+              selectedTimeFilter: selectedTimeFilter);
 
           // Process ActivitiesDone
           activitiesDone = await ReportsService.fetchActivitiesDone(
-            activityTimeLogs: activityTimeLogs, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+              activityTimeLogs: activityTimeLogs,
+              selectedTimeFilter: selectedTimeFilter);
           break;
         case 'Goals':
-          // To be added
+          goals =
+              await ReportsService.fetchGoalsOnce(goalProvider: goalProvider);
+
+          goalProgressLogs = await ReportsService.fetchGoalProgressOnce(
+              goalProgressProvider: goalProgressProvider,
+              selectedTimeFilter: selectedTimeFilter,
+              selectedDate: selectedDate);
+
+          // Process GoalTimeSpent
+          goalTimeSpent = await ReportsService.fetchGoalTimeSpent(
+              goalProgressLogs: goalProgressLogs,
+              selectedTimeFilter: selectedTimeFilter);
+
+          // Process GoalTimeDistribution
+          goalTimeDistribution = await ReportsService.fetchGoalTimeDistribution(
+              goalProgressLogs: goalProgressLogs,
+              selectedTimeFilter: selectedTimeFilter);
+
+          goalCompletionCount = await ReportsService.fetchGoalCompletionCount(
+              goals: goals, goalProgressLogs: goalProgressLogs);
           break;
         case 'Sleep':
           sleepLogs = await ReportsService.fetchSleepLogsOnce(
-            sleepLogProvider: sleepLogProvider, 
-            selectedTimeFilter: selectedTimeFilter,
-            selectedDate: selectedDate
-          );
-          
+              sleepLogProvider: sleepLogProvider,
+              selectedTimeFilter: selectedTimeFilter,
+              selectedDate: selectedDate);
+
           // Process SleepDuration
           sleepDuration = await ReportsService.fetchSleepDuration(
+              sleepLogs: sleepLogs, 
+              selectedTimeFilter: selectedTimeFilter);
+
+          sleepRegularity = await ReportsService.fetchSleepRegularity(
             sleepLogs: sleepLogs, 
-            selectedTimeFilter: selectedTimeFilter
-          );
+            selectedTimeFilter: selectedTimeFilter);
       }
-      
+
       if (!mounted) return; // Ensure the widget is still mounted before calling setState
       setState(() {
-        // Example data for class schedules
-        classAttendanceSummary = [
-          ClassAttendanceSummary('Attended', 55),
-          ClassAttendanceSummary('Excused', 12),
-          ClassAttendanceSummary('Did Not Attend', 12),
-        ];
-
-        classAttendanceDistribution = [
-          ClassAttendanceDistribution('IT311', 1, 1, 2),
-          ClassAttendanceDistribution('IT312', 1, 1, 2),
-          ClassAttendanceDistribution('IT313', 2, 3, 0),
-          ClassAttendanceDistribution('IT314', 1, 1, 1),
-          ClassAttendanceDistribution('IT315', 1, 2, 2),
-          ClassAttendanceDistribution('ES21a', 0, 0, 3),
-        ];
-
-        // Example data for goals
-        goalTimeSpent = [
-          GoalTimeSpent('Sun', 3),
-          GoalTimeSpent('Mon', 20),
-          GoalTimeSpent('Tue', 10),
-          GoalTimeSpent('Wed', 4),
-          GoalTimeSpent('Thu', 30),
-          GoalTimeSpent('Fri', 21),
-          GoalTimeSpent('Sat', 2),
-        ];
-
-        // // Example data for sleep
-        sleepRegularity = [
-          SleepRegularity('Sun', 23.0, 8.0),
-          SleepRegularity('Mon', 22.0, 5.0),
-          SleepRegularity('Tue', 2.0, 10.0),
-          SleepRegularity('Fri', 23.0, 8.0)
-        ];
-
         isLoading = false;
       });
     } catch (error) {
@@ -306,9 +326,9 @@ class _ReportsPageState extends State<ReportsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Reports', 
+          'Reports',
           style: GoogleFonts.openSans(
-            fontWeight: FontWeight.bold, 
+            fontWeight: FontWeight.bold,
             color: Color(0xFF173F70),
           ),
         ),
@@ -342,7 +362,8 @@ class _ReportsPageState extends State<ReportsPage> {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF5F5F5),
                       borderRadius: BorderRadius.circular(40.0),
@@ -401,12 +422,10 @@ class _ReportsPageState extends State<ReportsPage> {
                     SizedBox(width: 16),
                     IconButton(
                       icon: const Icon(Icons.chevron_right),
-                      onPressed: canNavigateForward 
-                          ? () => _navigateDate(1)
-                          : null,
-                      color: canNavigateForward 
-                          ? Color(0xFF173F70)
-                          : Colors.white,
+                      onPressed:
+                          canNavigateForward ? () => _navigateDate(1) : null,
+                      color:
+                          canNavigateForward ? Color(0xFF173F70) : Colors.white,
                     ),
                   ],
                 ),
@@ -464,6 +483,8 @@ class _ReportsPageState extends State<ReportsPage> {
                         timeFilter: selectedTimeFilter,
                         selectedDate: selectedDate,
                         goalTimeSpent: goalTimeSpent,
+                        goalTimeDistribution: goalTimeDistribution,
+                        goalCompletionCount: goalCompletionCount,
                       ),
                     ],
                     if (selectedCategory == 'Sleep') ...[

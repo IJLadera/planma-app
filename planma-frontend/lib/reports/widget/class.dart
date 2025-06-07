@@ -112,9 +112,25 @@ class ActivitiesDone {
 //-----------------------GOALS----------------------------------
 class GoalTimeSpent {
   final String day;
-  final int minutes;
+  final double minutes;
+  final double totalTimeSpent;
 
-  GoalTimeSpent(this.day, this.minutes);
+  GoalTimeSpent(this.day, this.minutes, this.totalTimeSpent);
+}
+
+class GoalTimeDistribution {
+  final String goalType;
+  final double percentage;
+
+  GoalTimeDistribution(this.goalType, this.percentage);
+}
+
+class GoalCompletionCount {
+  final String goal;
+  final int completedCount;
+  final int failedCount;
+
+  GoalCompletionCount(this.goal, this.completedCount, this.failedCount);
 }
 
 //-----------------------SLEEP----------------------------------
@@ -128,8 +144,8 @@ class SleepDuration {
 
 class SleepRegularity {
   final String day;
-  final double startTime;
-  final double endTime;
+  final int startTime;
+  final int endTime;
 
   SleepRegularity(this.day, this.startTime, this.endTime);
 }
@@ -518,6 +534,105 @@ class ChartContainer4 extends StatelessWidget {
             },
           ),
           SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+}
+
+class ChartContainer5 extends StatelessWidget {
+  final String title;
+  final Widget child;
+  final bool isLoading;
+  final List<GoalTimeDistribution> list;
+  final Map<String, Color> colorMap;
+
+  const ChartContainer5({
+    required this.title,
+    required this.child,
+    required this.isLoading,
+    required this.list,
+    required this.colorMap,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.openSans(
+              fontSize: 16, 
+              fontWeight: FontWeight.bold, 
+              color: Color(0xFF173F70),
+            ),
+          ),
+          const Divider(),
+          SizedBox(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : child),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(8),
+            itemCount: list.isNotEmpty ? list.length : 1,
+            itemBuilder: (context, index) {
+              if (list.isEmpty) {
+                return ListTile(
+                  leading: Icon(
+                    Icons.square_rounded,
+                    color: Colors.grey.shade300,
+                  ),
+                  title: Text(
+                    "No Data", 
+                    style: GoogleFonts.openSans(
+                      fontSize: 14, 
+                      color: Color(0xFF173F70),
+                    ),
+                  ),
+                  trailing: Text(
+                    '0 min', 
+                    style: GoogleFonts.openSans(
+                      fontSize: 14, 
+                      color: Color(0xFF173F70),
+                    ),
+                  ),
+                );
+              } else {
+                final data = list[index];
+                return ListTile(
+                  leading: Icon(
+                    Icons.square_rounded,
+                    color: colorMap[data.goalType],
+                  ),
+                  title: Text(
+                    data.goalType, 
+                    style: GoogleFonts.openSans(
+                      fontSize: 14, 
+                      color: Color(0xFF173F70),
+                    ),
+                  ),
+                  trailing: Text(
+                    '${data.percentage} min', 
+                    style: GoogleFonts.openSans(
+                      fontSize: 14, 
+                      color: Color(0xFF173F70),
+                    ),
+                  ),
+                );
+              }
+            },
+            separatorBuilder: (context, index) => const Divider(),
+          ),
         ],
       ),
     );

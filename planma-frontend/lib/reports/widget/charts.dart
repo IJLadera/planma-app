@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:planma_app/models/sleep_log_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:planma_app/reports/widget/class.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:math';
 
 class TaskCharts extends StatelessWidget {
   final bool isLoading;
@@ -83,7 +85,7 @@ class TaskCharts extends StatelessWidget {
       children: [
         // Time Spent on Tasks Chart
         ChartContainer2(
-          title: 'Time Spent on Tasks',
+          title: 'Time Spent Distribution',
           isLoading: isLoading,
           subtitle: "Total Time Spent:",
           subtitleValue:
@@ -137,7 +139,9 @@ class TaskCharts extends StatelessWidget {
               Colors.blue,
               Colors.green.shade400,
               Colors.amber,
-              Colors.purpleAccent
+              Colors.purpleAccent,
+              Colors.indigo,
+              Colors.orange
             ],
             series: <CircularSeries>[
               DoughnutSeries<TaskTimeDistribution, String>(
@@ -316,8 +320,8 @@ class EventCharts extends StatelessWidget {
                   : 1,
             ),
             legend: Legend(
-              isVisible: true, 
-              position: LegendPosition.bottom, 
+              isVisible: true,
+              position: LegendPosition.bottom,
               textStyle: GoogleFonts.inter(
                 fontSize: 12,
                 color: Colors.grey.shade600,
@@ -371,18 +375,12 @@ class ClassScheduleCharts extends StatelessWidget {
       "Attended": Colors.green.shade400,
       "Excused": Colors.blue.shade600,
       "Did Not Attend": Colors.red.shade400,
+      "No Data": Colors.grey.shade300,
     };
 
     return Column(
       children: [
-        // Align(
-        //   alignment: Alignment.centerLeft, // Aligns the text to the start
-        //   child: Text(
-        //     'Class Schedules',
-        //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        //   ),
-        // ),
-        // SizedBox(height: 16),
+        // Class Attendance Summary Chart
         ChartContainer4(
           title: 'Attendance Summary',
           isLoading: isLoading,
@@ -392,10 +390,11 @@ class ClassScheduleCharts extends StatelessWidget {
             margin: EdgeInsets.zero,
             series: <CircularSeries>[
               PieSeries<ClassAttendanceSummary, String>(
-                dataSource: classAttendanceSummary,
+                dataSource: classAttendanceSummary.isNotEmpty
+                    ? classAttendanceSummary
+                    : [ClassAttendanceSummary("No Data", 1)],
                 xValueMapper: (ClassAttendanceSummary data, _) => data.category,
-                yValueMapper: (ClassAttendanceSummary data, _) =>
-                    data.count,
+                yValueMapper: (ClassAttendanceSummary data, _) => data.count,
                 pointColorMapper: (ClassAttendanceSummary data, _) =>
                     colorMap[data.category],
               )
@@ -404,70 +403,82 @@ class ClassScheduleCharts extends StatelessWidget {
         ),
         SizedBox(height: 16),
 
+        // Class Attendance Distribution
         ChartContainer(
-            title: 'Attendance Distribution',
-            isLoading: isLoading,
-            child: SfCartesianChart(
-              primaryXAxis: CategoryAxis(
-                labelPlacement: LabelPlacement.betweenTicks,
-                labelAlignment: LabelAlignment.center,
-                majorGridLines: const MajorGridLines(width: 0),
-                interval: 1,
-                labelStyle: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w400,
-                ),
+          title: 'Attendance Distribution',
+          isLoading: isLoading,
+          child: SfCartesianChart(
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
               ),
-              primaryYAxis: NumericAxis(
-                labelStyle: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w400,
-                ),
-                minimum: 0,
-                maximum: (classAttendanceDistribution.isNotEmpty) ? null : 2,
-                interval: 1,
+            ),
+            primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
               ),
-              legend: Legend(
-                isVisible: true, 
-                position: LegendPosition.bottom,
-                textStyle: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w400,
-                ),
+              minimum: 0,
+              maximum: (classAttendanceDistribution.isNotEmpty) ? null : 2,
+              interval: classAttendanceDistribution.isNotEmpty &&
+                      classAttendanceDistribution
+                              .map((e) => [
+                                    e.attended,
+                                    e.excused,
+                                    e.didNotAttend
+                                  ].reduce((a, b) => a > b ? a : b))
+                              .reduce((a, b) => a > b ? a : b) >
+                          10
+                  ? 5
+                  : 1,
+            ),
+            legend: Legend(
+              isVisible: true,
+              position: LegendPosition.bottom,
+              textStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
               ),
-              series: <CartesianSeries>[
-                ColumnSeries<ClassAttendanceDistribution, String>(
-                  name: 'Attended',
-                  dataSource: classAttendanceDistribution,
-                  xValueMapper: (ClassAttendanceDistribution data, _) =>
-                      data.subject,
-                  yValueMapper: (ClassAttendanceDistribution data, _) =>
-                      data.attended,
-                  color: Color(0xFF32C652),
-                ),
-                ColumnSeries<ClassAttendanceDistribution, String>(
-                  name: 'Excused',
-                  dataSource: classAttendanceDistribution,
-                  xValueMapper: (ClassAttendanceDistribution data, _) =>
-                      data.subject,
-                  yValueMapper: (ClassAttendanceDistribution data, _) =>
-                      data.excused,
-                  color: Color(0xFF3A82EF),
-                ),
-                ColumnSeries<ClassAttendanceDistribution, String>(
-                  name: 'Did Not Attend',
-                  dataSource: classAttendanceDistribution,
-                  xValueMapper: (ClassAttendanceDistribution data, _) =>
-                      data.subject,
-                  yValueMapper: (ClassAttendanceDistribution data, _) =>
-                      data.didNotAttend,
-                  color: Color(0xFFEF4738),
-                ),
-              ],
-            ))
+            ),
+            series: <CartesianSeries>[
+              ColumnSeries<ClassAttendanceDistribution, String>(
+                name: 'Attended',
+                dataSource: classAttendanceDistribution,
+                xValueMapper: (ClassAttendanceDistribution data, _) =>
+                    data.subject,
+                yValueMapper: (ClassAttendanceDistribution data, _) =>
+                    data.attended,
+                color: Color(0xFF32C652),
+              ),
+              ColumnSeries<ClassAttendanceDistribution, String>(
+                name: 'Excused',
+                dataSource: classAttendanceDistribution,
+                xValueMapper: (ClassAttendanceDistribution data, _) =>
+                    data.subject,
+                yValueMapper: (ClassAttendanceDistribution data, _) =>
+                    data.excused,
+                color: Color(0xFF3A82EF),
+              ),
+              ColumnSeries<ClassAttendanceDistribution, String>(
+                name: 'Did Not Attend',
+                dataSource: classAttendanceDistribution,
+                xValueMapper: (ClassAttendanceDistribution data, _) =>
+                    data.subject,
+                yValueMapper: (ClassAttendanceDistribution data, _) =>
+                    data.didNotAttend,
+                color: Color(0xFFEF4738),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -663,13 +674,17 @@ class GoalsCharts extends StatelessWidget {
   final String timeFilter;
   final DateTime selectedDate;
   final List<GoalTimeSpent> goalTimeSpent;
+  final List<GoalTimeDistribution> goalTimeDistribution;
+  final List<GoalCompletionCount> goalCompletionCount;
 
   const GoalsCharts({
-    super.key, 
-    required this.isLoading, 
+    super.key,
+    required this.isLoading,
     required this.timeFilter,
     required this.selectedDate,
     required this.goalTimeSpent,
+    required this.goalTimeDistribution,
+    required this.goalCompletionCount,
   });
 
   List<String> generateXAxisLabels() {
@@ -716,11 +731,11 @@ class GoalsCharts extends StatelessWidget {
       for (var item in goalTimeSpent) item.day: item
     };
 
-    // double totalTimeSpent =
-    //     goalTimeSpent.isNotEmpty ? goalTimeSpent.first.totalTimeSpent : 0;
+    double totalTimeSpent =
+        goalTimeSpent.isNotEmpty ? goalTimeSpent.first.totalTimeSpent : 0;
 
     return labels.map((label) {
-      return mappedData[label] ?? GoalTimeSpent(label, 0);
+      return mappedData[label] ?? GoalTimeSpent(label, 0, totalTimeSpent);
     }).toList();
   }
 
@@ -728,6 +743,12 @@ class GoalsCharts extends StatelessWidget {
   Widget build(BuildContext context) {
     List<String> xAxisLabels = generateXAxisLabels();
     List<GoalTimeSpent> filledData = fillMissingData(xAxisLabels);
+
+    final Map<String, Color> colorMap = {
+      "Academic": Color(0xFFFBC62F),
+      "Personal": Color(0xFF00C7F2),
+      "No Data": Colors.grey.shade300,
+    };
 
     return Column(
       children: [
@@ -771,6 +792,93 @@ class GoalsCharts extends StatelessWidget {
           ),
         ),
         SizedBox(height: 16),
+
+        // Goal Time Distribution Chart
+        ChartContainer5(
+          title: 'Goal Time Distribution',
+          isLoading: isLoading,
+          list: goalTimeDistribution,
+          colorMap: colorMap,
+          child: SfCircularChart(
+            margin: EdgeInsets.zero,
+            series: <CircularSeries>[
+              DoughnutSeries<GoalTimeDistribution, String>(
+                dataSource: goalTimeDistribution.isNotEmpty
+                    ? goalTimeDistribution
+                    : [GoalTimeDistribution("No Data", 1)],
+                xValueMapper: (GoalTimeDistribution data, _) => data.goalType,
+                yValueMapper: (GoalTimeDistribution data, _) => data.percentage,
+                explodeAll: true,
+                pointColorMapper: (GoalTimeDistribution data, _) =>
+                    data.goalType == "No Data" ? Colors.grey.shade300 : null,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Goal Completion Count Chart
+        ChartContainer(
+          title: 'Goal Completion Count',
+          isLoading: isLoading,
+          child: SfCartesianChart(
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              labelAlignment: LabelAlignment.center,
+              majorGridLines: const MajorGridLines(width: 0),
+              interval: 1,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            primaryYAxis: NumericAxis(
+              labelStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+              minimum: 0,
+              maximum: (goalCompletionCount.isNotEmpty) ? null : 2,
+              interval: goalCompletionCount.isNotEmpty &&
+                      goalCompletionCount
+                              .map((e) => e.completedCount > e.failedCount
+                                  ? e.completedCount
+                                  : e.failedCount)
+                              .reduce((a, b) => a > b ? a : b) >
+                          10
+                  ? 5
+                  : 1,
+            ),
+            legend: Legend(
+              isVisible: true,
+              position: LegendPosition.bottom,
+              textStyle: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            series: <CartesianSeries>[
+              ColumnSeries<GoalCompletionCount, String>(
+                name: 'Completed',
+                dataSource: goalCompletionCount,
+                xValueMapper: (GoalCompletionCount data, _) => data.goal,
+                yValueMapper: (GoalCompletionCount data, _) =>
+                    data.completedCount,
+                color: Color(0xFF32C652),
+              ),
+              ColumnSeries<GoalCompletionCount, String>(
+                name: 'Failed',
+                dataSource: goalCompletionCount,
+                xValueMapper: (GoalCompletionCount data, _) => data.goal,
+                yValueMapper: (GoalCompletionCount data, _) => data.failedCount,
+                color: Color(0xFFEF4738),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -844,10 +952,42 @@ class SleepCharts extends StatelessWidget {
     }).toList();
   }
 
+  // TimeOfDay parseTimeOfDay(String timeString) {
+  //   final parts = timeString.split(':').map(int.parse).toList();
+  //   return TimeOfDay(hour: parts[0], minute: parts[1]);
+  // }
+
+  // int minutesSince6PM(String timeString) {
+  //   final time = parseTimeOfDay(timeString);
+  //   int minutes = time.hour * 60 + time.minute;
+  //   int base = 18 * 60; // 6:00 PM
+  //   return (minutes >= base) ? (minutes - base) : (minutes + (24 * 60 - base));
+  // }
+
+  // String formatMinutesToTime(int value) {
+  //   int base = 18 * 60;
+  //   int total = (value + base) % 1440;
+  //   int hour = total ~/ 60;
+  //   int minute = total % 60;
+  //   return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+  // }
+
   @override
   Widget build(BuildContext context) {
     List<String> xAxisLabels = generateXAxisLabels();
     List<SleepDuration> filledData = fillMissingData(xAxisLabels);
+
+    double? minY;
+    double? maxY;
+
+    if (sleepRegularity.isNotEmpty) {
+      final allMinutes = sleepRegularity
+          .expand((log) => [log.startTime, log.endTime])
+          .toList();
+
+      minY = (allMinutes.reduce(min) ~/ 60) * 60;
+      maxY = ((allMinutes.reduce(max) + 59) ~/ 60) * 60;
+    }
 
     return Column(
       children: [
@@ -909,23 +1049,22 @@ class SleepCharts extends StatelessWidget {
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w400,
               ),
-              labelFormat: '{value}:00',
-              minimum: 20, // To allow proper wrap around (20 → 0 → 4)
-              maximum: 32, // 20:00 acts as the reference point
-              interval: 2,
-              majorGridLines: const MajorGridLines(width: 0.5),
-              axisLine: const AxisLine(width: 0),
+              minimum: minY ?? 0,
+              maximum: maxY ?? 720,
+              interval: 60,
+              axisLabelFormatter: (AxisLabelRenderDetails args) {
+                final hour = (args.value.toInt() ~/ 60 + 18) % 24;
+                final minute = args.value.toInt() % 60;
+                final formatted = "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+                return ChartAxisLabel(formatted, const TextStyle(fontSize: 12));
+              },
             ),
             series: <CartesianSeries>[
               RangeColumnSeries<SleepRegularity, String>(
                 dataSource: sleepRegularity,
                 xValueMapper: (SleepRegularity data, _) => data.day,
-                lowValueMapper: (SleepRegularity data, _) =>
-                    _wrapTime(data.startTime),
-                highValueMapper: (SleepRegularity data, _) =>
-                    _wrapTime(data.endTime),
-                borderRadius: const BorderRadius.all(Radius.circular(4)),
-                width: 0.5,
+                lowValueMapper: (SleepRegularity data, _) => data.startTime,
+                highValueMapper: (SleepRegularity data, _) => data.endTime,
                 color: Colors.blueGrey,
               )
             ],

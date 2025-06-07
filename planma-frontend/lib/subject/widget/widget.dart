@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:planma_app/models/attended_class_model.dart';
+import 'package:planma_app/models/class_schedules_model.dart';
 
 class DayButton extends StatelessWidget {
   final String day;
@@ -302,14 +305,38 @@ class CustomWidgets {
               ),
             );
           }).toList(),
+          selectedItemBuilder: (context) {
+            return items.map((item) {
+              return Row(
+                children: [
+                  Icon(
+                    Icons.label,
+                    size: 18,
+                    color: getColor(item),
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    item,
+                    style: GoogleFonts.openSans(
+                      color: getColor(item),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              );
+            }).toList();
+          },
           style: GoogleFonts.openSans(
             color: textColor,
             fontWeight: FontWeight.w500,
           ),
           iconStyleData: IconStyleData(
             icon: Icon(Icons.arrow_drop_down,
-                color: labelColor), // Custom arrow icon
+                color: value != null ? getColor(value) : labelColor), // Custom arrow icon
             iconSize: 24, // Adjust the arrow size
+          ),
+          buttonStyleData: ButtonStyleData(
+            height: 40,
           ),
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(
@@ -377,26 +404,30 @@ class CustomWidgets {
     }
   }
 
-  static Widget buildAttendanceItemDropdown(String date, String status,
-      {ValueChanged<String?>? onChanged}) {
+  static Widget buildAttendanceItemDropdown({
+      required String date, 
+      required String value,
+      required Function(String?) onChanged,
+    }) {
     return Container(
       margin: EdgeInsets.only(bottom: 8),
       padding: EdgeInsets.symmetric(vertical: 3, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            date,
-            style: GoogleFonts.openSans(fontSize: 14, color: Colors.black),
+            DateFormat('dd MMMM yyyy').format(DateTime.parse(date)),
+            style: GoogleFonts.openSans(fontSize: 14, color: Color(0xFF173F70)),
           ),
           onChanged != null
               ? DropdownButton2<String>(
-                  value: status,
+                  value: value,
                   underline: SizedBox(),
+                  alignment: Alignment.centerRight,
                   buttonStyleData: ButtonStyleData(
                     height: 40,
                     width: 150,
@@ -407,30 +438,63 @@ class CustomWidgets {
                   ),
                   onChanged: onChanged,
                   items: ["Attended", "Did Not Attend", "Excused"]
-                      .map((String status) {
+                      .map((item) {
                     return DropdownMenuItem<String>(
-                      value: status,
+                      value: item,
+                      alignment: Alignment.centerRight,
                       child: Text(
-                        status,
+                        item,
                         style: GoogleFonts.openSans(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: getStatusColor(status),
+                          color: getStatusColor(item),
                         ),
                       ),
                     );
                   }).toList(),
                 )
-              : Text(
-                  status,
-                  style: GoogleFonts.openSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: getStatusColor(status),
-                  ),
+              : Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                      value,
+                      textAlign: TextAlign.right,
+                      style: GoogleFonts.openSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: getStatusColor(value),
+                      ),
+                    ),
                 ),
+              ),
         ],
       ),
     );
+  }
+
+  static AttendedClass? getTodaysAttendance(List<AttendedClass> records, ClassSchedule classSchedule) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    try {
+      return records.firstWhere(
+        (attendedClass) {
+          final recordDate = DateTime.parse(attendedClass.attendanceDate);
+          return attendedClass.classSchedule?.classschedId ==
+                  classSchedule.classschedId &&
+              recordDate.year == today.year &&
+              recordDate.month == today.month &&
+              recordDate.day == today.day;
+        },
+        orElse: () => AttendedClass(
+          id: -1,
+          classSchedule: null,
+          attendanceDate: '2020-01-01',
+          status: 'Did Not Attend',
+        ),
+      );
+    } catch (_) {
+      return null;
+    }
   }
 }

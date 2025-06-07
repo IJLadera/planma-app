@@ -17,6 +17,32 @@ class GoalProgressProvider with ChangeNotifier {
 
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
+  //Fetch all goal progress records
+  Future<void> fetchGoalProgress({String? startDate, String? endDate}) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}goal-progress/?start_date=$startDate&end_date=$endDate");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $_accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        _goalProgressLogs =
+            data.map((item) => GoalProgress.fromJson(item)).toList();
+        notifyListeners();
+      } else {
+        throw Exception(
+            'Failed to fetch goal progress logs. Status Code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error fetching goal progress: $e");
+    }
+  }
+
   //Fetch goal progress per goal
   Future<void> fetchGoalProgressPerGoal(Goal goal) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();

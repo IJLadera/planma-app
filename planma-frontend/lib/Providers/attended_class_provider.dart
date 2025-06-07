@@ -15,11 +15,13 @@ class AttendedClassProvider with ChangeNotifier {
   final String baseUrl = "http://127.0.0.1:8000/api/";
 
   // Fetch all attendance logs
-  Future<void> fetchAttendedClasses() async {
+  Future<void> fetchAttendedClasses({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}attended-classes/");
+    final url = Uri.parse(startDate != null && endDate != null
+        ? "${baseUrl}attended-classes/?start_date=$startDate&end_date=$endDate"
+        : "${baseUrl}attended-classes/");
 
     try {
       final response = await http.get(
@@ -102,7 +104,7 @@ class AttendedClassProvider with ChangeNotifier {
         // If already marked
         return;
       } else {
-        throw Exception('Failed to mark attendance');
+        throw Exception('Failed to mark attendance. ${response.statusCode}');
       }
     } catch (error) {
       rethrow;
