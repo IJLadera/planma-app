@@ -199,9 +199,9 @@ class _AddClassScreenState extends State<AddClassScreen> {
           duration: const Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
-            left: 50,
-            right: 50,
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
             top: 100,
           ),
           shape: RoundedRectangleBorder(
@@ -267,25 +267,50 @@ class _AddClassScreenState extends State<AddClassScreen> {
     _subjectCodeController.addListener(() {
       final subjectProvider =
           Provider.of<ClassScheduleProvider>(context, listen: false);
+      final semesterProvider =
+          Provider.of<SemesterProvider>(context, listen: false);
+
       String subjectCode = _subjectCodeController.text.trim();
 
       if (subjectCode.isNotEmpty) {
         subjectProvider.fetchSubjectDetails(subjectCode).then((_) {
-          setState(() {
-            if (subjectProvider.selectedSubject != null) {
-              _subjectTitleController.text =
-                  subjectProvider.selectedSubject!.subjectTitle;
-            } else {
-              _subjectTitleController.clear(); // Clear if no subject is found
-            }
-          });
+          if (subjectProvider.selectedSubject != null) {
+            final subject = subjectProvider.selectedSubject!;
+            setState(() {
+              _subjectTitleController.text = subject.subjectTitle;
+
+              // Auto-fill semester dropdown based on subject's semester
+              final semester = semesterProvider.semesters.firstWhere(
+                (sem) => sem['semester_id'] == subject.semesterId,
+                orElse: () => <String, dynamic>{},
+              );
+
+              if (semester != null) {
+                selectedSemesterId = semester['semester_id'];
+                selectedSemester =
+                    "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}";
+              }
+            });
+          } else {
+            setState(() {
+              _subjectTitleController.clear();
+              selectedSemesterId = null;
+              selectedSemester = null;
+            });
+          }
         }).catchError((error) {
           print("Error fetching subject details: $error");
-          _subjectTitleController.clear();
+          setState(() {
+            _subjectTitleController.clear();
+            selectedSemesterId = null;
+            selectedSemester = null;
+          });
         });
       } else {
         setState(() {
           _subjectTitleController.clear();
+          selectedSemesterId = null;
+          selectedSemester = null;
         });
       }
     });

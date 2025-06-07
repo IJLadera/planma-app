@@ -1,0 +1,18 @@
+flutter_native_splash:
+  # Background color matching your current splash screen
+  color: "#173F70"
+  
+  # Your existing logo
+  image: assets/planmalogo.png
+  
+  # Android 12 specific settings
+  android_12:
+    image: assets/planmalogo.png
+    icon_background_color: "#173F70"
+  
+  # Fullscreen mode
+  fullscreen: false
+  
+  # Ensure image is properly centered
+  android_gravity: center
+  ios_content_mode: center

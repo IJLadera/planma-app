@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class EventReminderDialog extends StatelessWidget {
+class EventReminder extends StatelessWidget {
   final String eventName; // Event name passed dynamically
   //final Function(String response) onResponse; // Callback for response handling
 
-  const EventReminderDialog({
+  const EventReminder({
     super.key,
     required this.eventName,
     //required this.onResponse,

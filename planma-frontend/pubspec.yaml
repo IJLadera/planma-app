@@ -40,6 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^1.2.2
   image_picker: ^1.0.4
+  flutter_dotenv: ^5.0.2
 
 
 
@@ -56,6 +57,9 @@ dependencies:
   flutter_local_notifications: ^17.1.0
   flutter_hooks: ^0.20.5
   share_plus: ^10.1.4
+  web_socket_channel: ^3.0.2
+  flutter_bloc: ^9.1.1
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
@@ -78,7 +82,8 @@ flutter:
   assets:
     - lib/user_preferences/assets/
     - lib/reminder/assets/
-    - lib/authentication/assets/
+    - assets/
+    - .env
 
 
   # The following line ensures that the Material Icons font is
@@ -116,3 +121,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+
+flutter_native_splash:
+  color: "#173F70"
+  image: assets/planmalogo.png
+  android_12:
+    image: assets/planmalogo.png
+    icon_background_color: "#173F70"
+  fullscreen: false   
+  android_gravity: center
+  ios_content_mode: center

@@ -8,11 +8,8 @@ import 'package:planma_app/goals/widget/widget.dart';
 
 class EditGoalSession extends StatefulWidget {
   final GoalSchedule session;
-  
-  const EditGoalSession({
-    super.key,
-    required this.session
-  });
+
+  const EditGoalSession({super.key, required this.session});
 
   @override
   State<EditGoalSession> createState() => _EditGoalSessionState();
@@ -40,38 +37,64 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     }
   }
 
+  // Method to select time
   Future<void> _selectTime(
       BuildContext context, TextEditingController controller) async {
+    // Parse the existing time from the controller, or use a default time
+    TimeOfDay initialTime;
+    if (controller.text.isNotEmpty) {
+      try {
+        final parsedTime = DateFormat.jm()
+            .parse(controller.text); // Parse time from "h:mm a" format
+        initialTime =
+            TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
+      } catch (e) {
+        initialTime =
+            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+      }
+    } else {
+      initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
+    }
+
+    // Show the time picker with the initial time
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: initialTime,
     );
+
     if (picked != null) {
       setState(() {
-        controller.text = picked.format(context);
+        controller.text = picked.format(context); // Update the controller text
       });
     }
   }
 
   TimeOfDay? _stringToTimeOfDay(String timeString) {
     try {
-      final timeParts = timeString.split(':');
-      final hour = int.parse(timeParts[0].trim());
-      final minuteParts = timeParts[1].split(' ');
-      final minute = int.parse(minuteParts[0].trim());
-      final period = minuteParts[1].toLowerCase();
+      final format =
+          RegExp(r'^(\d{1,2}):(\d{2})\s?(AM|PM)$', caseSensitive: false);
+      final match = format.firstMatch(timeString.trim());
 
-      // Adjust for AM/PM
-      final isPM = period == 'pm';
-      final adjustedHour =
-          (isPM && hour != 12) ? hour + 12 : (hour == 12 && !isPM ? 0 : hour);
+      if (match == null) {
+        throw FormatException('Invalid time format: $timeString');
+      }
+
+      final hour = int.parse(match.group(1)!);
+      final minute = int.parse(match.group(2)!);
+      final period = match.group(3)!.toLowerCase();
+
+      final adjustedHour = (period == 'pm' && hour != 12)
+          ? hour + 12
+          : (hour == 12 && period == 'am' ? 0 : hour);
 
       return TimeOfDay(hour: adjustedHour, minute: minute);
     } catch (e) {
-      return null; // Return null if parsing fails
+      print('Error parsing time: $e');
+      return null;
     }
   }
 
+  /// Converts a string like "HH:mm:ss" to "h:mm a" (for display)
   String _formatTimeForDisplay(String time24) {
     final timeParts = time24.split(':');
     final hour = int.parse(timeParts[0]);
@@ -87,13 +110,14 @@ class _EditGoalSessionState extends State<EditGoalSession> {
       timeOfDay.hour,
       timeOfDay.minute,
     );
-    return DateFormat.jm().format(dateTime);
+    return DateFormat.jm().format(dateTime); // Requires intl package
   }
 
   @override
   void initState() {
     super.initState();
-    _goalNameController = TextEditingController(text: widget.session.goal?.goalName);
+    _goalNameController =
+        TextEditingController(text: widget.session.goal?.goalName);
     _startTimeController = TextEditingController(
         text: _formatTimeForDisplay(widget.session.scheduledStartTime));
     _endTimeController = TextEditingController(
@@ -134,8 +158,8 @@ class _EditGoalSessionState extends State<EditGoalSession> {
       behavior: SnackBarBehavior.floating,
       margin: EdgeInsets.only(
         bottom: MediaQuery.of(context).size.height * 0.4,
-        left: 50,
-        right: 50,
+        left: 20,
+        right: 20,
         top: 100,
       ),
       shape: RoundedRectangleBorder(
@@ -174,12 +198,11 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     try {
       print('Starting to update goal schedule...');
       await provider.updateGoalSchedule(
-        goalScheduleId: widget.session.goalScheduleId!, 
-        goalId: widget.session.goal!.goalId!, 
-        scheduledDate: _scheduledDate!, 
-        startTime: startTime, 
-        endTime: endTime
-      );
+          goalScheduleId: widget.session.goalScheduleId!,
+          goalId: widget.session.goal!.goalId!,
+          scheduledDate: _scheduledDate!,
+          startTime: startTime,
+          endTime: endTime);
 
       // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
@@ -197,8 +220,11 @@ class _EditGoalSessionState extends State<EditGoalSession> {
       if (error.toString().contains('Scheduling overlap')) {
         errorMessage =
             'Scheduling overlap: This time slot is already occupied.';
-      } else if (error.toString().contains('Duplicate goal schedule entry detected')) {
-        errorMessage = 'Duplicate goal schedule entry: This goal schedule already exists.';
+      } else if (error
+          .toString()
+          .contains('Duplicate goal schedule entry detected')) {
+        errorMessage =
+            'Duplicate goal schedule entry: This goal schedule already exists.';
       } else {
         errorMessage = 'Failed to update goal schedule: $error';
       }
@@ -246,7 +272,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
                   _buildTitle('Goal Name'),
                   const SizedBox(height: 12),
                   CustomWidgets.buildTextField(
-                    _goalNameController, 
+                    _goalNameController,
                     'Goal Name',
                     readOnly: true,
                   ),
@@ -295,7 +321,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
               ),
               child: Text(
                 'Edit Goal Session',
