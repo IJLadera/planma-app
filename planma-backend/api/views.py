@@ -74,6 +74,8 @@ class ActivityViewSet(viewsets.ModelViewSet):
             # Fetch the CustomUser instance
             student = CustomUser.objects.get(student_id=student_id)
 
+            print("student: ", student)
+
             # Check for conflicting activity schedule
             duplicate = CustomActivity.objects.filter(
                 Q(scheduled_date=scheduled_date) &
@@ -353,7 +355,7 @@ class EventViewSet(viewsets.ModelViewSet):
             # Fetch the CustomUser instance
             student = CustomUser.objects.get(student_id=student_id)
 
-            # Check for conflicting event schedule
+            # Check for duplicate event schedule
             duplicate = CustomEvents.objects.filter(
                 Q(scheduled_date=scheduled_date) &
                 Q(scheduled_start_time=start_time) &
@@ -718,8 +720,32 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
         # Validate input
         if not all([subject_code, subject_title, semester_id, day_of_week, start_time, end_time, room]):
             return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Day of week mapping (Python: Monday=0, Django __week_day: Sunday=1)
+        weekday_map = {
+            'Monday': 0,
+            'Tuesday': 1,
+            'Wednesday': 2,
+            'Thursday': 3,
+            'Friday': 4,
+            'Saturday': 5,
+            'Sunday': 6
+        }
+
+        if day_of_week not in weekday_map:
+            return Response({'error': 'Invalid day_of_week provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        day_of_week_int = weekday_map[day_of_week]
 
         try:
+            # Fetch semester to get the start and end dates
+            semester = get_object_or_404(CustomSemester, pk=semester_id)
+            start_date = semester.sem_start_date
+            end_date = semester.sem_end_date
+
+            # Fetch the CustomUser instance
+            student = CustomUser.objects.get(student_id=student_id)
+
             # Fetch or create subject uniquely for this user
             subject, created = CustomSubject.objects.get_or_create(
                 subject_code=subject_code,
@@ -734,7 +760,6 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
                 Q(day_of_week=day_of_week) &
                 Q(scheduled_start_time=start_time) &
                 Q(scheduled_end_time=end_time) &
-                Q(room=room) &
                 Q(student_id=student_id)
             ).exists()
 
@@ -743,6 +768,32 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
                     {'error': 'Duplicate schedule entry detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Check for overlaps on that weekday across all weeks
+            # First, get all dates in semester matching day_of_week
+            current_date = start_date
+            conflict_found = False
+            conflicting_date = None
+
+            while current_date <= end_date:
+                if current_date.weekday() == day_of_week_int:
+                    overlapping = ScheduleEntry.objects.filter(
+                        student_id=student,
+                        scheduled_date=current_date,
+                        scheduled_start_time__lt=end_time,
+                        scheduled_end_time__gt=start_time
+                    )
+                    if overlapping.exists():
+                        conflict_found = True
+                        conflicting_date = current_date
+                        break
+                current_date += timedelta(days=1)
+
+            if conflict_found:
+                return Response({
+                    'error_type': 'overlap',
+                    'message': f'Conflict on {conflicting_date.strftime("%Y-%m-%d")}. Please choose a different time or day.'
+                }, status=status.HTTP_400_BAD_REQUEST)
 
             # Create the Class Schedule
             class_schedule = CustomClassSchedule.objects.create(
@@ -753,6 +804,22 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
                 room=room,
                 student_id_id=student_id,
             )
+
+            # Dynamically Create ScheduleEntry for Each Week of the Semester
+            current_date = start_date
+            while current_date <= end_date:
+                if current_date.weekday() == day_of_week_int:
+                    ScheduleEntry.objects.create(
+                        category_type='Class',
+                        reference_id=class_schedule.classsched_id,
+                        student_id=student,
+                        scheduled_date=current_date,
+                        scheduled_start_time=start_time,
+                        scheduled_end_time=end_time
+                    )
+                current_date += timedelta(days=1)
+
+            print(f"ScheduleEntries created successfully for class schedule!")
 
             # Serialize and return the created data
             serializer = self.get_serializer(class_schedule)
@@ -1036,7 +1103,13 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter attended classes based on the logged-in user
-        queryset = AttendedClass.objects.filter(classched_id__student_id=self.request.user)
+        queryset = AttendedClass.objects.filter(classsched_id__student_id=self.request.user)
+
+        # Apply date filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        if start_date and end_date:
+            queryset = queryset.filter(attendance_date__range=[start_date, end_date])
 
         # Apply classsched_id filtering if provided in query params
         classsched_id = self.request.query_params.get('classsched_id')
@@ -1051,7 +1124,7 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
 
         classsched_id = data.get('classsched_id')
         attendance_date = data.get('attendance_date')
-        status = data.get('status')
+        attendance_status = data.get('status', "Did Not Attend")
 
         # Validate input
         if not all([classsched_id, attendance_date]):
@@ -1068,12 +1141,12 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
             attendance, created = AttendedClass.objects.get_or_create(
                 classsched_id=classes,
                 attendance_date=attendance_date,
-                status=status
+                defaults={'status': attendance_status}
             )
 
             if not created:
                 # Update the existing attendance record
-                attendance.status = status
+                attendance.status = attendance_status
                 attendance.save()
                 return Response(
                     {'message': 'Attendance updated successfully.'},
@@ -1089,32 +1162,6 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
                 {'error': 'ClassSchedule not found or not associated with the logged-in user.'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        except Exception as e:
-            return Response(
-                {'error': f'An error occurred: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        data = request.data
-
-        status = data.get('status', None)
-        if status is None:
-            return Response(
-                {'error': 'status field is required.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            # Update the attendance status
-            instance.status = status
-            instance.save()
-
-            # Serialize and return the updated data
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
         except Exception as e:
             return Response(
                 {'error': f'An error occurred: {str(e)}'},

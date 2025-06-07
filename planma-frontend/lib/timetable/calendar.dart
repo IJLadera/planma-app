@@ -54,7 +54,7 @@ class _CalendarViewState extends State<CustomCalendar> {
         status = taskDetails["status"] ?? "Pending";
       } else if (entry.categoryType == "Activity") {
         Map<String, dynamic> activityDetails =
-            await provider.fetchTaskDetails(entry.referenceId);
+            await provider.fetchActivityDetails(entry.referenceId);
         name = activityDetails["activity_name"] ?? "Unknown";
         status = activityDetails["status"] ?? "Pending";
       } else if (entry.categoryType == "Goal") {
@@ -62,6 +62,8 @@ class _CalendarViewState extends State<CustomCalendar> {
             await provider.fetchGoalDetails(entry.referenceId);
         name = goalDetails["goal_name"] ?? "Unknown";
         status = goalDetails["status"] ?? "Pending";
+      } else if (entry.categoryType == "Class") {
+        name = await provider.fetchClassDetails(entry.referenceId);
       }
 
       Map<String, String> eventDetails = {

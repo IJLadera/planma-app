@@ -31,7 +31,6 @@ class ActivityTimeLogProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        // print(data);
 
         // Parse the response body as a list of activity time logs
         _activityTimeLogs =

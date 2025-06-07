@@ -288,22 +288,24 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     value: event.eventType,
                   ),
                   const Divider(),
-                  SizedBox(height: 16),
+                  SizedBox(height: 30),
                   // Show a loading indicator while attendance is being fetched
                   isLoadingAttendance
                       ? Center(child: CircularProgressIndicator())
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Attendance',
-                              style: GoogleFonts.openSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                            Center(
+                              child: Text(
+                                'Attendance',
+                                style: GoogleFonts.openSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF173F70),
+                                ),
                               ),
                             ),
-                            SizedBox(height: 8),
+                            SizedBox(height: 10),
                             CustomWidgets.dropwDownForAttendance(
                               label: 'Attendance',
                               value: selectedAttendance,
@@ -318,7 +320,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             ),
                           ],
                         ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 20),
                 ],
               ),
             ),

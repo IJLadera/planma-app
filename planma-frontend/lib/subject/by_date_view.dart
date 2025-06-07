@@ -37,6 +37,7 @@ class ByDateView extends StatelessWidget {
                         style: GoogleFonts.openSans(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: Color(0xFF173F70)
                         ),
                       ),
                     ),

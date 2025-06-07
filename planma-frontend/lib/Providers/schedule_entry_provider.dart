@@ -129,7 +129,7 @@ class ScheduleEntryProvider with ChangeNotifier {
         };
       }
     } catch (error) {
-      print("Error fetching task details: $error");
+      print("Error fetching activity details: $error");
       return {
         "activity_name": "Unknown Task",
         "status": "Unknown Status",
@@ -171,6 +171,32 @@ class ScheduleEntryProvider with ChangeNotifier {
         "goal_name": "Unknown Goal",
         "status": "Unknown Status",
       };
+    }
+  }
+
+  Future<String> fetchClassDetails(int referenceId) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("${baseUrl}class-schedules/$referenceId/");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return data["subject"]?["subject_code"] ?? "Unknown Classs";
+      } else {
+        return "Unknown Class";
+      }
+    } catch (error) {
+      print("Error fetching class details: $error");
+      return "Unknown Class";
     }
   }
 }
