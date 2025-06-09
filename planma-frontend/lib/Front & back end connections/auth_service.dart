@@ -1,9 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  AuthService() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   Future<Map<String, dynamic>?> signUp({
     required String firstName,
@@ -12,7 +24,7 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final url = "${baseUrl}users/";
+    final url = "$_baseApiUrl/users/";
 
     try {
       final response = await http.post(

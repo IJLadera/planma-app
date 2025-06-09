@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:planma_app/models/task_time_log_model.dart';
@@ -12,14 +13,25 @@ class TaskTimeLogProvider with ChangeNotifier {
   List<TaskTimeLog> get taskTimeLogs => _taskTimeLogs;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  TaskTimeLogProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   //Fetch all task time logs
   Future<void> fetchTaskTimeLogs ({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}task-logs/?start_date=$startDate&end_date=$endDate");
+    final url = Uri.parse("$_baseApiUrl/task-logs/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(
@@ -62,7 +74,7 @@ class TaskTimeLogProvider with ChangeNotifier {
     String formattedDuration = _formatDuration(duration);
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(dateLogged);
 
-    final url = Uri.parse("${baseUrl}task-logs/log_time/");
+    final url = Uri.parse("$_baseApiUrl/task-logs/log_time/");
 
     try {
       final response = await http.post(

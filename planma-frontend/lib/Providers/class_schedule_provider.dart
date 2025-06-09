@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
@@ -24,7 +25,18 @@ class ClassScheduleProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  ClassScheduleProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   //Fetch all subjects
   Future<void> fetchSubjects(SemesterProvider semesterProvider) async {
@@ -72,7 +84,7 @@ class ClassScheduleProvider with ChangeNotifier {
     // Fetch subjects for the active semester
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${baseUrl}subjects/?semester_id=$_activeSemesterId");
+    final url = Uri.parse("$_baseApiUrl/subjects/?semester_id=$_activeSemesterId");
 
     try {
       final response = await http.get(
@@ -100,7 +112,7 @@ class ClassScheduleProvider with ChangeNotifier {
   Future<void> fetchSubjectDetails(String subjectCode) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${baseUrl}subjects/$subjectCode/");
+    final url = Uri.parse("$_baseApiUrl/subjects/$subjectCode/");
 
     try {
       final response = await http.get(
@@ -140,7 +152,7 @@ class ClassScheduleProvider with ChangeNotifier {
 
     // Construct the URL with semester_id
     final url =
-        Uri.parse("${baseUrl}class-schedules/?semester_id=$selectedSemesterId");
+        Uri.parse("$_baseApiUrl/class-schedules/?semester_id=$selectedSemesterId");
 
     try {
       final response = await http.get(
@@ -193,7 +205,7 @@ class ClassScheduleProvider with ChangeNotifier {
           'Duplicate schedule detected locally. Please modify your entry.');
     }
 
-    final url = Uri.parse("${baseUrl}class-schedules/add_schedule/");
+    final url = Uri.parse("$_baseApiUrl/class-schedules/add_schedule/");
     try {
       final response = await http.post(
         url,
@@ -248,7 +260,7 @@ class ClassScheduleProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/$classschedId/");
+    final url = Uri.parse("$_baseApiUrl/class-schedules/$classschedId/");
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
 
@@ -293,7 +305,7 @@ class ClassScheduleProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/$classschedId/");
+    final url = Uri.parse("$_baseApiUrl/class-schedules/$classschedId/");
 
     try {
       final response = await http.delete(

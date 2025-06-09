@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:planma_app/models/goals_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,14 +12,25 @@ class GoalProvider extends ChangeNotifier {
   List<Goal> get goals => _goals;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  GoalProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   //Fetch all goals
   Future<void> fetchGoals() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goals/");
+    final url = Uri.parse("$_baseApiUrl/goals/");
 
     try {
       final response = await http.get(
@@ -72,7 +84,7 @@ class GoalProvider extends ChangeNotifier {
     // If the goal type is "Personal", set semester to null
     int? finalSemester = (goalType == "Personal") ? null : semester;
 
-    final url = Uri.parse("${baseUrl}goals/add_goal/");
+    final url = Uri.parse("$_baseApiUrl/goals/add_goal/");
     try {
       final response = await http.post(
         url,
@@ -140,7 +152,7 @@ class GoalProvider extends ChangeNotifier {
     // If the goal type is "Personal", set semester to null
     int? finalSemester = (goalType == "Personal") ? null : semester;
 
-    final url = Uri.parse("${baseUrl}goals/$goalId/");
+    final url = Uri.parse("$_baseApiUrl/goals/$goalId/");
 
     try {
       final response = await http.put(
@@ -189,7 +201,7 @@ class GoalProvider extends ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goals/$goalId/");
+    final url = Uri.parse("$_baseApiUrl/goals/$goalId/");
 
     try {
       final response = await http.delete(

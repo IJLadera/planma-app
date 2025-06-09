@@ -8,12 +8,24 @@ import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/Providers/task_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthLogout {
   String? _accessToken;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  AuthLogout() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   Future<void> logOut (BuildContext context) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -36,7 +48,7 @@ class AuthLogout {
 
     // _accessToken = sharedPreferences.getString("access");
 
-    // final url = Uri.parse("${baseUrl}auth/token/logout/");
+    // final url = Uri.parse("$_baseApiUrl/auth/token/logout/");
 
     // final response = await http.post(
     //   url,
@@ -58,8 +70,6 @@ class AuthLogout {
 // class AuthLogout {
 //   String? _accessToken;
 //   String? get accessToken => _accessToken;
-
-//   final String baseUrl = "http://127.0.0.1:8000/api/";
 
 //   Future<bool> logOut () async {
 //     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();

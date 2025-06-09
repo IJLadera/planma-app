@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:planma_app/models/goal_schedules_model.dart';
@@ -16,14 +17,25 @@ class GoalScheduleProvider extends ChangeNotifier {
   List<GoalSchedule> get goalschedules => _goalschedules;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  GoalScheduleProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   //Fetch all goal schedules
   Future<void> fetchGoalSchedules() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goal-schedules/");
+    final url = Uri.parse("$_baseApiUrl/goal-schedules/");
 
     try {
       final response = await http.get(
@@ -55,7 +67,7 @@ class GoalScheduleProvider extends ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goal-schedules/?goal_id=$goalId");
+    final url = Uri.parse("$_baseApiUrl/goal-schedules/?goal_id=$goalId");
 
     try {
       final response = await http.get(
@@ -84,7 +96,7 @@ class GoalScheduleProvider extends ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goal-schedules/pending_goal_schedules/?goal_id=$goalId");
+    final url = Uri.parse("$_baseApiUrl/goal-schedules/pending_goal_schedules/?goal_id=$goalId");
 
     try {
       final response = await http.get(
@@ -117,7 +129,7 @@ class GoalScheduleProvider extends ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goal-schedules/completed_goal_schedules/?goal_id=$goalId");
+    final url = Uri.parse("$_baseApiUrl/goal-schedules/completed_goal_schedules/?goal_id=$goalId");
 
     try {
       final response = await http.get(
@@ -198,7 +210,7 @@ class GoalScheduleProvider extends ChangeNotifier {
           'Duplicate goal entry detected locally. Please modify your entry.');
     }
 
-    final url = Uri.parse("${baseUrl}goal-schedules/add_schedule/");
+    final url = Uri.parse("$_baseApiUrl/goal-schedules/add_schedule/");
 
     try {
       final response = await http.post(
@@ -276,7 +288,7 @@ class GoalScheduleProvider extends ChangeNotifier {
           'Duplicate goal entry detected locally. Please modify your entry.');
     }
 
-    final url = Uri.parse("${baseUrl}goal-schedules/$goalScheduleId/");
+    final url = Uri.parse("$_baseApiUrl/goal-schedules/$goalScheduleId/");
 
     try {
       final response = await http.put(
@@ -326,7 +338,7 @@ class GoalScheduleProvider extends ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goal-schedules/$goalScheduleId/");
+    final url = Uri.parse("$_baseApiUrl/goal-schedules/$goalScheduleId/");
 
     try {
       final response = await http.delete(

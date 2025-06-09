@@ -8,6 +8,7 @@ import 'package:http_parser/http_parser.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String username;
@@ -37,15 +38,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late String? _initialProfilePicture;
   String? initProfilePictureFullUrl;
 
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
   @override
   void initState() {
     super.initState();
     _initialProfilePicture = widget.profilePictureUrl;
 
+    // Use dotenv to get API_URL and remove trailing slash if present
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = baseUrl;
+
     // Ensure the URL is absolute
     String getFullImageUrl(String? url) {
       if (url == null || url.isEmpty) return '';
-      return url.startsWith('http') ? url : 'http://127.0.0.1:8000$url';
+      return url.startsWith('http') ? url : '$_baseApiUrl$url';
     }
 
     initProfilePictureFullUrl = getFullImageUrl(_initialProfilePicture);

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:planma_app/models/goal_progress_model.dart';
@@ -15,14 +16,24 @@ class GoalProgressProvider with ChangeNotifier {
   Map<int, List<GoalProgress>> get goalProgressLogsPerGoal => _goalProgressLogsPerGoal;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  GoalProgressProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   //Fetch all goal progress records
   Future<void> fetchGoalProgress({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goal-progress/?start_date=$startDate&end_date=$endDate");
+    final url = Uri.parse("$_baseApiUrl/goal-progress/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(
@@ -63,7 +74,7 @@ class GoalProgressProvider with ChangeNotifier {
     }
 
     final url = Uri.parse(
-        "${baseUrl}goal-progress/?goal_id=${goal.goalId}&start_date=$startDate&end_date=$endDate");
+        "$_baseApiUrl/goal-progress/?goal_id=${goal.goalId}&start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(
@@ -132,7 +143,7 @@ class GoalProgressProvider with ChangeNotifier {
     String formattedDuration = _formatDuration(duration);
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(dateLogged);
 
-    final url = Uri.parse("${baseUrl}goal-progress/log_time/");
+    final url = Uri.parse("$_baseApiUrl/goal-progress/log_time/");
 
     try {
       final response = await http.post(

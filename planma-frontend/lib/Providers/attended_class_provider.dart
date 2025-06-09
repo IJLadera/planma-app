@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:planma_app/models/attended_class_model.dart';
@@ -12,7 +13,18 @@ class AttendedClassProvider with ChangeNotifier {
   List<AttendedClass> get attendedClasses => _attendedClasses;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  AttendedClassProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   // Fetch all attendance logs
   Future<void> fetchAttendedClasses({String? startDate, String? endDate}) async {
@@ -20,8 +32,8 @@ class AttendedClassProvider with ChangeNotifier {
     _accessToken = sharedPreferences.getString("access");
 
     final url = Uri.parse(startDate != null && endDate != null
-        ? "${baseUrl}attended-classes/?start_date=$startDate&end_date=$endDate"
-        : "${baseUrl}attended-classes/");
+        ? "$_baseApiUrl/attended-classes/?start_date=$startDate&end_date=$endDate"
+        : "$_baseApiUrl/attended-classes/");
 
     try {
       final response = await http.get(
@@ -48,7 +60,7 @@ class AttendedClassProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}attended-classes/?classsched_id=$classScheduleId");
+    final url = Uri.parse("$_baseApiUrl/attended-classes/?classsched_id=$classScheduleId");
 
     try {
       final response = await http.get(
@@ -80,7 +92,7 @@ class AttendedClassProvider with ChangeNotifier {
 
     String formattedAttendedDate = DateFormat('yyyy-MM-dd').format(attendedDate);
 
-    final url = Uri.parse("${baseUrl}attended-classes/mark_attendance/");
+    final url = Uri.parse("$_baseApiUrl/attended-classes/mark_attendance/");
 
     try {
       final response = await http.post(

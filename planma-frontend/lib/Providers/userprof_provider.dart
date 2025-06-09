@@ -42,7 +42,7 @@ class UserProfileProvider with ChangeNotifier {
   Future<void> fetchUserProfile() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${_baseApiUrl}/users/me/");
+    final url = Uri.parse("$_baseApiUrl/users/me/");
 
     try {
       final response = await http.get(
@@ -73,7 +73,7 @@ class UserProfileProvider with ChangeNotifier {
   Future<void> updateUserProfile(
       String firstName, String lastName, String username,
       {XFile? imageFile}) async {
-    final url = Uri.parse("${_baseApiUrl}users/update_profile/");
+    final url = Uri.parse("$_baseApiUrl/users/update_profile/");
 
     try {
       var request = http.MultipartRequest("PUT", url);

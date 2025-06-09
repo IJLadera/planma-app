@@ -1,14 +1,26 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthLogin {
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  AuthLogin() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   Future<Map<String, dynamic>?> logIn({
     required String email,
     required String password,
   }) async {
-    final url = "${baseUrl}auth/jwt/create/";
+    final url = "$_baseApiUrl/auth/jwt/create/";
 
     try {
       final response = await http.post(

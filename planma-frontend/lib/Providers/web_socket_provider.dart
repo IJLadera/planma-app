@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WebSocketProvider extends ChangeNotifier {
   WebSocketChannel? _channel;
@@ -22,8 +23,21 @@ class WebSocketProvider extends ChangeNotifier {
   String? _studentId;
   String? get studentId => _studentId;
 
+  // // Base API URL - adjust this to match your backend URL
+  // final String _baseApiUrl = 'http://localhost:8000/api';
+
   // Base API URL - adjust this to match your backend URL
-  final String _baseApiUrl = 'http://localhost:8000/api';
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  WebSocketProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   // Initialize WebSocket with authentication check
   Future<void> initialize({BuildContext? context}) async {
