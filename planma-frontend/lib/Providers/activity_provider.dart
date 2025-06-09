@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:planma_app/models/activity_model.dart';
@@ -16,14 +17,24 @@ class ActivityProvider with ChangeNotifier {
   List<Activity> get activity => _activities;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  ActivityProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   // Fetch pending activities list
   Future<void> fetchPendingActivities () async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}activities/pending_activities/");
+    final url = Uri.parse("$_baseApiUrl/activities/pending_activities/");
 
     try {
       final response = await http.get(
@@ -56,7 +67,7 @@ class ActivityProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}activities/completed_activities/");
+    final url = Uri.parse("$_baseApiUrl/activities/completed_activities/");
 
     try {
       final response = await http.get(
@@ -139,7 +150,7 @@ class ActivityProvider with ChangeNotifier {
           'Duplicate activity entry detected locally. Please modify your entry.');
     }
 
-    final url = Uri.parse("${baseUrl}activities/add_activity/");
+    final url = Uri.parse("$_baseApiUrl/activities/add_activity/");
     try {
       final response = await http.post(
         url,
@@ -220,7 +231,7 @@ class ActivityProvider with ChangeNotifier {
           'Duplicate activity entry detected locally. Please modify your entry.');
     }
 
-    final url = Uri.parse("${baseUrl}activities/$activityId/");
+    final url = Uri.parse("$_baseApiUrl/activities/$activityId/");
 
     try {
       final response = await http.put(
@@ -271,7 +282,7 @@ class ActivityProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}activities/$activityId/");
+    final url = Uri.parse("$_baseApiUrl/activities/$activityId/");
 
     try {
       final response = await http.delete(

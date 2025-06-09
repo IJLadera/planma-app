@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:planma_app/models/attended_events_model.dart';
 import 'dart:convert';
@@ -12,15 +13,26 @@ class AttendedEventsProvider with ChangeNotifier {
   List<AttendedEvent> get attendedEvents => [..._attendedEvents];
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  AttendedEventsProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   Future<void> fetchAttendedEvents({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
     final url = Uri.parse(startDate != null && endDate != null
-        ? "${baseUrl}attended-events/?start_date=$startDate&end_date=$endDate"
-        : "${baseUrl}attended-events/");
+        ? "$_baseApiUrl/attended-events/?start_date=$startDate&end_date=$endDate"
+        : "$_baseApiUrl/attended-events/");
 
     try {
       final response = await http.get(
@@ -53,7 +65,7 @@ class AttendedEventsProvider with ChangeNotifier {
 
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(date);
 
-    final url = Uri.parse("${baseUrl}attended-events/mark_attendance/");
+    final url = Uri.parse("$_baseApiUrl/attended-events/mark_attendance/");
 
     try {
       final response = await http.post(

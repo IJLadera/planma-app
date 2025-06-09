@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,14 +17,24 @@ class EventsProvider with ChangeNotifier {
   List<Event> get events => _events;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  EventsProvider(){
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   // Fetch upcoming events list
   Future<void> fetchUpcomingEvents() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}events/upcoming_events/");
+    final url = Uri.parse("$_baseApiUrl/events/upcoming_events/");
 
     try {
       final response = await http.get(
@@ -57,7 +68,7 @@ class EventsProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}events/past_events/");
+    final url = Uri.parse("$_baseApiUrl/events/past_events/");
 
     try {
       final response = await http.get(
@@ -91,7 +102,7 @@ class EventsProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}events/$eventId/");
+    final url = Uri.parse("$_baseApiUrl/events/$eventId/");
 
     try {
       final response = await http.delete(
@@ -154,7 +165,7 @@ class EventsProvider with ChangeNotifier {
           'Duplicate event entry detected locally. Please modify your entry.');
     }
 
-    final url = Uri.parse("${baseUrl}events/add_event/");
+    final url = Uri.parse("$_baseApiUrl/events/add_event/");
     try {
       final response = await http.post(
         url,
@@ -239,7 +250,7 @@ class EventsProvider with ChangeNotifier {
           'Duplicate event entry detected locally. Please modify your entry.');
     }
 
-    final url = Uri.parse("${baseUrl}events/$eventId/");
+    final url = Uri.parse("$_baseApiUrl/events/$eventId/");
 
     try {
       final response = await http.put(

@@ -25,6 +25,7 @@ import 'package:planma_app/user_profiile/user_page.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/widgets/reminder_notification.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -37,9 +38,21 @@ class _DashboardState extends State<Dashboard> {
   String? selectedSemester;
   int _selectedIndex = 0;
 
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
   @override
   void initState() {
     super.initState();
+
+    // Use dotenv to get API_URL and remove trailing slash if present
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = baseUrl;
+
+    // Providers
     final semesterProvider =
         Provider.of<SemesterProvider>(context, listen: false);
     final classScheduleProvider =
@@ -104,7 +117,7 @@ class _DashboardState extends State<Dashboard> {
     // Ensure the URL is absolute
     String getFullImageUrl(String? url) {
       if (url == null || url.isEmpty) return '';
-      return url.startsWith('http') ? url : 'http://127.0.0.1:8000$url';
+      return url.startsWith('http') ? url : '$_baseApiUrl$url';
     }
 
     String profilePictureFullUrl = getFullImageUrl(profilePictureUrl);

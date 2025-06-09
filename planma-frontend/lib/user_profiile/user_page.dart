@@ -6,7 +6,7 @@ import 'package:planma_app/user_profiile/widget/widget.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -26,6 +26,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   ];
   // String? _selectedTime; // Default value for the dropdown
   String? reminderOffsetTime;
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
 
   String formatReminderOffset(String time) {
     final parts = time.split(':'); // Split "01:00:00" into ["01", "00", "00"]
@@ -37,6 +39,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Use dotenv to get API_URL and remove trailing slash if present
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = baseUrl;
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         await context.read<UserPreferencesProvider>().fetchUserPreferences();
@@ -302,7 +312,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     // Ensure the URL is absolute
     String getFullImageUrl(String? url) {
       if (url == null || url.isEmpty) return '';
-      return url.startsWith('http') ? url : 'http://127.0.0.1:8000$url';
+      return url.startsWith('http') ? url : '$_baseApiUrl$url';
     }
 
     String profilePictureFullUrl = getFullImageUrl(profilePictureUrl);

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SemesterProvider with ChangeNotifier {
   List<Map<String, dynamic>> _semesters = [];
@@ -11,13 +12,24 @@ class SemesterProvider with ChangeNotifier {
   List<Map<String, dynamic>> get semesters => _semesters;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  SemesterProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   //Fetch all semesters
   Future<void> fetchSemesters() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("${baseUrl}semesters/");
+    final url = Uri.parse("$_baseApiUrl/semesters/");
 
     try {
       final response = await http.get(
@@ -45,7 +57,7 @@ class SemesterProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final semesterUrl = Uri.parse("${baseUrl}semesters/$semesterId/"); // Correct URL format
+    final semesterUrl = Uri.parse("$_baseApiUrl/semesters/$semesterId/"); // Correct URL format
 
     try {
       final response = await http.get(
@@ -91,7 +103,7 @@ class SemesterProvider with ChangeNotifier {
       throw Exception("Start date must be before the end date.");
     }
 
-    final url = Uri.parse("${baseUrl}semesters/add_semester/");
+    final url = Uri.parse("$_baseApiUrl/semesters/add_semester/");
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
@@ -151,7 +163,7 @@ class SemesterProvider with ChangeNotifier {
     throw Exception("Start date must be before the end date.");
   }
 
-  final url = Uri.parse("${baseUrl}semesters/$semesterId/");
+  final url = Uri.parse("$_baseApiUrl/semesters/$semesterId/");
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
   _accessToken = sharedPreferences.getString("access");
 
@@ -210,7 +222,7 @@ Future<void> deleteSemester(int semesterId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}semesters/$semesterId/");
+    final url = Uri.parse("$_baseApiUrl/semesters/$semesterId/");
 
     try {
       final response = await http.delete(

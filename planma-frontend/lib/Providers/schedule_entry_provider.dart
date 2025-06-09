@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:planma_app/models/schedule_entry_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ScheduleEntryProvider with ChangeNotifier {
   List<ScheduleEntry> _scheduleEntries = [];
@@ -11,13 +12,24 @@ class ScheduleEntryProvider with ChangeNotifier {
   List<ScheduleEntry> get scheduleEntries => _scheduleEntries;
   String? get accessToken => _accessToken;
 
-  final String baseUrl = "http://127.0.0.1:8000/api/";
+  // Base API URL - adjust this to match your backend URL
+  late final String _baseApiUrl;
+
+  // Constructor to properly initialize the base URL
+  ScheduleEntryProvider() {
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
+    _baseApiUrl = '$baseUrl/api';
+  }
 
   Future<void> fetchScheduleEntries() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}schedule/");
+    final url = Uri.parse("$_baseApiUrl/schedule/");
 
     try {
       final response = await http.get(
@@ -45,7 +57,7 @@ class ScheduleEntryProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}events/$referenceId/");
+    final url = Uri.parse("$_baseApiUrl/events/$referenceId/");
 
     try {
       final response = await http.get(
@@ -71,7 +83,7 @@ class ScheduleEntryProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}tasks/$referenceId/");
+    final url = Uri.parse("$_baseApiUrl/tasks/$referenceId/");
 
     try {
       final response = await http.get(
@@ -106,7 +118,7 @@ class ScheduleEntryProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}activities/$referenceId/");
+    final url = Uri.parse("$_baseApiUrl/activities/$referenceId/");
 
     try {
       final response = await http.get(
@@ -141,7 +153,7 @@ class ScheduleEntryProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}goal-schedules/$referenceId/");
+    final url = Uri.parse("$_baseApiUrl/goal-schedules/$referenceId/");
 
     try {
       final response = await http.get(
@@ -178,7 +190,7 @@ class ScheduleEntryProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("${baseUrl}class-schedules/$referenceId/");
+    final url = Uri.parse("$_baseApiUrl/class-schedules/$referenceId/");
 
     try {
       final response = await http.get(
