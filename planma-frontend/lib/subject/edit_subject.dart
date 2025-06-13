@@ -125,9 +125,11 @@ class _EditClassState extends State<EditClass> {
         TextEditingController(text: widget.classSchedule.subjectTitle);
     _roomController = TextEditingController(text: widget.classSchedule.room);
     _startTimeController = TextEditingController(
-        text: _formatTimeForDisplay(widget.classSchedule.scheduledStartTime));
+      text: _formatTimeForDisplay(widget.classSchedule.scheduledStartTime),
+    );
     _endTimeController = TextEditingController(
-        text: _formatTimeForDisplay(widget.classSchedule.scheduledEndTime));
+      text: _formatTimeForDisplay(widget.classSchedule.scheduledEndTime),
+    );
 
     print(_formatTimeForDisplay(widget.classSchedule.scheduledStartTime));
     print(_formatTimeForDisplay(widget.classSchedule.scheduledEndTime));
