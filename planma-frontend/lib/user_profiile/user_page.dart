@@ -92,8 +92,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               content: Container(
                 height: 200, // Increased height for better space
-                width: 350, // Increased width for better space
-                padding: EdgeInsets.symmetric(horizontal: 5.0), // Added padding
+                width: 300, // Increased width for better space
+                padding: EdgeInsets.symmetric(horizontal: 3.0), // Added padding
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -119,7 +119,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       },
                     ),
                     const SizedBox(
-                        height: 30), // Increased space between fields
+                        height: 20), // Increased space between fields
                     // Wake Time Picker
                     CustomWidget.buildTimePickerField(
                       context: context,
@@ -209,7 +209,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               content: Container(
                 height: 150,
-                width: 250,
+                width: 200,
                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                 child: Column(
                   children: [
