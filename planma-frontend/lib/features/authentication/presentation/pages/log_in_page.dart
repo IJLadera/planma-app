@@ -53,10 +53,10 @@ class _LogInPageState extends State<LogInPage> {
         final success = await userProvider.login(email, password);
 
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text("Welcome User", style: GoogleFonts.openSans())),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //       content: Text("Welcome User", style: GoogleFonts.openSans())),
+          // );
 
           // Initialize the user profile provider
           await context.read<UserProfileProvider>().init();

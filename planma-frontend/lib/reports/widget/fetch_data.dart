@@ -18,10 +18,8 @@ import 'package:planma_app/reports/widget/class.dart';
 
 class ReportsService {
   // ---------- Utility Function ----------
-  static Map<String, String> _calculateDateRange(
-    String selectedTimeFilter,
-    DateTime selectedDate,
-  ) {
+  static Map<String, String> _calculateDateRange(String selectedTimeFilter,
+      DateTime selectedDate, List<Map<String, dynamic>> semesters) {
     // Dates Calculation
     String startDate;
     String endDate;
@@ -45,12 +43,29 @@ class ReportsService {
         endDate = DateFormat('yyyy-12-31').format(selectedDate);
         break;
       case 'Semester':
-        if (selectedDate.month <= 6) {
-          startDate = DateFormat('yyyy-01-01').format(selectedDate);
-          endDate = DateFormat('yyyy-06-30').format(selectedDate);
+        final match = semesters.firstWhere(
+          (s) {
+            final start = DateTime.parse(s['sem_start_date']);
+            final end = DateTime.parse(s['sem_end_date']);
+            return !selectedDate.isBefore(start) && !selectedDate.isAfter(end);
+          },
+          orElse: () => {}, // empty map => “not found”
+        );
+
+        if (match.isNotEmpty) {
+          startDate = DateFormat('yyyy-MM-dd')
+              .format(DateTime.parse(match['sem_start_date']));
+          endDate = DateFormat('yyyy-MM-dd')
+              .format(DateTime.parse(match['sem_end_date']));
         } else {
-          startDate = DateFormat('yyyy-07-01').format(selectedDate);
-          endDate = DateFormat('yyyy-12-31').format(selectedDate);
+          // fallback to your original half‑year logic
+          if (selectedDate.month <= 6) {
+            startDate = DateFormat('yyyy-01-01').format(selectedDate);
+            endDate = DateFormat('yyyy-06-30').format(selectedDate);
+          } else {
+            startDate = DateFormat('yyyy-07-01').format(selectedDate);
+            endDate = DateFormat('yyyy-12-31').format(selectedDate);
+          }
         }
         break;
       case 'Day':
@@ -70,13 +85,56 @@ class ReportsService {
     return (totalMinutes - base + 1440) % 1440;
   }
 
+  // Helper for semesterForDate function
+  static bool isBetween(DateTime date, DateTime start, DateTime end) =>
+      (date.isAtSameMomentAs(start) || date.isAfter(start)) &&
+      (date.isAtSameMomentAs(end) || date.isBefore(end));
+
+  // Returns a semester suitable for selected date.
+  static Map<String, dynamic>? semesterForDate(
+    DateTime date,
+    List<Map<String, dynamic>> semesters,
+  ) {
+    if (semesters.isEmpty) return null;
+
+    // 1. Finds a semester whose range covers selected date.
+    final exact = semesters.firstWhere(
+      (s) => isBetween(
+        date,
+        DateTime.parse(s['sem_start_date']),
+        DateTime.parse(s['sem_end_date']),
+      ),
+      orElse: () => <String, dynamic>{},
+    );
+    if (exact.isNotEmpty) return exact;
+
+    // 2. If none, the most‑recent past semester (latest `sem_end_date` that is < selected date).
+    final past = semesters
+        .where((s) => DateTime.parse(s['sem_end_date']).isBefore(date))
+        .toList()
+      ..sort((a, b) => DateTime.parse(b['sem_end_date'])
+          .compareTo(DateTime.parse(a['sem_end_date'])));
+    if (past.isNotEmpty) return past.first;
+
+    // 3. If 2. even doesn’t exist (all semesters are in the future), the earliest upcoming semester (smallest `sem_start_date`).
+    final future = semesters
+        .where((s) => DateTime.parse(s['sem_start_date']).isAfter(date))
+        .toList()
+      ..sort((a, b) => DateTime.parse(a['sem_start_date'])
+          .compareTo(DateTime.parse(b['sem_start_date'])));
+    if (future.isNotEmpty) return future.first;
+
+    return null; // If no semesters are created at all
+  }
+
   // ---------- Fetching Data Once ----------
   static Future<List<TaskTimeLog>> fetchTaskLogsOnce({
     required TaskTimeLogProvider taskLogProvider,
+    required List<Map<String, dynamic>> semesters,
     required String selectedTimeFilter,
     required DateTime selectedDate,
   }) async {
-    var dateRange = _calculateDateRange(selectedTimeFilter, selectedDate);
+    var dateRange = _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
 
     await taskLogProvider.fetchTaskTimeLogs(
       startDate: dateRange['startDate']!,
@@ -88,10 +146,12 @@ class ReportsService {
 
   static Future<List<AttendedEvent>> fetchEventLogsOnce({
     required AttendedEventsProvider attendedEventsProvider,
+    required List<Map<String, dynamic>> semesters,
     required String selectedTimeFilter,
     required DateTime selectedDate,
   }) async {
-    var dateRange = _calculateDateRange(selectedTimeFilter, selectedDate);
+    var dateRange =
+        _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
 
     await attendedEventsProvider.fetchAttendedEvents(
       startDate: dateRange['startDate']!,
@@ -103,10 +163,12 @@ class ReportsService {
 
   static Future<List<AttendedClass>> fetchClassLogsOnce({
     required AttendedClassProvider attendedClassProvider,
+    required List<Map<String, dynamic>> semesters,
     required String selectedTimeFilter,
     required DateTime selectedDate,
   }) async {
-    var dateRange = _calculateDateRange(selectedTimeFilter, selectedDate);
+    var dateRange =
+        _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
 
     await attendedClassProvider.fetchAttendedClasses(
       startDate: dateRange['startDate']!,
@@ -118,10 +180,12 @@ class ReportsService {
 
   static Future<List<ActivityTimeLog>> fetchActivityLogsOnce({
     required ActivityTimeLogProvider activityLogProvider,
+    required List<Map<String, dynamic>> semesters,
     required String selectedTimeFilter,
     required DateTime selectedDate,
   }) async {
-    var dateRange = _calculateDateRange(selectedTimeFilter, selectedDate);
+    var dateRange =
+        _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
 
     await activityLogProvider.fetchActivityTimeLogs(
       startDate: dateRange['startDate']!,
@@ -131,9 +195,8 @@ class ReportsService {
     return activityLogProvider.activityTimeLogs;
   }
 
-  static Future<List<Goal>> fetchGoalsOnce({
-    required GoalProvider goalProvider
-  }) async {
+  static Future<List<Goal>> fetchGoalsOnce(
+      {required GoalProvider goalProvider}) async {
     await goalProvider.fetchGoals();
 
     return goalProvider.goals;
@@ -141,10 +204,12 @@ class ReportsService {
 
   static Future<List<GoalProgress>> fetchGoalProgressOnce({
     required GoalProgressProvider goalProgressProvider,
+    required List<Map<String, dynamic>> semesters,
     required String selectedTimeFilter,
     required DateTime selectedDate,
   }) async {
-    var dateRange = _calculateDateRange(selectedTimeFilter, selectedDate);
+    var dateRange =
+        _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
 
     await goalProgressProvider.fetchGoalProgress(
       startDate: dateRange['startDate']!,
@@ -156,10 +221,12 @@ class ReportsService {
 
   static Future<List<SleepLog>> fetchSleepLogsOnce({
     required SleepLogProvider sleepLogProvider,
+    required List<Map<String, dynamic>> semesters,
     required String selectedTimeFilter,
     required DateTime selectedDate,
   }) async {
-    var dateRange = _calculateDateRange(selectedTimeFilter, selectedDate);
+    var dateRange =
+        _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
 
     await sleepLogProvider.fetchSleepLogs(
       startDate: dateRange['startDate']!,
@@ -206,12 +273,7 @@ class ReportsService {
           groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, ..., Dec
           break;
         case 'Semester':
-          int month = loggedDate.month;
-          if (month <= 6) {
-            groupKey = 'H1'; // First half of year
-          } else {
-            groupKey = 'H2'; // Second half of year
-          }
+          groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, …
           break;
         default:
           groupKey = DateFormat('yyyy-MM-dd').format(loggedDate); // Exact date
@@ -497,12 +559,7 @@ class ReportsService {
           groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, ..., Dec
           break;
         case 'Semester':
-          int month = loggedDate.month;
-          if (month <= 6) {
-            groupKey = 'H1'; // First half of year
-          } else {
-            groupKey = 'H2'; // Second half of year
-          }
+          groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, …
           break;
         default:
           groupKey = DateFormat('yyyy-MM-dd').format(loggedDate); // Exact date
@@ -554,12 +611,7 @@ class ReportsService {
           groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, ..., Dec
           break;
         case 'Semester':
-          int month = loggedDate.month;
-          if (month <= 6) {
-            groupKey = 'H1'; // First half of year
-          } else {
-            groupKey = 'H2'; // Second half of year
-          }
+          groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, …
           break;
         default:
           groupKey = DateFormat('yyyy-MM-dd').format(loggedDate); // Exact date
@@ -626,12 +678,7 @@ class ReportsService {
           groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, ..., Dec
           break;
         case 'Semester':
-          int month = loggedDate.month;
-          if (month <= 6) {
-            groupKey = 'H1'; // First half of year
-          } else {
-            groupKey = 'H2'; // Second half of year
-          }
+          groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, …
           break;
         default:
           groupKey = DateFormat('yyyy-MM-dd').format(loggedDate); // Exact date
@@ -803,12 +850,7 @@ class ReportsService {
           groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, ..., Dec
           break;
         case 'Semester':
-          int month = loggedDate.month;
-          if (month <= 6) {
-            groupKey = 'H1'; // First half of year
-          } else {
-            groupKey = 'H2'; // Second half of year
-          }
+          groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, …
           break;
         default:
           groupKey = DateFormat('yyyy-MM-dd').format(loggedDate); // Exact date
@@ -859,12 +901,7 @@ class ReportsService {
           groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, ..., Dec
           break;
         case 'Semester':
-          int month = loggedDate.month;
-          if (month <= 6) {
-            groupKey = 'H1'; // First half of year
-          } else {
-            groupKey = 'H2'; // Second half of year
-          }
+          groupKey = DateFormat('MMM').format(loggedDate); // Jan, Feb, …
           break;
         default:
           groupKey = DateFormat('yyyy-MM-dd').format(loggedDate); // Exact date
@@ -880,7 +917,9 @@ class ReportsService {
       }
 
       sleepRegularityByDay.add(SleepRegularity(
-        groupKey, start, end,
+        groupKey,
+        start,
+        end,
       ));
     }
 

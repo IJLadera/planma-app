@@ -51,18 +51,13 @@ class UserProvider extends ChangeNotifier {
         return false;
       }
 
-      // You could add token validation logic here
-      // For example, check if token is expired
-      // If token is expired, try to refresh it
-
       // Get user data from shared preferences
       final userDataString = prefs.getString('user_data');
       if (userDataString != null) {
         _userData = jsonDecode(userDataString);
-      } else {
-        // If user data not available, try to fetch it
-        await fetchUserData();
       }
+      
+      await fetchUserData();
 
       _isAuthenticated = true;
       notifyListeners();
@@ -94,6 +89,14 @@ class UserProvider extends ChangeNotifier {
         // Save user data to shared preferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('user_data', jsonEncode(_userData));
+      } else if (response.statusCode == 401) {
+        // Try to refresh token and retry once
+        final refreshed = await refreshToken();
+        if (refreshed) {
+          return await fetchUserData(); // retry once
+        } else {
+          await logout(); // optional
+        }
       } else {
         print('Failed to fetch user data: ${response.statusCode}');
       }
@@ -206,7 +209,7 @@ class UserProvider extends ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse('$_baseApiUrl/token/refresh/'),
+        Uri.parse('$_baseApiUrl/auth/jwt/refresh/'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'refresh': _refreshToken,

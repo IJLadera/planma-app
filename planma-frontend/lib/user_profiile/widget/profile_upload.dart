@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,17 @@ class _ImageUploadState extends State<ImageUpload> {
   final ImagePicker _picker = ImagePicker();
   XFile? _image;
   bool _isLoading = false;
+
+  // Base API URL
+  late final String _baseApiUrl;
+  @override
+  void initState() {
+    super.initState();
+    // Remove trailing slash if present in API_URL
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    if (baseUrl.endsWith('/')) baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    _baseApiUrl = baseUrl;
+  }
 
   Future<void> _chooseImageFromCamera() async {
     try {
@@ -56,8 +68,7 @@ class _ImageUploadState extends State<ImageUpload> {
         return;
       }
 
-      var uri = Uri.parse(
-          'https://localhost:8000/users/update_profile');
+      var uri = Uri.parse('$_baseApiUrl/users/update_profile/');
       var request = http.MultipartRequest('PUT', uri)
         ..headers['Authorization'] = 'Bearer $accessToken'; // Pass the token
       request.files.add(await http.MultipartFile.fromPath('profile_picture', imageFile.path));

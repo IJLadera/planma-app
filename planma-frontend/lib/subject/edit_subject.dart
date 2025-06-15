@@ -131,9 +131,6 @@ class _EditClassState extends State<EditClass> {
       text: _formatTimeForDisplay(widget.classSchedule.scheduledEndTime),
     );
 
-    print(_formatTimeForDisplay(widget.classSchedule.scheduledStartTime));
-    print(_formatTimeForDisplay(widget.classSchedule.scheduledEndTime));
-
     selectedSemesterId = widget.classSchedule.semesterId;
     selectedDay = widget.classSchedule.dayOfWeek;
 
@@ -150,17 +147,15 @@ class _EditClassState extends State<EditClass> {
             orElse: () => {},
           );
 
-          if (matchedSemester != null) {
+          if (matchedSemester.isNotEmpty) {
             selectedSemester =
                 "${matchedSemester['acad_year_start']} - ${matchedSemester['acad_year_end']} ${matchedSemester['semester']}";
-            print("Pre-selected semester: $selectedSemester");
           } else {
             // Fallback to the first semester if no match is found
             final defaultSemester = semesterProvider.semesters.first;
             selectedSemester =
                 "${defaultSemester['acad_year_start']} - ${defaultSemester['acad_year_end']} ${defaultSemester['semester']}";
             selectedSemesterId = defaultSemester['semester_id'];
-            print("Default selected semester: $selectedSemester");
           }
         }
       });

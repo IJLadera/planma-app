@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WebSocketService {
   WebSocketChannel? _channel;
@@ -36,7 +37,8 @@ class WebSocketService {
       }
 
       // Create WebSocket connection
-      final wsUrl = Uri.parse('ws://localhost:8000/ws/reminders/$_studentId/');
+      final wsBase = dotenv.env['WS_URL'] ?? 'ws://localhost:8000';
+      final wsUrl = Uri.parse('$wsBase/ws/reminders/$_studentId/');
       _channel = WebSocketChannel.connect(wsUrl);
 
       // Listen for messages
