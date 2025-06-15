@@ -319,19 +319,20 @@ class _EditClassState extends State<EditClass> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const Icon(Icons.check_circle, color: Colors.green, size: 22),
               const SizedBox(width: 8),
               Text('Class Schedule updated successfully',
                   style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
+                      GoogleFonts.openSans(fontSize: 15, color: Colors.white)),
             ],
           ),
           duration: const Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
+            left: 10,
+            right: 10,
+            top: 100,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -366,8 +367,8 @@ class _EditClassState extends State<EditClass> {
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.only(
             bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 50,
-            right: 50,
+            left: 10,
+            right: 10,
             top: 100,
           ),
           shape: RoundedRectangleBorder(
@@ -402,185 +403,199 @@ class _EditClassState extends State<EditClass> {
         ),
         backgroundColor: Color(0xFFFFFFFF),
       ),
-      body: Consumer<SemesterProvider>(
-        builder: (context, semesterProvider, child) {
-          // Prepare the dropdown list of semesters
-          List<Map<String, dynamic>> semesters = semesterProvider.semesters;
-          List<String> semesterItems = semesters
-              .map((semester) =>
-                  "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
-              .toList();
-          semesterItems.add('- Add Semester -'); // Add option for new semester
-          print('Semester Items: $semesterItems');
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Consumer<SemesterProvider>(
+          builder: (context, semesterProvider, child) {
+            // Prepare the dropdown list of semesters
+            List<Map<String, dynamic>> semesters = semesterProvider.semesters;
+            List<String> semesterItems = semesters
+                .map((semester) =>
+                    "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
+                .toList();
+            semesterItems
+                .add('- Add Semester -'); // Add option for new semester
+            print('Semester Items: $semesterItems');
 
-          return Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomWidgets.buildTitle('Subject Code'),
-                      const SizedBox(height: 12),
-                      CustomWidgets.buildTextField(
-                          _subjectCodeController, 'Subject Code'),
-                      const SizedBox(height: 12),
-                      CustomWidgets.buildTitle('Subject Title'),
-                      const SizedBox(height: 12),
-                      CustomWidgets.buildTextField(
-                          _subjectTitleController, 'Subject Title'),
-                      const SizedBox(height: 12),
-                      CustomWidgets.buildTitle('Semester'),
-                      const SizedBox(height: 12),
-                      CustomWidgets.buildDropdownField(
-                        label: 'Select Semester',
-                        value: selectedSemester,
-                        items: semesterItems,
-                        onChanged: (value) {
-                          setState(() {
-                            if (value == '- Add Semester -') {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AddSemesterScreen()),
-                              ).then((_) => semesterProvider.fetchSemesters());
-                            } else {
-                              selectedSemester = value;
-
-                              // Split data from value for firstWhere comparison
-                              List<String> semesterParts =
-                                  selectedSemester!.split(' ');
-                              int acadYearStart = int.parse(semesterParts[0]);
-                              int acadYearEnd = int.parse(semesterParts[2]);
-                              String semesterType =
-                                  "${semesterParts[3]} ${semesterParts[4]}";
-
-                              final selectedSemesterMap =
-                                  semesterProvider.semesters.firstWhere(
-                                (semester) {
-                                  return semester['acad_year_start'] ==
-                                          acadYearStart &&
-                                      semester['acad_year_end'] ==
-                                          acadYearEnd &&
-                                      semester['semester'] == semesterType;
-                                },
-                                orElse: () =>
-                                    {}, // Return null if no match is found
-                              );
-
-                              if (selectedSemesterMap != null) {
-                                selectedSemesterId =
-                                    selectedSemesterMap['semester_id'];
-                                print(
-                                    "Found semester ID: ${selectedSemesterMap['semester_id']}");
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomWidgets.buildTitle('Subject Code'),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTextField(
+                            _subjectCodeController, 'Subject Code'),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTitle('Subject Title'),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTextField(
+                            _subjectTitleController, 'Subject Title'),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTitle('Semester'),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildDropdownField(
+                          label: 'Select Semester',
+                          value: selectedSemester,
+                          items: semesterItems,
+                          onChanged: (value) {
+                            setState(() {
+                              if (value == '- Add Semester -') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          AddSemesterScreen()),
+                                ).then(
+                                    (_) => semesterProvider.fetchSemesters());
                               } else {
-                                print("No matching semester found");
+                                selectedSemester = value;
+
+                                // Split data from value for firstWhere comparison
+                                List<String> semesterParts =
+                                    selectedSemester!.split(' ');
+                                int acadYearStart = int.parse(semesterParts[0]);
+                                int acadYearEnd = int.parse(semesterParts[2]);
+                                String semesterType =
+                                    "${semesterParts[3]} ${semesterParts[4]}";
+
+                                final selectedSemesterMap =
+                                    semesterProvider.semesters.firstWhere(
+                                  (semester) {
+                                    return semester['acad_year_start'] ==
+                                            acadYearStart &&
+                                        semester['acad_year_end'] ==
+                                            acadYearEnd &&
+                                        semester['semester'] == semesterType;
+                                  },
+                                  orElse: () =>
+                                      {}, // Return null if no match is found
+                                );
+
+                                if (selectedSemesterMap != null) {
+                                  selectedSemesterId =
+                                      selectedSemesterMap['semester_id'];
+                                  print(
+                                      "Found semester ID: ${selectedSemesterMap['semester_id']}");
+                                } else {
+                                  print("No matching semester found");
+                                }
                               }
-                            }
-                          });
-                        },
-                        backgroundColor: const Color(0xFFF5F5F5),
-                        labelColor: Colors.black,
-                        textColor: Colors.black,
-                        borderRadius: 30.0,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16),
-                        fontSize: 14.0,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Day of the Week',
-                        style: GoogleFonts.openSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF173F70),
+                            });
+                          },
+                          backgroundColor: const Color(0xFFF5F5F5),
+                          labelColor: Colors.black,
+                          textColor: Colors.black,
+                          borderRadius: 30.0,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 16),
+                          fontSize: 14.0,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          for (var day in ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'])
-                            DayButton(
-                              day: day,
-                              isSelected: selectedDay ==
-                                  dayAbbreviationToFull[
-                                      day], // Match full day name
-                              onTap: () {
-                                setState(() {
-                                  if (selectedDay ==
-                                      dayAbbreviationToFull[day]) {
-                                    selectedDay = null;
-                                  } else {
-                                    selectedDay = dayAbbreviationToFull[day];
-                                  }
-                                });
-                              },
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      CustomWidgets.buildTitle('Start and End Time'),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
-                                  _selectTime(context, _startTimeController),
-                              child: AbsorbPointer(
-                                child: CustomWidgets.buildTextField(
-                                    _startTimeController, 'Start Time'),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Day of the Week',
+                          style: GoogleFonts.openSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF173F70),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            for (var day in [
+                              'S',
+                              'M',
+                              'T',
+                              'W',
+                              'Th',
+                              'F',
+                              'Sa'
+                            ])
+                              DayButton(
+                                day: day,
+                                isSelected: selectedDay ==
+                                    dayAbbreviationToFull[
+                                        day], // Match full day name
+                                onTap: () {
+                                  setState(() {
+                                    if (selectedDay ==
+                                        dayAbbreviationToFull[day]) {
+                                      selectedDay = null;
+                                    } else {
+                                      selectedDay = dayAbbreviationToFull[day];
+                                    }
+                                  });
+                                },
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTitle('Start and End Time'),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    _selectTime(context, _startTimeController),
+                                child: AbsorbPointer(
+                                  child: CustomWidgets.buildTextField(
+                                      _startTimeController, 'Start Time'),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
-                                  _selectTime(context, _endTimeController),
-                              child: AbsorbPointer(
-                                child: CustomWidgets.buildTextField(
-                                    _endTimeController, 'End Time'),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    _selectTime(context, _endTimeController),
+                                child: AbsorbPointer(
+                                  child: CustomWidgets.buildTextField(
+                                      _endTimeController, 'End Time'),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      CustomWidgets.buildTitle('Room'),
-                      const SizedBox(height: 12),
-                      CustomWidgets.buildTextField(_roomController, 'Room'),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14.0, vertical: 20.0),
-                child: ElevatedButton(
-                  onPressed: () => _editClassSchedule(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF173F70),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 100),
-                  ),
-                  child: Text(
-                    'Edit Class Schedule',
-                    style: GoogleFonts.openSans(
-                      fontSize: 16,
-                      color: Colors.white,
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTitle('Room'),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTextField(_roomController, 'Room'),
+                      ],
                     ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14.0, vertical: 20.0),
+                  child: ElevatedButton(
+                    onPressed: () => _editClassSchedule(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF173F70),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 80),
+                    ),
+                    child: Text(
+                      'Edit Class Schedule',
+                      style: GoogleFonts.openSans(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
       resizeToAvoidBottomInset: false,
     );

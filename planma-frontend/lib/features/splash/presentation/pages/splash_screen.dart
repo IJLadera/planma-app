@@ -42,9 +42,11 @@ class _SplashControllerState extends State<SplashController> {
   Widget build(BuildContext context) {
     // This build method won't be seen by users as native splash
     // is handling the splash display
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Color(0xFF173F70),
-      body: SizedBox.shrink(),
+      body: SizedBox.fromSize(
+        size: Size(250, 250),
+      ),
     );
   }
 }

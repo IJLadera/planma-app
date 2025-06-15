@@ -92,156 +92,162 @@ class _LogInPageState extends State<LogInPage> {
     return Scaffold(
       resizeToAvoidBottomInset:
           false, // Ensures the screen adjusts for the keyboard
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            children: [
-              SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 90),
-                    Container(
-                      height:
-                          constraints.maxHeight * 0.25, // 25% of screen height
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Login to your account',
-                        style: GoogleFonts.openSans(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF173F70),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 90),
+                      Container(
+                        height: constraints.maxHeight *
+                            0.25, // 25% of screen height
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Login to your account',
+                          style: GoogleFonts.openSans(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF173F70),
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 15),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          _buildTextFormField(
-                            controller: emailController,
-                            labelText: 'Email',
-                            icon: Icons.person,
-                            validator: (value) => value!.isEmpty
-                                ? 'Please enter your email'
-                                : null,
-                          ),
-                          const SizedBox(height: 20),
-                          _buildTextFormField(
-                            controller: passwordController,
-                            labelText: 'Password',
-                            icon: Icons.lock,
-                            obscureText: obscurePassword,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: const Color(0xFF173F70),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  obscurePassword = !obscurePassword;
-                                });
-                              },
+                      SizedBox(height: 15),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            _buildTextFormField(
+                              controller: emailController,
+                              labelText: 'Email',
+                              icon: Icons.person,
+                              validator: (value) => value!.isEmpty
+                                  ? 'Please enter your email'
+                                  : null,
                             ),
-                            validator: (value) => value!.isEmpty
-                                ? 'Please enter your password'
-                                : null,
-                          ),
-                          SizedBox(height: 15),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {
+                            const SizedBox(height: 20),
+                            _buildTextFormField(
+                              controller: passwordController,
+                              labelText: 'Password',
+                              icon: Icons.lock,
+                              obscureText: obscurePassword,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: const Color(0xFF173F70),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    obscurePassword = !obscurePassword;
+                                  });
+                                },
+                              ),
+                              validator: (value) => value!.isEmpty
+                                  ? 'Please enter your password'
+                                  : null,
+                            ),
+                            SizedBox(height: 15),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ForgotPasswordPage(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Forgot Password?',
+                                  style: GoogleFonts.openSans(
+                                    fontSize: 14,
+                                    color: const Color(0xFF173F70),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 15),
+                            SizedBox(
+                              width: double.infinity,
+                              height:
+                                  50, // Match the height of the TextFormField
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _login,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF173F70),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        12), // Match TextFormField's border radius
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal:
+                                          12), // Match horizontal padding
+                                ),
+                                child: _isLoading
+                                    ? CircularProgressIndicator(
+                                        color: Colors.white)
+                                    : Text(
+                                        'Login',
+                                        style: GoogleFonts.openSans(
+                                          fontSize: 18,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 70),
+                    child: RichText(
+                      text: TextSpan(
+                        text: "Don't have an account? ",
+                        style: GoogleFonts.openSans(
+                          color: Color(0xFF173F70),
+                          fontSize: 16,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Sign Up',
+                            style: GoogleFonts.openSans(
+                              color: const Color(0xFF173F70),
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ForgotPasswordPage(),
+                                    builder: (context) => SignUpPage(),
                                   ),
                                 );
                               },
-                              child: Text(
-                                'Forgot Password?',
-                                style: GoogleFonts.openSans(
-                                  fontSize: 14,
-                                  color: const Color(0xFF173F70),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 15),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50, // Match the height of the TextFormField
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _login,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF173F70),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      12), // Match TextFormField's border radius
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12), // Match horizontal padding
-                              ),
-                              child: _isLoading
-                                  ? CircularProgressIndicator(
-                                      color: Colors.white)
-                                  : Text(
-                                      'Login',
-                                      style: GoogleFonts.openSans(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 70),
-                  child: RichText(
-                    text: TextSpan(
-                      text: "Don't have an account? ",
-                      style: GoogleFonts.openSans(
-                        color: Color(0xFF173F70),
-                        fontSize: 16,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'Sign Up',
-                          style: GoogleFonts.openSans(
-                            color: const Color(0xFF173F70),
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => SignUpPage(),
-                                ),
-                              );
-                            },
-                        ),
-                      ],
-                    ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

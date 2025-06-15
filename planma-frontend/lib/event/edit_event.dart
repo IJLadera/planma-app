@@ -270,18 +270,20 @@ class _EditEvent extends State<EditEvent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Edit Event',
-            style: GoogleFonts.openSans(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF173F70),
-            ),
+      appBar: AppBar(
+        title: Text(
+          'Edit Event',
+          style: GoogleFonts.openSans(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
           ),
-          backgroundColor: Color(0xFFFFFFFF),
         ),
-        body: Column(
+        backgroundColor: Color(0xFFFFFFFF),
+      ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
           children: [
             Expanded(
                 child: SingleChildScrollView(
@@ -376,7 +378,7 @@ class _EditEvent extends State<EditEvent> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
                 child: Text(
                   'Edit Event',
@@ -388,6 +390,9 @@ class _EditEvent extends State<EditEvent> {
               ),
             ),
           ],
-        ));
+        ),
+      ),
+      resizeToAvoidBottomInset: false,
+    );
   }
 }

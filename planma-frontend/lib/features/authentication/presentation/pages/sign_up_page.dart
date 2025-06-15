@@ -63,7 +63,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
         // Get the UserProvider
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        
+
         // Call the register method from UserProvider
         final success = await userProvider.register(
           firstName: firstNameController.text,
@@ -134,236 +134,240 @@ class _SignUpPageState extends State<SignUpPage> {
         shadowColor: Color(0xFFFFFFFF),
       ),
       backgroundColor: Color(0xFFFFFFFF),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Sign Up text below AppBar
-                Text(
-                  'Sign Up',
-                  style: GoogleFonts.openSans(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF173F70),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(), 
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Sign Up text below AppBar
+                  Text(
+                    'Sign Up',
+                    style: GoogleFonts.openSans(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF173F70),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20), // Spacing between title and form
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: firstNameController,
-                        decoration: InputDecoration(
-                          labelStyle: GoogleFonts.openSans(),
-                          labelText: 'First Name',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        validator: (value) => value!.isEmpty
-                            ? 'Please enter your first name'
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: lastNameController,
-                        decoration: InputDecoration(
-                          labelStyle: GoogleFonts.openSans(),
-                          labelText: 'Last Name',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        validator: (value) => value!.isEmpty
-                            ? 'Please enter your last name'
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: userNameController,
-                        decoration: InputDecoration(
-                          labelStyle: GoogleFonts.openSans(),
-                          labelText: 'Username',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        validator: (value) => value!.isEmpty
-                            ? 'Please enter your username'
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          labelStyle: GoogleFonts.openSans(),
-                          labelText: 'Email',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Email is required';
-                          }
-                          final emailRegex = RegExp(
-                              r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-                          if (!emailRegex.hasMatch(value)) {
-                            return 'Enter a valid email address';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: passwordController,
-                        obscureText: obscurePassword,
-                        decoration: InputDecoration(
-                          labelStyle: GoogleFonts.openSans(),
-                          labelText: 'Password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility),
-                            onPressed: () {
-                              setState(() {
-                                obscurePassword = !obscurePassword;
-                              });
-                            },
-                          ),
-                        ),
-                        validator: (value) => value!.isEmpty
-                            ? 'Please enter your password'
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: confirmPasswordController,
-                        obscureText: obscureConfirmPassword,
-                        decoration: InputDecoration(
-                          labelStyle: GoogleFonts.openSans(),
-                          labelText: 'Confirm Password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(obscureConfirmPassword
-                                ? Icons.visibility_off
-                                : Icons.visibility),
-                            onPressed: () {
-                              setState(() {
-                                obscureConfirmPassword =
-                                    !obscureConfirmPassword;
-                              });
-                            },
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != passwordController.text) {
-                            return 'Passwords do not match';
-                          }
-                          if (value == null || value.isEmpty) {
-                            return 'Password is required';
-                          }
-                          if (value.length < 8) {
-                            return 'Password must be at least 8 characters long';
-                          }
-                          // if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                          //   return 'Password must have at least one uppercase letter';
-                          // }
-                          if (!RegExp(r'[0-9]').hasMatch(value)) {
-                            return 'Password must have at least one number';
-                          }
-                          if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
-                              .hasMatch(value)) {
-                            return 'Password must have at least one special character';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 50),
-                      ElevatedButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () {
-                                if (_formKey.currentState!.validate()) {
-                                  _signUp(context);
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: MediaQuery.of(context).size.width *
-                                0.25, // 25% of screen width
-                            vertical: MediaQuery.of(context).size.height *
-                                0.02, // 2% of screen height
-                          ),
-                          backgroundColor: const Color(0xFF173F70),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                'Create Account',
-                                style: GoogleFonts.openSans(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                      const SizedBox(height: 20),
-                      RichText(
-                        text: TextSpan(
-                          text: 'Already have an account? ',
-                          style: GoogleFonts.openSans(
-                            color: Color(0xFF173F70),
-                          ),
-                          children: [
-                            TextSpan(
-                              text: 'Login',
-                              style: GoogleFonts.openSans(
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF173F70),
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => LogInPage()),
-                                  );
-                                },
+                  const SizedBox(height: 20), // Spacing between title and form
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: firstNameController,
+                          decoration: InputDecoration(
+                            labelStyle: GoogleFonts.openSans(),
+                            labelText: 'First Name',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          ],
+                          ),
+                          validator: (value) => value!.isEmpty
+                              ? 'Please enter your first name'
+                              : null,
                         ),
-                      )
-                    ],
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: lastNameController,
+                          decoration: InputDecoration(
+                            labelStyle: GoogleFonts.openSans(),
+                            labelText: 'Last Name',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          validator: (value) => value!.isEmpty
+                              ? 'Please enter your last name'
+                              : null,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: userNameController,
+                          decoration: InputDecoration(
+                            labelStyle: GoogleFonts.openSans(),
+                            labelText: 'Username',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          validator: (value) => value!.isEmpty
+                              ? 'Please enter your username'
+                              : null,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: emailController,
+                          decoration: InputDecoration(
+                            labelStyle: GoogleFonts.openSans(),
+                            labelText: 'Email',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Email is required';
+                            }
+                            final emailRegex = RegExp(
+                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                            if (!emailRegex.hasMatch(value)) {
+                              return 'Enter a valid email address';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: passwordController,
+                          obscureText: obscurePassword,
+                          decoration: InputDecoration(
+                            labelStyle: GoogleFonts.openSans(),
+                            labelText: 'Password',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility),
+                              onPressed: () {
+                                setState(() {
+                                  obscurePassword = !obscurePassword;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) => value!.isEmpty
+                              ? 'Please enter your password'
+                              : null,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: confirmPasswordController,
+                          obscureText: obscureConfirmPassword,
+                          decoration: InputDecoration(
+                            labelStyle: GoogleFonts.openSans(),
+                            labelText: 'Confirm Password',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(obscureConfirmPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility),
+                              onPressed: () {
+                                setState(() {
+                                  obscureConfirmPassword =
+                                      !obscureConfirmPassword;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please confirm your password';
+                            }
+                            if (value != passwordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            if (value == null || value.isEmpty) {
+                              return 'Password is required';
+                            }
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters long';
+                            }
+                            // if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                            //   return 'Password must have at least one uppercase letter';
+                            // }
+                            if (!RegExp(r'[0-9]').hasMatch(value)) {
+                              return 'Password must have at least one number';
+                            }
+                            if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
+                                .hasMatch(value)) {
+                              return 'Password must have at least one special character';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 50),
+                        ElevatedButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  if (_formKey.currentState!.validate()) {
+                                    _signUp(context);
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: MediaQuery.of(context).size.width *
+                                  0.25, // 25% of screen width
+                              vertical: MediaQuery.of(context).size.height *
+                                  0.02, // 2% of screen height
+                            ),
+                            backgroundColor: const Color(0xFF173F70),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: _isLoading
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'Create Account',
+                                  style: GoogleFonts.openSans(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(height: 20),
+                        RichText(
+                          text: TextSpan(
+                            text: 'Already have an account? ',
+                            style: GoogleFonts.openSans(
+                              color: Color(0xFF173F70),
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Login',
+                                style: GoogleFonts.openSans(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF173F70),
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => LogInPage()),
+                                    );
+                                  },
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }

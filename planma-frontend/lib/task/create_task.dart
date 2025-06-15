@@ -119,8 +119,8 @@ class _CreateTaskState extends State<AddTaskScreen> {
       behavior: SnackBarBehavior.floating,
       margin: EdgeInsets.only(
         bottom: MediaQuery.of(context).size.height * 0.4,
-        left: 50,
-        right: 50,
+        left: 20,
+        right: 20,
         top: 100,
       ),
       shape: RoundedRectangleBorder(
@@ -270,128 +270,132 @@ class _CreateTaskState extends State<AddTaskScreen> {
         ),
         backgroundColor: Color(0xFFFFFFFF),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  CustomWidgets.buildTitle(
-                    'Task Name',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTextField(
-                    _taskNameController,
-                    'Task Name',
-                    style: GoogleFonts.openSans(),
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTitle('Description'),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTextField(
-                    _descriptionController,
-                    'Description',
-                    style: GoogleFonts.openSans(),
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTitle('Scheduled Date'),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildDateTile(
-                    'Scheduled Date',
-                    _scheduledDate,
-                    context,
-                    true,
-                    (context, date) => _selectDate(context, true),
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTitle('Start and End Time'),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'Start Time',
-                          _startTimeController,
-                          context,
-                          (context) =>
-                              _selectTime(context, _startTimeController),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    CustomWidgets.buildTitle(
+                      'Task Name',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTextField(
+                      _taskNameController,
+                      'Task Name',
+                      style: GoogleFonts.openSans(),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTitle('Description'),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTextField(
+                      _descriptionController,
+                      'Description',
+                      style: GoogleFonts.openSans(),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTitle('Scheduled Date'),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildDateTile(
+                      'Scheduled Date',
+                      _scheduledDate,
+                      context,
+                      true,
+                      (context, date) => _selectDate(context, true),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTitle('Start and End Time'),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomWidgets.buildTimeField(
+                            'Start Time',
+                            _startTimeController,
+                            context,
+                            (context) =>
+                                _selectTime(context, _startTimeController),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'End Time',
-                          _endTimeController,
-                          context,
-                          (context) => _selectTime(context, _endTimeController),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CustomWidgets.buildTimeField(
+                            'End Time',
+                            _endTimeController,
+                            context,
+                            (context) =>
+                                _selectTime(context, _endTimeController),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTitle('Deadline'),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildDateTile(
-                    'Deadline',
-                    _deadline,
-                    context,
-                    false,
-                    (context, date) => _selectDate(context, false),
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTitle('Subject'),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildDropdownField(
-                    label: 'Choose Subject',
-                    value: _subject,
-                    items: Provider.of<ClassScheduleProvider>(context)
-                        .subjects
-                        .map((subject) => DropdownMenuItem(
-                              value: subject.subjectId,
-                              child: Text(subject.subjectCode),
-                            ))
-                        .toList(),
-                    onChanged: (int? value) {
-                      setState(() {
-                        _subject = value;
-                      });
-                    },
-                    backgroundColor: const Color(0xFFF5F5F5),
-                    labelColor: Colors.black,
-                    textColor: Colors.black,
-                    borderRadius: 30.0,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    fontSize: 14.0,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-            child: ElevatedButton(
-              onPressed: () => _submitTask(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF173F70),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-              ),
-              child: Text(
-                'Create Task',
-                style: GoogleFonts.openSans(
-                  fontSize: 16,
-                  color: Colors.white,
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTitle('Deadline'),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildDateTile(
+                      'Deadline',
+                      _deadline,
+                      context,
+                      false,
+                      (context, date) => _selectDate(context, false),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTitle('Subject'),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildDropdownField(
+                      label: 'Choose Subject',
+                      value: _subject,
+                      items: Provider.of<ClassScheduleProvider>(context)
+                          .subjects
+                          .map((subject) => DropdownMenuItem(
+                                value: subject.subjectId,
+                                child: Text(subject.subjectCode),
+                              ))
+                          .toList(),
+                      onChanged: (int? value) {
+                        setState(() {
+                          _subject = value;
+                        });
+                      },
+                      backgroundColor: const Color(0xFFF5F5F5),
+                      labelColor: Colors.black,
+                      textColor: Colors.black,
+                      borderRadius: 30.0,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
+                      fontSize: 14.0,
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+              child: ElevatedButton(
+                onPressed: () => _submitTask(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF173F70),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                ),
+                child: Text(
+                  'Create Task',
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       resizeToAvoidBottomInset: false,
     );

@@ -216,124 +216,132 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
         ),
         backgroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            _buildTitle('Academic Year'),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                // Start Year Button
-                CustomWidgets.buildYearPickerButton(
-                  context: context,
-                  hint: "Start Year", // Hint for start year
-                  isStartYear: true, // Set to true for start year
-                  selectedStartYear:
-                      _selectedStartYear, // Selected start year (can be null if not selected)
-                  selectedEndYear:
-                      null, // Don't pass the end year here, it's only for start year
-                  onTap: (BuildContext context, bool isStartYear) {
-                    // Trigger the year picker for the start year
-                    _showYearPicker(context, isStartYear);
-                  },
-                ),
-                const SizedBox(width: 12),
-                // End Year Button
-                CustomWidgets.buildYearPickerButton(
-                  context: context,
-                  hint: "End Year", // Hint for end year
-                  isStartYear: false, // Set to false for end year
-                  selectedStartYear: null, // Don't pass the start year here
-                  selectedEndYear:
-                      _selectedEndYear, // Selected end year (can be null if not selected)
-                  onTap: (BuildContext context, bool isStartYear) {
-                    // Trigger the year picker for the end year
-                    _showYearPicker(context, isStartYear);
-                  },
-                )
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildTitle('Year Level'),
-            const SizedBox(height: 12),
-            CustomWidgets.buildDropdownField(
-              label: 'Choose Year Level',
-              value: _selectedYearLevel,
-              items: _yearLevelOptions,
-              onChanged: (value) {
-                setState(() => _selectedYearLevel = value);
-              },
-              backgroundColor: const Color(0xFFF5F5F5),
-              labelColor: Colors.black,
-              textColor: Colors.black,
-              borderRadius: 30.0,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              fontSize: 14.0,
-            ),
-            const SizedBox(height: 12),
-            _buildTitle('Semester'),
-            const SizedBox(height: 12),
-            CustomWidgets.buildDropdownField(
-              label: 'Choose Semester',
-              value: _selectedSemester,
-              items: _semesterOptions,
-              onChanged: (value) {
-                setState(() => _selectedSemester = value);
-              },
-              backgroundColor: const Color(0xFFF5F5F5),
-              labelColor: Colors.black,
-              textColor: Colors.black,
-              borderRadius: 30.0,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              fontSize: 14.0,
-            ),
-            const SizedBox(height: 12),
-            _buildTitle('Semester Dates'),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                CustomWidgets.buildDateTile(
-                  'Start Date',
-                  startDateController,
-                  context,
-                  true, // Pass true for start date
-                  (BuildContext context, TextEditingController controller) {
-                    _selectDate(context, true); // Pass true for start date
-                  },
-                ),
-                SizedBox(width: 10),
-                CustomWidgets.buildDateTile(
-                  'End Date',
-                  endDateController,
-                  context,
-                  false, // Pass false for end date
-                  (BuildContext context, TextEditingController controller) {
-                    _selectDate(context, false); // Pass false for end date
-                  },
-                )
-              ],
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _submitSemester(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF173F70),
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                ),
-                child: const Text('Add Semester',
-                    style: TextStyle(fontSize: 16, color: Colors.white)),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              _buildTitle('Academic Year'),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  // Start Year Button
+                  CustomWidgets.buildYearPickerButton(
+                    context: context,
+                    hint: "Start Year", // Hint for start year
+                    isStartYear: true, // Set to true for start year
+                    selectedStartYear:
+                        _selectedStartYear, // Selected start year (can be null if not selected)
+                    selectedEndYear:
+                        null, // Don't pass the end year here, it's only for start year
+                    onTap: (BuildContext context, bool isStartYear) {
+                      // Trigger the year picker for the start year
+                      _showYearPicker(context, isStartYear);
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  // End Year Button
+                  CustomWidgets.buildYearPickerButton(
+                    context: context,
+                    hint: "End Year", // Hint for end year
+                    isStartYear: false, // Set to false for end year
+                    selectedStartYear: null, // Don't pass the start year here
+                    selectedEndYear:
+                        _selectedEndYear, // Selected end year (can be null if not selected)
+                    onTap: (BuildContext context, bool isStartYear) {
+                      // Trigger the year picker for the end year
+                      _showYearPicker(context, isStartYear);
+                    },
+                  )
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              _buildTitle('Year Level'),
+              const SizedBox(height: 12),
+              CustomWidgets.buildDropdownField(
+                label: 'Choose Year Level',
+                value: _selectedYearLevel,
+                items: _yearLevelOptions,
+                onChanged: (value) {
+                  setState(() => _selectedYearLevel = value);
+                },
+                backgroundColor: const Color(0xFFF5F5F5),
+                labelColor: Colors.black,
+                textColor: Colors.black,
+                borderRadius: 30.0,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                fontSize: 14.0,
+              ),
+              const SizedBox(height: 12),
+              _buildTitle('Semester'),
+              const SizedBox(height: 12),
+              CustomWidgets.buildDropdownField(
+                label: 'Choose Semester',
+                value: _selectedSemester,
+                items: _semesterOptions,
+                onChanged: (value) {
+                  setState(() => _selectedSemester = value);
+                },
+                backgroundColor: const Color(0xFFF5F5F5),
+                labelColor: Colors.black,
+                textColor: Colors.black,
+                borderRadius: 30.0,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                fontSize: 14.0,
+              ),
+              const SizedBox(height: 12),
+              _buildTitle('Semester Dates'),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  CustomWidgets.buildDateTile(
+                    'Start Date',
+                    startDateController,
+                    context,
+                    true, // Pass true for start date
+                    (BuildContext context, TextEditingController controller) {
+                      _selectDate(context, true); // Pass true for start date
+                    },
+                  ),
+                  SizedBox(width: 10),
+                  CustomWidgets.buildDateTile(
+                    'End Date',
+                    endDateController,
+                    context,
+                    false, // Pass false for end date
+                    (BuildContext context, TextEditingController controller) {
+                      _selectDate(context, false); // Pass false for end date
+                    },
+                  )
+                ],
+              ),
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _submitSemester(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF173F70),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 100),
+                  ),
+                  child: const Text('Add Semester',
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 

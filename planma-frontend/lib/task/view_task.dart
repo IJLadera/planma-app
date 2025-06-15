@@ -79,8 +79,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).size.height * 0.4,
-          left: 50,
-          right: 50,
+          left: 20,
+          right: 20,
           top: 100,
         ),
         shape: RoundedRectangleBorder(
