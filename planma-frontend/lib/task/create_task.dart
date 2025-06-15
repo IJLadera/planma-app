@@ -380,7 +380,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
               ),
               child: Text(
                 'Create Task',
