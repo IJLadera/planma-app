@@ -61,19 +61,33 @@ class _DashboardState extends State<Dashboard> {
     // final socketService = Provider.of<WebSocketService>(context, listen: false);
     // socketService.disconnect();  // Disconnect WebSocket when widget is disposed
     // super.dispose();
-    
+
     semesterProvider.fetchSemesters().then((_) {
       if (semesterProvider.semesters.isNotEmpty) {
-        // Set the default selected semester
+        final now = DateTime.now();
+
+        // Find the most recent semester that has already started
+        final validSemesters = semesterProvider.semesters.where((semester) {
+          final startDate = DateTime.parse(semester['sem_start_date']);
+          return startDate.isBefore(now) || startDate.isAtSameMomentAs(now);
+        }).toList();
+
+        // Sort by start date descending to get the most recent one
+        validSemesters.sort((a, b) => DateTime.parse(b['sem_start_date'])
+            .compareTo(DateTime.parse(a['sem_start_date'])));
+
+        final selected = validSemesters.isNotEmpty
+            ? validSemesters.first
+            : semesterProvider
+                .semesters.first; // fallback to first if none match
+
         setState(() {
           selectedSemester =
-              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+              "${selected['acad_year_start']} - ${selected['acad_year_end']} ${selected['semester']}";
         });
 
-        // Automatically fetch class schedules for the default semester
-        final defaultSemesterId = semesterProvider.semesters[0]['semester_id'];
         classScheduleProvider.fetchClassSchedules(
-          selectedSemesterId: defaultSemesterId,
+          selectedSemesterId: selected['semester_id'],
         );
       } else {
         setState(() {

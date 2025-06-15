@@ -13,7 +13,7 @@ class UserPreferencesProvider with ChangeNotifier {
   List<UserPreferences> get userPreferences => _userPreferences;
   String? get accessToken => _accessToken;
 
-  // Base API URL - adjust this to match your backend URL
+  // Base API URL
   late final String _baseApiUrl;
 
   // Constructor to properly initialize the base URL

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:planma_app/models/sleep_log_model.dart';
+import 'package:planma_app/reports/widget/fetch_data.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:planma_app/reports/widget/class.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,6 +13,7 @@ class TaskCharts extends StatelessWidget {
   final List<TaskTimeSpent> taskTimeSpent;
   final List<TaskTimeDistribution> taskTimeDistribution;
   final List<FinishedTask> taskFinished;
+  final List<Map<String, dynamic>> semesters;
 
   const TaskCharts({
     super.key,
@@ -22,6 +23,7 @@ class TaskCharts extends StatelessWidget {
     required this.taskTimeSpent,
     required this.taskTimeDistribution,
     required this.taskFinished,
+    required this.semesters,
   });
 
   List<String> generateXAxisLabels() {
@@ -42,7 +44,16 @@ class TaskCharts extends StatelessWidget {
         return List.generate(
             daysInMonth, (index) => (index + 1).toString().padLeft(2, '0'));
       case 'Semester':
-        return ['H1', 'H2']; // Adjust based on semester
+        final sem = ReportsService.semesterForDate(selectedDate, semesters);
+        if (sem == null) return [];
+        final start = DateTime.parse(sem['sem_start_date']);
+        final end = DateTime.parse(sem['sem_end_date']);
+        final monthCount =
+            (end.year - start.year) * 12 + end.month - start.month + 1;
+        return List.generate(monthCount, (i) {
+          final m = DateTime(start.year, start.month + i, 1);
+          return DateFormat('MMM').format(m);
+        });
       case 'Year':
         return [
           'Jan',
@@ -68,8 +79,9 @@ class TaskCharts extends StatelessWidget {
       for (var item in taskTimeSpent) item.day: item
     };
 
-    double totalTimeSpent =
-        taskTimeSpent.isNotEmpty ? taskTimeSpent.first.totalTimeSpent : 0;
+    double totalTimeSpent = taskTimeSpent.isNotEmpty 
+        ? taskTimeSpent.first.totalTimeSpent 
+        : 0;
 
     return labels.map((label) {
       return mappedData[label] ?? TaskTimeSpent(label, 0, totalTimeSpent);
@@ -110,10 +122,9 @@ class TaskCharts extends StatelessWidget {
                 fontWeight: FontWeight.w400,
               ),
               minimum: 0,
-              maximum: filledData
-                      .map((e) => e.minutes)
-                      .reduce((a, b) => a > b ? a : b) +
-                  10,
+              maximum: filledData.isNotEmpty
+                  ? filledData.map((e) => e.minutes).reduce((a, b) => a > b ? a : b) + 10
+                  : 10,
             ),
             series: <CartesianSeries<TaskTimeSpent, String>>[
               ColumnSeries<TaskTimeSpent, String>(
@@ -492,6 +503,7 @@ class ActivitiesChart extends StatelessWidget {
   final DateTime selectedDate;
   final List<ActivitiesTimeSpent> activitiesTimeSpent;
   final List<ActivitiesDone> activitiesDone;
+  final List<Map<String, dynamic>> semesters;
 
   const ActivitiesChart({
     super.key,
@@ -500,6 +512,7 @@ class ActivitiesChart extends StatelessWidget {
     required this.selectedDate,
     required this.activitiesTimeSpent,
     required this.activitiesDone,
+    required this.semesters,
   });
 
   List<String> generateXAxisLabels() {
@@ -520,7 +533,16 @@ class ActivitiesChart extends StatelessWidget {
         return List.generate(
             daysInMonth, (index) => (index + 1).toString().padLeft(2, '0'));
       case 'Semester':
-        return ['H1', 'H2']; // Adjust based on semester
+        final sem = ReportsService.semesterForDate(selectedDate, semesters);
+        if (sem == null) return [];
+        final start = DateTime.parse(sem['sem_start_date']);
+        final end = DateTime.parse(sem['sem_end_date']);
+        final monthCount =
+            (end.year - start.year) * 12 + end.month - start.month + 1;
+        return List.generate(monthCount, (i) {
+          final m = DateTime(start.year, start.month + i, 1);
+          return DateFormat('MMM').format(m);
+        });
       case 'Year':
         return [
           'Jan',
@@ -560,8 +582,9 @@ class ActivitiesChart extends StatelessWidget {
       for (var item in activitiesDone) item.day: item
     };
 
-    int totalCount =
-        activitiesDone.isNotEmpty ? activitiesDone.first.totalActivityDone : 0;
+    int totalCount = activitiesDone.isNotEmpty 
+        ? activitiesDone.first.totalActivityDone 
+        : 0;
 
     return labels.map((label) {
       return mappedData[label] ?? ActivitiesDone(label, 0, totalCount);
@@ -602,10 +625,9 @@ class ActivitiesChart extends StatelessWidget {
                 fontWeight: FontWeight.w400,
               ),
               minimum: 0,
-              maximum: filledData1
-                      .map((e) => e.minutes)
-                      .reduce((a, b) => a > b ? a : b) +
-                  10,
+              maximum: filledData1.isNotEmpty
+                  ? filledData1.map((e) => e.minutes).reduce((a, b) => a > b ? a : b) + 10
+                  : 10,
             ),
             series: <CartesianSeries>[
               ColumnSeries<ActivitiesTimeSpent, String>(
@@ -676,6 +698,7 @@ class GoalsCharts extends StatelessWidget {
   final List<GoalTimeSpent> goalTimeSpent;
   final List<GoalTimeDistribution> goalTimeDistribution;
   final List<GoalCompletionCount> goalCompletionCount;
+  final List<Map<String, dynamic>> semesters;
 
   const GoalsCharts({
     super.key,
@@ -685,6 +708,7 @@ class GoalsCharts extends StatelessWidget {
     required this.goalTimeSpent,
     required this.goalTimeDistribution,
     required this.goalCompletionCount,
+    required this.semesters,
   });
 
   List<String> generateXAxisLabels() {
@@ -705,7 +729,16 @@ class GoalsCharts extends StatelessWidget {
         return List.generate(
             daysInMonth, (index) => (index + 1).toString().padLeft(2, '0'));
       case 'Semester':
-        return ['H1', 'H2']; // Adjust based on semester
+        final sem = ReportsService.semesterForDate(selectedDate, semesters);
+        if (sem == null) return [];
+        final start = DateTime.parse(sem['sem_start_date']);
+        final end = DateTime.parse(sem['sem_end_date']);
+        final monthCount =
+            (end.year - start.year) * 12 + end.month - start.month + 1;
+        return List.generate(monthCount, (i) {
+          final m = DateTime(start.year, start.month + i, 1);
+          return DateFormat('MMM').format(m);
+        });
       case 'Year':
         return [
           'Jan',
@@ -776,10 +809,9 @@ class GoalsCharts extends StatelessWidget {
                 fontWeight: FontWeight.w400,
               ),
               minimum: 0,
-              maximum: filledData
-                      .map((e) => e.minutes)
-                      .reduce((a, b) => a > b ? a : b) +
-                  10,
+              maximum: filledData.isNotEmpty
+                  ? filledData.map((e) => e.minutes).reduce((a, b) => a > b ? a : b) + 10
+                  : 10,
             ),
             series: <CartesianSeries>[
               ColumnSeries<GoalTimeSpent, String>(
@@ -890,6 +922,7 @@ class SleepCharts extends StatelessWidget {
   final DateTime selectedDate;
   final List<SleepDuration> sleepDuration;
   final List<SleepRegularity> sleepRegularity;
+  final List<Map<String, dynamic>> semesters;
 
   const SleepCharts({
     super.key,
@@ -898,6 +931,7 @@ class SleepCharts extends StatelessWidget {
     required this.selectedDate,
     required this.sleepDuration,
     required this.sleepRegularity,
+    required this.semesters,
   });
 
   List<String> generateXAxisLabels() {
@@ -918,7 +952,16 @@ class SleepCharts extends StatelessWidget {
         return List.generate(
             daysInMonth, (index) => (index + 1).toString().padLeft(2, '0'));
       case 'Semester':
-        return ['H1', 'H2']; // Adjust based on semester
+        final sem = ReportsService.semesterForDate(selectedDate, semesters);
+        if (sem == null) return [];
+        final start = DateTime.parse(sem['sem_start_date']);
+        final end = DateTime.parse(sem['sem_end_date']);
+        final monthCount =
+            (end.year - start.year) * 12 + end.month - start.month + 1;
+        return List.generate(monthCount, (i) {
+          final m = DateTime(start.year, start.month + i, 1);
+          return DateFormat('MMM').format(m);
+        });
       case 'Year':
         return [
           'Jan',
@@ -951,26 +994,6 @@ class SleepCharts extends StatelessWidget {
       return mappedData[label] ?? SleepDuration(label, 0, averageHours);
     }).toList();
   }
-
-  // TimeOfDay parseTimeOfDay(String timeString) {
-  //   final parts = timeString.split(':').map(int.parse).toList();
-  //   return TimeOfDay(hour: parts[0], minute: parts[1]);
-  // }
-
-  // int minutesSince6PM(String timeString) {
-  //   final time = parseTimeOfDay(timeString);
-  //   int minutes = time.hour * 60 + time.minute;
-  //   int base = 18 * 60; // 6:00 PM
-  //   return (minutes >= base) ? (minutes - base) : (minutes + (24 * 60 - base));
-  // }
-
-  // String formatMinutesToTime(int value) {
-  //   int base = 18 * 60;
-  //   int total = (value + base) % 1440;
-  //   int hour = total ~/ 60;
-  //   int minute = total % 60;
-  //   return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -1055,7 +1078,8 @@ class SleepCharts extends StatelessWidget {
               axisLabelFormatter: (AxisLabelRenderDetails args) {
                 final hour = (args.value.toInt() ~/ 60 + 18) % 24;
                 final minute = args.value.toInt() % 60;
-                final formatted = "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+                final formatted =
+                    "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
                 return ChartAxisLabel(formatted, const TextStyle(fontSize: 12));
               },
             ),

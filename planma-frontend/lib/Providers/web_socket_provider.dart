@@ -234,7 +234,8 @@ class WebSocketProvider extends ChangeNotifier {
       print('Connecting to WebSocket with student_id: $_studentId');
       
       // Build the WebSocket URL with student ID
-      final wsUrl = Uri.parse('ws://localhost:8000/ws/reminders/$_studentId/');
+      final wsBase = dotenv.env['WS_URL'] ?? 'ws://localhost:8000';
+      final wsUrl = Uri.parse('$wsBase/ws/reminders/$studentId/');
       print('WebSocket URL: $wsUrl');
       
       _channel = WebSocketChannel.connect(wsUrl);

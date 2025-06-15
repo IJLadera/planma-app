@@ -5,6 +5,7 @@ import 'package:planma_app/Providers/attended_class_provider.dart';
 import 'package:planma_app/Providers/attended_events_provider.dart';
 import 'package:planma_app/Providers/goal_progress_provider.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/Providers/sleep_provider.dart';
 import 'package:planma_app/Providers/task_log_provider.dart';
 import 'package:planma_app/models/activity_time_log_model.dart';
@@ -35,6 +36,7 @@ class _ReportsPageState extends State<ReportsPage> {
   DateTime selectedDate = DateTime.now();
   bool isLoading = true;
   bool canNavigateForward = true;
+  bool canNavigateBackward = true;
 
   // Placeholder task
   List<TaskTimeSpent> taskTimeSpent = [];
@@ -57,6 +59,8 @@ class _ReportsPageState extends State<ReportsPage> {
   //Placeholder sleep
   List<SleepDuration> sleepDuration = [];
   List<SleepRegularity> sleepRegularity = [];
+  //Placeholder semesters (for semester filtering)
+  List<Map<String, dynamic>> semesters = [];
 
   @override
   void initState() {
@@ -85,14 +89,24 @@ class _ReportsPageState extends State<ReportsPage> {
             endOfWeek.isBefore(DateTime(today.year, today.month, today.day));
         break;
       case 'Month':
-        formattedTimeFilter = DateFormat('MMMM').format(selectedDate);
+        formattedTimeFilter = DateFormat('MMMM yyyy').format(selectedDate);
         canNavigateForward =
             selectedDate.isBefore(DateTime(today.year, today.month, 1));
         break;
       case 'Semester':
-        formattedTimeFilter = DateFormat('MMMM yyyy').format(selectedDate);
-        canNavigateForward =
-            selectedDate.isBefore(DateTime(today.year, today.month, 1));
+        final semProv = context.read<SemesterProvider>();
+        final semester = ReportsService.semesterForDate(selectedDate, semProv.semesters);
+        if (semester != null) {
+          formattedTimeFilter = '${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}';
+          // Allow forward nav only if this isn’t the last known semester
+          canNavigateForward = semester != semProv.semesters.last &&
+              DateTime.parse(semester['sem_end_date']).isBefore(today);
+          canNavigateBackward = semester != semesters.first;
+        } else {
+          formattedTimeFilter = 'No semester';
+          canNavigateForward = false;
+          canNavigateBackward = false;
+        }
         break;
       case 'Year':
         formattedTimeFilter = DateFormat('yyyy').format(selectedDate);
@@ -103,7 +117,7 @@ class _ReportsPageState extends State<ReportsPage> {
 
   void _navigateDate(int direction) {
     setState(() {
-      if (direction == -1) {
+      if (direction == -1 && canNavigateBackward) {
         // Navigate dates backward
         switch (selectedTimeFilter) {
           case 'Day':
@@ -117,8 +131,7 @@ class _ReportsPageState extends State<ReportsPage> {
                 selectedDate.month + direction, selectedDate.day);
             break;
           case 'Semester':
-            selectedDate = DateTime(selectedDate.year,
-                selectedDate.month + (6 * direction), selectedDate.day);
+            _shiftSemester(-1);
             break;
           case 'Year':
             selectedDate = DateTime(selectedDate.year + direction,
@@ -139,8 +152,7 @@ class _ReportsPageState extends State<ReportsPage> {
                 selectedDate.month + direction, selectedDate.day);
             break;
           case 'Semester':
-            selectedDate = DateTime(selectedDate.year,
-                selectedDate.month + (6 * direction), selectedDate.day);
+            _shiftSemester(1);
             break;
           case 'Year':
             selectedDate = DateTime(selectedDate.year + direction,
@@ -151,6 +163,23 @@ class _ReportsPageState extends State<ReportsPage> {
       _updateFormattedTimeFilter();
       _fetchChartData();
     });
+  }
+
+  void _shiftSemester(int step) {
+    final semProv = context.read<SemesterProvider>();
+    if (semProv.semesters.isEmpty) return;
+
+    final sems = [...semProv.semesters]..sort((a, b) =>
+        DateTime.parse(a['sem_start_date'])
+            .compareTo(DateTime.parse(b['sem_start_date'])));
+
+    final current = ReportsService.semesterForDate(selectedDate, sems);
+    if (current == null) return; // no match – do nothing
+
+    final idx = sems.indexOf(current) + step;
+    if (idx < 0 || idx >= sems.length) return; // out of range – do nothing
+
+    selectedDate = DateTime.parse(sems[idx]['sem_start_date']);
   }
 
   Future<void> _fetchChartData() async {
@@ -180,10 +209,13 @@ class _ReportsPageState extends State<ReportsPage> {
       List<SleepLog>? sleepLogs;
 
       // ---------- Fetching of Records ----------
+      semesters = context.read<SemesterProvider>().semesters;
+
       switch (selectedCategory) {
         case 'Tasks':
           taskTimeLogs = await ReportsService.fetchTaskLogsOnce(
               taskLogProvider: taskLogProvider,
+              semesters: semesters,
               selectedTimeFilter: selectedTimeFilter,
               selectedDate: selectedDate);
 
@@ -205,6 +237,7 @@ class _ReportsPageState extends State<ReportsPage> {
         case 'Events':
           attendedEvents = await ReportsService.fetchEventLogsOnce(
               attendedEventsProvider: attendedEventsProvider,
+              semesters: semesters,
               selectedTimeFilter: selectedTimeFilter,
               selectedDate: selectedDate);
 
@@ -229,6 +262,7 @@ class _ReportsPageState extends State<ReportsPage> {
         case 'Class Schedules':
           attendedClasses = await ReportsService.fetchClassLogsOnce(
             attendedClassProvider: attendedClassProvider,
+            semesters: semesters,
             selectedTimeFilter: selectedTimeFilter,
             selectedDate: selectedDate,
           );
@@ -249,6 +283,7 @@ class _ReportsPageState extends State<ReportsPage> {
         case 'Activities':
           activityTimeLogs = await ReportsService.fetchActivityLogsOnce(
               activityLogProvider: activityLogProvider,
+              semesters: semesters,
               selectedTimeFilter: selectedTimeFilter,
               selectedDate: selectedDate);
 
@@ -268,6 +303,7 @@ class _ReportsPageState extends State<ReportsPage> {
 
           goalProgressLogs = await ReportsService.fetchGoalProgressOnce(
               goalProgressProvider: goalProgressProvider,
+              semesters: semesters,
               selectedTimeFilter: selectedTimeFilter,
               selectedDate: selectedDate);
 
@@ -287,20 +323,20 @@ class _ReportsPageState extends State<ReportsPage> {
         case 'Sleep':
           sleepLogs = await ReportsService.fetchSleepLogsOnce(
               sleepLogProvider: sleepLogProvider,
+              semesters: semesters,
               selectedTimeFilter: selectedTimeFilter,
               selectedDate: selectedDate);
 
           // Process SleepDuration
           sleepDuration = await ReportsService.fetchSleepDuration(
-              sleepLogs: sleepLogs, 
-              selectedTimeFilter: selectedTimeFilter);
+              sleepLogs: sleepLogs, selectedTimeFilter: selectedTimeFilter);
 
           sleepRegularity = await ReportsService.fetchSleepRegularity(
-            sleepLogs: sleepLogs, 
-            selectedTimeFilter: selectedTimeFilter);
+              sleepLogs: sleepLogs, selectedTimeFilter: selectedTimeFilter);
       }
 
-      if (!mounted) return; // Ensure the widget is still mounted before calling setState
+      if (!mounted)
+        return; // Ensure the widget is still mounted before calling setState
       setState(() {
         isLoading = false;
       });
@@ -405,8 +441,8 @@ class _ReportsPageState extends State<ReportsPage> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.chevron_left),
-                      onPressed: () => _navigateDate(-1),
-                      color: Color(0xFF173F70),
+                      onPressed: canNavigateBackward ? () => _navigateDate(-1) : null,
+                      color: canNavigateBackward ? const Color(0xFF173F70) : Colors.white,
                     ),
                     SizedBox(width: 16),
                     Text(
@@ -422,10 +458,8 @@ class _ReportsPageState extends State<ReportsPage> {
                     SizedBox(width: 16),
                     IconButton(
                       icon: const Icon(Icons.chevron_right),
-                      onPressed:
-                          canNavigateForward ? () => _navigateDate(1) : null,
-                      color:
-                          canNavigateForward ? Color(0xFF173F70) : Colors.white,
+                      onPressed: canNavigateForward ? () => _navigateDate(1) : null,
+                      color: canNavigateForward ? Color(0xFF173F70) : Colors.white,
                     ),
                   ],
                 ),
@@ -448,6 +482,7 @@ class _ReportsPageState extends State<ReportsPage> {
                         taskTimeSpent: taskTimeSpent,
                         taskTimeDistribution: taskTimeDistribution,
                         taskFinished: taskFinished,
+                        semesters: semesters,
                       ),
                     ],
                     // EVENTS category
@@ -475,6 +510,7 @@ class _ReportsPageState extends State<ReportsPage> {
                         selectedDate: selectedDate,
                         activitiesTimeSpent: activitiesTimeSpent,
                         activitiesDone: activitiesDone,
+                        semesters: semesters,
                       ),
                     ],
                     if (selectedCategory == 'Goals') ...[
@@ -485,6 +521,7 @@ class _ReportsPageState extends State<ReportsPage> {
                         goalTimeSpent: goalTimeSpent,
                         goalTimeDistribution: goalTimeDistribution,
                         goalCompletionCount: goalCompletionCount,
+                        semesters: semesters,
                       ),
                     ],
                     if (selectedCategory == 'Sleep') ...[
@@ -494,6 +531,7 @@ class _ReportsPageState extends State<ReportsPage> {
                         selectedDate: selectedDate,
                         sleepDuration: sleepDuration,
                         sleepRegularity: sleepRegularity,
+                        semesters: semesters,
                       ),
                     ],
                   ],

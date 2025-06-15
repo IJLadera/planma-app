@@ -245,21 +245,48 @@ class _AddClassScreenState extends State<AddClassScreen> {
     // Fetch semesters when the screen loads
     final semesterProvider =
         Provider.of<SemesterProvider>(context, listen: false);
+
+    // Fetch semesters when the screen loads
     semesterProvider.fetchSemesters().then((_) {
+      if (semesterProvider.semesters.isEmpty) return;
+
+      // CASE A: <AddClassScreen selectedSemesterId:…> was supplied by caller
+      Map<String, dynamic>? preSelected;
+      if (widget.selectedSemesterId != null) {
+        preSelected = semesterProvider.semesters.firstWhere(
+          (s) => s['semester_id'] == widget.selectedSemesterId,
+          orElse: () => <String, dynamic>{},
+        );
+      }
+
+      // CASE B: pick the most‑recent semester that has already started
+      if (preSelected == null || preSelected.isEmpty) {
+        final now = DateTime.now();
+
+        // keep only semesters whose start date is ≤ today
+        final valid = semesterProvider.semesters.where((s) {
+          final start = DateTime.parse(s['sem_start_date']);
+          return !start.isAfter(now); //  start ≤ now
+        }).toList();
+
+        // Sort by start date descending to get the most recent one
+        valid.sort((a, b) => DateTime.parse(b['sem_start_date'])
+            .compareTo(DateTime.parse(a['sem_start_date'])));
+
+        // fallback to first if none match
+        preSelected = valid.isNotEmpty
+            ? valid.first
+            : semesterProvider.semesters.reduce((a, b) =>
+                DateTime.parse(a['sem_start_date'])
+                        .isAfter(DateTime.parse(b['sem_start_date']))
+                    ? a
+                    : b);
+      }
+      
       setState(() {
-        // Set default value if there are semesters available
-        if (semesterProvider.semesters.isNotEmpty) {
-          // Select the first semester
-          selectedSemester =
-              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
-
-          final defaultSemester = semesterProvider.semesters.first;
-          selectedSemesterId = defaultSemester['semester_id'];
-
-          // Log the selected semester
-          print("Default selected semester: $selectedSemester");
-          print("Default selected semester ID: $selectedSemesterId");
-        }
+        selectedSemesterId = preSelected!['semester_id'];
+        selectedSemester =
+            "${preSelected['acad_year_start']} - ${preSelected['acad_year_end']} ${preSelected['semester']}";
       });
     });
 

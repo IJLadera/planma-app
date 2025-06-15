@@ -118,10 +118,10 @@ REST_FRAMEWORK={
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'ACCESS_TOKEN_LIFETIME' : timedelta(hours =3),
+    'ACCESS_TOKEN_LIFETIME' : timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
     'USER_ID_FIELD': 'student_id',
     'USER_ID_CLAIM': 'user_id',
 }
