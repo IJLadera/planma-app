@@ -182,10 +182,31 @@ class _AddEventScreen extends State<AddEventScreen> {
 
       // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.check_circle,
-          text: 'Event created successfully!',
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Text('Event Created Successfully',
+                  style:
+                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 10,
         ),
       );
 
@@ -205,10 +226,36 @@ class _AddEventScreen extends State<AddEventScreen> {
 
       // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.error,
-          text: errorMessage,
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Failed to Create Event 1: $error',
+                  style:
+                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Square shape
+          ),
+          backgroundColor: Colors.red, // Error background color
+          elevation: 10,
         ),
       );
     }
@@ -244,115 +291,120 @@ class _AddEventScreen extends State<AddEventScreen> {
         ),
         backgroundColor: Color(0xFFFFFFFF),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildTitle(
-                    'Event Name',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTextField(
-                      _eventNameController, 'Event Name'),
-                  const SizedBox(height: 12),
-                  _buildTitle(
-                    'Description',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTextField(
-                      _eventDescController, 'Description'),
-                  const SizedBox(height: 12),
-                  _buildTitle(
-                    'Location',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTextField(
-                      _eventLocationController, 'Location'),
-                  const SizedBox(height: 12),
-                  _buildTitle(
-                    'Scheduled Date',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
-                      context, true, _selectDate),
-                  const SizedBox(height: 12),
-                  _buildTitle(
-                    'Start and End Time',
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'Start Time',
-                          _startTimeController,
-                          context,
-                          (context) =>
-                              _selectTime(context, _startTimeController),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildTitle(
+                      'Event Name',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTextField(
+                        _eventNameController, 'Event Name'),
+                    const SizedBox(height: 12),
+                    _buildTitle(
+                      'Description',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTextField(
+                        _eventDescController, 'Description'),
+                    const SizedBox(height: 12),
+                    _buildTitle(
+                      'Location',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTextField(
+                        _eventLocationController, 'Location'),
+                    const SizedBox(height: 12),
+                    _buildTitle(
+                      'Scheduled Date',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildDateTile('Scheduled Date',
+                        _scheduledDate, context, true, _selectDate),
+                    const SizedBox(height: 12),
+                    _buildTitle(
+                      'Start and End Time',
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomWidgets.buildTimeField(
+                            'Start Time',
+                            _startTimeController,
+                            context,
+                            (context) =>
+                                _selectTime(context, _startTimeController),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'End Time',
-                          _endTimeController,
-                          context,
-                          (context) => _selectTime(context, _endTimeController),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CustomWidgets.buildTimeField(
+                            'End Time',
+                            _endTimeController,
+                            context,
+                            (context) =>
+                                _selectTime(context, _endTimeController),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTitle(
-                    'Event Type',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildDropdownField(
-                    label: 'Choose Event Type',
-                    value: _selectedEventType,
-                    items: _eventTypes,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedEventType = value;
-                      });
-                    },
-                    backgroundColor: const Color(0xFFF5F5F5),
-                    borderRadius: 30.0,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                    fontSize: 14.0,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-            child: ElevatedButton(
-              onPressed: _createEvent,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF173F70),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
-              ),
-              child: Text(
-                'Create Event',
-                style: GoogleFonts.openSans(
-                  fontSize: 16,
-                  color: Colors.white,
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTitle(
+                      'Event Type',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildDropdownField(
+                      label: 'Choose Event Type',
+                      value: _selectedEventType,
+                      items: _eventTypes,
+                      onChanged: (String? value) {
+                        setState(() {
+                          _selectedEventType = value;
+                        });
+                      },
+                      backgroundColor: const Color(0xFFF5F5F5),
+                      borderRadius: 30.0,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 5),
+                      fontSize: 14.0,
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+              child: ElevatedButton(
+                onPressed: _createEvent,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF173F70),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                ),
+                child: Text(
+                  'Create Event',
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }

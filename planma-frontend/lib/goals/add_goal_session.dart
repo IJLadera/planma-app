@@ -102,43 +102,6 @@ class _AddGoalSession extends State<AddGoalSession> {
     }
   }
 
-  // Helper function to create snackbars
-  SnackBar _buildSnackBar(
-      {required IconData icon,
-      required String text,
-      required Color backgroundColor}) {
-    return SnackBar(
-      content: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-      duration: const Duration(seconds: 3),
-      behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).size.height * 0.4,
-        left: 50,
-        right: 50,
-        top: 100,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      backgroundColor: backgroundColor,
-      elevation: 10,
-    );
-  }
-
   void _submitForm(BuildContext context) async {
     final provider = Provider.of<GoalScheduleProvider>(context, listen: false);
 
@@ -175,10 +138,31 @@ class _AddGoalSession extends State<AddGoalSession> {
 
       // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.check_circle,
-          text: 'Goal schedule created successfully!',
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Text('Goal Session Created Successfully',
+                  style:
+                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 10,
         ),
       );
 
@@ -201,10 +185,36 @@ class _AddGoalSession extends State<AddGoalSession> {
 
       // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.error,
-          text: errorMessage,
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Failed To Create Goal Session 1: $error',
+                  style:
+                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Square shape
+          ),
+          backgroundColor: Colors.red, // Error background color
+          elevation: 10,
         ),
       );
     }
@@ -237,78 +247,83 @@ class _AddGoalSession extends State<AddGoalSession> {
         ),
         backgroundColor: Color(0xFFFFFFFF),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildTitle('Goal Name'),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTextField(
-                    _goalNameController,
-                    'Goal Name',
-                    readOnly: true,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTitle('Scheduled Date'),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
-                      context, true, _selectDate),
-                  const SizedBox(height: 12),
-                  _buildTitle('Start and End Time'),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'Start Time',
-                          _startTimeController,
-                          context,
-                          (context) =>
-                              _selectTime(context, _startTimeController),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildTitle('Goal Name'),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTextField(
+                      _goalNameController,
+                      'Goal Name',
+                      readOnly: true,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTitle('Scheduled Date'),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildDateTile('Scheduled Date',
+                        _scheduledDate, context, true, _selectDate),
+                    const SizedBox(height: 12),
+                    _buildTitle('Start and End Time'),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomWidgets.buildTimeField(
+                            'Start Time',
+                            _startTimeController,
+                            context,
+                            (context) =>
+                                _selectTime(context, _startTimeController),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'End Time',
-                          _endTimeController,
-                          context,
-                          (context) => _selectTime(context, _endTimeController),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CustomWidgets.buildTimeField(
+                            'End Time',
+                            _endTimeController,
+                            context,
+                            (context) =>
+                                _selectTime(context, _endTimeController),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-            child: ElevatedButton(
-              onPressed: () => _submitForm(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF173F70),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-              ),
-              child: Text(
-                'Add Goal Session',
-                style: GoogleFonts.openSans(
-                  fontSize: 16,
-                  color: Color(0xFFFFFFFF),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+              child: ElevatedButton(
+                onPressed: () => _submitForm(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF173F70),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                ),
+                child: Text(
+                  'Add Goal Session',
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    color: Color(0xFFFFFFFF),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }

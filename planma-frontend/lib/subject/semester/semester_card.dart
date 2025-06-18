@@ -17,8 +17,18 @@ class SemesterCard extends StatelessWidget {
     final isConfirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Event'),
-        content: const Text('Are you sure you want to delete this event?'),
+        title: Text(
+          'Delete Event',
+          style: GoogleFonts.openSans(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+        ),
+        content: Text(
+          'Are you sure you want to delete this subject?',
+          style: GoogleFonts.openSans(
+            fontSize: 16,
+            color: Color(0xFF1D4E89),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -51,7 +61,7 @@ class SemesterCard extends StatelessWidget {
         color: const Color(0xFFE3E3E3),
         borderRadius: BorderRadius.circular(12.0),
       ),
-      child: ListTile(    
+      child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +112,9 @@ class SemesterCard extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => EditSemesterScreen(semester: semester,)));
+                        builder: (context) => EditSemesterScreen(
+                              semester: semester,
+                            )));
               },
             ),
             IconButton(

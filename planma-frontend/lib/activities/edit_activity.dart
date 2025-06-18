@@ -224,13 +224,35 @@ class _EditActivity extends State<EditActivity> {
 
       // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.check_circle,
-          text: 'Activity updated successfully!',
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min, // Make the row compact
+            mainAxisAlignment: MainAxisAlignment.center, // Center the content
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Activity Updated Successfully!',
+                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 30,
+            right: 30,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16), // Make it a square
+          ),
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 12, // Add shadow for better visibility
         ),
       );
-
       Navigator.pop(context);
     } catch (error) {
       String errorMessage = 'Failed to update activity';
@@ -238,18 +260,49 @@ class _EditActivity extends State<EditActivity> {
       if (error.toString().contains('Scheduling overlap')) {
         errorMessage =
             'Scheduling overlap: This time slot is already occupied.';
-      } else if (error.toString().contains('Duplicate activity entry detected')) {
-        errorMessage = 'Duplicate activity entry: This activity already exists.';
+      } else if (error
+          .toString()
+          .contains('Duplicate activity entry detected')) {
+        errorMessage =
+            'Duplicate activity entry: This activity already exists.';
       } else {
         errorMessage = 'Failed to update activity: $error';
       }
 
       // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.error,
-          text: errorMessage,
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error,
+                  color: Colors.white, size: 24), // Error icon
+              const SizedBox(width: 8),
+              Expanded(
+                // Prevents text overflow
+                child: Text(
+                  'Failed To Update Activity (1): $error',
+                  style:
+                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+                  overflow: TextOverflow.ellipsis, // Handles long errors
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
+            left: 30,
+            right: 30,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Square shape
+          ),
+          backgroundColor: Colors.red, // Error background color
+          elevation: 10, // Adds shadow
         ),
       );
     }
@@ -263,80 +316,84 @@ class _EditActivity extends State<EditActivity> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Edit Activity',
-            style: GoogleFonts.openSans(
-              color: Color(0xFF173F70),
-              fontWeight: FontWeight.bold,
-            ),
+      appBar: AppBar(
+        title: Text(
+          'Edit Activity',
+          style: GoogleFonts.openSans(
+            color: Color(0xFF173F70),
+            fontWeight: FontWeight.bold,
           ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
         ),
-        body: Column(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
           children: [
             Expanded(
-                child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  CustomWidgets.buildTitle(
-                    'Activity Name',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTextField(
-                      _activityNameController, 'Activity Name'),
-                  SizedBox(height: 12),
-                  CustomWidgets.buildTitle(
-                    'Description',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTextField(
-                      _activityDescriptionController, 'Description'),
-                  SizedBox(height: 12),
-                  CustomWidgets.buildTitle(
-                    'Scheduled Date',
-                  ),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildDateTile('Scheduled Date', _scheduledDate,
-                      context, true, _selectDate),
-                  const SizedBox(height: 12),
-                  CustomWidgets.buildTitle(
-                    'Start and End Time',
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'Start Time',
-                          _startTimeController,
-                          context,
-                          (context) =>
-                              _selectTime(context, _startTimeController),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    CustomWidgets.buildTitle(
+                      'Activity Name',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTextField(
+                        _activityNameController, 'Activity Name'),
+                    SizedBox(height: 12),
+                    CustomWidgets.buildTitle(
+                      'Description',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTextField(
+                        _activityDescriptionController, 'Description'),
+                    SizedBox(height: 12),
+                    CustomWidgets.buildTitle(
+                      'Scheduled Date',
+                    ),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildDateTile('Scheduled Date',
+                        _scheduledDate, context, true, _selectDate),
+                    const SizedBox(height: 12),
+                    CustomWidgets.buildTitle(
+                      'Start and End Time',
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomWidgets.buildTimeField(
+                            'Start Time',
+                            _startTimeController,
+                            context,
+                            (context) =>
+                                _selectTime(context, _startTimeController),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: CustomWidgets.buildTimeField(
-                          'End Time',
-                          _endTimeController,
-                          context,
-                          (context) => _selectTime(context, _endTimeController),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CustomWidgets.buildTimeField(
+                            'End Time',
+                            _endTimeController,
+                            context,
+                            (context) =>
+                                _selectTime(context, _endTimeController),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            )),
+            ),
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
@@ -348,7 +405,7 @@ class _EditActivity extends State<EditActivity> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
                 child: Text(
                   'Edit Activity',
@@ -360,7 +417,10 @@ class _EditActivity extends State<EditActivity> {
               ),
             ),
           ],
-        ));
+        ),
+      ),
+      resizeToAvoidBottomInset: false,
+    );
   }
 
   @override

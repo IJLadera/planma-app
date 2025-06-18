@@ -41,10 +41,10 @@ class _SemesterScreenState extends State<SemesterScreen> {
       elevation: 0,
     ),
     body: semesterProvider.semesters.isEmpty
-        ? const Center(
+        ? Center(
             child: Text(
               'No semesters found',
-              style: TextStyle(fontSize: 16, color: Colors.black),
+              style: GoogleFonts.openSans(fontSize: 16, color: Colors.black),
             ),
           )
         : Column(

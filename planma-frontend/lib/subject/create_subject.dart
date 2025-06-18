@@ -153,7 +153,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
             children: [
               const Icon(Icons.check_circle, color: Colors.green, size: 24),
               const SizedBox(width: 8),
-              Text('Class Schedule added successfully',
+              Text('Class Schedule Added Successfully',
                   style:
                       GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
             ],
@@ -188,7 +188,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Failed to add class schedule 1: $error',
+                  'Failed To Add Class Schedule 1: $error',
                   style:
                       GoogleFonts.openSans(fontSize: 16, color: Colors.white),
                   overflow: TextOverflow.ellipsis,
@@ -282,7 +282,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                     ? a
                     : b);
       }
-      
+
       setState(() {
         selectedSemesterId = preSelected!['semester_id'];
         selectedSemester =
@@ -358,193 +358,207 @@ class _AddClassScreenState extends State<AddClassScreen> {
         ),
         backgroundColor: Color(0xFFFFFFFF),
       ),
-      body: Consumer<SemesterProvider>(
-        builder: (context, semesterProvider, child) {
-          // Prepare the dropdown list of semesters
-          List<Map<String, dynamic>> semesters = semesterProvider.semesters;
-          List<String> semesterItems = semesters
-              .map((semester) =>
-                  "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
-              .toList();
-          semesterItems.add('- Add Semester -'); // Add option for new semester
-          return Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomWidgets.buildTitle(
-                        'Subject Code',
-                      ),
-                      SizedBox(height: 15),
-                      CustomWidgets.buildTextField(
-                        _subjectCodeController,
-                        'Subject Code',
-                        style: GoogleFonts.openSans(),
-                      ),
-                      SizedBox(height: 15),
-                      CustomWidgets.buildTitle(
-                        'Subject Title',
-                      ),
-                      const SizedBox(height: 15),
-                      CustomWidgets.buildTextField(
-                        _subjectTitleController,
-                        'Subject Title',
-                        style: GoogleFonts.openSans(),
-                      ),
-                      SizedBox(height: 15),
-                      CustomWidgets.buildTitle(
-                        'Semester',
-                      ),
-                      const SizedBox(height: 15),
-                      CustomWidgets.buildDropdownField(
-                        label: 'Choose Semester',
-                        textStyle: GoogleFonts.openSans(
-                          fontSize: 14,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Consumer<SemesterProvider>(
+          builder: (context, semesterProvider, child) {
+            // Prepare the dropdown list of semesters
+            List<Map<String, dynamic>> semesters = semesterProvider.semesters;
+            List<String> semesterItems = semesters
+                .map((semester) =>
+                    "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
+                .toList();
+            semesterItems
+                .add('- Add Semester -'); // Add option for new semester
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomWidgets.buildTitle(
+                          'Subject Code',
                         ),
-                        value: selectedSemester,
-                        items: semesterItems,
-                        onChanged: (value) {
-                          setState(() {
-                            if (value == '- Add Semester -') {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AddSemesterScreen()),
-                              ).then((_) => semesterProvider.fetchSemesters());
-                            } else {
-                              selectedSemester = value;
+                        SizedBox(height: 15),
+                        CustomWidgets.buildTextField(
+                          _subjectCodeController,
+                          'Subject Code',
+                          style: GoogleFonts.openSans(),
+                        ),
+                        SizedBox(height: 15),
+                        CustomWidgets.buildTitle(
+                          'Subject Title',
+                        ),
+                        const SizedBox(height: 15),
+                        CustomWidgets.buildTextField(
+                          _subjectTitleController,
+                          'Subject Title',
+                          style: GoogleFonts.openSans(),
+                        ),
+                        SizedBox(height: 15),
+                        CustomWidgets.buildTitle(
+                          'Semester',
+                        ),
+                        const SizedBox(height: 15),
+                        CustomWidgets.buildDropdownField(
+                          label: 'Choose Semester',
+                          textStyle: GoogleFonts.openSans(
+                            fontSize: 14,
+                          ),
+                          value: selectedSemester,
+                          items: semesterItems,
+                          onChanged: (value) {
+                            setState(() {
+                              if (value == '- Add Semester -') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          AddSemesterScreen()),
+                                ).then(
+                                    (_) => semesterProvider.fetchSemesters());
+                              } else {
+                                selectedSemester = value;
 
-                              // Split data from value for firstWhere comparison
-                              List<String> semesterParts =
-                                  selectedSemester!.split(' ');
-                              int acadYearStart = int.parse(semesterParts[0]);
-                              int acadYearEnd = int.parse(semesterParts[2]);
-                              String semesterType =
-                                  "${semesterParts[3]} ${semesterParts[4]}";
+                                // Split data from value for firstWhere comparison
+                                List<String> semesterParts =
+                                    selectedSemester!.split(' ');
+                                int acadYearStart = int.parse(semesterParts[0]);
+                                int acadYearEnd = int.parse(semesterParts[2]);
+                                String semesterType =
+                                    "${semesterParts[3]} ${semesterParts[4]}";
 
-                              final selectedSemesterMap =
-                                  semesterProvider.semesters.firstWhere(
-                                (semester) {
-                                  return semester['acad_year_start'] ==
-                                          acadYearStart &&
-                                      semester['acad_year_end'] ==
-                                          acadYearEnd &&
-                                      semester['semester'] == semesterType;
+                                final selectedSemesterMap =
+                                    semesterProvider.semesters.firstWhere(
+                                  (semester) {
+                                    return semester['acad_year_start'] ==
+                                            acadYearStart &&
+                                        semester['acad_year_end'] ==
+                                            acadYearEnd &&
+                                        semester['semester'] == semesterType;
+                                  },
+                                  orElse: () =>
+                                      {}, // Return null if no match is found
+                                );
+                                selectedSemesterId =
+                                    selectedSemesterMap['semester_id'];
+                                print(
+                                    "Found semester ID: ${selectedSemesterMap['semester_id']}");
+                              }
+                            });
+                          },
+                          backgroundColor: const Color(0xFFF5F5F5),
+                          labelColor: Colors.black,
+                          textColor: Colors.black,
+                          borderRadius: 30.0,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 6),
+                          fontSize: 14.0,
+                        ),
+                        const SizedBox(height: 15),
+                        CustomWidgets.buildTitle(
+                          'Day of the Week',
+                        ),
+                        SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            for (var day in [
+                              'S',
+                              'M',
+                              'T',
+                              'W',
+                              'Th',
+                              'F',
+                              'Sa'
+                            ])
+                              DayButton(
+                                day: day,
+                                isSelected: _selectedDay ==
+                                    dayAbbreviationToFull[
+                                        day], // Match full day name
+                                onTap: () {
+                                  setState(() {
+                                    if (_selectedDay ==
+                                        dayAbbreviationToFull[day]) {
+                                      _selectedDay = null;
+                                    } else {
+                                      _selectedDay = dayAbbreviationToFull[day];
+                                    }
+                                  });
                                 },
-                                orElse: () =>
-                                    {}, // Return null if no match is found
-                              );
-                              selectedSemesterId =
-                                  selectedSemesterMap['semester_id'];
-                              print(
-                                  "Found semester ID: ${selectedSemesterMap['semester_id']}");
-                            }
-                          });
-                        },
-                        backgroundColor: const Color(0xFFF5F5F5),
-                        labelColor: Colors.black,
-                        textColor: Colors.black,
-                        borderRadius: 30.0,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 6),
-                        fontSize: 14.0,
-                      ),
-                      const SizedBox(height: 15),
-                      CustomWidgets.buildTitle(
-                        'Day of the Week',
-                      ),
-                      SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          for (var day in ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'])
-                            DayButton(
-                              day: day,
-                              isSelected: _selectedDay ==
-                                  dayAbbreviationToFull[
-                                      day], // Match full day name
-                              onTap: () {
-                                setState(() {
-                                  if (_selectedDay ==
-                                      dayAbbreviationToFull[day]) {
-                                    _selectedDay = null;
-                                  } else {
-                                    _selectedDay = dayAbbreviationToFull[day];
-                                  }
-                                });
-                              },
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        CustomWidgets.buildTitle(
+                          'Start and End Time',
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CustomWidgets.buildTimeField(
+                                'Start Time',
+                                _startTimeController,
+                                context,
+                                (context) =>
+                                    _selectTime(context, _startTimeController),
+                              ),
                             ),
-                        ],
-                      ),
-                      const SizedBox(height: 15),
-                      CustomWidgets.buildTitle(
-                        'Start and End Time',
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: CustomWidgets.buildTimeField(
-                              'Start Time',
-                              _startTimeController,
-                              context,
-                              (context) =>
-                                  _selectTime(context, _startTimeController),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: CustomWidgets.buildTimeField(
+                                'End Time',
+                                _endTimeController,
+                                context,
+                                (context) =>
+                                    _selectTime(context, _endTimeController),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: CustomWidgets.buildTimeField(
-                              'End Time',
-                              _endTimeController,
-                              context,
-                              (context) =>
-                                  _selectTime(context, _endTimeController),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 15),
-                      CustomWidgets.buildTitle(
-                        'Room',
-                      ),
-                      const SizedBox(height: 16),
-                      CustomWidgets.buildTextField(_roomController, 'Room',
-                          style: GoogleFonts.openSans(
-                            fontSize: 16,
-                            color: Colors.black,
-                          )),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 20.0),
-                child: ElevatedButton(
-                  onPressed: () => _submitClassSchedule(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF173F70),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        CustomWidgets.buildTitle(
+                          'Room',
+                        ),
+                        const SizedBox(height: 16),
+                        CustomWidgets.buildTextField(_roomController, 'Room',
+                            style: GoogleFonts.openSans(
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),),
+                      ],
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 120),
                   ),
-                  child: Text('Add Schedule',
-                      style: GoogleFonts.openSans(
-                        fontSize: 16,
-                        color: Colors.white,
-                      )),
                 ),
-              ),
-            ],
-          );
-        },
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 20.0),
+                  child: ElevatedButton(
+                    onPressed: () => _submitClassSchedule(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF173F70),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 100),
+                    ),
+                    child: Text('Add Schedule',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        )),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
       resizeToAvoidBottomInset: false,
     );
