@@ -93,7 +93,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               content: Container(
                 height: 200, // Increased height for better space
                 width: 300, // Increased width for better space
-                padding: EdgeInsets.symmetric(horizontal: 3.0), // Added padding
+                padding: EdgeInsets.symmetric(horizontal: 2.0), // Added padding
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -119,7 +119,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       },
                     ),
                     const SizedBox(
-                        height: 20), // Increased space between fields
+                      height: 20,
+                    ),
                     // Wake Time Picker
                     CustomWidget.buildTimePickerField(
                       context: context,
@@ -169,8 +170,38 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content:
-                                Text("Sleep/Wake times updated successfully")),
+                          content: Row(
+                            mainAxisSize:
+                                MainAxisSize.min, // Make the row compact
+                            mainAxisAlignment:
+                                MainAxisAlignment.center, // Center the content
+                            children: [
+                              const Icon(Icons.check_circle,
+                                  color: Colors.green, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Sleep/Wake times Updated Successfully!',
+                                style: GoogleFonts.openSans(
+                                    fontSize: 14, color: Colors.white),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                          duration: const Duration(seconds: 3),
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.height * 0.4,
+                            left: 10,
+                            right: 10,
+                            top: 100,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(16), // Make it a square
+                          ),
+                          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+                          elevation: 12, // Add shadow for better visibility
+                        ),
                       );
                       Navigator.of(context).pop();
                     }
@@ -273,15 +304,78 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           "New Reminder Offset Time: $reminderOffsetTimeString");
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content: Text(
-                                "Reminder offset time updated successfully")),
+                          content: Row(
+                            mainAxisSize:
+                                MainAxisSize.min, // Make the row compact
+                            mainAxisAlignment:
+                                MainAxisAlignment.center, // Center the content
+                            children: [
+                              const Icon(Icons.check_circle,
+                                  color: Colors.green, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Reminder offset time updated successfully!',
+                                style: GoogleFonts.openSans(
+                                    fontSize: 12, color: Colors.white),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                          duration: const Duration(seconds: 3),
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.height * 0.4,
+                            left: 30,
+                            right: 30,
+                            top: 100,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(16), // Make it a square
+                          ),
+                          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+                          elevation: 12, // Add shadow for better visibility
+                        ),
                       );
                       Navigator.of(context).pop();
                     } catch (error) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content:
-                                Text("Failed to update reminder offset time")),
+                          content: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.error,
+                                  color: Colors.white, size: 24), // Error icon
+                              const SizedBox(width: 8),
+                              Expanded(
+                                // Prevents text overflow
+                                child: Text(
+                                  'Failed To Update Reminder Offset Time (1): $error',
+                                  style: GoogleFonts.openSans(
+                                      color: Colors.white, fontSize: 12),
+                                  overflow: TextOverflow
+                                      .ellipsis, // Handles long errors
+                                ),
+                              ),
+                            ],
+                          ),
+                          duration: const Duration(seconds: 3),
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.height *
+                                0.4, // Moves to center
+                            left: 30,
+                            right: 30,
+                            top: 100,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(20), // Square shape
+                          ),
+                          backgroundColor: Colors.red, // Error background color
+                          elevation: 10, // Adds shadow
+                        ),
                       );
                     }
                   },
@@ -306,7 +400,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     String? username = context.watch<UserProfileProvider>().username;
     String? firstName = context.watch<UserProfileProvider>().firstName;
     String? lastName = context.watch<UserProfileProvider>().lastName;
-    String? profilePictureUrl = context.watch<UserProfileProvider>().profilePicture;
+    String? profilePictureUrl =
+        context.watch<UserProfileProvider>().profilePicture;
     final userPreferencesProvider = context.watch<UserPreferencesProvider>();
 
     // Ensure the URL is absolute
@@ -346,8 +441,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.yellow,
-                  backgroundImage: profilePictureFullUrl.isNotEmpty 
-                      ? NetworkImage(profilePictureFullUrl) 
+                  backgroundImage: profilePictureFullUrl.isNotEmpty
+                      ? NetworkImage(profilePictureFullUrl)
                       : null,
                   child: profilePictureUrl == null || profilePictureUrl.isEmpty
                       ? Icon(Icons.person, size: 50, color: Colors.black)

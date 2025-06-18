@@ -173,10 +173,33 @@ class _AddActivityState extends State<AddActivityScreen> {
 
       // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.check_circle,
-          text: 'Activity created successfully!',
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min, // Make the row compact
+            mainAxisAlignment: MainAxisAlignment.center, // Center the content
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Activity Created Successfully!',
+                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 30,
+            right: 30,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16), // Make it a square
+          ),
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 12, // Add shadow for better visibility
         ),
       );
 
@@ -188,18 +211,49 @@ class _AddActivityState extends State<AddActivityScreen> {
       if (error.toString().contains('Scheduling overlap')) {
         errorMessage =
             'Scheduling overlap: This time slot is already occupied.';
-      } else if (error.toString().contains('Duplicate activity entry detected')) {
-        errorMessage = 'Duplicate activity entry: This activity already exists.';
+      } else if (error
+          .toString()
+          .contains('Duplicate activity entry detected')) {
+        errorMessage =
+            'Duplicate activity entry: This activity already exists.';
       } else {
         errorMessage = 'Failed to create activity: $error';
       }
 
       // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.error,
-          text: errorMessage,
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error,
+                  color: Colors.white, size: 24), // Error icon
+              const SizedBox(width: 8),
+              Expanded(
+                // Prevents text overflow
+                child: Text(
+                  'Failed To Create Activity (1): $error',
+                  style:
+                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
+                  overflow: TextOverflow.ellipsis, // Handles long errors
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
+            left: 30,
+            right: 30,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Square shape
+          ),
+          backgroundColor: Colors.red, // Error background color
+          elevation: 10, // Adds shadow
         ),
       );
     }
@@ -224,21 +278,23 @@ class _AddActivityState extends State<AddActivityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Create Activity',
-            style: GoogleFonts.openSans(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Color(0xFF173F70)),
-          ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-          backgroundColor: Color(0xFFFFFFFF),
+      appBar: AppBar(
+        title: Text(
+          'Create Activity',
+          style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Color(0xFF173F70)),
         ),
-        body: Column(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: Color(0xFFFFFFFF),
+      ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
           children: [
             Expanded(
                 child: SingleChildScrollView(
@@ -296,7 +352,8 @@ class _AddActivityState extends State<AddActivityScreen> {
               ),
             )),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
                 onPressed: () => _createActivity(context),
                 style: ElevatedButton.styleFrom(
@@ -316,7 +373,10 @@ class _AddActivityState extends State<AddActivityScreen> {
               ),
             ),
           ],
-        ));
+        ),
+      ),
+      resizeToAvoidBottomInset: false,
+    );
   }
 
   @override

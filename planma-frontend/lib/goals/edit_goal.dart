@@ -116,7 +116,7 @@ class _EditGoal extends State<EditGoal> {
             children: [
               const Icon(Icons.check_circle, color: Colors.green, size: 24),
               const SizedBox(width: 8),
-              Text('Goal edited successfully',
+              Text('Goal Updated Successfully',
                   style:
                       GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
             ],
@@ -148,7 +148,7 @@ class _EditGoal extends State<EditGoal> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Failed to add class schedule 1: $error',
+                  'Failed To Update Goal 1: $error',
                   style:
                       GoogleFonts.openSans(fontSize: 16, color: Colors.white),
                   overflow: TextOverflow.ellipsis,
@@ -193,181 +193,189 @@ class _EditGoal extends State<EditGoal> {
         ),
         backgroundColor: Color(0xFFFFFFFF),
       ),
-      body: Consumer<SemesterProvider>(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Consumer<SemesterProvider>(
           builder: (context, semesterProvider, child) {
-        // Prepare the dropdown list of semesters
-        List<Map<String, dynamic>> semesters = semesterProvider.semesters;
-        List<String> semesterItems = semesters
-            .map((semester) =>
-                "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
-            .toList();
-        semesterItems.add('- Add Semester -');
-        return Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    CustomWidgets.buildTitle(
-                      'Goal Name',
-                    ),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildTextField(
-                      _goalCodeController,
-                      'Goal Name',
-                    ),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildTitle(
-                      'Description',
-                    ),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildTextField(
-                      _descriptionController,
-                      'Description',
-                    ),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildTitle('Timeframe'),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildDropdownField(
-                      label: 'Timeframe',
-                      textStyle: GoogleFonts.openSans(fontSize: 16),
-                      value: _selectedTimeframe,
-                      items: _timeframe,
-                      onChanged: (value) =>
-                          setState(() => _selectedTimeframe = value),
-                    ),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildTitle('Target Duration'),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildScheduleDatePicker(
-                      context: context,
-                      displayText: CustomWidgets.formatDurationText(
-                          _targetDuration), // Correct call
-                      onPickerTap: () async {
-                        // Pass the required arguments: context, initialDuration, and the callback function
-                        await CustomWidgets.showDurationPicker(
-                            context, _targetDuration, (newDuration) {
-                          setState(() {
-                            _targetDuration =
-                                newDuration; // Update target duration
-                          });
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildTitle(
-                      'Goal Type',
-                    ),
-                    const SizedBox(height: 12),
-                    CustomWidgets.buildDropdownField(
-                      label: 'Goal Type',
-                      textStyle: GoogleFonts.openSans(fontSize: 16),
-                      value: _selectedGoalType,
-                      items: _goalType,
-                      onChanged: (String? value) {
-                        setState(() {
-                          _selectedGoalType = value;
+            // Prepare the dropdown list of semesters
+            List<Map<String, dynamic>> semesters = semesterProvider.semesters;
+            List<String> semesterItems = semesters
+                .map((semester) =>
+                    "${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}")
+                .toList();
+            semesterItems.add('- Add Semester -');
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        CustomWidgets.buildTitle(
+                          'Goal Name',
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTextField(
+                          _goalCodeController,
+                          'Goal Name',
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTitle(
+                          'Description',
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTextField(
+                          _descriptionController,
+                          'Description',
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTitle('Timeframe'),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildDropdownField(
+                          label: 'Timeframe',
+                          textStyle: GoogleFonts.openSans(fontSize: 16),
+                          value: _selectedTimeframe,
+                          items: _timeframe,
+                          onChanged: (value) =>
+                              setState(() => _selectedTimeframe = value),
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTitle('Target Duration'),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildScheduleDatePicker(
+                          context: context,
+                          displayText: CustomWidgets.formatDurationText(
+                              _targetDuration), // Correct call
+                          onPickerTap: () async {
+                            // Pass the required arguments: context, initialDuration, and the callback function
+                            await CustomWidgets.showDurationPicker(
+                                context, _targetDuration, (newDuration) {
+                              setState(() {
+                                _targetDuration =
+                                    newDuration; // Update target duration
+                              });
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildTitle(
+                          'Goal Type',
+                        ),
+                        const SizedBox(height: 12),
+                        CustomWidgets.buildDropdownField(
+                          label: 'Goal Type',
+                          textStyle: GoogleFonts.openSans(fontSize: 16),
+                          value: _selectedGoalType,
+                          items: _goalType,
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedGoalType = value;
 
-                          // Reset semester fields if goal type is changed
-                          if (_selectedGoalType == 'Personal') {
-                            _selectedSemester = null;
-                            _selectedSemesterId = null;
-                          } else if (_selectedGoalType == 'Academic' &&
-                              _selectedSemesterId == null) {
-                            // Ensure a valid semester is selected when changing to 'Academic'
-                            final semesterProvider =
-                                Provider.of<SemesterProvider>(context,
-                                    listen: false);
-                            if (semesterProvider.semesters.isNotEmpty) {
-                              final defaultSemester =
-                                  semesterProvider.semesters.first;
-                              _selectedSemester =
-                                  "${defaultSemester['acad_year_start']} - ${defaultSemester['acad_year_end']} ${defaultSemester['semester']}";
-                              _selectedSemesterId =
-                                  defaultSemester['semester_id'];
-                            }
-                          }
-                        });
-                      },
+                              // Reset semester fields if goal type is changed
+                              if (_selectedGoalType == 'Personal') {
+                                _selectedSemester = null;
+                                _selectedSemesterId = null;
+                              } else if (_selectedGoalType == 'Academic' &&
+                                  _selectedSemesterId == null) {
+                                // Ensure a valid semester is selected when changing to 'Academic'
+                                final semesterProvider =
+                                    Provider.of<SemesterProvider>(context,
+                                        listen: false);
+                                if (semesterProvider.semesters.isNotEmpty) {
+                                  final defaultSemester =
+                                      semesterProvider.semesters.first;
+                                  _selectedSemester =
+                                      "${defaultSemester['acad_year_start']} - ${defaultSemester['acad_year_end']} ${defaultSemester['semester']}";
+                                  _selectedSemesterId =
+                                      defaultSemester['semester_id'];
+                                }
+                              }
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        if (_selectedGoalType == 'Academic') ...[
+                          CustomWidgets.buildDropdownField(
+                            label: 'Select Semester',
+                            textStyle: GoogleFonts.openSans(fontSize: 14),
+                            value: _selectedSemester,
+                            items: semesterItems,
+                            onChanged: (value) {
+                              setState(() {
+                                if (value == '- Add Semester -') {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            AddSemesterScreen()),
+                                  ).then(
+                                      (_) => semesterProvider.fetchSemesters());
+                                } else {
+                                  _selectedSemester = value;
+
+                                  // Extract semester details for selection
+                                  List<String> semesterParts =
+                                      _selectedSemester!.split(' ');
+                                  int acadYearStart =
+                                      int.parse(semesterParts[0]);
+                                  int acadYearEnd = int.parse(semesterParts[2]);
+                                  String semesterType =
+                                      "${semesterParts[3]} ${semesterParts[4]}";
+
+                                  final selectedSemesterMap =
+                                      semesterProvider.semesters.firstWhere(
+                                    (semester) =>
+                                        semester['acad_year_start'] ==
+                                            acadYearStart &&
+                                        semester['acad_year_end'] ==
+                                            acadYearEnd &&
+                                        semester['semester'] == semesterType,
+                                    orElse: () => {},
+                                  );
+                                  _selectedSemesterId =
+                                      selectedSemesterMap['semester_id'];
+                                }
+                              });
+                            },
+                            backgroundColor: const Color(0xFFF5F5F5),
+                            labelColor: Colors.black,
+                            textColor: Colors.black,
+                            borderRadius: 30.0,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
+                            fontSize: 14.0,
+                          ),
+                        ],
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    if (_selectedGoalType == 'Academic') ...[
-                      CustomWidgets.buildDropdownField(
-                        label: 'Select Semester',
-                        textStyle: GoogleFonts.openSans(fontSize: 14),
-                        value: _selectedSemester,
-                        items: semesterItems,
-                        onChanged: (value) {
-                          setState(() {
-                            if (value == '- Add Semester -') {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AddSemesterScreen()),
-                              ).then((_) => semesterProvider.fetchSemesters());
-                            } else {
-                              _selectedSemester = value;
-
-                              // Extract semester details for selection
-                              List<String> semesterParts =
-                                  _selectedSemester!.split(' ');
-                              int acadYearStart = int.parse(semesterParts[0]);
-                              int acadYearEnd = int.parse(semesterParts[2]);
-                              String semesterType =
-                                  "${semesterParts[3]} ${semesterParts[4]}";
-
-                              final selectedSemesterMap =
-                                  semesterProvider.semesters.firstWhere(
-                                (semester) =>
-                                    semester['acad_year_start'] ==
-                                        acadYearStart &&
-                                    semester['acad_year_end'] == acadYearEnd &&
-                                    semester['semester'] == semesterType,
-                                orElse: () => {},
-                              );
-                              _selectedSemesterId =
-                                  selectedSemesterMap['semester_id'];
-                            }
-                          });
-                        },
-                        backgroundColor: const Color(0xFFF5F5F5),
-                        labelColor: Colors.black,
-                        textColor: Colors.black,
-                        borderRadius: 30.0,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 6),
-                        fontSize: 14.0,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              child: ElevatedButton(
-                onPressed: () => _editGoal(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF173F70),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(
-                  'Edit Goal',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    color: Colors.white,
                   ),
                 ),
-              ),
-            ),
-          ],
-        );
-      }),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 20.0),
+                  child: ElevatedButton(
+                    onPressed: () => _editGoal(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF173F70),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 100),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'Edit Goal',
+                      style: GoogleFonts.openSans(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
       resizeToAvoidBottomInset: false,
     );
   }

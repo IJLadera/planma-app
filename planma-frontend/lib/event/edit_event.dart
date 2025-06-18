@@ -231,10 +231,31 @@ class _EditEvent extends State<EditEvent> {
 
       // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.check_circle,
-          text: 'Event updated successfully!',
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const SizedBox(width: 8),
+              Text('Event Updated Successfully',
+                  style:
+                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
+          elevation: 10,
         ),
       );
 
@@ -253,10 +274,36 @@ class _EditEvent extends State<EditEvent> {
 
       // Error Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        _buildSnackBar(
-          icon: Icons.error,
-          text: errorMessage,
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Failed to Update Event 1: $error',
+                  style:
+                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.4,
+            left: 20,
+            right: 20,
+            top: 100,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Square shape
+          ),
+          backgroundColor: Colors.red, // Error background color
+          elevation: 10,
         ),
       );
     }
@@ -270,18 +317,20 @@ class _EditEvent extends State<EditEvent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Edit Event',
-            style: GoogleFonts.openSans(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF173F70),
-            ),
+      appBar: AppBar(
+        title: Text(
+          'Edit Event',
+          style: GoogleFonts.openSans(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
           ),
-          backgroundColor: Color(0xFFFFFFFF),
         ),
-        body: Column(
+        backgroundColor: Color(0xFFFFFFFF),
+      ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
           children: [
             Expanded(
                 child: SingleChildScrollView(
@@ -376,7 +425,7 @@ class _EditEvent extends State<EditEvent> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 120),
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
                 child: Text(
                   'Edit Event',
@@ -388,6 +437,9 @@ class _EditEvent extends State<EditEvent> {
               ),
             ),
           ],
-        ));
+        ),
+      ),
+      resizeToAvoidBottomInset: false,
+    );
   }
 }

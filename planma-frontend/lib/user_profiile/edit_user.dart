@@ -146,111 +146,119 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         backgroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.yellow,
-                    backgroundImage: getImageProvider(),
-                    child: (getImageProvider() == null)
-                        ? Icon(Icons.person, size: 50, color: Colors.black)
-                        : null,
-                  ),
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Color(0xFF173F70),
-                    child: IconButton(
-                      icon: Icon(Icons.edit, size: 16, color: Colors.white),
-                      onPressed: () => _showImagePickerOptions(context),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(), 
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.yellow,
+                      backgroundImage: getImageProvider(),
+                      child: (getImageProvider() == null)
+                          ? Icon(Icons.person, size: 50, color: Colors.black)
+                          : null,
+                    ),
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Color(0xFF173F70),
+                      child: IconButton(
+                        icon: Icon(Icons.edit, size: 16, color: Colors.white),
+                        onPressed: () => _showImagePickerOptions(context),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                // Username Field
+                TextFormField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              // Username Field
-              TextFormField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                ),
+                SizedBox(height: 20),
+                // First Name Field
+                TextFormField(
+                  controller: firstNameController,
+                  decoration: InputDecoration(
+                    labelText: 'First Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              // First Name Field
-              TextFormField(
-                controller: firstNameController,
-                decoration: InputDecoration(
-                  labelText: 'First Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                SizedBox(height: 20),
+                // Last Name Field
+                TextFormField(
+                  controller: lastNameController,
+                  decoration: InputDecoration(
+                    labelText: 'Last Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              // Last Name Field
-              TextFormField(
-                controller: lastNameController,
-                decoration: InputDecoration(
-                  labelText: 'Last Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              SizedBox(height: 30),
-              // Save Changes Button
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    XFile? imageFile;
+                SizedBox(height: 30),
+                // Save Changes Button
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      XFile? imageFile;
 
-                    if (kIsWeb && _webImage != null) {
-                      imageFile = XFile.fromData(_webImage!);
-                    } else if (_image != null) {
-                      imageFile = XFile(_image!.path);
+                      if (kIsWeb && _webImage != null) {
+                        imageFile = XFile.fromData(_webImage!);
+                      } else if (_image != null) {
+                        imageFile = XFile(_image!.path);
+                      }
+
+                      context.read<UserProfileProvider>().updateUserProfile(
+                          firstNameController.text,
+                          lastNameController.text,
+                          usernameController.text,
+                          imageFile: imageFile);
+                      Navigator.pop(context, {
+                        'username': usernameController.text,
+                        'firstName': firstNameController.text,
+                        'lastName': lastNameController.text,
+                      });
                     }
-                    
-                    context.read<UserProfileProvider>().updateUserProfile(firstNameController.text, lastNameController.text, usernameController.text, imageFile: imageFile); 
-                    Navigator.pop(context, {
-                      'username': usernameController.text,
-                      'firstName': firstNameController.text,
-                      'lastName': lastNameController.text,
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF173F70),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                child: _isLoading
-                    ? CircularProgressIndicator(
-                        color: Colors.white,
-                      )
-                    : Text(
-                        'Save Changes',
-                        style: GoogleFonts.openSans(
-                          fontSize: 14,
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF173F70),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 100),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: _isLoading
+                      ? CircularProgressIndicator(
                           color: Colors.white,
+                        )
+                      : Text(
+                          'Save Changes',
+                          style: GoogleFonts.openSans(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }
