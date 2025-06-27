@@ -41,19 +41,19 @@ dependencies:
   http: ^1.2.2
   image_picker: ^1.0.4
   flutter_dotenv: ^5.0.2
-
+  firebase_core: ^2.0.0
+  firebase_messaging: ^14.0.0
 
 
   # Calendar
   syncfusion_flutter_calendar: ^27.2.2
-
   font_awesome_flutter: ^10.4.0
   jwt_decode: ^0.3.1
   dropdown_button2: ^2.3.9
   syncfusion_flutter_charts: ^27.2.2
   
   # Notifications
-  push: ^3.3.3
+  # push: ^3.3.3
   flutter_local_notifications: ^17.1.0
   flutter_hooks: ^0.20.5
   share_plus: ^10.1.4

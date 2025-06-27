@@ -217,3 +217,8 @@ class ScheduleEntrySerializer(serializers.ModelSerializer):
             "Goal": GoalScheduleSerializer,
         }
         return CATEGORY_SERIALIZERS.get(category_type)
+    
+class FCMTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FCMToken
+        fields = ['token']

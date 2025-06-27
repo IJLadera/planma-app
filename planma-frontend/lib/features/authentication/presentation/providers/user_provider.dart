@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:planma_app/services/firebase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -132,6 +133,9 @@ class UserProvider extends ChangeNotifier {
 
         // Fetch user data
         await fetchUserData();
+
+        // Initialize FCM and send token to Django
+        await FCMService.initFCM(_accessToken!);
 
         _isAuthenticated = true;
         notifyListeners();

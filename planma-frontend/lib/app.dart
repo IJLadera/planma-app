@@ -23,7 +23,6 @@ import 'package:planma_app/timer/stopwatch_provider.dart';
 import 'package:planma_app/timer/timer_provider.dart';
 import 'package:provider/provider.dart';
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
