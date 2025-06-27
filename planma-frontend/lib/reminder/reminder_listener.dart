@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:planma_app/reminder/activity_reminder.dart';
+import 'package:planma_app/reminder/class_reminder.dart';
+import 'package:planma_app/reminder/event_reminder.dart';
+import 'package:planma_app/reminder/goal_reminder.dart';
+import 'package:planma_app/reminder/sleep_reminder.dart';
+import 'package:planma_app/reminder/task_reminder.dart';
 import 'package:provider/provider.dart';
 import 'package:planma_app/Providers/web_socket_provider.dart';
 import 'package:planma_app/features/authentication/presentation/providers/user_provider.dart';
@@ -113,7 +119,7 @@ class _ReminderListenerState extends State<ReminderListener> with WidgetsBinding
 
           // Show different types of reminders
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            _showReminderSnackBar(context, reminderType, reminder);
+            _navigateToReminderDetails(context, reminderType, reminder);
           });
         }
 
@@ -123,84 +129,84 @@ class _ReminderListenerState extends State<ReminderListener> with WidgetsBinding
     );
   }
 
-  void _showReminderSnackBar(
-      BuildContext context, String reminderType, dynamic reminderData) {
-    String message = '';
-    IconData icon = Icons.notifications;
-    Color color = Colors.blue;
+  // void _showReminderSnackBar(
+  //     BuildContext context, String reminderType, dynamic reminderData) {
+  //   String message = '';
+  //   IconData icon = Icons.notifications;
+  //   Color color = Colors.blue;
 
-    // Format reminder message based on type
-    switch (reminderType) {
-      case 'sleep':
-        message = reminderData.toString();
-        icon = Icons.bedtime;
-        color = Colors.indigo;
-        break;
-      case 'wake':
-        message = reminderData.toString();
-        icon = Icons.wb_sunny;
-        color = Colors.orange;
-        break;
-      case 'task':
-        final taskName = reminderData['name'] ?? 'Task';
-        final hoursRemaining = reminderData['hours_remaining'] ?? 0;
-        message = '$taskName due in $hoursRemaining hours';
-        icon = Icons.task_alt;
-        color = Colors.red;
-        break;
-      case 'event':
-        final eventName = reminderData['name'] ?? 'Event';
-        message = 'Upcoming event: $eventName';
-        icon = Icons.event;
-        color = Colors.purple;
-        break;
-      case 'class':
-        final subjectTitle = reminderData['subject_title'] ?? 'Class';
-        final room = reminderData['room'] ?? '';
-        message = 'Class reminder: $subjectTitle in $room';
-        icon = Icons.school;
-        color = Colors.teal;
-        break;
-      case 'activity':
-        final activityName = reminderData['name'] ?? 'Activity';
-        message = 'Scheduled activity: $activityName';
-        icon = Icons.directions_run;
-        color = Colors.green;
-        break;
-      case 'goal':
-        final goalName = reminderData['name'] ?? 'Goal';
-        message = 'Goal reminder: $goalName';
-        icon = Icons.flag;
-        color = Colors.amber;
-        break;
-      default:
-        message = 'New reminder received';
-    }
+  //   // Format reminder message based on type
+  //   switch (reminderType) {
+  //     case 'sleep':
+  //       message = reminderData.toString();
+  //       icon = Icons.bedtime;
+  //       color = Colors.indigo;
+  //       break;
+  //     case 'wake':
+  //       message = reminderData.toString();
+  //       icon = Icons.wb_sunny;
+  //       color = Colors.orange;
+  //       break;
+  //     case 'task':
+  //       final taskName = reminderData['name'] ?? 'Task';
+  //       final hoursRemaining = reminderData['hours_remaining'] ?? 0;
+  //       message = '$taskName due in $hoursRemaining hours';
+  //       icon = Icons.task_alt;
+  //       color = Colors.red;
+  //       break;
+  //     case 'event':
+  //       final eventName = reminderData['name'] ?? 'Event';
+  //       message = 'Upcoming event: $eventName';
+  //       icon = Icons.event;
+  //       color = Colors.purple;
+  //       break;
+  //     case 'class':
+  //       final subjectTitle = reminderData['subject_title'] ?? 'Class';
+  //       final room = reminderData['room'] ?? '';
+  //       message = 'Class reminder: $subjectTitle in $room';
+  //       icon = Icons.school;
+  //       color = Colors.teal;
+  //       break;
+  //     case 'activity':
+  //       final activityName = reminderData['name'] ?? 'Activity';
+  //       message = 'Scheduled activity: $activityName';
+  //       icon = Icons.directions_run;
+  //       color = Colors.green;
+  //       break;
+  //     case 'goal':
+  //       final goalName = reminderData['name'] ?? 'Goal';
+  //       message = 'Goal reminder: $goalName';
+  //       icon = Icons.flag;
+  //       color = Colors.amber;
+  //       break;
+  //     default:
+  //       message = 'New reminder received';
+  //   }
 
-    // Show the snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: color,
-        duration: const Duration(seconds: 5),
-        action: SnackBarAction(
-          label: 'VIEW',
-          textColor: Colors.white,
-          onPressed: () {
-            // Navigate to appropriate screen based on reminder type
-            _navigateToReminderDetails(context, reminderType, reminderData);
-          },
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+  //   // Show the snackbar
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Row(
+  //         children: [
+  //           Icon(icon, color: Colors.white),
+  //           const SizedBox(width: 12),
+  //           Expanded(child: Text(message)),
+  //         ],
+  //       ),
+  //       backgroundColor: color,
+  //       duration: const Duration(seconds: 5),
+  //       action: SnackBarAction(
+  //         label: 'VIEW',
+  //         textColor: Colors.white,
+  //         onPressed: () {
+  //           // Navigate to appropriate screen based on reminder type
+  //           _navigateToReminderDetails(context, reminderType, reminderData);
+  //         },
+  //       ),
+  //       behavior: SnackBarBehavior.floating,
+  //     ),
+  //   );
+  // }
 
   void _navigateToReminderDetails(
       BuildContext context, String reminderType, dynamic reminderData) {
@@ -209,19 +215,64 @@ class _ReminderListenerState extends State<ReminderListener> with WidgetsBinding
       case 'task':
         print('Testing');
         // Navigate to task details
-        // Navigator.push(context, MaterialPageRoute(builder: (_) => TaskDetailScreen(taskId: reminderData['id'])));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TaskReminder(
+              taskName: reminderData['id'],
+            ),
+          ),
+        );
         break;
       case 'event':
         // Navigate to event details
-        // Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(eventId: reminderData['id'])));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EventReminder(
+              eventName: reminderData['id'],
+            ),
+          ),
+        );
         break;
       case 'class':
         // Navigate to class schedule
-        // Navigator.push(context, MaterialPageRoute(builder: (_) => ClassScheduleScreen()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ClassReminder(),
+          ),
+        );
         break;
-      // Add cases for other reminder types
-      default:
-        // No specific navigation
+      case 'activity':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ActivityReminder(
+              activityName: reminderData['id'],
+            ),
+          ),
+        );
+        break;
+      case 'goal':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => GoalReminder(
+              goalName: reminderData['id'],
+            ),
+          ),
+        );
+        break;
+      case 'sleep':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SleepReminder(
+              sleepTime: reminderData['id'],
+            ),
+          ),
+        );
         break;
     }
   }

@@ -122,7 +122,6 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 
-
 flutter_native_splash:
   color: "#173F70"
   image: assets/planmalogo.png
@@ -132,3 +131,5 @@ flutter_native_splash:
   fullscreen: false   
   android_gravity: center
   ios_content_mode: center
+  web: true
+  web_image_mode: contain
