@@ -1,1 +1,2 @@
 *.pyc
+planma-backend/secrets/firebase-service-account.json
