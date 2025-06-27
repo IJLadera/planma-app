@@ -22,6 +22,8 @@ router.register(r'sleep-logs', SleepLogViewSet, basename='sleeplog')
 router.register(r'userprefs', UserPreferenceView, basename='userpref')
 router.register(r'users', CustomUserViewSet, basename='user')
 router.register(r'schedule', ScheduleEntryViewSet, basename='schedule')
+router.register(r'fcm-token', FCMTokenViewSet, basename='fcm-token')
+router.register(r'your-user', YourUserViewSet, basename='your-user')
 
 urlpatterns = [
     path ('djoser/', include ('djoser.urls')),

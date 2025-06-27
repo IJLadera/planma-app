@@ -13,9 +13,9 @@ from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.timezone import make_aware, now
-
 from django.http import JsonResponse
 from datetime import datetime, timedelta
+from api.tasks import send_push_notification
 
 # views.py
 # from djoser.views import TokenCreateView
@@ -73,8 +73,6 @@ class ActivityViewSet(viewsets.ModelViewSet):
         try:
             # Fetch the CustomUser instance
             student = CustomUser.objects.get(student_id=student_id)
-
-            print("student: ", student)
 
             # Check for conflicting activity schedule
             duplicate = CustomActivity.objects.filter(
@@ -2005,7 +2003,49 @@ class ScheduleEntryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return ScheduleEntry.objects.filter(student_id=self.request.user)
     
-    # def list(self, request, *args, **kwargs):
-    #     queryset = self.get_queryset()
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer.data)
+# Firebase Cloud Messaging (Push Notifs)
+class FCMTokenViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FCMTokenSerializer
+    queryset = FCMToken.objects.all()
+
+    def get_queryset(self):
+        # Only allow users to access their own FCM token
+        return self.queryset.filter(user=self.request.user)
+
+    @action(detail=False, methods=['post'])
+    def register(self, request):
+        """
+        Registers or updates the FCM token for the authenticated user.
+        """
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            token = serializer.validated_data['token']
+            fcm_token, created = FCMToken.objects.update_or_create(
+                user=request.user,
+                defaults={'token': token}
+            )
+            return Response({
+                "message": "Token saved successfully.",
+                "created": created
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class YourUserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+
+    @action(detail=False, methods=['post'], url_path='test-push')
+    def test_push_notification(self, request):
+        student_id = request.data.get('student_id')
+        if not student_id:
+            return Response({"error": "Missing student_id"}, status=400)
+
+        # Send a test push
+        send_push_notification.delay(
+            student_id,
+            "🔔 Test Push",
+            "This is a manual test notification"
+        )
+        return Response({"status": "Push triggered"}, status=200)

@@ -23,9 +23,6 @@ class WebSocketProvider extends ChangeNotifier {
   String? _studentId;
   String? get studentId => _studentId;
 
-  // // Base API URL - adjust this to match your backend URL
-  // final String _baseApiUrl = 'http://localhost:8000/api';
-
   // Base API URL - adjust this to match your backend URL
   late final String _baseApiUrl;
 
@@ -343,6 +340,7 @@ class WebSocketProvider extends ChangeNotifier {
 
   // Force refresh connection
   Future<void> refreshConnection({BuildContext? context}) async {
+    print('Refreshing WebSocket');
     await disconnect();
     await initialize(context: context);
   }

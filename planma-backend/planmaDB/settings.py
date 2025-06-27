@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 from celery.schedules import crontab
 import environ
 import os
+import firebase_admin
+from firebase_admin import credentials
 
 load_dotenv()
 
@@ -30,6 +32,10 @@ environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Initialize Firebase App once
+if not firebase_admin._apps:
+    cred = credentials.Certificate(os.path.join(BASE_DIR, 'secrets/firebase-service-account.json'))
+    firebase_admin.initialize_app(cred)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/

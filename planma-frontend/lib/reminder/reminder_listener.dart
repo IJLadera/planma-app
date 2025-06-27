@@ -15,12 +15,15 @@ class ReminderListener extends StatefulWidget {
   State<ReminderListener> createState() => _ReminderListenerState();
 }
 
-class _ReminderListenerState extends State<ReminderListener> {
+class _ReminderListenerState extends State<ReminderListener> with WidgetsBindingObserver{
   bool _initialized = false;
+  WebSocketProvider? _wsProvider;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     // Initialize WebSocket connection after frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeWebSocket();
@@ -30,13 +33,12 @@ class _ReminderListenerState extends State<ReminderListener> {
   void _initializeWebSocket() {
     // Get user provider to check authentication status
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final webSocketProvider =
-        Provider.of<WebSocketProvider>(context, listen: false);
+    _wsProvider = Provider.of<WebSocketProvider>(context, listen: false);
 
     // Only initialize if the user is authenticated
     if (userProvider.isAuthenticated) {
       if (!_initialized) {
-        webSocketProvider.initialize(context: context);
+        _wsProvider!.initialize(context: context);
         _initialized = true;
       }
     }
@@ -61,6 +63,33 @@ class _ReminderListenerState extends State<ReminderListener> {
       webSocketProvider.onUserLogout();
       _initialized = false;
     }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_wsProvider == null) return;
+
+    if (state == AppLifecycleState.resumed) {
+      _wsProvider!.sendMessage({
+        "type": "status_update",
+        "foreground": true,
+      });
+      _wsProvider!.refreshConnection(context: context);
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      _wsProvider!.sendMessage({
+        "type": "status_update",
+        "foreground": false,
+      });
+      _wsProvider!.disconnect();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override

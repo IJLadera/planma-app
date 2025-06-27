@@ -1,5 +1,7 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:planma_app/Notifications/local_notification_service.dart';
 import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/events_provider.dart';
@@ -44,6 +46,23 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      try {
+        print('📩 Received message while app is in foreground!');
+        if (message.notification != null) {
+          final title = message.notification!.title;
+          final body = message.notification!.body;
+          print('Notification Title: $title');
+          print('Notification Body: $body');
+          LocalNotificationService.showNotification(title: title, body: body);
+        }
+      } catch (e, stack) {
+        print('Error showing notification: $e');
+        print(stack);
+      }
+    });
+
 
     // Use dotenv to get API_URL and remove trailing slash if present
     String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
