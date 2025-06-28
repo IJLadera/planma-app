@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/Front%20&%20back%20end%20connections/logout_service.dart';
 import 'package:planma_app/features/authentication/presentation/pages/log_in_page.dart';
+import 'package:planma_app/features/authentication/presentation/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class CustomWidget {
   static Widget buildTimePickerField({
@@ -65,7 +67,7 @@ class CustomWidget {
   }
 
   static Future<void> logout(BuildContext context) async {
-    final authLogout = AuthLogout();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     // Show a loading dialog
     showDialog(
@@ -91,7 +93,7 @@ class CustomWidget {
     // Introduce an artificial delay (e.g., 2 seconds)
     await Future.delayed(Duration(seconds: 2));
 
-    await authLogout.logOut(context);
+    await userProvider.logout();
 
     // Dismiss the loading dialog
     Navigator.pop(context);

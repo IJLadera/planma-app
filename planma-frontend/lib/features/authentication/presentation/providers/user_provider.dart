@@ -45,8 +45,13 @@ class UserProvider extends ChangeNotifier {
       _refreshToken = prefs.getString('refresh');
       _studentId = prefs.getString('student_id');
 
-      // If no tokens and student_id are present, user is not authenticated
-      if (_accessToken == null && _refreshToken == null && _studentId == null) {
+      print("Access: $_accessToken");
+      print("Refresh: $_refreshToken");
+
+
+      // If no tokens are present, user is not authenticated
+      if (_accessToken == null || _refreshToken == null) {
+        await logout();
         _isAuthenticated = false;
         notifyListeners();
         return false;
@@ -60,11 +65,20 @@ class UserProvider extends ChangeNotifier {
       
       await fetchUserData();
 
+      // If userData remains null after attempt, assume auth is invalid
+      if (_userData == null) {
+        await logout();
+        _isAuthenticated = false;
+        notifyListeners();
+        return false;
+      }
+
       _isAuthenticated = true;
       notifyListeners();
       return true;
     } catch (e) {
       print('Error checking authentication: $e');
+      await logout(); // safest fallback
       _isAuthenticated = false;
       notifyListeners();
       return false;
@@ -182,11 +196,11 @@ class UserProvider extends ChangeNotifier {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$_baseApiUrl/auth/users/'),
+        Uri.parse('$_baseApiUrl/djoser/users/'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'first_name': firstName,
-          'last_name': lastName,
+          'firstname': firstName,
+          'lastname': lastName,
           'username': username,
           'email': email,
           'password': password,

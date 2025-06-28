@@ -17,3 +17,4 @@ channels-redis
 sqlparse
 daphne
 django-celery-beat
+firebase_admin
