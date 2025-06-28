@@ -48,9 +48,9 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
       );
 
       // If successful, show a success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Reminder saved successfully!")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text("Reminder saved successfully!")),
+      // );
 
       // Navigate to the next screen
       Navigator.push(
