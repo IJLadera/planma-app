@@ -224,15 +224,9 @@ class _EditClassState extends State<EditClass> {
     String endTimeString = _endTimeController.text.trim();
     String room = _roomController.text.trim();
 
-    print(startTimeString);
-    print(endTimeString);
-
     // Convert String to TimeOfDay
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
-
-    print('formatted: $startTime');
-    print('formatted: $endTime');
 
     if (selectedSemesterId == null) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,7 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
+import 'package:planma_app/Providers/events_provider.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/services/firebase_service.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -179,6 +185,13 @@ class UserProvider extends ChangeNotifier {
       await prefs.remove('refresh');
       await prefs.remove('user_data');
       await prefs.remove('student_id'); // Also remove student_id
+
+      //Clear Providers
+      // Provider.of<SemesterProvider>(context, listen: false).resetState();
+      // Provider.of<ClassScheduleProvider>(context, listen: false).resetState();
+      // Provider.of<TaskProvider>(context, listen: false).resetState();
+      // Provider.of<EventsProvider>(context, listen: false).resetState();
+      // Provider.of<ActivityProvider>(context, listen: false).resetState();
 
       notifyListeners();
     } catch (e) {
