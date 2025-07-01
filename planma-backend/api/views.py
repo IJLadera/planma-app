@@ -860,27 +860,27 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
                 )
             
         try:
-            # Check if the subject needs updating or creation
-            subject, created = CustomSubject.objects.get_or_create(
+            subject = instance.subject  # The subject linked to the class you're editing
+
+            # Optional: prevent changing to a duplicate subject_code for same student and semester
+            if CustomSubject.objects.exclude(subject_id=subject.subject_id).filter(
                 subject_code=data["subject_code"],
-                student_id_id=request.user.student_id,
-                defaults={
-                    "subject_title": data["subject_title"],
-                    "semester_id_id": data["semester_id"],
-                },
-            )
-            if not created:
-                if subject.student_id_id != request.user.student_id:
-                    return Response(
-                        {'error': 'You do not own this subject record.'},
-                        status=status.HTTP_403_FORBIDDEN
-                    )
-                subject.subject_title = data['subject_title']
-                subject.semester_id_id = data['semester_id']
-                subject.save()
+                student_id=request.user,
+                semester_id=data["semester_id"]
+            ).exists():
+                return Response(
+                    {"error": "A subject with this code already exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update the subject fields
+            subject.subject_code = data["subject_code"]
+            subject.subject_title = data["subject_title"]
+            subject.semester_id_id = data["semester_id"]  # optional if not changing semesters
+            subject.save()
 
             # Update the class schedule instance
-            instance.subject_code = subject
+            instance.subject = subject
             instance.day_of_week = data["day_of_week"]
             instance.scheduled_start_time = data["scheduled_start_time"]
             instance.scheduled_end_time = data["scheduled_end_time"]

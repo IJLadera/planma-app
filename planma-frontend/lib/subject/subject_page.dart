@@ -62,15 +62,25 @@ class _ClassScheduleState extends State<ClassSchedule> {
             : semesterProvider
                 .semesters.first; // fallback to first if none match
 
+        // Check if current selectedSemester is still valid
+        final selectedExists = semesterProvider.semesters.any((sem) =>
+            "${sem['acad_year_start']} - ${sem['acad_year_end']} ${sem['semester']}" == selectedSemester);
+
         setState(() {
-          selectedSemester =
-              "${selected['acad_year_start']} - ${selected['acad_year_end']} ${selected['semester']}";
+          selectedSemester = selectedExists
+              ? selectedSemester
+              : "${selected['acad_year_start']} - ${selected['acad_year_end']} ${selected['semester']}";
         });
 
         classScheduleProvider.fetchClassSchedules(
           selectedSemesterId: selected['semester_id'],
         );
-      }
+      } else {
+        // Reset to null if no semesters exist
+        setState(() {
+          selectedSemester = null;
+        });
+      } 
     });
   }
 
@@ -105,7 +115,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
                           Expanded(
                             child: CustomWidgets.buildDropdownField(
                               label: '- Add Semester -',
-                              value: selectedSemester,
+                              value: semesters.contains(selectedSemester) ? selectedSemester : null,
                               items: semesters,
                               onChanged: (String? value) {
                                 setState(() {

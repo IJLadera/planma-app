@@ -48,8 +48,12 @@ class SemesterCard extends StatelessWidget {
     );
 
     if (isConfirmed == true) {
-      provider.deleteSemester(semester['semester_id']);
-      Navigator.pop(context);
+      await provider.deleteSemester(semester['semester_id']);
+      await provider.fetchSemesters();
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Go back to previous screen safely
+      }
     }
   }
 
