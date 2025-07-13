@@ -40,37 +40,37 @@ class _AddGoalSession extends State<AddGoalSession> {
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: initialDate ?? DateTime.now(), // Use last selected date
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
 
     if (pickedDate != null) {
       setState(() {
-        _scheduledDate = pickedDate;
+        _scheduledDate = pickedDate; // Save selected date
       });
     }
   }
 
   Future<void> _selectTime(
-      BuildContext context, TextEditingController controller) async {
-    // Parse the existing time from the controller, or use a default time
+    BuildContext context,
+    TextEditingController controller, {
+    bool openEndTimeAfter = false,
+    TextEditingController? endTimeController,
+  }) async {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm()
-            .parse(controller.text); // Parse time from "h:mm a" format
+        final parsedTime = DateFormat.jm().parse(controller.text);
         initialTime =
             TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime =
-            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime = TimeOfDay.now();
       }
     } else {
-      initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
+      initialTime = TimeOfDay.now();
     }
 
-    // Show the time picker with the initial time
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -78,8 +78,13 @@ class _AddGoalSession extends State<AddGoalSession> {
 
     if (picked != null) {
       setState(() {
-        controller.text = picked.format(context); // Update the controller text
+        controller.text = picked.format(context);
       });
+
+      // Immediately show End Time Picker after Start Time if needed
+      if (openEndTimeAfter && endTimeController != null) {
+        await _selectTime(context, endTimeController);
+      }
     }
   }
 
@@ -102,6 +107,30 @@ class _AddGoalSession extends State<AddGoalSession> {
     }
   }
 
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
   void _submitForm(BuildContext context) async {
     final provider = Provider.of<GoalScheduleProvider>(context, listen: false);
 
@@ -111,20 +140,20 @@ class _AddGoalSession extends State<AddGoalSession> {
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
 
-    if (_scheduledDate == null ||
-        startTimeString.isEmpty ||
-        endTimeString.isEmpty) {
-      // Show error dialog if any field is empty
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+    if (_scheduledDate == null) {
+      _showError(context, "Please select a scheduled date.");
       return;
     }
-
-    if (!_isValidTimeRange(startTime!, endTime!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Start Time must be before End Time.')),
-      );
+    if (startTimeString.isEmpty || startTime == null) {
+      _showError(context, "Please enter a valid start time.");
+      return;
+    }
+    if (endTimeString.isEmpty || endTime == null) {
+      _showError(context, "Please enter a valid end time.");
+      return;
+    }
+    if (!_isValidTimeRange(startTime, endTime)) {
+      _showError(context, "Start time must be before end time.");
       return;
     }
 
@@ -136,87 +165,43 @@ class _AddGoalSession extends State<AddGoalSession> {
         endTime: endTime,
       );
 
-      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text('Goal Session Created Successfully',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 10),
+              Text(
+                'Goal Session created successfully!',
+                style: GoogleFonts.openSans(color: Colors.white),
+              ),
             ],
           ),
-          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          duration: const Duration(seconds: 3),
         ),
       );
 
       Navigator.pop(context);
       _clearFields();
     } catch (error) {
-      String errorMessage = 'Failed to create goal schedule';
+      String errorMessage;
 
       if (error.toString().contains('Scheduling overlap')) {
-        errorMessage =
-            'Scheduling overlap: This time slot is already occupied.';
+        errorMessage = 'This time slot overlaps with another goal session.';
       } else if (error
           .toString()
           .contains('Duplicate goal schedule entry detected')) {
-        errorMessage =
-            'Duplicate goal schedule entry: This goal schedule already exists.';
+        errorMessage = 'This goal session already exists.';
       } else {
-        errorMessage = 'Failed to create goal schedule: $error';
+        errorMessage = 'Failed to create goal session: $error';
       }
 
-      // Error Snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Failed To Create Goal Session 1: $error',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10,
-        ),
-      );
+      _showError(context, errorMessage);
     }
   }
 
@@ -278,8 +263,12 @@ class _AddGoalSession extends State<AddGoalSession> {
                             'Start Time',
                             _startTimeController,
                             context,
-                            (context) =>
-                                _selectTime(context, _startTimeController),
+                            (context) => _selectTime(
+                              context,
+                              _startTimeController,
+                              openEndTimeAfter: true,
+                              endTimeController: _endTimeController,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),

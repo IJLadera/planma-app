@@ -75,20 +75,82 @@ class _EditGoal extends State<EditGoal> {
     });
   }
 
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
+  void _showSuccess(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF50B6FF),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _editGoal(BuildContext context) async {
     final provider = Provider.of<GoalProvider>(context, listen: false);
 
     String goalName = _goalCodeController.text.trim();
     String goalDescription = _descriptionController.text.trim();
 
-    if (goalName.isEmpty ||
-        goalDescription.isEmpty ||
-        _selectedGoalType == null ||
-        _selectedTimeframe == null ||
-        (_selectedGoalType == 'Academic' && _selectedSemesterId == null)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields!')),
-      );
+    if (goalName.isEmpty) {
+      _showError(context, 'Goal name is required.');
+      return;
+    }
+
+    if (goalDescription.isEmpty) {
+      _showError(context, 'Goal description is required.');
+      return;
+    }
+
+    if (_selectedGoalType == null) {
+      _showError(context, 'Goal type is required.');
+      return;
+    }
+
+    if (_selectedTimeframe == null) {
+      _showError(context, 'Timeframe is required.');
+      return;
+    }
+
+    if (_selectedGoalType == 'Academic' && _selectedSemesterId == null) {
+      _showError(context, 'Semester is required for Academic goals.');
       return;
     }
 
@@ -107,70 +169,17 @@ class _EditGoal extends State<EditGoal> {
           semester: semester);
       print('Schedule updated successfully!');
 
-      // After validation and adding logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text('Goal Updated Successfully',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
-        ),
-      );
+      _showSuccess(context, 'Goal updated successfully!');
       Navigator.pop(context, true);
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Failed To Update Goal 1: $error',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10,
-        ),
-      );
+      String errorMessage;
+
+      if (error.toString().contains('Duplicate goal entry detected')) {
+        errorMessage = 'This goal already exists.';
+      } else {
+        errorMessage = 'Failed to update goal: $error';
+      }
+      _showError(context, errorMessage);
     }
   }
 

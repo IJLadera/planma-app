@@ -23,6 +23,8 @@ class _AddEventScreen extends State<AddEventScreen> {
   String? _selectedEventType;
   final List<String> _eventTypes = ['Academic', 'Personal'];
 
+  bool _isSubmitting = false;
+
   // Method to select date
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
@@ -39,26 +41,26 @@ class _AddEventScreen extends State<AddEventScreen> {
     }
   }
 
-  // Method to select time
+// Method to select time
   Future<void> _selectTime(
-      BuildContext context, TextEditingController controller) async {
-    // Parse the existing time from the controller, or use a default time
+    BuildContext context,
+    TextEditingController controller, {
+    bool openEndTimeAfter = false,
+    TextEditingController? endTimeController,
+  }) async {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm()
-            .parse(controller.text); // Parse time from "h:mm a" format
+        final parsedTime = DateFormat.jm().parse(controller.text);
         initialTime =
             TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime =
-            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime = TimeOfDay.now();
       }
     } else {
-      initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
+      initialTime = TimeOfDay.now();
     }
 
-    // Show the time picker with the initial time
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -66,8 +68,13 @@ class _AddEventScreen extends State<AddEventScreen> {
 
     if (picked != null) {
       setState(() {
-        controller.text = picked.format(context); // Update the controller text
+        controller.text = picked.format(context);
       });
+
+      // Immediately show End Time Picker after Start Time if needed
+      if (openEndTimeAfter && endTimeController != null) {
+        await _selectTime(context, endTimeController);
+      }
     }
   }
 
@@ -90,45 +97,36 @@ class _AddEventScreen extends State<AddEventScreen> {
     }
   }
 
-  // Helper function to create snackbars
-  SnackBar _buildSnackBar(
-      {required IconData icon,
-      required String text,
-      required Color backgroundColor}) {
-    return SnackBar(
-      content: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-              overflow: TextOverflow.ellipsis,
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 4),
       ),
-      duration: const Duration(seconds: 3),
-      behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).size.height * 0.4,
-        left: 50,
-        right: 50,
-        top: 100,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      backgroundColor: backgroundColor,
-      elevation: 10,
     );
   }
 
   // Create event function
   Future<void> _createEvent() async {
+    if (_isSubmitting) return; // Prevent duplicate submissions
+    FocusScope.of(context).unfocus(); // Dismiss keyboard
+
     final provider = Provider.of<EventsProvider>(context, listen: false);
 
     String eventName = _eventNameController.text.trim();
@@ -141,31 +139,37 @@ class _AddEventScreen extends State<AddEventScreen> {
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
 
-    if (eventName.isEmpty ||
-        eventDescription.isEmpty ||
-        location.isEmpty ||
-        _scheduledDate == null ||
-        startTimeString.isEmpty ||
-        endTimeString.isEmpty ||
-        _selectedEventType == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Please fill in all fields!',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+    // Dynamic validation with specific error messages
+    if (eventName.isEmpty) {
+      _showError(context, 'Event name is required.');
       return;
     }
-
-    if (!_isValidTimeRange(startTime!, endTime!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Start Time must be before End Time.',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+    if (eventDescription.isEmpty) {
+      _showError(context, 'Event description is required.');
+      return;
+    }
+    if (location.isEmpty) {
+      _showError(context, 'Location is required.');
+      return;
+    }
+    if (_scheduledDate == null) {
+      _showError(context, 'Please select a scheduled date.');
+      return;
+    }
+    if (startTimeString.isEmpty || startTime == null) {
+      _showError(context, 'Please enter a valid start time.');
+      return;
+    }
+    if (endTimeString.isEmpty || endTime == null) {
+      _showError(context, 'Please enter a valid end time.');
+      return;
+    }
+    if (!_isValidTimeRange(startTime, endTime)) {
+      _showError(context, 'Start time must be before end time.');
+      return;
+    }
+    if (_selectedEventType == null) {
+      _showError(context, 'Please select an event type.');
       return;
     }
 
@@ -179,85 +183,44 @@ class _AddEventScreen extends State<AddEventScreen> {
         endTime: endTime,
         eventType: _selectedEventType!,
       );
-
-      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text('Event Created Successfully',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Event created successfully!',
+                  style: GoogleFonts.openSans(color: Colors.white),
+                ),
+              ),
             ],
           ),
-          duration: const Duration(seconds: 3),
+          backgroundColor: const Color(0xFF50B6FF),
           behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          duration: const Duration(seconds: 3),
         ),
       );
 
       Navigator.pop(context);
       _clearFields();
     } catch (error) {
-      String errorMessage = 'Failed to create event';
+      String errorMessage;
 
       if (error.toString().contains('Scheduling overlap')) {
         errorMessage =
-            'Scheduling overlap: This time slot is already occupied.';
+            'This time slot overlaps with another event.';
       } else if (error.toString().contains('Duplicate event entry detected')) {
-        errorMessage = 'Duplicate event entry: This event already exists.';
+        errorMessage = 'This event already exists.';
       } else {
-        errorMessage = 'Failed to create event: $error';
+        errorMessage = 'Failed: $error';
       }
 
-      // Error Snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Failed to Create Event 1: $error',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10,
-        ),
-      );
+      _showError(context, errorMessage);
     }
   }
 
@@ -300,35 +263,35 @@ class _AddEventScreen extends State<AddEventScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    _buildTitle(
+                    CustomWidgets.buildTitle(
                       'Event Name',
                     ),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(
                         _eventNameController, 'Event Name'),
                     const SizedBox(height: 12),
-                    _buildTitle(
+                    CustomWidgets.buildTitle(
                       'Description',
                     ),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(
                         _eventDescController, 'Description'),
                     const SizedBox(height: 12),
-                    _buildTitle(
+                    CustomWidgets.buildTitle(
                       'Location',
                     ),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(
                         _eventLocationController, 'Location'),
                     const SizedBox(height: 12),
-                    _buildTitle(
+                    CustomWidgets.buildTitle(
                       'Scheduled Date',
                     ),
                     const SizedBox(height: 12),
                     CustomWidgets.buildDateTile('Scheduled Date',
                         _scheduledDate, context, true, _selectDate),
                     const SizedBox(height: 12),
-                    _buildTitle(
+                    CustomWidgets.buildTitle(
                       'Start and End Time',
                     ),
                     const SizedBox(height: 12),
@@ -339,8 +302,12 @@ class _AddEventScreen extends State<AddEventScreen> {
                             'Start Time',
                             _startTimeController,
                             context,
-                            (context) =>
-                                _selectTime(context, _startTimeController),
+                            (context) => _selectTime(
+                              context,
+                              _startTimeController,
+                              openEndTimeAfter: true,
+                              endTimeController: _endTimeController,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -356,7 +323,7 @@ class _AddEventScreen extends State<AddEventScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildTitle(
+                    CustomWidgets.buildTitle(
                       'Event Type',
                     ),
                     const SizedBox(height: 12),
@@ -407,22 +374,4 @@ class _AddEventScreen extends State<AddEventScreen> {
       resizeToAvoidBottomInset: false,
     );
   }
-}
-
-Widget _buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
-      ),
-    ),
-  );
 }

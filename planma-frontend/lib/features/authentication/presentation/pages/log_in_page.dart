@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/features/authentication/presentation/providers/user_provider.dart';
@@ -31,8 +34,8 @@ class _LogInPageState extends State<LogInPage> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      final email = emailController.text;
-      final password = passwordController.text;
+      final email = emailController.text.trim();
+      final password = passwordController.text.trim();
 
       if (email.isEmpty || password.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -69,15 +72,31 @@ class _LogInPageState extends State<LogInPage> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content:
-                    Text("Wrong Credentials", style: GoogleFonts.openSans())),
+              content: Text("Invalid Credentials. Please try again.",
+                  style: GoogleFonts.openSans()),
+            ),
           );
         }
+      } on TimeoutException {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Connection timed out. Try again later.",
+                style: GoogleFonts.openSans()),
+          ),
+        );
+      } on HttpException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Server error: ${e.message}",
+                style: GoogleFonts.openSans()),
+          ),
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text("Login failed: ${e.toString()}",
-                  style: GoogleFonts.openSans())),
+            content: Text("Login failed: ${e.toString()}",
+                style: GoogleFonts.openSans()),
+          ),
         );
       } finally {
         setState(() {

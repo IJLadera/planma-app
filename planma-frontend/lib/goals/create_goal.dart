@@ -30,20 +30,78 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
   final List<String> _goalTypes = ['Academic', 'Personal'];
   final List<String> _timeframe = ['Daily', 'Weekly', 'Monthly'];
 
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
+  void _showSuccess(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _submitGoal(BuildContext context) async {
     final provider = Provider.of<GoalProvider>(context, listen: false);
 
     String goalName = _goalNameController.text.trim();
     String goalDescription = _descriptionController.text.trim();
 
-    if (goalName.isEmpty ||
-        goalDescription.isEmpty ||
-        _selectedGoalType == null ||
-        _selectedTimeframe == null ||
-        (_selectedGoalType == 'Academic' && _selectedSemesterId == null)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields!')),
-      );
+    if (goalName.isEmpty) {
+      _showError(context, 'Goal name is required.');
+      return;
+    }
+    if (goalDescription.isEmpty) {
+      _showError(context, 'Goal description is required.');
+      return;
+    }
+    if (_selectedGoalType == null) {
+      _showError(context, 'Please select a goal type.');
+      return;
+    }
+    if (_selectedTimeframe == null) {
+      _showError(context, 'Please select a timeframe.');
+      return;
+    }
+    if (_selectedGoalType == 'Academic' && _selectedSemesterId == null) {
+      _showError(context, 'Please select a semester for academic goals.');
       return;
     }
 
@@ -58,78 +116,13 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
           targetHours: _targetDuration,
           goalType: _selectedGoalType!,
           semester: semester);
-
-      // After validation and adding logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min, // Make the row compact
-            mainAxisAlignment: MainAxisAlignment.center, // Center the content
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Goal Created Successfully!',
-                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 30,
-            right: 30,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // Make it a square
-          ),
-          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 12, // Add shadow for better visibility
-        ),
-      );
+      _showSuccess(context, 'Goal Created Successfully!');
 
       Navigator.pop(context);
       // Clear fields after adding
       _clearFields();
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error,
-                  color: Colors.white, size: 24), // Error icon
-              const SizedBox(width: 8),
-              Expanded(
-                // Prevents text overflow
-                child: Text(
-                  'Failed To Create Goal (1): $error',
-                  style:
-                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-                  overflow: TextOverflow.ellipsis, // Handles long errors
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
-            left: 30,
-            right: 30,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10, // Adds shadow
-        ),
-      );
+      _showError(context, 'Failed to create goal: $error');
     }
   }
 

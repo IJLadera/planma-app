@@ -22,6 +22,8 @@ class _EditTask extends State<EditTask> {
   late TextEditingController _descriptionController;
   late TextEditingController _startTimeController;
   late TextEditingController _endTimeController;
+  final _scheduledDateController = TextEditingController();
+  final _deadlineDateController = TextEditingController();
 
   DateTime? _scheduledDate;
   DateTime? _deadline;
@@ -29,18 +31,25 @@ class _EditTask extends State<EditTask> {
 
   // Method to select date
   Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
+    final currentDate = isScheduledDate ? _scheduledDate : _deadline;
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: currentDate ?? DateTime.now(), // Use selected date if exists
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
+
+    final dateFormat = DateFormat('yyyy-MM-dd');
+
     if (picked != null) {
       setState(() {
         if (isScheduledDate) {
           _scheduledDate = picked;
+          _scheduledDateController.text = dateFormat.format(picked);
         } else {
           _deadline = picked;
+          _deadlineDateController.text = dateFormat.format(picked);
         }
       });
     }
@@ -48,24 +57,24 @@ class _EditTask extends State<EditTask> {
 
   // Method to select time
   Future<void> _selectTime(
-      BuildContext context, TextEditingController controller) async {
-    // Parse the existing time from the controller, or use a default time
+    BuildContext context,
+    TextEditingController controller, {
+    bool openEndTimeAfter = false,
+    TextEditingController? endTimeController,
+  }) async {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm()
-            .parse(controller.text); // Parse time from "h:mm a" format
+        final parsedTime = DateFormat.jm().parse(controller.text);
         initialTime =
             TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime =
-            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime = TimeOfDay.now();
       }
     } else {
-      initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
+      initialTime = TimeOfDay.now();
     }
 
-    // Show the time picker with the initial time
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -73,8 +82,13 @@ class _EditTask extends State<EditTask> {
 
     if (picked != null) {
       setState(() {
-        controller.text = picked.format(context); // Update the controller text
+        controller.text = picked.format(context);
       });
+
+      // Immediately show End Time Picker after Start Time if needed
+      if (openEndTimeAfter && endTimeController != null) {
+        await _selectTime(context, endTimeController);
+      }
     }
   }
 
@@ -160,40 +174,29 @@ class _EditTask extends State<EditTask> {
     });
   }
 
-  // Helper function to create snackbars
-  SnackBar _buildSnackBar(
-      {required IconData icon,
-      required String text,
-      required Color backgroundColor}) {
-    return SnackBar(
-      content: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-              overflow: TextOverflow.ellipsis,
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 4),
       ),
-      duration: const Duration(seconds: 3),
-      behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).size.height * 0.4,
-        left: 50,
-        right: 50,
-        top: 100,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      backgroundColor: backgroundColor,
-      elevation: 10,
     );
   }
 
@@ -211,28 +214,45 @@ class _EditTask extends State<EditTask> {
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
 
-    if (taskName.isEmpty ||
-        taskDescription.isEmpty ||
-        _scheduledDate == null ||
-        startTimeString.isEmpty ||
-        endTimeString.isEmpty ||
-        _deadline == null ||
-        _subject == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields!')),
-      );
+    // Validate individual fields with specific messages
+    if (taskName.isEmpty) {
+      _showError(context, "Task name is required.");
+      return;
+    }
+    if (taskDescription.isEmpty) {
+      _showError(context, "Task description is required.");
+      return;
+    }
+    if (_scheduledDate == null) {
+      _showError(context, "Please select a scheduled date.");
+      return;
+    }
+    if (startTimeString.isEmpty || startTime == null) {
+      _showError(context, "Please select a valid start time.");
+      return;
+    }
+    if (endTimeString.isEmpty || endTime == null) {
+      _showError(context, "Please select a valid end time.");
+      return;
+    }
+    if (_deadline == null) {
+      _showError(context, "Please set a deadline.");
+      return;
+    }
+    if (_subject == null) {
+      _showError(context, "Please choose a subject.");
       return;
     }
 
-    if (!_isValidTimeRange(startTime!, endTime!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Start Time must be before End Time.')),
-      );
+    if (!_isValidTimeRange(startTime, endTime)) {
+      _showError(context, "Start time must be before end time.");
       return;
     }
 
-    final selectedSubject =
-        subjects.firstWhere((subject) => subject.subjectId == _subject);
+    final selectedSubject = subjects.firstWhere(
+      (subject) => subject.subjectId == _subject,
+      orElse: () => throw Exception("Selected subject not found."),
+    );
 
     try {
       print('Starting to update task...');
@@ -247,83 +267,42 @@ class _EditTask extends State<EditTask> {
         subject: selectedSubject,
       );
 
-      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text('Task Updated Successfully',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Task updated successfully!',
+                  style: GoogleFonts.openSans(color: Colors.white),
+                ),
+              ),
             ],
           ),
-          duration: const Duration(seconds: 3),
+          backgroundColor: const Color(0xFF50B6FF),
           behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          duration: const Duration(seconds: 3),
         ),
       );
 
       Navigator.pop(context);
     } catch (error) {
-      String errorMessage = 'Failed to update task';
+      String errorMessage;
 
       if (error.toString().contains('Scheduling overlap')) {
-        errorMessage =
-            'Scheduling overlap: This time slot is already occupied.';
+        errorMessage = 'This time slot is already occupied.';
       } else if (error.toString().contains('Duplicate task entry detected')) {
-        errorMessage = 'Duplicate task entry: This task already exists.';
+        errorMessage = 'This task already exists.';
       } else {
-        errorMessage = 'Failed to update task: $error';
+        errorMessage = 'Unexpected error: ${error.toString()}';
       }
 
-      // Error Snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Failed to Update Task 1: $error',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10,
-        ),
-      );
+      _showError(context, errorMessage);
     }
   }
 
@@ -357,21 +336,21 @@ class _EditTask extends State<EditTask> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    _buildTitle('Task Name'),
+                    CustomWidgets.buildTitle('Task Name'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(
                       _taskNameController,
                       'Task Name',
                     ),
                     const SizedBox(height: 12),
-                    _buildTitle('Description'),
+                    CustomWidgets.buildTitle('Description'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(
                       _descriptionController,
                       'Description',
                     ),
                     const SizedBox(height: 12),
-                    _buildTitle('Scheduled Date'),
+                    CustomWidgets.buildTitle('Scheduled Date'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildDateTile(
                       'Scheduled Date',
@@ -381,7 +360,7 @@ class _EditTask extends State<EditTask> {
                       (context, date) => _selectDate(context, true),
                     ),
                     const SizedBox(height: 12),
-                    _buildTitle('Start and End Time'),
+                    CustomWidgets.buildTitle('Start and End Time'),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -390,8 +369,12 @@ class _EditTask extends State<EditTask> {
                             'Start Time',
                             _startTimeController,
                             context,
-                            (context) =>
-                                _selectTime(context, _startTimeController),
+                            (context) => _selectTime(
+                              context,
+                              _startTimeController,
+                              openEndTimeAfter: true,
+                              endTimeController: _endTimeController,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -407,7 +390,7 @@ class _EditTask extends State<EditTask> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildTitle('Deadline'),
+                    CustomWidgets.buildTitle('Deadline'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildDateTile(
                       'Deadline',
@@ -417,7 +400,7 @@ class _EditTask extends State<EditTask> {
                       (context, date) => _selectDate(context, false),
                     ),
                     const SizedBox(height: 12),
-                    _buildTitle('Subject'),
+                    CustomWidgets.buildTitle('Subject'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildDropdownField(
                       label: 'Choose Subject',
@@ -486,22 +469,4 @@ class _EditTask extends State<EditTask> {
     // Always call super.dispose()
     super.dispose();
   }
-}
-
-Widget _buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
-      ),
-    ),
-  );
 }

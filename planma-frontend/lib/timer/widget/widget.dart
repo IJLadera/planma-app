@@ -17,7 +17,7 @@ class CustomWidgets {
               Text(
                 "Timer Saved Successfully!",
                 style: GoogleFonts.openSans(
-                    fontSize: 18,
+                    fontSize: 17,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF173F70)),
               ),
