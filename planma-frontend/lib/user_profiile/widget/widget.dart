@@ -122,4 +122,48 @@ class CustomWidget {
     //   );
     // }
   }
+
+  static void showCustomSnackBar({
+    required BuildContext context,
+    required String message,
+    required bool isSuccess,
+  }) {
+    final backgroundColor =
+        isSuccess ? const Color(0xFF50B6FF).withOpacity(0.8) : Colors.red;
+
+    final icon = isSuccess
+        ? const Icon(Icons.check_circle, color: Colors.green, size: 20)
+        : const Icon(Icons.error, color: Colors.white, size: 24);
+
+    final snackBar = SnackBar(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          icon,
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: GoogleFonts.openSans(fontSize: 12, color: Colors.white),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).size.height * 0.4,
+        left: 30,
+        right: 30,
+        top: 100,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: backgroundColor,
+      elevation: 12,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 }

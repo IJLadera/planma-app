@@ -42,24 +42,24 @@ class _EditEvent extends State<EditEvent> {
 
   // Method to select time
   Future<void> _selectTime(
-      BuildContext context, TextEditingController controller) async {
-    // Parse the existing time from the controller, or use a default time
+    BuildContext context,
+    TextEditingController controller, {
+    bool openEndTimeAfter = false,
+    TextEditingController? endTimeController,
+  }) async {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm()
-            .parse(controller.text); // Parse time from "h:mm a" format
+        final parsedTime = DateFormat.jm().parse(controller.text);
         initialTime =
             TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime =
-            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime = TimeOfDay.now();
       }
     } else {
-      initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
+      initialTime = TimeOfDay.now();
     }
 
-    // Show the time picker with the initial time
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -67,8 +67,13 @@ class _EditEvent extends State<EditEvent> {
 
     if (picked != null) {
       setState(() {
-        controller.text = picked.format(context); // Update the controller text
+        controller.text = picked.format(context);
       });
+
+      // Immediately show End Time Picker after Start Time if needed
+      if (openEndTimeAfter && endTimeController != null) {
+        await _selectTime(context, endTimeController);
+      }
     }
   }
 
@@ -138,40 +143,28 @@ class _EditEvent extends State<EditEvent> {
     _selectedEventType = widget.event.eventType;
   }
 
-  // Helper function to create snackbars
-  SnackBar _buildSnackBar(
-      {required IconData icon,
-      required String text,
-      required Color backgroundColor}) {
-    return SnackBar(
-      content: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-              overflow: TextOverflow.ellipsis,
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 4),
       ),
-      duration: const Duration(seconds: 3),
-      behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).size.height * 0.4,
-        left: 50,
-        right: 50,
-        top: 100,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      backgroundColor: backgroundColor,
-      elevation: 10,
     );
   }
 
@@ -188,31 +181,41 @@ class _EditEvent extends State<EditEvent> {
     final startTime = _stringToTimeOfDay(startTimeString);
     final endTime = _stringToTimeOfDay(endTimeString);
 
-    if (eventName.isEmpty ||
-        eventDesc.isEmpty ||
-        location.isEmpty ||
-        _scheduledDate == null ||
-        startTimeString.isEmpty ||
-        endTimeString.isEmpty ||
-        _selectedEventType == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Please fill in all fields!',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+    if (eventName.isEmpty) {
+      _showError(context, "Event name is required.");
+    }
+
+    if (eventDesc.isEmpty) {
+      _showError(context, 'Event description is required.');
+      return;
+    }
+    if (location.isEmpty) {
+      _showError(context, 'Location is required.');
+      return;
+    }
+    if (_scheduledDate == null) {
+      _showError(context, 'Please select a scheduled date.');
+      return;
+    }
+    if (startTimeString.isEmpty || startTime == null) {
+      _showError(context, 'Please enter a valid start time.');
+      return;
+    }
+    if (endTimeString.isEmpty || endTime == null) {
+      _showError(context, 'Please enter a valid end time.');
+      return;
+    }
+    if (!_isValidTimeRange(startTime, endTime)) {
+      _showError(context, 'Start time must be before end time.');
+      return;
+    }
+    if (_selectedEventType == null) {
+      _showError(context, 'Please select an event type.');
       return;
     }
 
-    if (!_isValidTimeRange(startTime!, endTime!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Start Time must be before End Time.',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+    if (!_isValidTimeRange(startTime, endTime)) {
+      _showError(context, "Start time must be before end time.");
       return;
     }
 
@@ -261,51 +264,15 @@ class _EditEvent extends State<EditEvent> {
 
       Navigator.pop(context);
     } catch (error) {
-      String errorMessage = 'Failed to update event';
+      String errorMessage;
 
       if (error.toString().contains('Scheduling overlap')) {
-        errorMessage =
-            'Scheduling overlap: This time slot is already occupied.';
+        errorMessage = 'This timeslot is already occupied';
       } else if (error.toString().contains('Duplicate event entry detected')) {
-        errorMessage = 'Duplicate event entry: This event already exists.';
+        errorMessage = 'This event already exists.';
       } else {
         errorMessage = 'Failed to update event: $error';
       }
-
-      // Error Snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Failed to Update Event 1: $error',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10,
-        ),
-      );
     }
   }
 
@@ -441,5 +408,17 @@ class _EditEvent extends State<EditEvent> {
       ),
       resizeToAvoidBottomInset: false,
     );
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers and clean up listeners
+    _eventNameController.dispose();
+    _descriptionController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+
+    // Always call super.dispose()
+    super.dispose();
   }
 }

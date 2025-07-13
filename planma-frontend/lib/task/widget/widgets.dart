@@ -11,40 +11,42 @@ class CustomWidgets {
     TextStyle? style,
     TextStyle? labelStyle,
     Color backgroundColor = const Color(0xFFF5F5F5),
-    Color readOnlyBackgroundColor =
-        const Color(0xFFE0E0E0), // Light grey for read-only
+    Color readOnlyBackgroundColor = const Color(0xFFE0E0E0),
     double borderRadius = 30.0,
     EdgeInsetsGeometry contentPadding = const EdgeInsets.all(16),
     bool readOnly = false,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: readOnly
-            ? readOnlyBackgroundColor
-            : backgroundColor, // Change background for read-only
         borderRadius: BorderRadius.circular(borderRadius),
+        color: readOnly ? readOnlyBackgroundColor : backgroundColor,
       ),
       child: TextField(
         controller: controller,
         style: style ??
             GoogleFonts.openSans(
               fontSize: 14,
-              color: readOnly
-                  ? Colors.grey
-                  : Colors.black, // Grey out text for read-only
+              color: readOnly ? Colors.grey : Colors.black,
             ),
         readOnly: readOnly,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: labelStyle ??
               GoogleFonts.openSans(
                 fontSize: 14,
-                color: readOnly
-                    ? Colors.grey
-                    : Colors.black, // Grey out label for read-only
+                color: readOnly ? Colors.grey : Colors.black,
               ),
-          border: InputBorder.none,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+            borderSide: BorderSide.none, // still no visible border lines
+          ),
           contentPadding: contentPadding,
+          filled: true,
+          fillColor: Colors.transparent, // already handled by Container
         ),
       ),
     );
@@ -177,5 +179,4 @@ class CustomWidgets {
       ),
     );
   }
-  
 }
