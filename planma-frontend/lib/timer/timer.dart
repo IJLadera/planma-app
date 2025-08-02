@@ -117,8 +117,7 @@ class _TimerWidgetState extends State<TimerWidget> {
               GestureDetector(
                 onTap: () {
                   if (timerProvider.isRunning) {
-                    timerProvider.stopTimer(); // Stop the timer
-                    // Show Save Confirmation Dialog after stopping the timer
+                    timerProvider.stopTimer();
                     _showSaveConfirmationDialog(
                         context,
                         timerProvider,
@@ -175,7 +174,6 @@ class _TimerWidgetState extends State<TimerWidget> {
     );
   }
 
-  // Helper Methods
   void _showSaveConfirmationDialog(
       BuildContext context,
       TimerProvider timerProvider,
@@ -211,7 +209,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                         'Are you sure you want to save the time log? The timer stopped at ',
                   ),
                   TextSpan(
-                    text: _formatTime(timerProvider.remainingTime),
+                    text: _formatDurationDifference(startTime!),
                     style: GoogleFonts.openSans(
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -223,8 +221,8 @@ class _TimerWidgetState extends State<TimerWidget> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                  timerProvider.startTimer(); // Continue the timer
+                  Navigator.of(context).pop();
+                  timerProvider.startTimer();
                 },
                 child: Text(
                   'Cancel',
@@ -247,15 +245,14 @@ class _TimerWidgetState extends State<TimerWidget> {
                         goalProgressProvider: goalProgressProvider,
                         taskProvider: taskProvider,
                         activityProvider: activityProvider,
-                        goalScheduleProvider:
-                            goalScheduleProvider); // Save time spent
+                        goalScheduleProvider: goalScheduleProvider);
                   });
-                  final formattedDuration =
-                      _formatTime(timerProvider.timeSpent);
+
+                  final formattedDuration = _formatTime(timerProvider.timeSpent);
 
                   timerProvider.resetTimer();
-                  safePop(context); // Close dialog after saving
-                  safePop(context); // Close Clock Screen after saving
+                  safePop(context);
+                  safePop(context);
                   CustomWidgets.showTimerSavedPopup(context, formattedDuration);
                 },
                 child: Text(
@@ -307,5 +304,32 @@ class _TimerWidgetState extends State<TimerWidget> {
     int minutes = (totalSeconds % 3600) ~/ 60;
     int seconds = totalSeconds % 60;
     return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
+  }
+
+  DateTime _parseTimeString(String time) {
+    final now = DateTime.now();
+    final parts = time.split(":");
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    int hours = duration.inHours;
+    int minutes = duration.inMinutes.remainder(60);
+    int seconds = duration.inSeconds.remainder(60);
+    return "${hours.toString().padLeft(2, "0")}:${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}";
+  }
+
+  String _formatDurationDifference(String startTime) {
+    final now = DateTime.now();
+    final scheduled = _parseTimeString(startTime);
+    final diff = scheduled.difference(now);
+    final actualDiff = diff.isNegative ? diff.abs() : Duration.zero;
+    return _formatDuration(actualDiff);
   }
 }

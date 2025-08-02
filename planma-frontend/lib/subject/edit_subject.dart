@@ -38,26 +38,25 @@ class _EditClassState extends State<EditClass> {
     'Sa': 'Saturday',
   };
 
-  // Method to select time
   Future<void> _selectTime(
-      BuildContext context, TextEditingController controller) async {
-    // Parse the existing time from the controller, or use a default time
+    BuildContext context,
+    TextEditingController controller, {
+    bool openEndTimeAfter = false,
+    TextEditingController? endTimeController,
+  }) async {
     TimeOfDay initialTime;
     if (controller.text.isNotEmpty) {
       try {
-        final parsedTime = DateFormat.jm()
-            .parse(controller.text); // Parse time from "h:mm a" format
+        final parsedTime = DateFormat.jm().parse(controller.text);
         initialTime =
             TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
       } catch (e) {
-        initialTime =
-            TimeOfDay(hour: 12, minute: 0); // Fallback in case of parsing error
+        initialTime = TimeOfDay.now();
       }
     } else {
-      initialTime = TimeOfDay(hour: 12, minute: 0); // Default time
+      initialTime = TimeOfDay.now();
     }
 
-    // Show the time picker with the initial time
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -65,8 +64,13 @@ class _EditClassState extends State<EditClass> {
 
     if (picked != null) {
       setState(() {
-        controller.text = picked.format(context); // Update the controller text
+        controller.text = picked.format(context);
       });
+
+      // Immediately show End Time Picker after Start Time if needed
+      if (openEndTimeAfter && endTimeController != null) {
+        await _selectTime(context, endTimeController);
+      }
     }
   }
 
@@ -214,6 +218,31 @@ class _EditClassState extends State<EditClass> {
     });
   }
 
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   // Method to handle editing a class
   void _editClassSchedule(BuildContext context) async {
     final provider = Provider.of<ClassScheduleProvider>(context, listen: false);
@@ -229,62 +258,42 @@ class _EditClassState extends State<EditClass> {
     final endTime = _stringToTimeOfDay(endTimeString);
 
     if (selectedSemesterId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Please select a semester!',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+      _showError(context, "Please select a semester!");
       return;
     }
 
     if (widget.classSchedule.classschedId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Class Schedule ID is missing!',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+      _showError(context, "Class Schedule ID is missing!");
       return;
     }
 
-    if (subjectCode.isEmpty ||
-        subjectTitle.isEmpty ||
-        room.isEmpty ||
-        startTimeString.isEmpty ||
-        endTimeString.isEmpty ||
-        selectedDay == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Please fill in all fields!',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+    if (subjectCode.isEmpty) {
+      _showError(context, "Subject code is required.");
+      return;
+    }
+    if (subjectTitle.isEmpty) {
+      _showError(context, "Subject title is required.");
+      return;
+    }
+    if (room.isEmpty) {
+      _showError(context, "Room is required.");
+      return;
+    }
+    if (selectedDay == null) {
+      _showError(context, "Please select a day of the week.");
+      return;
+    }
+    if (startTimeString.isEmpty || startTime == null) {
+      _showError(context, "Please enter a valid start time.");
+      return;
+    }
+    if (endTimeString.isEmpty || endTime == null) {
+      _showError(context, "Please enter a valid end time.");
       return;
     }
 
-    if (startTime == null || endTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Invalid time format. Use "h:mm AM/PM".',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
-      return;
-    }
-
-    if (!_isValidTimeRange(startTime!, endTime!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Start Time must be before End Time.',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+    if (!_isValidTimeRange(startTime, endTime)) {
+      _showError(context, "Start time must be before end time.");
       return;
     }
 
@@ -308,46 +317,11 @@ class _EditClassState extends State<EditClass> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
+              const Icon(Icons.check_circle, color: Colors.white, size: 24),
               const SizedBox(width: 8),
-              Text('Class Schedule updated successfully',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white)),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4,
-            left: 20,
-            right: 20,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10,
-        ),
-      );
-      //Text('Failed to update class schedule: $error')
-
-      Navigator.pop(context);
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Failed to update class schedule: $error',
-                  style:
-                      GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
-                ),
+              Text(
+                'Class Schedule updated successfully',
+                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
               ),
             ],
           ),
@@ -357,15 +331,27 @@ class _EditClassState extends State<EditClass> {
             bottom: MediaQuery.of(context).size.height * 0.4,
             left: 20,
             right: 20,
-            top: 100,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: const Color(0xFF50B6FF).withOpacity(0.8),
           elevation: 10,
         ),
       );
+      Navigator.pop(context);
+    } catch (error) {
+      String errorMessage;
+
+      if (error.toString().contains('Duplicate class schedule')) {
+        errorMessage = 'This class schedule already exists.';
+      } else if (error.toString().contains('Scheduling overlap')) {
+        errorMessage = 'This time slot overlaps with another class.';
+      } else {
+        errorMessage = 'Failed to update class schedule: $error';
+      }
+
+      _showError(context, errorMessage);
     }
   }
 
@@ -528,24 +514,27 @@ class _EditClassState extends State<EditClass> {
                         Row(
                           children: [
                             Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    _selectTime(context, _startTimeController),
-                                child: AbsorbPointer(
-                                  child: CustomWidgets.buildTextField(
-                                      _startTimeController, 'Start Time'),
+                              child: CustomWidgets.buildTimeField(
+                                'Start Time',
+                                _startTimeController,
+                                context,
+                                (context) => _selectTime(
+                                  context,
+                                  _startTimeController,
+                                  openEndTimeAfter:
+                                      true, // OPTIONAL if your function supports it
+                                  endTimeController: _endTimeController,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 12),
                             Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
+                              child: CustomWidgets.buildTimeField(
+                                'End Time',
+                                _endTimeController,
+                                context,
+                                (context) =>
                                     _selectTime(context, _endTimeController),
-                                child: AbsorbPointer(
-                                  child: CustomWidgets.buildTextField(
-                                      _endTimeController, 'End Time'),
-                                ),
                               ),
                             ),
                           ],

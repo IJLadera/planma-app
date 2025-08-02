@@ -72,45 +72,82 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    final initial = isStartDate ? startDate : endDate;
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate:
+          initial ?? DateTime.now(), // Show previously selected or today
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
 
     if (picked != null) {
       setState(() {
-        final formattedDate = DateFormat('dd MMMM yyyy')
-            .format(picked); // Format date as '07 December 2024'
+        final formattedDate = DateFormat('dd MMMM yyyy').format(picked);
 
         if (isStartDate) {
           startDate = picked;
-          startDateController.text = formattedDate; // Set formatted start date
+          startDateController.text = formattedDate;
         } else {
           endDate = picked;
-          endDateController.text = formattedDate; // Set formatted end date
+          endDateController.text = formattedDate;
         }
       });
     }
   }
 
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _submitSemester(BuildContext context) async {
     final provider = Provider.of<SemesterProvider>(context, listen: false);
 
-    if (_selectedStartYear == null ||
-        _selectedEndYear == null ||
-        _selectedYearLevel == null ||
-        _selectedSemester == null ||
-        startDate == null ||
-        endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-          'Please fill in all fields!',
-          style: GoogleFonts.openSans(fontSize: 14),
-        )),
-      );
+    // Validate input fields individually with meaningful error messages
+    if (_selectedStartYear == null) {
+      _showError(context, "Please select the start academic year.");
+      return;
+    }
+    if (_selectedEndYear == null) {
+      _showError(context, "Please select the end academic year.");
+      return;
+    }
+    if (_selectedYearLevel == null) {
+      _showError(context, "Please select the year level.");
+      return;
+    }
+    if (_selectedSemester == null) {
+      _showError(context, "Please select the semester.");
+      return;
+    }
+    if (startDate == null) {
+      _showError(context, "Please choose a semester start date.");
+      return;
+    }
+    if (endDate == null) {
+      _showError(context, "Please choose a semester end date.");
       return;
     }
 
@@ -123,71 +160,42 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
         selectedStartDate: startDate!,
         selectedEndDate: endDate!,
       );
+
+      // Success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
-            mainAxisSize: MainAxisSize.min, // Make the row compact
-            mainAxisAlignment: MainAxisAlignment.center, // Center the content
             children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'Semester Added Successfully!',
-                style: GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4, // Move to middle
-            left: 50,
-            right: 50,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Make it a square
-          ),
-          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-          elevation: 10, // Add shadow for better visibility
-        ),
-      );
-      Navigator.pop(context, newSemesterId);
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error,
-                  color: Colors.white, size: 24), // Error icon
-              const SizedBox(width: 8),
-              Expanded(
-                // Prevents text overflow
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 10),
+              Center(
                 child: Text(
-                  'Failed To Add Semester (1): $error',
-                  style:
-                      GoogleFonts.openSans(color: Colors.white, fontSize: 16),
-                  overflow: TextOverflow.ellipsis, // Handles long errors
+                  'Semester added successfully!',
+                  style: GoogleFonts.openSans(color: Colors.white),
                 ),
               ),
             ],
           ),
-          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height * 0.4, // Moves to center
-            left: 50,
-            right: 50,
-            top: 100,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Square shape
-          ),
-          backgroundColor: Colors.red, // Error background color
-          elevation: 10, // Adds shadow
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          duration: const Duration(seconds: 3),
         ),
       );
+
+      Navigator.pop(context, newSemesterId);
+    } catch (error) {
+      String errorMessage;
+
+      if (error.toString().contains('Duplicate semester')) {
+        errorMessage = 'This semester already exists.';
+      } else {
+        errorMessage = 'Failed to add semester: ${error.toString()}';
+      }
+
+      _showError(context, errorMessage);
     }
   }
 
@@ -320,7 +328,6 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                   )
                 ],
               ),
-              const Spacer(),
               Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16.0, vertical: 20.0),

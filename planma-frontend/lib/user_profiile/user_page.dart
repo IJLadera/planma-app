@@ -74,34 +74,33 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _showTimePickerDialog(
       BuildContext context, UserPreferencesProvider provider) async {
-    // Show dialog with Sleep and Wake time options
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          // Use StatefulBuilder to update the dialog's state
           builder: (BuildContext context, StateSetter setDialogState) {
             return AlertDialog(
               title: Text(
                 'Change Sleep & Wake Time',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.openSans(
-                    fontSize: 24, // Increased font size for the title
-                    color: Color(0xFF173F70),
-                    fontWeight: FontWeight.bold),
+                  fontSize: 24,
+                  color: Color(0xFF173F70),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               content: Container(
-                height: 200, // Increased height for better space
-                width: 300, // Increased width for better space
-                padding: EdgeInsets.symmetric(horizontal: 2.0), // Added padding
+                height: 200,
+                width: 300,
+                padding: EdgeInsets.symmetric(horizontal: 2.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     CustomWidget.buildTimePickerField(
                       context: context,
                       label: "Usual Sleep Time",
-                      time: sleepTime!, // Reference updated sleepTime
+                      time: sleepTime!,
                       onTap: () async {
                         final TimeOfDay? picked = await showTimePicker(
                           context: context,
@@ -109,23 +108,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         );
                         if (picked != null) {
                           setState(() {
-                            sleepTime = picked; // Update main state
+                            sleepTime = picked;
                           });
                           setDialogState(() {
-                            // Update dialog state to reflect changes
                             sleepTime = picked;
                           });
                         }
                       },
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    // Wake Time Picker
+                    const SizedBox(height: 20),
                     CustomWidget.buildTimePickerField(
                       context: context,
                       label: "Usual Wake Time",
-                      time: wakeTime!, // Reference updated wakeTime
+                      time: wakeTime!,
                       onTap: () async {
                         final TimeOfDay? picked = await showTimePicker(
                           context: context,
@@ -133,10 +128,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         );
                         if (picked != null) {
                           setState(() {
-                            wakeTime = picked; // Update main state
+                            wakeTime = picked;
                           });
                           setDialogState(() {
-                            // Update dialog state to reflect changes
                             wakeTime = picked;
                           });
                         }
@@ -146,64 +140,51 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
               ),
               actions: [
-                // Cancel Button
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     'Cancel',
                     style: GoogleFonts.openSans(
-                        fontSize: 14, color: Color(0xFF173F70)),
+                      fontSize: 14,
+                      color: Color(0xFF173F70),
+                    ),
                   ),
                 ),
-                // Save Button
                 TextButton(
                   onPressed: () async {
-                    final prefId = provider.userPreferences[0].prefId;
+                    final prefId = provider.userPreferences.isNotEmpty
+                        ? provider.userPreferences[0].prefId
+                        : null;
 
-                    if (prefId != null) {
+                    if (prefId == null) {
+                      CustomWidget.showCustomSnackBar(
+                        context: context,
+                        message: 'Preference ID not found.',
+                        isSuccess: false,
+                      );
+                      return;
+                    }
+
+                    try {
                       await provider.saveSleepWakeTimes(
                         usualSleepTime: sleepTime!,
                         usualWakeTime: wakeTime!,
                         prefId: prefId,
                       );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            mainAxisSize:
-                                MainAxisSize.min, // Make the row compact
-                            mainAxisAlignment:
-                                MainAxisAlignment.center, // Center the content
-                            children: [
-                              const Icon(Icons.check_circle,
-                                  color: Colors.green, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Sleep/Wake times Updated Successfully!',
-                                style: GoogleFonts.openSans(
-                                    fontSize: 14, color: Colors.white),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                          duration: const Duration(seconds: 3),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).size.height * 0.4,
-                            left: 10,
-                            right: 10,
-                            top: 100,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(16), // Make it a square
-                          ),
-                          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-                          elevation: 12, // Add shadow for better visibility
-                        ),
+
+                      CustomWidget.showCustomSnackBar(
+                        context: context,
+                        message: 'Sleep/Wake times updated successfully!',
+                        isSuccess: true,
                       );
+
                       Navigator.of(context).pop();
+                    } catch (error) {
+                      CustomWidget.showCustomSnackBar(
+                        context: context,
+                        message: 'Failed to update: $error',
+                        isSuccess: false,
+                      );
                     }
                   },
                   child: Text(
@@ -272,9 +253,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     'Cancel',
                     style: GoogleFonts.openSans(
@@ -300,82 +279,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         reminderOffsetTime: reminderOffsetTimeString,
                         prefId: prefId!,
                       );
-                      print(
-                          "New Reminder Offset Time: $reminderOffsetTimeString");
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            mainAxisSize:
-                                MainAxisSize.min, // Make the row compact
-                            mainAxisAlignment:
-                                MainAxisAlignment.center, // Center the content
-                            children: [
-                              const Icon(Icons.check_circle,
-                                  color: Colors.green, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Reminder offset time updated successfully!',
-                                style: GoogleFonts.openSans(
-                                    fontSize: 12, color: Colors.white),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                          duration: const Duration(seconds: 3),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).size.height * 0.4,
-                            left: 30,
-                            right: 30,
-                            top: 100,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(16), // Make it a square
-                          ),
-                          backgroundColor: Color(0xFF50B6FF).withOpacity(0.8),
-                          elevation: 12, // Add shadow for better visibility
-                        ),
+
+                      CustomWidget.showCustomSnackBar(
+                        context: context,
+                        message: 'Reminder offset time updated successfully!',
+                        isSuccess: true,
                       );
+
                       Navigator.of(context).pop();
                     } catch (error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.error,
-                                  color: Colors.white, size: 24), // Error icon
-                              const SizedBox(width: 8),
-                              Expanded(
-                                // Prevents text overflow
-                                child: Text(
-                                  'Failed To Update Reminder Offset Time (1): $error',
-                                  style: GoogleFonts.openSans(
-                                      color: Colors.white, fontSize: 12),
-                                  overflow: TextOverflow
-                                      .ellipsis, // Handles long errors
-                                ),
-                              ),
-                            ],
-                          ),
-                          duration: const Duration(seconds: 3),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).size.height *
-                                0.4, // Moves to center
-                            left: 30,
-                            right: 30,
-                            top: 100,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(20), // Square shape
-                          ),
-                          backgroundColor: Colors.red, // Error background color
-                          elevation: 10, // Adds shadow
-                        ),
+                      CustomWidget.showCustomSnackBar(
+                        context: context,
+                        message: 'Failed To Update: $error',
+                        isSuccess: false,
                       );
                     }
                   },
