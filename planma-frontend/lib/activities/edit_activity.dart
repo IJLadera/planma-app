@@ -167,7 +167,8 @@ class _EditActivity extends State<EditActivity> {
     final provider = Provider.of<ActivityProvider>(context, listen: false);
 
     String activityName = _activityNameController.text.trim();
-    String activityDescription = _activityDescriptionController.text.trim();
+    String? rawActivityDescription = _activityDescriptionController.text.trim();
+    String? normalizedActivityDescription = rawActivityDescription.isEmpty ? null : rawActivityDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -179,7 +180,7 @@ class _EditActivity extends State<EditActivity> {
       _showError(context, "Activity name is required.");
       return;
     }
-    if (activityDescription.isEmpty) {
+    if (rawActivityDescription.isEmpty) {
       _showError(context, "Activity description is required.");
       return;
     }
@@ -205,7 +206,7 @@ class _EditActivity extends State<EditActivity> {
       await provider.updateActivity(
         activityId: widget.activity.activityId!,
         activityName: activityName,
-        activityDesc: activityDescription,
+        activityDesc: normalizedActivityDescription,
         scheduledDate: _scheduledDate!,
         startTime: startTime,
         endTime: endTime,

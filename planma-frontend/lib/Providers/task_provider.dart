@@ -118,7 +118,7 @@ class TaskProvider with ChangeNotifier {
   // Add a task
   Future<void> addTask({
     required String taskName,
-    required String taskDesc,
+    required String? taskDesc,
     required DateTime scheduledDate,
     required TimeOfDay startTime,
     required TimeOfDay endTime,
@@ -130,10 +130,9 @@ class TaskProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate =
-        DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String formattedDeadline =
-        DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedDeadline = DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+    String? normalizedDesc = taskDesc?.trim().isEmpty == true ? null : taskDesc;
 
     bool isConflict = _tasks.any((schedule) =>
         schedule.scheduledDate == scheduledDate &&
@@ -147,7 +146,7 @@ class TaskProvider with ChangeNotifier {
 
     bool isDuplicate = _tasks.any((schedule) =>
         schedule.taskName == taskName &&
-        schedule.taskDescription == taskDesc &&
+        ((schedule.taskDescription?.trim().isEmpty == true ? null : schedule.taskDescription) == normalizedDesc) &&
         schedule.scheduledDate == scheduledDate &&
         schedule.scheduledStartTime == formattedStartTime &&
         schedule.scheduledEndTime == formattedEndTime &&
@@ -169,7 +168,7 @@ class TaskProvider with ChangeNotifier {
         },
         body: json.encode({
           'task_name': taskName,
-          'task_desc': taskDesc,
+          'task_desc': normalizedDesc,
           'scheduled_date': formattedScheduledDate,
           'scheduled_start_time': formattedStartTime,
           'scheduled_end_time': formattedEndTime,
@@ -206,7 +205,7 @@ class TaskProvider with ChangeNotifier {
   Future<void> updateTask({
     required int taskId,
     required String taskName,
-    required String taskDesc,
+    required String? taskDesc,
     required DateTime scheduledDate,
     required TimeOfDay startTime,
     required TimeOfDay endTime,
@@ -218,10 +217,9 @@ class TaskProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate =
-        DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String formattedDeadline =
-        DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedDeadline = DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+    String? normalizedDesc = taskDesc?.trim().isEmpty == true ? null : taskDesc;
 
     bool isConflict = _tasks.any((schedule) =>
         schedule.taskId != taskId &&
@@ -236,7 +234,7 @@ class TaskProvider with ChangeNotifier {
 
     bool isDuplicate = _tasks.any((schedule) =>
         schedule.taskName == taskName &&
-        schedule.taskDescription == taskDesc &&
+        ((schedule.taskDescription?.trim().isEmpty == true ? null : schedule.taskDescription) == normalizedDesc) &&
         schedule.scheduledDate == scheduledDate &&
         schedule.scheduledStartTime == formattedStartTime &&
         schedule.scheduledEndTime == formattedEndTime &&
@@ -259,7 +257,7 @@ class TaskProvider with ChangeNotifier {
         },
         body: json.encode({
           'task_name': taskName,
-          'task_desc': taskDesc,
+          'task_desc': normalizedDesc,
           'scheduled_date': formattedScheduledDate,
           'scheduled_start_time': formattedStartTime,
           'scheduled_end_time': formattedEndTime,

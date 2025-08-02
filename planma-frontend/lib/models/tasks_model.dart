@@ -3,7 +3,7 @@ import 'package:planma_app/models/subjects_model.dart';
 class Task {
   final int? taskId;
   final String taskName;
-  final String taskDescription;
+  final String? taskDescription;
   final DateTime scheduledDate;
   final String scheduledStartTime;
   final String scheduledEndTime;
@@ -28,7 +28,7 @@ class Task {
   return Task(
     taskId: json['task_id'] as int?, // Optional
     taskName: json['task_name'] ?? 'N/A', // Default if null
-    taskDescription: json['task_desc'] ?? 'N/A', // Default if null
+    taskDescription: json['task_desc'] as String?, // Default if null
     scheduledDate: DateTime.parse(json['scheduled_date']),
     scheduledStartTime: json['scheduled_start_time'] ?? '00:00',
     scheduledEndTime: json['scheduled_end_time'] ?? '00:00', // Default time
@@ -44,7 +44,7 @@ class Task {
     return {
       'task_id': taskId,
       'task_name': taskName,
-      'task_desc': taskDescription,
+      'task_desc': taskDescription == null || taskDescription!.trim().isEmpty ? null : taskDescription,
       'scheduled_date': scheduledDate.toIso8601String(),
       'scheduled_start_time': scheduledStartTime,
       'scheduled_end_time': scheduledEndTime,

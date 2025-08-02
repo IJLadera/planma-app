@@ -211,4 +211,9 @@ class ScheduleEntryProvider with ChangeNotifier {
       return "Unknown Class";
     }
   }
+
+  void resetState() {
+    _scheduleEntries = [];
+    notifyListeners();
+  }
 }

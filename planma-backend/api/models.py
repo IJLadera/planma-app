@@ -341,12 +341,6 @@ class CustomTask(models.Model):
         related_name='tasks', db_column="student_id"
     )
 
-    """
-    Added reminder set:
-    This approach will check all users' tasks on every run of the scheduled task. 
-    If your application has many users, you might want to consider more advanced 
-    scheduling approaches, but this should work for a moderate number of users.
-    """
     reminder_sent = models.BooleanField(default=False)
 
     def delete(self, *args, **kwargs):

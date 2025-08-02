@@ -134,11 +134,11 @@ class _CreateTaskState extends State<AddTaskScreen> {
 
   void _submitTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
-    final subjects =
-        Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
+    final subjects = Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
 
     String taskName = _taskNameController.text.trim();
-    String taskDescription = _descriptionController.text.trim();
+    String? rawTaskDescription = _descriptionController.text.trim();
+    String? normalizedTaskDescription = rawTaskDescription.isEmpty ? null : rawTaskDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
     final startTime = _stringToTimeOfDay(startTimeString);
@@ -149,7 +149,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
       _showError(context, "Task name is required.");
       return;
     }
-    if (taskDescription.isEmpty) {
+    if (rawTaskDescription.isEmpty) {
       _showError(context, "Task description is required.");
       return;
     }
@@ -186,7 +186,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
     try {
       await provider.addTask(
         taskName: taskName,
-        taskDesc: taskDescription,
+        taskDesc: normalizedTaskDescription,
         scheduledDate: _scheduledDate!,
         startTime: startTime,
         endTime: endTime,

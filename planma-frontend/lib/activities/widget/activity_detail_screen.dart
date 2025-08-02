@@ -3,13 +3,13 @@ import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class ActivityDetailsScreen extends StatelessWidget {
   final String title;
-  final String detail;
+  final String? detail;
   final TextStyle? textStyle;
 
   const ActivityDetailsScreen({
     super.key,
     required this.title,
-    required this.detail,
+    this.detail,
     this.textStyle,
   });
 
@@ -32,11 +32,12 @@ class ActivityDetailsScreen extends StatelessWidget {
           Expanded(
             flex: 5,
             child: Text(
-              detail,
+              (detail == null || detail!.trim().isEmpty) ? 'No description' : detail!,
               style: GoogleFonts.openSans(
                 color: Color(0xFF173F70),
-                fontWeight: FontWeight.bold,
+                fontWeight: (detail == null || detail!.trim().isEmpty) ? FontWeight.w500 : FontWeight.bold,
                 fontSize: 14,
+                fontStyle: (detail == null || detail!.trim().isEmpty) ? FontStyle.italic : FontStyle.normal,
               ),
             ),
           ),

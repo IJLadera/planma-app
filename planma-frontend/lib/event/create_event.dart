@@ -131,7 +131,8 @@ class _AddEventScreen extends State<AddEventScreen> {
 
     String eventName = _eventNameController.text.trim();
     String location = _eventLocationController.text.trim();
-    String eventDescription = _eventDescController.text.trim();
+    String? rawEventDescription = _eventDescController.text.trim();
+    String? normalizedEventDescription = rawEventDescription.isEmpty ? null : rawEventDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -144,7 +145,7 @@ class _AddEventScreen extends State<AddEventScreen> {
       _showError(context, 'Event name is required.');
       return;
     }
-    if (eventDescription.isEmpty) {
+    if (rawEventDescription.isEmpty) {
       _showError(context, 'Event description is required.');
       return;
     }
@@ -176,7 +177,7 @@ class _AddEventScreen extends State<AddEventScreen> {
     try {
       await provider.addEvent(
         eventName: eventName,
-        eventDesc: eventDescription,
+        eventDesc: normalizedEventDescription,
         location: location,
         scheduledDate: _scheduledDate!,
         startTime: startTime,

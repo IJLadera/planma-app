@@ -1,7 +1,7 @@
 class Event {
   final int? eventId;
   final String eventName;
-  final String eventDesc;
+  final String? eventDesc;
   final String location;
   final DateTime scheduledDate;
   final String scheduledStartTime;
@@ -23,7 +23,7 @@ class Event {
     return Event(
       eventId: json['event_id'],
       eventName: json['event_name'],
-      eventDesc: json['event_desc'],
+      eventDesc: json['event_desc'] as String?,
       location: json['location'],
       scheduledDate: DateTime.parse(json['scheduled_date']),
       scheduledStartTime: json['scheduled_start_time'] ?? '00:00',
@@ -38,7 +38,7 @@ class Event {
     return {
       'event_id': eventId,
       'event_name': eventName,
-      'event_desc': eventDesc,
+      'event_desc': eventDesc == null || eventDesc!.trim().isEmpty ? null : eventDesc,
       'location': location,
       'scheduled_date': scheduledDate.toIso8601String(),
       'scheduled_start_time': scheduledStartTime,

@@ -127,14 +127,15 @@ class _EditGoal extends State<EditGoal> {
     final provider = Provider.of<GoalProvider>(context, listen: false);
 
     String goalName = _goalCodeController.text.trim();
-    String goalDescription = _descriptionController.text.trim();
+    String? rawGoalDescription = _descriptionController.text.trim();
+    String? normalizedGoalDescription = rawGoalDescription.isEmpty ? null : rawGoalDescription;
 
     if (goalName.isEmpty) {
       _showError(context, 'Goal name is required.');
       return;
     }
 
-    if (goalDescription.isEmpty) {
+    if (rawGoalDescription.isEmpty) {
       _showError(context, 'Goal description is required.');
       return;
     }
@@ -162,7 +163,7 @@ class _EditGoal extends State<EditGoal> {
       await provider.updateGoal(
           goalId: widget.goal.goalId!,
           goalName: goalName,
-          goalDescription: goalDescription,
+          goalDescription: normalizedGoalDescription,
           timeframe: _selectedTimeframe!,
           targetHours: _targetDuration,
           goalType: _selectedGoalType!,

@@ -82,13 +82,14 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
     final provider = Provider.of<GoalProvider>(context, listen: false);
 
     String goalName = _goalNameController.text.trim();
-    String goalDescription = _descriptionController.text.trim();
+    String? rawGoalDescription = _descriptionController.text.trim();
+    String? normalizedGoalDescription = rawGoalDescription.isEmpty ? null : rawGoalDescription;
 
     if (goalName.isEmpty) {
       _showError(context, 'Goal name is required.');
       return;
     }
-    if (goalDescription.isEmpty) {
+    if (rawGoalDescription.isEmpty) {
       _showError(context, 'Goal description is required.');
       return;
     }
@@ -111,7 +112,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
 
       await provider.addGoal(
           goalName: goalName,
-          goalDescription: goalDescription,
+          goalDescription: normalizedGoalDescription,
           timeframe: _selectedTimeframe!,
           targetHours: _targetDuration,
           goalType: _selectedGoalType!,

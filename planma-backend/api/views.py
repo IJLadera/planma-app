@@ -10,7 +10,7 @@ from djoser.views import UserViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time as dtime
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.timezone import make_aware, now
 from django.http import JsonResponse
@@ -66,9 +66,12 @@ class ActivityViewSet(viewsets.ModelViewSet):
         end_time = data.get('scheduled_end_time')
         student_id = request.user.student_id  # Authenticated user
 
+        if activity_desc is not None and isinstance(activity_desc, str) and activity_desc.strip() == '':
+            activity_desc = None
+
         # Validate input
-        if not all([activity_name, activity_desc, scheduled_date, start_time, end_time]):
-            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([activity_name, scheduled_date, start_time, end_time]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Fetch the CustomUser instance
@@ -102,7 +105,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
             # Create Activity
             activity = CustomActivity.objects.create(
                 activity_name=activity_name,
-                activity_desc=activity_desc,
+                activity_desc=activity_desc or None,
                 scheduled_date=scheduled_date,
                 scheduled_start_time=start_time,
                 scheduled_end_time=end_time,
@@ -154,12 +157,30 @@ class ActivityViewSet(viewsets.ModelViewSet):
         start_time = data.get('scheduled_start_time')
         end_time = data.get('scheduled_end_time')
 
+        if activity_desc is not None and isinstance(activity_desc, str) and activity_desc.strip() == '':
+            activity_desc = None
+
         # Validate input
-        if not all([activity_name, activity_desc, scheduled_date, start_time, end_time]):
+        if not all([activity_name, scheduled_date, start_time, end_time]):
             return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Parse scheduled_date, start_time, end_time
         try:
+            if isinstance(scheduled_date, str):
+                scheduled_date = datetime.fromisoformat(scheduled_date).date()
 
+            if isinstance(start_time, str):
+                start_time = dtime.fromisoformat(start_time)
+
+            if isinstance(end_time, str):
+                end_time = dtime.fromisoformat(end_time)
+        except ValueError as ve:
+            return Response(
+                {'error': f'Invalid date/time format: {ve}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
             # Check for conflicting activity schedule (excluding current activity)
             duplicate = CustomActivity.objects.filter(
                 Q(scheduled_date=scheduled_date) &
@@ -187,6 +208,12 @@ class ActivityViewSet(viewsets.ModelViewSet):
 
             if overlapping_schedules.exists():
                 return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Reset reminder_sent if event is moved to a future datetime
+            old_dt = timezone.make_aware(datetime.combine(instance.scheduled_date, instance.scheduled_start_time))
+            new_dt = timezone.make_aware(datetime.combine(scheduled_date, start_time))
+            if instance.reminder_sent and new_dt > old_dt:
+                instance.reminder_sent = False
 
             # Update the activity instance
             instance.activity_name = activity_name
@@ -345,9 +372,12 @@ class EventViewSet(viewsets.ModelViewSet):
         event_type = data.get('event_type')
         student_id = request.user.student_id  # Authenticated user
 
+        if event_desc is not None and isinstance(event_desc, str) and event_desc.strip() == '':
+            event_desc = None
+
         # Validate input
-        if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
-            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([event_name, location, scheduled_date, start_time, end_time, event_type]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Fetch the CustomUser instance
@@ -381,7 +411,7 @@ class EventViewSet(viewsets.ModelViewSet):
             # Create Events
             event = CustomEvents.objects.create(
                 event_name=event_name,
-                event_desc=event_desc,
+                event_desc=event_desc or None,
                 location=location,
                 scheduled_date=scheduled_date,
                 scheduled_start_time=start_time,
@@ -436,8 +466,27 @@ class EventViewSet(viewsets.ModelViewSet):
         end_time = data.get('scheduled_end_time')
         event_type = data.get('event_type')
 
-        if not all([event_name, event_desc, location, scheduled_date, start_time, end_time, event_type]):
-            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        if event_desc is not None and isinstance(event_desc, str) and event_desc.strip() == '':
+            event_desc = None
+
+        if not all([event_name, location, scheduled_date, start_time, end_time, event_type]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Parse scheduled_date, start_time, end_time
+        try:
+            if isinstance(scheduled_date, str):
+                scheduled_date = datetime.fromisoformat(scheduled_date).date()
+
+            if isinstance(start_time, str):
+                start_time = dtime.fromisoformat(start_time)
+
+            if isinstance(end_time, str):
+                end_time = dtime.fromisoformat(end_time)
+        except ValueError as ve:
+            return Response(
+                {'error': f'Invalid date/time format: {ve}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
 
@@ -468,6 +517,12 @@ class EventViewSet(viewsets.ModelViewSet):
 
             if overlapping_schedules.exists():
                 return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Reset reminder_sent if event is moved to a future datetime
+            old_dt = timezone.make_aware(datetime.combine(instance.scheduled_date, instance.scheduled_start_time))
+            new_dt = timezone.make_aware(datetime.combine(scheduled_date, start_time))
+            if instance.reminder_sent and new_dt > old_dt:
+                instance.reminder_sent = False
 
             # Update the task instance
             instance.event_name = event_name
@@ -905,13 +960,20 @@ class ClassScheduleViewSet(viewsets.ModelViewSet):
         subject = instance.subject
 
         with transaction.atomic():
+            # Delete related ScheduleEntry records manually
+            ScheduleEntry.objects.filter(
+                category_type='Class',
+                reference_id=instance.classsched_id,
+                student_id=instance.student_id
+            ).delete()
+            
             self.perform_destroy(instance)
 
             # Check if the subject is still referenced in any other records *belonging to the same user*
             if not CustomClassSchedule.objects.filter(
                 subject=subject,
                 student_id=request.user.student_id
-            ).exists():
+            ).exists(): 
                 subject.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -1072,8 +1134,6 @@ class SemesterViewSet(viewsets.ModelViewSet):
             return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-
-        
             instance.acad_year_start = acad_year_start
             instance.acad_year_end = acad_year_end
             instance.year_level = year_level
@@ -1209,9 +1269,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         subject_id = data.get('subject_id')
         student_id = request.user.student_id  # Authenticated user
 
+        if task_desc is not None and isinstance(task_desc, str) and task_desc.strip() == '':
+            task_desc = None
+
         # Validate input
-        if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_id]):
-            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([task_name, scheduled_date, start_time, end_time, deadline_str, subject_id]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Convert deadline to timezone-aware datetime
@@ -1257,7 +1320,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             # Create Task
             task = CustomTask.objects.create(
                 task_name=task_name,
-                task_desc=task_desc,
+                task_desc=task_desc or None,
                 scheduled_date=scheduled_date,
                 scheduled_start_time=start_time,
                 scheduled_end_time=end_time,
@@ -1314,8 +1377,24 @@ class TaskViewSet(viewsets.ModelViewSet):
         subject_id = data.get('subject_id')
 
         # Validate input
-        if not all([task_name, task_desc, scheduled_date, start_time, end_time, deadline_str, subject_id]):
+        if not all([task_name, scheduled_date, start_time, end_time, deadline_str, subject_id]):
             return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Parse scheduled_date, start_time, end_time
+        try:
+            if isinstance(scheduled_date, str):
+                scheduled_date = datetime.fromisoformat(scheduled_date).date()
+
+            if isinstance(start_time, str):
+                start_time = dtime.fromisoformat(start_time)
+
+            if isinstance(end_time, str):
+                end_time = dtime.fromisoformat(end_time)
+        except ValueError as ve:
+            return Response(
+                {'error': f'Invalid date/time format: {ve}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             # Convert deadline to timezone-aware datetime
@@ -1358,6 +1437,12 @@ class TaskViewSet(viewsets.ModelViewSet):
             if overlapping_schedules.exists():
                 return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Reset reminder_sent if event is moved to a future datetime
+            old_dt = timezone.make_aware(datetime.combine(instance.scheduled_date, instance.scheduled_start_time))
+            new_dt = timezone.make_aware(datetime.combine(scheduled_date, start_time))
+            if instance.reminder_sent and new_dt > old_dt:
+                instance.reminder_sent = False
+            
             # Update the task instance
             instance.task_name = task_name
             instance.task_desc = task_desc
@@ -1496,9 +1581,12 @@ class GoalViewSet(viewsets.ModelViewSet):
         semester_id = data.get('semester_id')
         student_id = request.user.student_id
 
+        if goal_desc is not None and isinstance(goal_desc, str) and goal_desc.strip() == '':
+            goal_desc = None
+
         # Validate input
-        if not all([goal_name, goal_desc, timeframe, target_hours, goal_type]):
-            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([goal_name, timeframe, target_hours, goal_type]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Additional validation for `semester_id` based on `goal_type`
         if goal_type == 'Academic' and not semester_id:
@@ -1532,7 +1620,7 @@ class GoalViewSet(viewsets.ModelViewSet):
             # Create Goal
             goal = Goals.objects.create(
                 goal_name=goal_name,
-                goal_desc=goal_desc,
+                goal_desc=goal_desc or None,
                 timeframe=timeframe,
                 target_hours=target_hours,
                 goal_type=goal_type,
@@ -1574,9 +1662,12 @@ class GoalViewSet(viewsets.ModelViewSet):
         goal_type = data.get('goal_type')
         semester_id = data.get('semester_id')
 
+        if goal_desc is not None and isinstance(goal_desc, str) and goal_desc.strip() == '':
+            goal_desc = None
+
         # Validate input
-        if not all([goal_name, goal_desc, timeframe, target_hours, goal_type]):
-            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([goal_name, timeframe, target_hours, goal_type]):
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Additional validation for `semester_id` based on `goal_type`
         if goal_type == 'Academic' and not semester_id:

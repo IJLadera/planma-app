@@ -93,7 +93,7 @@ class CustomWidget {
     // Introduce an artificial delay (e.g., 2 seconds)
     await Future.delayed(Duration(seconds: 2));
 
-    await userProvider.logout();
+    await userProvider.logout(context);
 
     // Dismiss the loading dialog
     Navigator.pop(context);

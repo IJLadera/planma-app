@@ -66,18 +66,22 @@ class TimerProvider with ChangeNotifier {
   }
 
   // Start the timer
-  void startTimer() {
+  void startTimer({Future<void> Function()? onFinished}) {
     if (isRunning || remainingTime <= 0)
       return; // Prevent multiple timers or starting when time is 0
     _isRunning = true;
     notifyListeners(); // Notify immediately to update the UI
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (remainingTime > 0) {
         remainingTime--;
         timeSpent++; // Increment time spent
       } else {
         stopTimer(); // Stop the timer when it reaches 0
+        notifyListeners(); // Notify first to update UI
+        if (onFinished != null) {
+          await onFinished(); // Call the auto-save and popup logic
+        }
       }
       notifyListeners();
     });
@@ -92,7 +96,7 @@ class TimerProvider with ChangeNotifier {
   }
 
   // Save and print the time spent
-  void saveTimeSpent({
+  Future<void> saveTimeSpent({
     required ClockContext clockContext,
     required dynamic record,
     required SleepLogProvider sleepLogProvider,

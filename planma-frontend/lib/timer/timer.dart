@@ -129,7 +129,27 @@ class _TimerWidgetState extends State<TimerWidget> {
                         activityProvider,
                         goalScheduleProvider);
                   } else {
-                    timerProvider.startTimer();
+                    timerProvider.startTimer(
+                      onFinished: () async {
+                        await timerProvider.saveTimeSpent(
+                          clockContext: widget.clockContext, 
+                          record: widget.record, 
+                          sleepLogProvider: sleepLogProvider, 
+                          taskTimeLogProvider: taskTimeLogProvider, 
+                          activityTimeLogProvider: activityTimeLogProvider, 
+                          goalProgressProvider: goalProgressProvider, 
+                          taskProvider: taskProvider, 
+                          activityProvider: activityProvider, 
+                          goalScheduleProvider: goalScheduleProvider
+                        );
+
+                        final formattedDuration =
+                            _formatTime(timerProvider.timeSpent);
+                        safePop(context); // Close Timer screen
+                        // safePop(context); // Close Clock screen
+                        CustomWidgets.showTimerSavedPopup(context, formattedDuration);
+                      },
+                    ); // Start the timer
                   }
                 },
                 child: Container(
@@ -228,8 +248,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                         goalScheduleProvider: goalScheduleProvider);
                   });
 
-                  final formattedDuration =
-                      _formatDurationDifference(startTime!);
+                  final formattedDuration = _formatTime(timerProvider.timeSpent);
 
                   timerProvider.resetTimer();
                   safePop(context);
