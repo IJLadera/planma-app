@@ -33,7 +33,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
   ];
 
   void _showYearPicker(BuildContext context, bool isStartYear) {
-    final startYear = 2024;
+    final startYear = 2025;
     final years = List.generate(100, (index) => startYear + index);
 
     showDialog(

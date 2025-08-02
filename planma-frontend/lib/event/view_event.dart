@@ -213,6 +213,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       final endTime = _formatTimeForDisplay(event.scheduledEndTime);
       final formattedScheduledDate =
           DateFormat('dd MMMM yyyy').format(event.scheduledDate);
+      String currentDay = DateFormat('dd MMMM yyyy').format(DateTime.now());
+      bool isTodayEventDay = currentDay == formattedScheduledDate;
 
       return Scaffold(
         backgroundColor: Color(0xFFFFFFFF),
@@ -290,36 +292,38 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   const Divider(),
                   SizedBox(height: 30),
                   // Show a loading indicator while attendance is being fetched
-                  isLoadingAttendance
-                      ? Center(child: CircularProgressIndicator())
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: Text(
-                                'Attendance',
-                                style: GoogleFonts.openSans(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF173F70),
+                  if (isTodayEventDay) ...[
+                    isLoadingAttendance
+                        ? Center(child: CircularProgressIndicator())
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: Text(
+                                  'Attendance',
+                                  style: GoogleFonts.openSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF173F70),
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 10),
-                            CustomWidgets.dropwDownForAttendance(
-                              label: 'Attendance',
-                              value: selectedAttendance,
-                              items: ['Did Not Attend', 'Attended'],
-                              onChanged: _handleAttendanceChange,
-                              backgroundColor: Color(0XFFF5F5F5),
-                              labelColor: Colors.black,
-                              textColor:
-                                  CustomWidgets.getColor(selectedAttendance),
-                              borderRadius: 8.0,
-                              fontSize: 14.0,
-                            ),
-                          ],
-                        ),
+                              SizedBox(height: 10),
+                              CustomWidgets.dropwDownForAttendance(
+                                label: 'Attendance',
+                                value: selectedAttendance,
+                                items: ['Did Not Attend', 'Attended'],
+                                onChanged: _handleAttendanceChange,
+                                backgroundColor: Color(0XFFF5F5F5),
+                                labelColor: Colors.black,
+                                textColor:
+                                    CustomWidgets.getColor(selectedAttendance),
+                                borderRadius: 8.0,
+                                fontSize: 14.0,
+                              ),
+                            ],
+                          ),
+                  ],
                   SizedBox(height: 20),
                 ],
               ),

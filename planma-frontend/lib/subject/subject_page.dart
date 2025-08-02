@@ -37,13 +37,64 @@ class _ClassScheduleState extends State<ClassSchedule> {
   @override
   void initState() {
     super.initState();
+    _refreshSemesterAndSchedules();
+    // final semesterProvider =
+    //     Provider.of<SemesterProvider>(context, listen: false);
+    // final classScheduleProvider =
+    //     Provider.of<ClassScheduleProvider>(context, listen: false);
+
+    // // Fetch semesters when the screen loads
+    // semesterProvider.fetchSemesters().then((_) {
+    //   if (semesterProvider.semesters.isNotEmpty) {
+    //     final now = DateTime.now();
+
+    //     // Find the most recent semester that has already started
+    //     final validSemesters = semesterProvider.semesters.where((semester) {
+    //       final startDate = DateTime.parse(semester['sem_start_date']);
+    //       return startDate.isBefore(now) || startDate.isAtSameMomentAs(now);
+    //     }).toList();
+
+    //     // Sort by start date descending to get the most recent one
+    //     validSemesters.sort((a, b) => DateTime.parse(b['sem_start_date'])
+    //         .compareTo(DateTime.parse(a['sem_start_date'])));
+
+    //     final selected = validSemesters.isNotEmpty
+    //         ? validSemesters.first
+    //         : semesterProvider
+    //             .semesters.first; // fallback to first if none match
+
+    //     // Check if current selectedSemester is still valid
+    //     final selectedExists = semesterProvider.semesters.any((sem) =>
+    //         "${sem['acad_year_start']} - ${sem['acad_year_end']} ${sem['semester']}" == selectedSemester);
+
+    //     setState(() {
+    //       selectedSemester = selectedExists
+    //           ? selectedSemester
+    //           : "${selected['acad_year_start']} - ${selected['acad_year_end']} ${selected['semester']}";
+    //     });
+
+    //     classScheduleProvider.fetchClassSchedules(
+    //       selectedSemesterId: selected['semester_id'],
+    //     );
+    //   } else {
+    //     // Reset to null if no semesters exist
+    //     setState(() {
+    //       selectedSemester = '- Add Semester -';
+    //     });
+
+    //     classScheduleProvider.resetState();
+    //   } 
+    // });
+  }
+
+  Future<void>_refreshSemesterAndSchedules() async {
     final semesterProvider =
         Provider.of<SemesterProvider>(context, listen: false);
     final classScheduleProvider =
         Provider.of<ClassScheduleProvider>(context, listen: false);
 
     // Fetch semesters when the screen loads
-    semesterProvider.fetchSemesters().then((_) {
+    await semesterProvider.fetchSemesters().then((_) {
       if (semesterProvider.semesters.isNotEmpty) {
         final now = DateTime.now();
 
@@ -59,8 +110,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
 
         final selected = validSemesters.isNotEmpty
             ? validSemesters.first
-            : semesterProvider
-                .semesters.first; // fallback to first if none match
+            : semesterProvider.semesters.first; // fallback to first sem if none match
 
         // Check if current selectedSemester is still valid
         final selectedExists = semesterProvider.semesters.any((sem) =>
@@ -78,8 +128,10 @@ class _ClassScheduleState extends State<ClassSchedule> {
       } else {
         // Reset to null if no semesters exist
         setState(() {
-          selectedSemester = null;
+          selectedSemester = '- Add Semester -';
         });
+
+        classScheduleProvider.resetState();
       } 
     });
   }
@@ -115,7 +167,7 @@ class _ClassScheduleState extends State<ClassSchedule> {
                           Expanded(
                             child: CustomWidgets.buildDropdownField(
                               label: '- Add Semester -',
-                              value: semesters.contains(selectedSemester) ? selectedSemester : null,
+                              value: semesters.contains(selectedSemester) ? selectedSemester : '- Add Semester -',
                               items: semesters,
                               onChanged: (String? value) {
                                 setState(() {
@@ -221,7 +273,9 @@ class _ClassScheduleState extends State<ClassSchedule> {
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         const SemesterScreen()),
-                              );
+                              ).then((_) {
+                                _refreshSemesterAndSchedules();
+                              });                            
                             },
                           ),
                           PopupMenuButton<String>(

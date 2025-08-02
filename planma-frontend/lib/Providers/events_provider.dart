@@ -128,7 +128,7 @@ class EventsProvider with ChangeNotifier {
   //add a event
   Future<void> addEvent({
     required String eventName,
-    required String eventDesc,
+    required String? eventDesc,
     required String location,
     required DateTime scheduledDate,
     required TimeOfDay startTime,
@@ -140,8 +140,8 @@ class EventsProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate =
-        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String? normalizedDesc = eventDesc?.trim().isEmpty == true ? null : eventDesc;
 
     bool isConflict = _events.any((schedule) =>
         schedule.scheduledDate == scheduledDate &&
@@ -155,7 +155,7 @@ class EventsProvider with ChangeNotifier {
 
     bool isDuplicate = _events.any((schedule) =>
         schedule.eventName == eventName &&
-        schedule.eventDesc == eventDesc &&
+        ((schedule.eventDesc?.trim().isEmpty == true ? null : schedule.eventDesc) == normalizedDesc) &&
         schedule.scheduledDate == scheduledDate &&
         schedule.scheduledStartTime == formattedStartTime &&
         schedule.scheduledEndTime == formattedEndTime);
@@ -175,7 +175,7 @@ class EventsProvider with ChangeNotifier {
         },
         body: json.encode({
           'event_name': eventName,
-          'event_desc': eventDesc,
+          'event_desc': normalizedDesc,
           'location': location,
           'scheduled_date': formattedScheduledDate,
           'scheduled_start_time': formattedStartTime,
@@ -212,7 +212,7 @@ class EventsProvider with ChangeNotifier {
   Future<void> updateEvent({
     required int eventId,
     required String eventName,
-    required String eventDesc,
+    required String? eventDesc,
     required String location,
     required DateTime scheduledDate,
     required TimeOfDay startTime,
@@ -224,8 +224,8 @@ class EventsProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate =
-        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String? normalizedDesc = eventDesc?.trim().isEmpty == true ? null : eventDesc;
 
     bool isConflict = _events.any((schedule) =>
         schedule.eventId != eventId &&
@@ -240,7 +240,7 @@ class EventsProvider with ChangeNotifier {
 
     bool isDuplicate = _events.any((schedule) =>
         schedule.eventName == eventName &&
-        schedule.eventDesc == eventDesc &&
+        ((schedule.eventDesc?.trim().isEmpty == true ? null : schedule.eventDesc) == normalizedDesc) &&
         schedule.scheduledDate == scheduledDate &&
         schedule.scheduledStartTime == formattedStartTime &&
         schedule.scheduledEndTime == formattedEndTime);
@@ -261,7 +261,7 @@ class EventsProvider with ChangeNotifier {
         },
         body: json.encode({
           'event_name': eventName,
-          'event_desc': eventDesc,
+          'event_desc': normalizedDesc,
           'location': location,
           'scheduled_date': formattedScheduledDate,
           'scheduled_start_time': formattedStartTime,

@@ -135,9 +135,6 @@ class _EditTask extends State<EditTask> {
     _endTimeController = TextEditingController(
         text: _formatTimeForDisplay(widget.task.scheduledEndTime));
 
-    print(_formatTimeForDisplay(widget.task.scheduledStartTime));
-    print(_formatTimeForDisplay(widget.task.scheduledEndTime));
-
     _scheduledDate = widget.task.scheduledDate;
     _deadline = widget.task.deadline;
     _subject = widget.task.subject?.subjectId;
@@ -203,7 +200,8 @@ class _EditTask extends State<EditTask> {
         Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
 
     String taskName = _taskNameController.text.trim();
-    String taskDescription = _descriptionController.text.trim();
+    String? rawTaskDescription = _descriptionController.text.trim();
+    String? normalizedTaskDescription = rawTaskDescription.isEmpty ? null : rawTaskDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -212,7 +210,6 @@ class _EditTask extends State<EditTask> {
     final endTime = _stringToTimeOfDay(endTimeString);
 
     if (taskName.isEmpty ||
-        taskDescription.isEmpty ||
         _scheduledDate == null ||
         startTimeString.isEmpty ||
         endTimeString.isEmpty ||
@@ -239,7 +236,7 @@ class _EditTask extends State<EditTask> {
       await provider.updateTask(
         taskId: widget.task.taskId!,
         taskName: taskName,
-        taskDesc: taskDescription,
+        taskDesc: normalizedTaskDescription,
         scheduledDate: _scheduledDate!,
         startTime: startTime,
         endTime: endTime,

@@ -8,7 +8,7 @@ class TaskDetailRow extends StatelessWidget {
   const TaskDetailRow({
     super.key,
     required this.title,
-    required this.detail,
+    this.detail,
   });
 
   @override
@@ -30,11 +30,12 @@ class TaskDetailRow extends StatelessWidget {
           Expanded(
             flex: 5,
             child: Text(
-              detail,
+              (detail == null || detail!.trim().isEmpty) ? 'No description' : detail!,
               style: GoogleFonts.openSans(
-                color: const Color(0xFF173F70),
+                color: Color(0xFF173F70),
+                fontWeight: (detail == null || detail!.trim().isEmpty) ? FontWeight.w500 : FontWeight.bold,
                 fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontStyle: (detail == null || detail!.trim().isEmpty) ? FontStyle.italic : FontStyle.normal,
               ),
             ),
           ),

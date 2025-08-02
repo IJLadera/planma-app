@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/subject/semester/edit_semester.dart';
 import 'package:provider/provider.dart';
@@ -52,6 +53,12 @@ class SemesterCard extends StatelessWidget {
       await provider.fetchSemesters();
 
       if (context.mounted) {
+        if (provider.semesters.isEmpty) {
+          // Make sure ClassScheduleScreen doesn't hold invalid selectedSemester
+          final scheduleProvider =
+              Provider.of<ClassScheduleProvider>(context, listen: false);
+          scheduleProvider.resetState(); // if needed
+        }
         Navigator.of(context).pop(); // Go back to previous screen safely
       }
     }

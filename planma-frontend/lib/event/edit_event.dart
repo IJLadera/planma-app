@@ -179,7 +179,8 @@ class _EditEvent extends State<EditEvent> {
     final provider = Provider.of<EventsProvider>(context, listen: false);
 
     String eventName = _eventNameController.text.trim();
-    String eventDesc = _descriptionController.text.trim();
+    String? rawEventDescription = _descriptionController.text.trim();
+    String? normalizedEventDescription = rawEventDescription.isEmpty ? null : rawEventDescription;
     String location = _eventLocationController.text.trim();
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
@@ -189,7 +190,6 @@ class _EditEvent extends State<EditEvent> {
     final endTime = _stringToTimeOfDay(endTimeString);
 
     if (eventName.isEmpty ||
-        eventDesc.isEmpty ||
         location.isEmpty ||
         _scheduledDate == null ||
         startTimeString.isEmpty ||
@@ -221,7 +221,7 @@ class _EditEvent extends State<EditEvent> {
       await provider.updateEvent(
         eventId: widget.event.eventId!,
         eventName: eventName,
-        eventDesc: eventDesc,
+        eventDesc: normalizedEventDescription,
         location: location,
         scheduledDate: _scheduledDate!,
         startTime: startTime,

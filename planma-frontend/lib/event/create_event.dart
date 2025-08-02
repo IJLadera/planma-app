@@ -133,7 +133,8 @@ class _AddEventScreen extends State<AddEventScreen> {
 
     String eventName = _eventNameController.text.trim();
     String location = _eventLocationController.text.trim();
-    String eventDescription = _eventDescController.text.trim();
+    String? rawEventDescription = _eventDescController.text.trim();
+    String? normalizedEventDescription = rawEventDescription.isEmpty ? null : rawEventDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -142,7 +143,6 @@ class _AddEventScreen extends State<AddEventScreen> {
     final endTime = _stringToTimeOfDay(endTimeString);
 
     if (eventName.isEmpty ||
-        eventDescription.isEmpty ||
         location.isEmpty ||
         _scheduledDate == null ||
         startTimeString.isEmpty ||
@@ -172,7 +172,7 @@ class _AddEventScreen extends State<AddEventScreen> {
     try {
       await provider.addEvent(
         eventName: eventName,
-        eventDesc: eventDescription,
+        eventDesc: normalizedEventDescription,
         location: location,
         scheduledDate: _scheduledDate!,
         startTime: startTime,

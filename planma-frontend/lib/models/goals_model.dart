@@ -1,7 +1,7 @@
 class Goal {
   final int? goalId;
   final String goalName;
-  final String goalDescription;
+  final String? goalDescription;
   final String timeframe;
   final int targetHours;
   final String goalType;
@@ -21,7 +21,7 @@ class Goal {
     return Goal(
       goalId: json['goal_id'] as int?,
       goalName: json['goal_name'] ?? 'N/A', 
-      goalDescription: json['goal_desc'] ?? 'N/A', 
+      goalDescription: json['goal_desc'] as String?, 
       timeframe: json['timeframe'] ?? 'Daily', 
       targetHours: json['target_hours'] ?? 0, 
       goalType: json['goal_type'] ?? 'Academic',
@@ -34,7 +34,7 @@ class Goal {
     return {
       'goal_id': goalId,
       'goal_name': goalName, 
-      'goal_desc': goalDescription, 
+      'goal_desc': goalDescription == null || goalDescription!.trim().isEmpty ? null : goalDescription,
       'timeframe': timeframe, 
       'target_hours': targetHours, 
       'goal_type': goalType,

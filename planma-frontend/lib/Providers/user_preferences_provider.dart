@@ -240,4 +240,8 @@ class UserPreferencesProvider with ChangeNotifier {
       throw FormatException("Invalid reminder offset format: $reminderOffset");
     }
   }
+  void resetState() {
+    _userPreferences = [];
+    notifyListeners();
+  }
 }

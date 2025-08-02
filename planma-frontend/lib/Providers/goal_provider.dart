@@ -59,7 +59,7 @@ class GoalProvider extends ChangeNotifier {
   //Add a goal
   Future<void> addGoal({
     required String goalName,
-    required String goalDescription,
+    required String? goalDescription,
     required String timeframe,
     required Duration targetHours,
     required String goalType,
@@ -69,6 +69,7 @@ class GoalProvider extends ChangeNotifier {
     _accessToken = sharedPreferences.getString("access");
 
     int formattedTargetHours = targetHours.inHours;
+    String? normalizedDesc = goalDescription?.trim().isEmpty == true ? null : goalDescription;
 
     bool isDuplicate = _goals.any((schedule) =>
         schedule.goalName == goalName &&
@@ -94,7 +95,7 @@ class GoalProvider extends ChangeNotifier {
         },
         body: json.encode({
           'goal_name': goalName,
-          'goal_desc': goalDescription,
+          'goal_desc': normalizedDesc,
           'timeframe': timeframe,
           'target_hours': formattedTargetHours,
           'goal_type': goalType,
@@ -127,7 +128,7 @@ class GoalProvider extends ChangeNotifier {
   Future<void> updateGoal({
     required int goalId,
     required String goalName,
-    required String goalDescription,
+    required String? goalDescription,
     required String timeframe,
     required Duration targetHours,
     required String goalType,
@@ -137,6 +138,7 @@ class GoalProvider extends ChangeNotifier {
     _accessToken = sharedPreferences.getString("access");
 
     int formattedTargetHours = targetHours.inHours;
+    String? normalizedDesc = goalDescription?.trim().isEmpty == true ? null : goalDescription;
 
     bool isDuplicate = _goals.any((schedule) =>
         schedule.goalName == goalName &&
@@ -163,7 +165,7 @@ class GoalProvider extends ChangeNotifier {
         },
         body: json.encode({
           'goal_name': goalName,
-          'goal_desc': goalDescription,
+          'goal_desc': normalizedDesc,
           'timeframe': timeframe,
           'target_hours': formattedTargetHours,
           'goal_type': goalType,

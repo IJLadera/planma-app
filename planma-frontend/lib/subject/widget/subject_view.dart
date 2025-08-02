@@ -210,8 +210,26 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     return Consumer2<ClassScheduleProvider, AttendedClassProvider>(
         builder: (context, classScheduleProvider, attendanceProvider, child) {
       final schedule = classScheduleProvider.classSchedules.firstWhere(
-          (schedule) =>
-              schedule.classschedId == widget.classSchedule.classschedId);
+        (schedule) => schedule.classschedId == widget.classSchedule.classschedId,
+        orElse: () => ClassSchedule(
+          classschedId: -1,
+          subjectId: -1,
+          subjectCode: '',
+          subjectTitle: '',
+          semesterId: -1,
+          dayOfWeek: '',
+          scheduledStartTime: '',
+          scheduledEndTime: '',
+          room: '',
+        ),
+      );
+
+      if (schedule.classschedId == -1) {
+        return Scaffold(
+          appBar: AppBar(title: Text('Schedule Details')),
+          body: Center(child: Text('Schedule not found')),
+        );
+      }
 
       final startTime = _formatTimeForDisplay(schedule.scheduledStartTime);
       final endTime = _formatTimeForDisplay(schedule.scheduledEndTime);
@@ -321,13 +339,15 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                           MaterialPageRoute(
                             builder: (context) => ClassAttendanceHistoryScreen(
                               classSchedule: widget.classSchedule,
-                              attendedClasses: attendanceProvider.attendedClasses,
+                              attendedClasses:
+                                  attendanceProvider.attendedClasses,
                               selectedAttendance: selectedAttendance,
                               isTodayClassDay: isTodayClassDay,
                             ),
                           ),
                         ).then((updatedAttendance) {
-                          if (updatedAttendance != null && updatedAttendance != selectedAttendance) {
+                          if (updatedAttendance != null &&
+                              updatedAttendance != selectedAttendance) {
                             setState(() {
                               selectedAttendance = updatedAttendance;
                             });

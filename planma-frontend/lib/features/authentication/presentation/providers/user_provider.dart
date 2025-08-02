@@ -1,11 +1,21 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:planma_app/Providers/activity_log_provider.dart';
 import 'package:planma_app/Providers/activity_provider.dart';
+import 'package:planma_app/Providers/attended_class_provider.dart';
+import 'package:planma_app/Providers/attended_events_provider.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
 import 'package:planma_app/Providers/events_provider.dart';
+import 'package:planma_app/Providers/goal_progress_provider.dart';
+import 'package:planma_app/Providers/goal_provider.dart';
+import 'package:planma_app/Providers/goal_schedule_provider.dart';
+import 'package:planma_app/Providers/schedule_entry_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/Providers/sleep_provider.dart';
+import 'package:planma_app/Providers/task_log_provider.dart';
 import 'package:planma_app/Providers/task_provider.dart';
+import 'package:planma_app/Providers/user_preferences_provider.dart';
 import 'package:planma_app/services/firebase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -171,7 +181,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Log out user
-  Future<void> logout() async {
+  Future<void> logout([BuildContext? context]) async {
     try {
       // Clear tokens and user data
       _accessToken = null;
@@ -187,11 +197,23 @@ class UserProvider extends ChangeNotifier {
       await prefs.remove('student_id'); // Also remove student_id
 
       //Clear Providers
-      // Provider.of<SemesterProvider>(context, listen: false).resetState();
-      // Provider.of<ClassScheduleProvider>(context, listen: false).resetState();
-      // Provider.of<TaskProvider>(context, listen: false).resetState();
-      // Provider.of<EventsProvider>(context, listen: false).resetState();
-      // Provider.of<ActivityProvider>(context, listen: false).resetState();
+      if (context != null) {
+        Provider.of<ActivityTimeLogProvider>(context, listen: false).resetState();
+        Provider.of<ActivityProvider>(context, listen: false).resetState();
+        Provider.of<AttendedClassProvider>(context, listen: false).resetState();
+        Provider.of<AttendedEventsProvider>(context, listen: false).resetState();
+        Provider.of<ClassScheduleProvider>(context, listen: false).resetState();
+        Provider.of<EventsProvider>(context, listen: false).resetState();
+        Provider.of<GoalProgressProvider>(context, listen: false).resetState();
+        Provider.of<GoalProvider>(context, listen: false).resetState();
+        Provider.of<GoalScheduleProvider>(context, listen: false).resetState();
+        Provider.of<ScheduleEntryProvider>(context, listen: false).resetState();
+        Provider.of<SemesterProvider>(context, listen: false).resetState();
+        Provider.of<SleepLogProvider>(context, listen: false).resetState();
+        Provider.of<TaskTimeLogProvider>(context, listen: false).resetState();
+        Provider.of<TaskProvider>(context, listen: false).resetState();
+        Provider.of<UserPreferencesProvider>(context, listen: false).resetState();
+      }
 
       notifyListeners();
     } catch (e) {

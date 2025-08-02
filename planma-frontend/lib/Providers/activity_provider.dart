@@ -116,7 +116,7 @@ class ActivityProvider with ChangeNotifier {
   // Add a Activity
   Future<void> addActivity({
     required String activityName,
-    required String activityDesc,
+    required String? activityDesc,
     required DateTime scheduledDate,
     required TimeOfDay startTime,
     required TimeOfDay endTime,
@@ -127,6 +127,7 @@ class ActivityProvider with ChangeNotifier {
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String? normalizedDesc = activityDesc?.trim().isEmpty == true ? null : activityDesc;
 
     bool isConflict = _activities.any((schedule) =>
       schedule.scheduledDate == scheduledDate &&
@@ -140,7 +141,7 @@ class ActivityProvider with ChangeNotifier {
 
     bool isDuplicate = _activities.any((schedule) =>
       schedule.activityName == activityName &&
-      schedule.activityDescription == activityDesc &&
+      ((schedule.activityDescription?.trim().isEmpty == true ? null : schedule.activityDescription) == normalizedDesc) &&
       schedule.scheduledDate == scheduledDate &&
       schedule.scheduledStartTime == formattedStartTime &&
       schedule.scheduledEndTime == formattedEndTime);
@@ -160,7 +161,7 @@ class ActivityProvider with ChangeNotifier {
         },
         body: json.encode({
           'activity_name': activityName,
-          'activity_desc': activityDesc,
+          'activity_desc': normalizedDesc,
           'scheduled_date': formattedScheduledDate,
           'scheduled_start_time': formattedStartTime,
           'scheduled_end_time': formattedEndTime,
@@ -196,7 +197,7 @@ class ActivityProvider with ChangeNotifier {
   Future<void> updateActivity({
     required int activityId,
     required String activityName,
-    required String activityDesc,
+    required String? activityDesc,
     required DateTime scheduledDate,
     required TimeOfDay startTime,
     required TimeOfDay endTime,
@@ -207,6 +208,7 @@ class ActivityProvider with ChangeNotifier {
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
     String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String? normalizedDesc = activityDesc?.trim().isEmpty == true ? null : activityDesc;
 
     bool isConflict = _activities.any((schedule) =>
       schedule.activityId != activityId &&
@@ -221,7 +223,7 @@ class ActivityProvider with ChangeNotifier {
 
     bool isDuplicate = _activities.any((schedule) =>
       schedule.activityName == activityName &&
-      schedule.activityDescription == activityDesc &&
+      ((schedule.activityDescription?.trim().isEmpty == true ? null : schedule.activityDescription) == normalizedDesc) &&
       schedule.scheduledDate == scheduledDate &&
       schedule.scheduledStartTime == formattedStartTime &&
       schedule.scheduledEndTime == formattedEndTime);
@@ -242,7 +244,7 @@ class ActivityProvider with ChangeNotifier {
         },
         body: json.encode({
           'activity_name': activityName,
-          'activity_desc': activityDesc,
+          'activity_desc': normalizedDesc,
           'scheduled_date': formattedScheduledDate,
           'scheduled_start_time': formattedStartTime,
           'scheduled_end_time': formattedEndTime,

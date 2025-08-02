@@ -127,7 +127,8 @@ class _AddActivityState extends State<AddActivityScreen> {
     final provider = Provider.of<ActivityProvider>(context, listen: false);
 
     String activityName = _activityNameController.text.trim();
-    String activityDescription = _activityDescriptionController.text.trim();
+    String? rawActivityDescription = _activityDescriptionController.text.trim();
+    String? normalizedActivityDescription = rawActivityDescription.isEmpty ? null : rawActivityDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -136,7 +137,6 @@ class _AddActivityState extends State<AddActivityScreen> {
     final endTime = _stringToTimeOfDay(endTimeString);
 
     if (activityName.isEmpty ||
-        activityDescription.isEmpty ||
         _scheduledDate == null ||
         startTimeString.isEmpty ||
         endTimeString.isEmpty) {
@@ -166,7 +166,7 @@ class _AddActivityState extends State<AddActivityScreen> {
     try {
       await provider.addActivity(
           activityName: activityName,
-          activityDesc: activityDescription,
+          activityDesc: normalizedActivityDescription,
           scheduledDate: _scheduledDate!,
           startTime: startTime,
           endTime: endTime);
