@@ -197,7 +197,7 @@ class _TimetableState extends State<Timetable> {
             timeSlotViewSettings: TimeSlotViewSettings(
               startHour: 0,
               endHour: 24,
-              timeTextStyle: const TextStyle(
+              timeTextStyle: GoogleFonts.openSans(
                 fontSize: 13,
                 color: Color(0xFF8F9BB3),
                 fontWeight: FontWeight.w500,
@@ -422,7 +422,7 @@ class _AppointmentDataSource extends CalendarDataSource {
       ),
       child: Text(
         appointment.subject, // Keep raw name, apply styling below
-        style: TextStyle(
+        style: GoogleFonts.openSans(
           color: Colors.white,
           fontSize: 14,
           fontWeight: FontWeight.bold,

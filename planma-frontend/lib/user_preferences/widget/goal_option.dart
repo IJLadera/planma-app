@@ -1,54 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class GoalOptionTile extends StatefulWidget {
+class GoalOptionTile extends StatelessWidget {
   final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  const GoalOptionTile({super.key, required this.title});
-
-  @override
-  _GoalOptionTileState createState() => _GoalOptionTileState();
-}
-
-class _GoalOptionTileState extends State<GoalOptionTile> {
-  bool _isSelected = false;
+  const GoalOptionTile({
+    super.key,
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isSelected = !_isSelected;
-        });
-      },
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color:
-              _isSelected ? Color(0xFF173F70).withOpacity(0.1) : Colors.white,
+          color: isSelected
+              ? const Color(0xFF173F70).withOpacity(0.1)
+              : Colors.white,
           border: Border.all(
-            color: _isSelected ? Color(0xFF173F70) : Colors.grey.shade300,
+            color: isSelected ? const Color(0xFF173F70) : Colors.grey.shade300,
           ),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
           children: [
             Checkbox(
-              value: _isSelected,
-              onChanged: (value) {
-                setState(() {
-                  _isSelected = value!;
-                });
-              },
-              activeColor: Color(0xFF173F70),
+              value: isSelected,
+              onChanged: (_) => onTap(),
+              activeColor: const Color(0xFF173F70),
             ),
             const SizedBox(width: 8.0),
             Text(
-              widget.title,
+              title,
               style: GoogleFonts.openSans(
                 fontSize: 16,
-                color: _isSelected ? Color(0xFF173F70) : Colors.black,
+                color: isSelected ? const Color(0xFF173F70) : Colors.black,
               ),
             ),
           ],

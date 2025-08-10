@@ -41,7 +41,53 @@ class CustomWidget {
     );
   }
 
+  static Widget buildDateTile(
+    String label,
+    TextEditingController controller,
+    BuildContext context,
+    bool someFlag,
+    Function(BuildContext, TextEditingController) selectDate,
+  ) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => selectDate(context, controller), // Trigger the date picker
+        child: AbsorbPointer(
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: ListTile(
+              title: TextFormField(
+                controller: controller,
+                readOnly: true, // To prevent manual input
+                style: GoogleFonts.openSans(
+                  fontSize: 14, // Make sure the font size is set here
+                  color: Colors.black, // Ensure text color is applied correctly
+                ),
+                decoration: InputDecoration(
+                  labelText: label,
+                  labelStyle: GoogleFonts.openSans(
+                    fontSize: 14, // Ensure the label style matches
+                    color: Colors.black, // Label text color
+                  ),
+                  suffixIcon: const Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 5),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   static Widget buildDropdownField({
+    required String label,
     required String? value,
     required List<String> items,
     required Function(String?) onChanged,
@@ -49,7 +95,7 @@ class CustomWidget {
     Color labelColor = Colors.black,
     Color textColor = Colors.black,
     double borderRadius = 30.0,
-    EdgeInsets contentPadding = const EdgeInsets.all(2),
+    EdgeInsets contentPadding = const EdgeInsets.all(100),
     double fontSize = 14.0,
     TextStyle? textStyle,
   }) {
@@ -61,6 +107,11 @@ class CustomWidget {
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
+          hint: Text(
+            label,
+            style: textStyle ??
+                GoogleFonts.openSans(color: labelColor, fontSize: fontSize),
+          ),
           value: value,
           onChanged: onChanged,
           items: items.map((item) {
@@ -88,9 +139,51 @@ class CustomWidget {
           ),
           iconStyleData: IconStyleData(
             icon: Icon(Icons.arrow_drop_down, color: labelColor),
-            iconSize: 30,
+            iconSize: 24,
           ),
         ),
+      ),
+    );
+  }
+
+  static Widget buildYearPickerButton({
+    required BuildContext context,
+    required String hint,
+    required bool isStartYear,
+    required String? selectedStartYear,
+    required String? selectedEndYear,
+    required Function(BuildContext, bool)
+        onTap, // Keeps the onTap function similar to old code
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () =>
+            onTap(context, isStartYear), // Triggers the same action as before
+        child: buildContainer(
+          Text(
+            isStartYear
+                ? selectedStartYear ?? hint
+                : selectedEndYear ?? hint, // Displays the selected year or hint
+            style: GoogleFonts.openSans(fontSize: 14),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget buildContainer(Widget child) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          child,
+          const Spacer(),
+          const Icon(Icons.calendar_today),
+        ],
       ),
     );
   }

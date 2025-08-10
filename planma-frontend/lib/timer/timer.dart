@@ -87,8 +87,8 @@ class _TimerWidgetState extends State<TimerWidget> {
             alignment: Alignment.center,
             children: [
               SizedBox(
-                height: 280,
-                width: 280,
+                height: 250,
+                width: 250,
                 child: CircularProgressIndicator(
                   backgroundColor: Colors.white,
                   value: timerProvider.initialTime > 0
@@ -110,7 +110,7 @@ class _TimerWidgetState extends State<TimerWidget> {
               ),
             ],
           ),
-          const SizedBox(height: 120),
+          const SizedBox(height: 100),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

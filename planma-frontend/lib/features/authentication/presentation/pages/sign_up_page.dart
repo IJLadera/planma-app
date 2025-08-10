@@ -165,9 +165,6 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        shadowColor: Color(0xFFFFFFFF),
-      ),
       backgroundColor: Color(0xFFFFFFFF),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -182,67 +179,47 @@ class _SignUpPageState extends State<SignUpPage> {
                   Text(
                     'Sign Up',
                     style: GoogleFonts.openSans(
-                      fontSize: 24,
+                      fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF173F70),
                     ),
                   ),
-                  const SizedBox(height: 20), // Spacing between title and form
+                  const SizedBox(height: 25), // Spacing between title and form
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        TextFormField(
+                        _buildTextFormField(
                           controller: firstNameController,
-                          decoration: InputDecoration(
-                            labelStyle: GoogleFonts.openSans(),
-                            labelText: 'First Name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          labelText: 'First Name',
+                          icon: Icons.person,
                           validator: (value) => value!.isEmpty
                               ? 'Please enter your first name'
                               : null,
                         ),
-                        const SizedBox(height: 10),
-                        TextFormField(
+                        const SizedBox(height: 15),
+                        _buildTextFormField(
                           controller: lastNameController,
-                          decoration: InputDecoration(
-                            labelStyle: GoogleFonts.openSans(),
-                            labelText: 'Last Name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          labelText: 'Last Name',
+                          icon: Icons.person_outline,
                           validator: (value) => value!.isEmpty
                               ? 'Please enter your last name'
                               : null,
                         ),
-                        const SizedBox(height: 10),
-                        TextFormField(
+                        const SizedBox(height: 15),
+                        _buildTextFormField(
                           controller: userNameController,
-                          decoration: InputDecoration(
-                            labelStyle: GoogleFonts.openSans(),
-                            labelText: 'Username',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          labelText: 'Username',
+                          icon: Icons.account_circle,
                           validator: (value) => value!.isEmpty
                               ? 'Please enter your username'
                               : null,
                         ),
-                        const SizedBox(height: 10),
-                        TextFormField(
+                        const SizedBox(height: 15),
+                        _buildTextFormField(
                           controller: emailController,
-                          decoration: InputDecoration(
-                            labelStyle: GoogleFonts.openSans(),
-                            labelText: 'Email',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          labelText: 'Email',
+                          icon: Icons.email,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Email is required';
@@ -255,90 +232,86 @@ class _SignUpPageState extends State<SignUpPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 10),
-                        TextFormField(
+                        const SizedBox(height: 15),
+                        _buildTextFormField(
                           controller: passwordController,
+                          labelText: 'Password',
+                          icon: Icons.lock,
                           obscureText: obscurePassword,
-                          decoration: InputDecoration(
-                            labelStyle: GoogleFonts.openSans(),
-                            labelText: 'Password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(obscurePassword
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscurePassword
                                   ? Icons.visibility_off
-                                  : Icons.visibility),
-                              onPressed: () {
-                                setState(() {
-                                  obscurePassword = !obscurePassword;
-                                });
-                              },
+                                  : Icons.visibility,
+                              color: const Color(0xFF173F70),
                             ),
+                            onPressed: () {
+                              setState(() {
+                                obscurePassword = !obscurePassword;
+                              });
+                            },
                           ),
                           validator: validatePassword,
                         ),
-                        const SizedBox(height: 10),
-                        TextFormField(
+                        const SizedBox(height: 15),
+                        _buildTextFormField(
                           controller: confirmPasswordController,
+                          labelText: 'Confirm Password',
+                          icon: Icons.lock_outline,
                           obscureText: obscureConfirmPassword,
-                          decoration: InputDecoration(
-                            labelStyle: GoogleFonts.openSans(),
-                            labelText: 'Confirm Password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(obscureConfirmPassword
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscureConfirmPassword
                                   ? Icons.visibility_off
-                                  : Icons.visibility),
-                              onPressed: () {
-                                setState(() {
-                                  obscureConfirmPassword =
-                                      !obscureConfirmPassword;
-                                });
-                              },
+                                  : Icons.visibility,
+                              color: const Color(0xFF173F70),
                             ),
+                            onPressed: () {
+                              setState(() {
+                                obscureConfirmPassword =
+                                    !obscureConfirmPassword;
+                              });
+                            },
                           ),
                           validator: validateConfirmPassword,
                         ),
                         const SizedBox(height: 50),
-                        ElevatedButton(
-                          onPressed: _isLoading
-                              ? null
-                              : () {
-                                  if (_formKey.currentState!.validate()) {
-                                    _signUp(context);
-                                  }
-                                },
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: MediaQuery.of(context).size.width *
-                                  0.25, // 25% of screen width
-                              vertical: MediaQuery.of(context).size.height *
-                                  0.02, // 2% of screen height
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 20),
+                          child: ElevatedButton(
+                            onPressed: _isLoading
+                                ? null
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      _signUp(context);
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF173F70),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 100),
                             ),
-                            backgroundColor: const Color(0xFF173F70),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    'Create Account',
+                                    style: GoogleFonts.openSans(
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                           ),
-                          child: _isLoading
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(
-                                  'Create Account',
-                                  style: GoogleFonts.openSans(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
                         ),
                         const SizedBox(height: 20),
                         RichText(
@@ -376,6 +349,33 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+    String? Function(String?)? validator,
+    bool obscureText = false,
+    Widget? suffixIcon,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: GoogleFonts.openSans(),
+        prefixIcon: Icon(icon, color: const Color(0xFF173F70)),
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      ),
+      validator: validator,
+      style: GoogleFonts.openSans(),
     );
   }
 }
