@@ -142,7 +142,7 @@ class _CalendarViewState extends State<CustomCalendar> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Padding(
-          padding: EdgeInsets.symmetric(vertical: 10),
+          padding: EdgeInsets.symmetric(vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -155,9 +155,9 @@ class _CalendarViewState extends State<CustomCalendar> {
                   }
                 },
               ),
-              SizedBox(width: 16),
+              SizedBox(width: 14),
               ConstrainedBox(
-                constraints: BoxConstraints(minWidth: 220),
+                constraints: BoxConstraints(minWidth: 210),
                 child: Center(
                   child: Text(
                     isCalendarActive ? 'Calendar' : 'Time Blocking',
@@ -170,7 +170,7 @@ class _CalendarViewState extends State<CustomCalendar> {
                   ),
                 ),
               ),
-              SizedBox(width: 16),
+              SizedBox(width: 14),
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 color: Color(0xFF173F70),

@@ -195,29 +195,32 @@ class _LogInPageState extends State<LogInPage> {
                               ),
                             ),
                             SizedBox(height: 15),
-                            SizedBox(
-                              width: double.infinity,
-                              height:
-                                  50, // Match the height of the TextFormField
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 2, vertical: 20),
                               child: ElevatedButton(
                                 onPressed: _isLoading ? null : _login,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF173F70),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        12), // Match TextFormField's border radius
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal:
-                                          12), // Match horizontal padding
+                                      vertical: 15, horizontal: 135),
                                 ),
                                 child: _isLoading
-                                    ? CircularProgressIndicator(
-                                        color: Colors.white)
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
                                     : Text(
                                         'Login',
                                         style: GoogleFonts.openSans(
-                                          fontSize: 18,
+                                          fontSize: 16,
                                           color: Colors.white,
                                         ),
                                       ),
@@ -238,7 +241,7 @@ class _LogInPageState extends State<LogInPage> {
                         text: "Don't have an account? ",
                         style: GoogleFonts.openSans(
                           color: Color(0xFF173F70),
-                          fontSize: 16,
+                          fontSize: 14,
                         ),
                         children: [
                           TextSpan(

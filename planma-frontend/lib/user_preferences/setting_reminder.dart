@@ -107,6 +107,7 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
                 padding: const EdgeInsets.symmetric(
                     vertical: 8.0), // Reduced padding
                 child: CustomWidget.buildDropdownField(
+                  label: '',
                   value: _selectedTime, // Current selected value
                   items: _timeOptions,
                   onChanged: (value) {
