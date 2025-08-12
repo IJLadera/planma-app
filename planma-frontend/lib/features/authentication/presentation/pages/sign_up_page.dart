@@ -52,14 +52,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
       try {
         // Show signing up message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Signing up...",
-              style: GoogleFonts.openSans(fontSize: 14),
-            ),
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //       "Signing up...",
+        //       style: GoogleFonts.openSans(fontSize: 14),
+        //     ),
+        //   ),
+        // );
 
         // Get the UserProvider
         final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -77,16 +77,6 @@ class _SignUpPageState extends State<SignUpPage> {
         ScaffoldMessenger.of(context).clearSnackBars();
 
         if (success) {
-          // Sign-up successful
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Account created successfully!",
-                style: GoogleFonts.openSans(fontSize: 14),
-              ),
-            ),
-          );
-
           // Initialize user profile provider
           await context.read<UserProfileProvider>().init();
 

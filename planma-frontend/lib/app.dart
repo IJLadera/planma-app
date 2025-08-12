@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => GoalScheduleProvider()),
         ChangeNotifierProvider(create: (context) => AttendedEventsProvider()),
         ChangeNotifierProvider(create: (context) => AttendedClassProvider()),
-        ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
+        ChangeNotifierProvider(create: (context) => UserPreferencesProvider()),
         ChangeNotifierProvider(create: (context) => TimerProvider()),
         ChangeNotifierProvider(create: (context) => StopwatchProvider()),
         ChangeNotifierProvider(create: (context) => SleepLogProvider()),

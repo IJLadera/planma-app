@@ -4,10 +4,13 @@ import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/goals/widget/widget.dart';
 import 'package:planma_app/subject/semester/add_semester.dart';
+import 'package:planma_app/user_preferences/finished.dart';
 import 'package:provider/provider.dart';
 
 class CreateGoal extends StatefulWidget {
-  const CreateGoal({super.key});
+  final String? initialGoalName;
+
+  const CreateGoal({super.key, this.initialGoalName});
 
   @override
   _CreateGoal createState() => _CreateGoal();
@@ -30,143 +33,125 @@ class _CreateGoal extends State<CreateGoal> {
   final List<String> _goalTypes = ['Academic', 'Personal'];
   final List<String> _timeframe = ['Daily', 'Weekly', 'Monthly'];
 
-  // void _showError(BuildContext context, String message) {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Row(
-  //         children: [
-  //           const Icon(Icons.error, color: Colors.white),
-  //           const SizedBox(width: 10),
-  //           Expanded(
-  //             child: Text(
-  //               message,
-  //               style: GoogleFonts.openSans(color: Colors.white),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       backgroundColor: Colors.red,
-  //       behavior: SnackBarBehavior.floating,
-  //       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //       duration: const Duration(seconds: 4),
-  //     ),
-  //   );
-  // }
-
-  // void _showSuccess(BuildContext context, String message) {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Row(
-  //         children: [
-  //           const Icon(Icons.check_circle, color: Colors.white),
-  //           const SizedBox(width: 10),
-  //           Expanded(
-  //             child: Text(
-  //               message,
-  //               style: GoogleFonts.openSans(color: Colors.white),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       backgroundColor: Colors.green,
-  //       behavior: SnackBarBehavior.floating,
-  //       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //       duration: const Duration(seconds: 3),
-  //     ),
-  //   );
-  // }
-
-  void _submitGoal(BuildContext context) async {
-    // final provider = Provider.of<GoalProvider>(context, listen: false);
-
-    // String goalName = _goalNameController.text.trim();
-    // String? rawGoalDescription = _descriptionController.text.trim();
-    // String? normalizedGoalDescription = rawGoalDescription.isEmpty ? null : rawGoalDescription;
-
-    // if (goalName.isEmpty) {
-    //   _showError(context, 'Goal name is required.');
-    //   return;
-    // }
-    // if (rawGoalDescription.isEmpty) {
-    //   _showError(context, 'Goal description is required.');
-    //   return;
-    // }
-    // if (_selectedGoalType == null) {
-    //   _showError(context, 'Please select a goal type.');
-    //   return;
-    // }
-    // if (_selectedTimeframe == null) {
-    //   _showError(context, 'Please select a timeframe.');
-    //   return;
-    // }
-    // if (_selectedGoalType == 'Academic' && _selectedSemesterId == null) {
-    //   _showError(context, 'Please select a semester for academic goals.');
-    //   return;
-    // }
-
-    // try {
-    //   int? semester =
-    //       _selectedGoalType == 'Personal' ? null : _selectedSemesterId;
-
-    //   await provider.addGoal(
-    //       goalName: goalName,
-    //       goalDescription: normalizedGoalDescription,
-    //       timeframe: _selectedTimeframe!,
-    //       targetHours: _targetDuration,
-    //       goalType: _selectedGoalType!,
-    //       semester: semester);
-    //   _showSuccess(context, 'Goal Created Successfully!');
-
-    //   Navigator.pop(context);
-    //   // Clear fields after adding
-    //   _clearFields();
-    // } catch (error) {
-    //   _showError(context, 'Failed to create goal: $error');
-    // }
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
-  // // Clear fields after submit
-  // void _clearFields() {
-  //   _goalNameController.clear();
-  //   _descriptionController.clear();
-  //   _timeframe.clear();
-  //   _selectedGoalType = null;
-  //   setState(() {});
-  // }
+  void _submitGoal(BuildContext context) async {
+    final provider = Provider.of<GoalProvider>(context, listen: false);
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Fetch semesters when the screen loads
-  //   final semesterProvider =
-  //       Provider.of<SemesterProvider>(context, listen: false);
-  //   semesterProvider.fetchSemesters().then((_) {
-  //     setState(() {
-  //       // Set default value if there are semesters available
-  //       if (semesterProvider.semesters.isNotEmpty) {
-  //         // Select the first semester
-  //         selectedSemester =
-  //             "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+    String goalName = _goalNameController.text.trim();
+    String? rawGoalDescription = _descriptionController.text.trim();
+    String? normalizedGoalDescription =
+        rawGoalDescription.isEmpty ? null : rawGoalDescription;
 
-  //         final defaultSemester = semesterProvider.semesters.first;
-  //         _selectedSemesterId = defaultSemester['semester_id'];
+    if (goalName.isEmpty) {
+      _showError(context, 'Goal name is required.');
+      return;
+    }
+    if (_selectedGoalType == null) {
+      _showError(context, 'Please select a goal type.');
+      return;
+    }
+    if (_selectedTimeframe == null) {
+      _showError(context, 'Please select a timeframe.');
+      return;
+    }
+    if (_selectedGoalType == 'Academic' && _selectedSemesterId == null) {
+      _showError(context, 'Please select a semester for academic goals.');
+      return;
+    }
 
-  //         // Log the selected semester
-  //         print("Default selected semester: $selectedSemester");
-  //         print("Default selected semester ID: $_selectedSemesterId");
-  //       }
-  //     });
-  //   });
-  // }
+    try {
+      int? semester =
+          _selectedGoalType == 'Personal' ? null : _selectedSemesterId;
+
+      await provider.addGoal(
+          goalName: goalName,
+          goalDescription: normalizedGoalDescription,
+          timeframe: _selectedTimeframe!,
+          targetHours: _targetDuration,
+          goalType: _selectedGoalType!,
+          semester: semester);
+      // _showSuccess(context, 'Goal Created Successfully!');
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SuccessScreen(),
+        ),
+      );
+      // Clear fields after adding
+      _clearFields();
+    } catch (error) {
+      _showError(context, 'Failed to create goal: $error');
+    }
+  }
+
+  // Clear fields after submit
+  void _clearFields() {
+    _goalNameController.clear();
+    _descriptionController.clear();
+    _timeframe.clear();
+    _selectedGoalType = null;
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre fill selected goal name option
+    if (widget.initialGoalName != null) {
+      _goalNameController.text = widget.initialGoalName!;
+    }
+    // Fetch semesters when the screen loads
+    final semesterProvider =
+        Provider.of<SemesterProvider>(context, listen: false);
+    semesterProvider.fetchSemesters().then((_) {
+      setState(() {
+        // Set default value if there are semesters available
+        if (semesterProvider.semesters.isNotEmpty) {
+          // Select the first semester
+          selectedSemester =
+              "${semesterProvider.semesters[0]['acad_year_start']} - ${semesterProvider.semesters[0]['acad_year_end']} ${semesterProvider.semesters[0]['semester']}";
+
+          final defaultSemester = semesterProvider.semesters.first;
+          _selectedSemesterId = defaultSemester['semester_id'];
+
+          // Log the selected semester
+          print("Default selected semester: $selectedSemester");
+          print("Default selected semester ID: $_selectedSemesterId");
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Create Goal',
+          'Add First Goal',
           style: GoogleFonts.openSans(
             color: const Color(0xFF173F70),
             fontWeight: FontWeight.bold,
@@ -201,7 +186,7 @@ class _CreateGoal extends State<CreateGoal> {
                         CustomWidgets.buildTextField(
                             _goalNameController, 'Goal Name'),
                         const SizedBox(height: 12),
-                        CustomWidgets.buildTitle('Description'),
+                        CustomWidgets.buildTitle('Description (optional)'),
                         const SizedBox(height: 12),
                         CustomWidgets.buildTextField(
                             _descriptionController, 'Description'),
@@ -247,6 +232,7 @@ class _CreateGoal extends State<CreateGoal> {
                         ),
                         const SizedBox(height: 12),
                         if (_selectedGoalType == 'Academic') ...[
+                          CustomWidgets.buildTitle('Semester'),
                           CustomWidgets.buildDropdownField(
                             label: 'Select Semester',
                             textStyle: GoogleFonts.openSans(
@@ -321,26 +307,35 @@ class _CreateGoal extends State<CreateGoal> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 15, horizontal: 100),
                     ),
-                    child: Text('Add Goal',
-                        style: GoogleFonts.openSans(
-                          fontSize: 16,
-                          color: Colors.white,
-                        )),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: TextButton(
-                    onPressed: () {},
                     child: Text(
-                      "Skip for now",
+                      'Add Goal',
                       style: GoogleFonts.openSans(
-                        fontSize: 14,
-                        color: Color(0xFF173F70),
+                        fontSize: 16,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
+                // const SizedBox(height: 20),
+                // Center(
+                //   child: TextButton(
+                //     onPressed: () {
+                //       Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) => SuccessScreen(),
+                //         ),
+                //       );
+                //     },
+                //     child: Text(
+                //       "Skip for now",
+                //       style: GoogleFonts.openSans(
+                //         fontSize: 14,
+                //         color: Color(0xFF173F70),
+                //       ),
+                //     ),
+                //   ),
+                // ),
               ],
             );
           },

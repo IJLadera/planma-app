@@ -89,10 +89,6 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
       _showError(context, 'Goal name is required.');
       return;
     }
-    if (rawGoalDescription.isEmpty) {
-      _showError(context, 'Goal description is required.');
-      return;
-    }
     if (_selectedGoalType == null) {
       _showError(context, 'Please select a goal type.');
       return;
@@ -201,7 +197,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                         CustomWidgets.buildTextField(
                             _goalNameController, 'Goal Name'),
                         const SizedBox(height: 12),
-                        CustomWidgets.buildTitle('Description'),
+                        CustomWidgets.buildTitle('Description (optional)'),
                         const SizedBox(height: 12),
                         CustomWidgets.buildTextField(
                             _descriptionController, 'Description'),
@@ -247,6 +243,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                         ),
                         const SizedBox(height: 12),
                         if (_selectedGoalType == 'Academic') ...[
+                          CustomWidgets.buildTitle('Semester'),
                           CustomWidgets.buildDropdownField(
                             label: 'Select Semester',
                             textStyle: GoogleFonts.openSans(

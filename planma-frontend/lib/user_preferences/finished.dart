@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/core/dashboard.dart';
 
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({super.key});
@@ -60,7 +61,12 @@ class SuccessScreen extends StatelessWidget {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigate to dashboard
+                      Navigator.push(
+                        context, 
+                        MaterialPageRoute(
+                          builder: (context) => Dashboard(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70), // Navy blue

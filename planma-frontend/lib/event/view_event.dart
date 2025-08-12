@@ -213,8 +213,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       final endTime = _formatTimeForDisplay(event.scheduledEndTime);
       final formattedScheduledDate =
           DateFormat('dd MMMM yyyy').format(event.scheduledDate);
-      String currentDay = DateFormat('dd MMMM yyyy').format(DateTime.now());
-      bool isTodayEventDay = currentDay == formattedScheduledDate;
+      // String currentDay = DateFormat('dd MMMM yyyy').format(DateTime.now());
+      // bool isTodayEventDay = currentDay == formattedScheduledDate;
+      bool isTodayOrPastEventDay = !event.scheduledDate.isAfter(DateTime.now());
 
       return Scaffold(
         backgroundColor: Color(0xFFFFFFFF),
@@ -292,38 +293,59 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   const Divider(),
                   SizedBox(height: 30),
                   // Show a loading indicator while attendance is being fetched
-                  if (isTodayEventDay) ...[
-                    isLoadingAttendance
-                        ? Center(child: CircularProgressIndicator())
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: Text(
-                                  'Attendance',
-                                  style: GoogleFonts.openSans(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF173F70),
-                                  ),
+                  isLoadingAttendance
+                      ? Center(child: CircularProgressIndicator())
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Text(
+                                'Attendance',
+                                style: GoogleFonts.openSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF173F70),
                                 ),
                               ),
-                              SizedBox(height: 10),
-                              CustomWidgets.dropwDownForAttendance(
-                                label: 'Attendance',
-                                value: selectedAttendance,
-                                items: ['Did Not Attend', 'Attended'],
-                                onChanged: _handleAttendanceChange,
-                                backgroundColor: Color(0XFFF5F5F5),
-                                labelColor: Colors.black,
-                                textColor:
-                                    CustomWidgets.getColor(selectedAttendance),
-                                borderRadius: 8.0,
-                                fontSize: 14.0,
+                            ),
+                            SizedBox(height: 10),
+                            IgnorePointer(
+                              ignoring:
+                                  !isTodayOrPastEventDay, // Disable interaction if not today
+                              child: Opacity(
+                                opacity: isTodayOrPastEventDay
+                                    ? 1.0
+                                    : 0.5, // Greyed-out effect
+                                child: CustomWidgets.dropwDownForAttendance(
+                                  label: 'Attendance',
+                                  value: selectedAttendance,
+                                  items: ['Did Not Attend', 'Attended'],
+                                  onChanged: _handleAttendanceChange,
+                                  backgroundColor: Color(0XFFF5F5F5),
+                                  labelColor: Colors.black,
+                                  textColor: CustomWidgets.getColor(
+                                      selectedAttendance),
+                                  borderRadius: 8.0,
+                                  fontSize: 14.0,
+                                ),
                               ),
-                            ],
-                          ),
-                  ],
+                            ),
+                            if (!isTodayOrPastEventDay) ...[
+                              SizedBox(height: 8),
+                              Center(
+                                child: Text(
+                                  "You can only log attendance on the scheduled day or after.",
+                                  style: GoogleFonts.openSans(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
                   SizedBox(height: 20),
                 ],
               ),

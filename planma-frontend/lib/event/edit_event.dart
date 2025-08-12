@@ -185,11 +185,6 @@ class _EditEvent extends State<EditEvent> {
     if (eventName.isEmpty) {
       _showError(context, "Event name is required.");
     }
-
-    if (rawEventDescription.isEmpty) {
-      _showError(context, 'Event description is required.');
-      return;
-    }
     if (location.isEmpty) {
       _showError(context, 'Location is required.');
       return;
@@ -313,7 +308,7 @@ class _EditEvent extends State<EditEvent> {
                       _eventNameController, 'Event Name'),
                   SizedBox(height: 12),
                   CustomWidgets.buildTitle(
-                    'Description',
+                    'Description (optional)',
                   ),
                   const SizedBox(height: 12), // Increased space
                   CustomWidgets.buildTextField(

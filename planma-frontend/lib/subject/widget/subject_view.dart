@@ -205,12 +205,22 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     return DateFormat.jm().format(dateTime);
   }
 
+  bool _isTodayOrPastClassDay(String classDay) {
+    // Map day names to numbers: Monday = 1, Sunday = 7
+    int classDayNum = DateFormat('EEEE').parse(classDay).weekday;
+    int todayNum = DateTime.now().weekday;
+
+    // If class day is today or earlier in the week (past days)
+    return classDayNum <= todayNum;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<ClassScheduleProvider, AttendedClassProvider>(
         builder: (context, classScheduleProvider, attendanceProvider, child) {
       final schedule = classScheduleProvider.classSchedules.firstWhere(
-        (schedule) => schedule.classschedId == widget.classSchedule.classschedId,
+        (schedule) =>
+            schedule.classschedId == widget.classSchedule.classschedId,
         orElse: () => ClassSchedule(
           classschedId: -1,
           subjectId: -1,
@@ -235,6 +245,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       final endTime = _formatTimeForDisplay(schedule.scheduledEndTime);
       String currentDay = DateFormat('EEEE').format(DateTime.now());
       bool isTodayClassDay = currentDay == schedule.dayOfWeek;
+      bool isTodayOrPastClassDay = _isTodayOrPastClassDay(schedule.dayOfWeek);
 
       return Scaffold(
         backgroundColor: Colors.white,
@@ -305,31 +316,55 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                       detail: schedule.room.isNotEmpty ? schedule.room : 'N/A'),
                   const Divider(),
                   const SizedBox(height: 30),
-                  if (isTodayClassDay) ...[
-                    isLoadingAttendance
-                        ? Center(child: CircularProgressIndicator())
-                        : Center(
-                            child: Text(
-                              "Today's Attendance",
-                              style: GoogleFonts.openSans(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Color(0xFF173F70)),
+                  isLoadingAttendance
+                      ? Center(child: CircularProgressIndicator())
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Text(
+                                "Today's Attendance",
+                                style: GoogleFonts.openSans(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Color(0xFF173F70)),
+                              ),
                             ),
-                          ),
-                    const SizedBox(height: 10),
-                    CustomWidgets.dropwDownForAttendance(
-                      label: 'Attendance',
-                      value: selectedAttendance,
-                      items: ['Did Not Attend', 'Excused', 'Attended'],
-                      onChanged: _handleAttendanceChange,
-                      backgroundColor: Color(0XFFF5F5F5),
-                      labelColor: Colors.black,
-                      textColor: CustomWidgets.getColor(selectedAttendance),
-                      borderRadius: 8.0,
-                      fontSize: 14.0,
-                    ),
-                  ],
+                            const SizedBox(height: 10),
+                            IgnorePointer(
+                              ignoring: !isTodayOrPastClassDay,
+                              child: Opacity(
+                                opacity: isTodayOrPastClassDay ? 1.0 : 0.5,
+                                child: CustomWidgets.dropwDownForAttendance(
+                                  label: 'Attendance',
+                                  value: selectedAttendance,
+                                  items: ['Did Not Attend', 'Excused', 'Attended'],
+                                  onChanged: _handleAttendanceChange,
+                                  backgroundColor: Color(0XFFF5F5F5),
+                                  labelColor: Colors.black,
+                                  textColor: CustomWidgets.getColor(
+                                      selectedAttendance),
+                                  borderRadius: 8.0,
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                            ),
+                            if (!isTodayOrPastClassDay) ...[
+                              SizedBox(height: 8),
+                              Center(
+                                child: Text(
+                                  "You can only log attendance on or after the scheduled class day.",
+                                  style: GoogleFonts.openSans(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
                   const SizedBox(height: 20),
                   Center(
                     child: GestureDetector(

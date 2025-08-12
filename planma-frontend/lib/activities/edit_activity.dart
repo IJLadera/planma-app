@@ -180,10 +180,6 @@ class _EditActivity extends State<EditActivity> {
       _showError(context, "Activity name is required.");
       return;
     }
-    if (rawActivityDescription.isEmpty) {
-      _showError(context, "Activity description is required.");
-      return;
-    }
     if (_scheduledDate == null) {
       _showError(context, "Please select a scheduled date.");
       return;
@@ -292,7 +288,7 @@ class _EditActivity extends State<EditActivity> {
                         _activityNameController, 'Activity Name'),
                     SizedBox(height: 12),
                     CustomWidgets.buildTitle(
-                      'Description',
+                      'Description (optional)',
                     ),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(

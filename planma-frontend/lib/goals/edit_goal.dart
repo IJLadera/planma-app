@@ -135,11 +135,6 @@ class _EditGoal extends State<EditGoal> {
       return;
     }
 
-    if (rawGoalDescription.isEmpty) {
-      _showError(context, 'Goal description is required.');
-      return;
-    }
-
     if (_selectedGoalType == null) {
       _showError(context, 'Goal type is required.');
       return;
@@ -231,7 +226,7 @@ class _EditGoal extends State<EditGoal> {
                         ),
                         const SizedBox(height: 12),
                         CustomWidgets.buildTitle(
-                          'Description',
+                          'Description (optional)',
                         ),
                         const SizedBox(height: 12),
                         CustomWidgets.buildTextField(
