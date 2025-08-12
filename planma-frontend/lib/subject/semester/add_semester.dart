@@ -239,12 +239,10 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                   // Start Year Button
                   CustomWidgets.buildYearPickerButton(
                     context: context,
-                    hint: "Start Year", // Hint for start year
-                    isStartYear: true, // Set to true for start year
-                    selectedStartYear:
-                        _selectedStartYear, // Selected start year (can be null if not selected)
-                    selectedEndYear:
-                        null, // Don't pass the end year here, it's only for start year
+                    hint: "Start Year",
+                    isStartYear: true,
+                    selectedStartYear: _selectedStartYear,
+                    selectedEndYear: null,
                     onTap: (BuildContext context, bool isStartYear) {
                       // Trigger the year picker for the start year
                       _showYearPicker(context, isStartYear);
@@ -254,11 +252,10 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                   // End Year Button
                   CustomWidgets.buildYearPickerButton(
                     context: context,
-                    hint: "End Year", // Hint for end year
-                    isStartYear: false, // Set to false for end year
-                    selectedStartYear: null, // Don't pass the start year here
-                    selectedEndYear:
-                        _selectedEndYear, // Selected end year (can be null if not selected)
+                    hint: "End Year",
+                    isStartYear: false,
+                    selectedStartYear: null,
+                    selectedEndYear: _selectedEndYear,
                     onTap: (BuildContext context, bool isStartYear) {
                       // Trigger the year picker for the end year
                       _showYearPicker(context, isStartYear);

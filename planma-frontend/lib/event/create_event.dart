@@ -145,10 +145,6 @@ class _AddEventScreen extends State<AddEventScreen> {
       _showError(context, 'Event name is required.');
       return;
     }
-    if (rawEventDescription.isEmpty) {
-      _showError(context, 'Event description is required.');
-      return;
-    }
     if (location.isEmpty) {
       _showError(context, 'Location is required.');
       return;
@@ -272,7 +268,7 @@ class _AddEventScreen extends State<AddEventScreen> {
                         _eventNameController, 'Event Name'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTitle(
-                      'Description',
+                      'Description (optional)',
                     ),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(

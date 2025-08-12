@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planma_app/core/dashboard.dart';
+import 'package:planma_app/user_preferences/create_semester.dart';
 import 'package:planma_app/user_preferences/setting_goal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/user_preferences/widget/widget.dart';
@@ -56,7 +57,7 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Dashboard(),
+          builder: (context) => PlanSemesterPage(),
         ),
       );
     } catch (e) {

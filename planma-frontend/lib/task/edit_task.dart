@@ -217,10 +217,6 @@ class _EditTask extends State<EditTask> {
       _showError(context, "Task name is required.");
       return;
     }
-    if (rawTaskDescription.isEmpty) {
-      _showError(context, "Task description is required.");
-      return;
-    }
     if (_scheduledDate == null) {
       _showError(context, "Please select a scheduled date.");
       return;
@@ -341,7 +337,7 @@ class _EditTask extends State<EditTask> {
                       'Task Name',
                     ),
                     const SizedBox(height: 12),
-                    CustomWidgets.buildTitle('Description'),
+                    CustomWidgets.buildTitle('Description (optional)'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(
                       _descriptionController,

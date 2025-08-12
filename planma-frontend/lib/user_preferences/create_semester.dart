@@ -2,24 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:planma_app/Providers/semester_provider.dart';
+import 'package:planma_app/user_preferences/set_goal.dart';
 import 'package:planma_app/user_preferences/widget/create_goal.dart';
 import 'package:planma_app/user_preferences/widget/widget.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const PlanSemesterPage(),
-    );
-  }
-}
+import 'package:provider/provider.dart';
 
 class PlanSemesterPage extends StatefulWidget {
   const PlanSemesterPage({super.key});
@@ -113,6 +100,120 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
     }
   }
 
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.openSans(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _submitSemester(BuildContext context) async {
+    final provider = Provider.of<SemesterProvider>(context, listen: false);
+
+    // Validate input fields individually with meaningful error messages
+    if (_selectedStartYear == null) {
+      _showError(context, "Please select the start academic year.");
+      return;
+    }
+    if (_selectedEndYear == null) {
+      _showError(context, "Please select the end academic year.");
+      return;
+    }
+    if (_selectedYearLevel == null) {
+      _showError(context, "Please select the year level.");
+      return;
+    }
+    if (_selectedSemester == null) {
+      _showError(context, "Please select the semester.");
+      return;
+    }
+    if (startDate == null) {
+      _showError(context, "Please choose a semester start date.");
+      return;
+    }
+    if (endDate == null) {
+      _showError(context, "Please choose a semester end date.");
+      return;
+    }
+
+    try {
+      await provider.addSemester(
+        acadYearStart: int.parse(_selectedStartYear!),
+        acadYearEnd: int.parse(_selectedEndYear!),
+        yearLevel: _selectedYearLevel!,
+        semester: _selectedSemester!,
+        selectedStartDate: startDate!,
+        selectedEndDate: endDate!,
+      );
+
+      // Success Snackbar
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Row(
+      //       children: [
+      //         const Icon(Icons.check_circle, color: Colors.white),
+      //         const SizedBox(width: 10),
+      //         Center(
+      //           child: Text(
+      //             'Semester added successfully!',
+      //             style: GoogleFonts.openSans(color: Colors.white),
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //     backgroundColor: Colors.green,
+      //     behavior: SnackBarBehavior.floating,
+      //     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+      //     shape:
+      //         RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      //     duration: const Duration(seconds: 3),
+      //   ),
+      // );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GoalSelectionPage(),
+        ),
+      );
+    } catch (error) {
+      String errorMessage;
+
+      if (error.toString().contains('Duplicate semester')) {
+        errorMessage = 'This semester already exists.';
+      } else {
+        errorMessage = 'Failed to add semester: ${error.toString()}';
+      }
+
+      _showError(context, errorMessage);
+    }
+  }
+
+  @override
+  void dispose() {
+    startDateController.dispose();
+    endDateController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,7 +265,10 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
                       isStartYear: true,
                       selectedStartYear: _selectedStartYear,
                       selectedEndYear: null,
-                      onTap: _showYearPicker,
+                      onTap: (BuildContext context, bool isStartYear) {
+                        // Trigger the year picker for the start year
+                        _showYearPicker(context, isStartYear);
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -175,7 +279,10 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
                       isStartYear: false,
                       selectedStartYear: null,
                       selectedEndYear: _selectedEndYear,
-                      onTap: _showYearPicker,
+                      onTap: (BuildContext context, bool isStartYear) {
+                        // Trigger the year picker for the start year
+                        _showYearPicker(context, isStartYear);
+                      },
                     ),
                   ),
                 ],
@@ -205,7 +312,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
               _buildTitle('Semester'),
               const SizedBox(height: 12),
               CustomWidget.buildDropdownField(
-                label: 'Choose Year Level',
+                label: 'Choose Semester',
                 value: _selectedSemester,
                 items: _semesterOptions,
                 onChanged: (value) {
@@ -250,8 +357,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
                     horizontal: 16.0, vertical: 20.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    // Your action here
-                    print("Button pressed!");
+                    _submitSemester(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),
@@ -262,7 +368,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
                         vertical: 15, horizontal: 100),
                   ),
                   child: Text(
-                    'Add Semester',
+                    'Next',
                     style:
                         GoogleFonts.openSans(fontSize: 16, color: Colors.white),
                   ),
@@ -272,7 +378,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
               Center(
                 child: RichText(
                   text: TextSpan(
-                    text: 'Sign Up',
+                    text: 'Skip for now',
                     style: GoogleFonts.openSans(
                       color: const Color(0xFF173F70),
                       fontWeight: FontWeight.bold,
@@ -283,7 +389,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CreateGoal(),
+                            builder: (context) => GoalSelectionPage(),
                           ),
                         );
                       },

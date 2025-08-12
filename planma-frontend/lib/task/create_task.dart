@@ -149,10 +149,6 @@ class _CreateTaskState extends State<AddTaskScreen> {
       _showError(context, "Task name is required.");
       return;
     }
-    if (rawTaskDescription.isEmpty) {
-      _showError(context, "Task description is required.");
-      return;
-    }
     if (_scheduledDate == null) {
       _showError(context, "Please select a scheduled date.");
       return;
@@ -313,7 +309,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
                       style: GoogleFonts.openSans(),
                     ),
                     const SizedBox(height: 12),
-                    CustomWidgets.buildTitle('Description'),
+                    CustomWidgets.buildTitle('Description (optional)'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(
                       _descriptionController,

@@ -1,23 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/user_preferences/finished.dart';
 import 'package:planma_app/user_preferences/widget/create_goal.dart';
 import 'package:planma_app/user_preferences/widget/goal_option.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const GoalSelectionPage(),
-    );
-  }
-}
 
 class GoalSelectionPage extends StatefulWidget {
   const GoalSelectionPage({super.key});
@@ -30,8 +15,8 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
   int? selectedIndex;
 
   final List<String> goals = [
-    'Study for the Whole Semester',
-    'Exercise',
+    'Study',
+    'Gym Workout',
     'Practice a Skill',
     'Create Custom',
   ];
@@ -76,12 +61,12 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
                   shrinkWrap: true, // Allows ListView to occupy minimal height
                   children: [
                     GoalOptionTile(
-                      title: "Study for the Whole Semester",
+                      title: "Study",
                       isSelected: selectedIndex == 0,
                       onTap: () => setState(() => selectedIndex = 0),
                     ),
                     GoalOptionTile(
-                      title: "Exercise",
+                      title: "Gym Workout",
                       isSelected: selectedIndex == 1,
                       onTap: () => setState(() => selectedIndex = 1),
                     ),
@@ -126,7 +111,21 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) =>  ));
+                  if (selectedIndex != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateGoal(
+                          initialGoalName: goals[selectedIndex!], // Pass title
+                        ),
+                      ),
+                    );
+                  } else {
+                    // Optionally show a snackbar or dialog if nothing is selected
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Please select a goal first")),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
@@ -144,7 +143,14 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
               const SizedBox(height: 20),
               Center(
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SuccessScreen(),
+                      ),
+                    );
+                  },
                   child: Text(
                     "Skip for now",
                     style: GoogleFonts.openSans(

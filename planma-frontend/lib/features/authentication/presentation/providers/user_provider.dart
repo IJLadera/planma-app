@@ -61,10 +61,6 @@ class UserProvider extends ChangeNotifier {
       _refreshToken = prefs.getString('refresh');
       _studentId = prefs.getString('student_id');
 
-      print("Access: $_accessToken");
-      print("Refresh: $_refreshToken");
-
-
       // If no tokens are present, user is not authenticated
       if (_accessToken == null || _refreshToken == null) {
         await logout();
@@ -183,19 +179,6 @@ class UserProvider extends ChangeNotifier {
   // Log out user
   Future<void> logout([BuildContext? context]) async {
     try {
-      // Clear tokens and user data
-      _accessToken = null;
-      _refreshToken = null;
-      _userData = null;
-      _isAuthenticated = false;
-
-      // Remove data from shared preferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove('access');
-      await prefs.remove('refresh');
-      await prefs.remove('user_data');
-      await prefs.remove('student_id'); // Also remove student_id
-
       //Clear Providers
       if (context != null) {
         Provider.of<ActivityTimeLogProvider>(context, listen: false).resetState();
@@ -214,6 +197,19 @@ class UserProvider extends ChangeNotifier {
         Provider.of<TaskProvider>(context, listen: false).resetState();
         Provider.of<UserPreferencesProvider>(context, listen: false).resetState();
       }
+
+      // Clear tokens and user data
+      _accessToken = null;
+      _refreshToken = null;
+      _userData = null;
+      _isAuthenticated = false;
+
+      // Remove data from shared preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove('access');
+      await prefs.remove('refresh');
+      await prefs.remove('user_data');
+      await prefs.remove('student_id'); // Also remove student_id
 
       notifyListeners();
     } catch (e) {
