@@ -120,7 +120,7 @@ class _SleepWakeSetupScreenState extends State<SleepWakeSetupScreen> {
               ElevatedButton(
                 onPressed: _savePreferences, // Trigger saving preferences
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 130, vertical: 15),
+                  padding: EdgeInsets.symmetric(horizontal: 110, vertical: 15),
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),

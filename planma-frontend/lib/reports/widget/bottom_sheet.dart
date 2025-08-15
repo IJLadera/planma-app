@@ -41,7 +41,7 @@ class BottomSheetWidget extends StatelessWidget {
               child: Text(
                 "Categories",
                 style: GoogleFonts.openSans(
-                  fontSize: 18, 
+                  fontSize: 20, 
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF173F70),
                 ),
@@ -116,7 +116,7 @@ class BottomSheetWidget extends StatelessWidget {
           title: Text(
             title,
             style: GoogleFonts.openSans(
-              fontSize: 16,
+              fontSize: 14,
               color: Color(0xFF173F70),
             ),
           ),

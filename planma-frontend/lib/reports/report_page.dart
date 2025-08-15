@@ -412,7 +412,7 @@ class _ReportsPageState extends State<ReportsPage> {
                             selectedCategory,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.openSans(
-                              fontSize: 15,
+                              fontSize: 14,
                               color: const Color(0xFF173F70),
                               fontWeight: FontWeight.bold,
                             ),

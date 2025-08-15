@@ -217,6 +217,13 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: Colors.white,
+      ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -225,7 +232,6 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
-
               // Title
               Center(
                 child: Text(
@@ -253,8 +259,8 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
               const SizedBox(height: 32),
 
               // Academic Year Section
-              _buildTitle("Academic Year"),
-              const SizedBox(height: 16),
+              CustomWidget.buildTitle("Academic Year"),
+              const SizedBox(height: 12),
 
               Row(
                 children: [
@@ -291,7 +297,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
               const SizedBox(height: 24),
 
               // Year Level Section
-              _buildTitle('Year Level'),
+              CustomWidget.buildTitle('Year Level'),
               const SizedBox(height: 12),
               CustomWidget.buildDropdownField(
                 label: 'Choose Year Level',
@@ -309,7 +315,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
                 fontSize: 14.0,
               ),
               const SizedBox(height: 12),
-              _buildTitle('Semester'),
+              CustomWidget.buildTitle('Semester'),
               const SizedBox(height: 12),
               CustomWidget.buildDropdownField(
                 label: 'Choose Semester',
@@ -327,7 +333,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
                 fontSize: 14.0,
               ),
               const SizedBox(height: 12),
-              _buildTitle('Semester Dates'),
+              CustomWidget.buildTitle('Semester Dates'),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -352,28 +358,28 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
                   )
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 20.0),
+              const SizedBox(height: 20),
+              Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    _submitSemester(context);
-                  },
+                  onPressed: () => _submitSemester(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 100),
+                        vertical: 15, horizontal: 110),
                   ),
                   child: Text(
                     'Next',
-                    style:
-                        GoogleFonts.openSans(fontSize: 16, color: Colors.white),
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
               Center(
                 child: RichText(
@@ -400,17 +406,7 @@ class _PlanSemesterPageState extends State<PlanSemesterPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: const Color(0xFF173F70),
-      ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }

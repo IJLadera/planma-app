@@ -353,7 +353,10 @@ class _AddClassScreenState extends State<AddClassScreen> {
         title: Text(
           'Add Class Schedule',
           style: GoogleFonts.openSans(
-              fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -538,7 +541,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                           _roomController,
                           'Room',
                           style: GoogleFonts.openSans(
-                            fontSize: 16,
+                            fontSize: 14,
                             color: Colors.black,
                           ),
                         ),

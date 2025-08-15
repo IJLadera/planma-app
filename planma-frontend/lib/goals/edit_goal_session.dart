@@ -266,7 +266,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    _buildTitle('Goal Name'),
+                    CustomWidgets.buildTitle('Goal Name'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildTextField(
                       _goalNameController,
@@ -274,12 +274,12 @@ class _EditGoalSessionState extends State<EditGoalSession> {
                       readOnly: true,
                     ),
                     const SizedBox(height: 12),
-                    _buildTitle('Scheduled Date'),
+                    CustomWidgets.buildTitle('Scheduled Date'),
                     const SizedBox(height: 12),
                     CustomWidgets.buildDateTile('Scheduled Date',
                         _scheduledDate, context, true, _selectDate),
                     const SizedBox(height: 12),
-                    _buildTitle('Start and End Time'),
+                    CustomWidgets.buildTitle('Start and End Time'),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -340,22 +340,4 @@ class _EditGoalSessionState extends State<EditGoalSession> {
       resizeToAvoidBottomInset: false,
     );
   }
-}
-
-Widget _buildTitle(String title) {
-  return Container(
-    margin: const EdgeInsets.only(
-        left: 16.0,
-        top: 8.0,
-        right: 16.0), // Adjust the margin values as needed
-    alignment: Alignment.centerLeft, // Ensures the text starts from the left
-    child: Text(
-      title,
-      style: GoogleFonts.openSans(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF173F70),
-      ),
-    ),
-  );
 }

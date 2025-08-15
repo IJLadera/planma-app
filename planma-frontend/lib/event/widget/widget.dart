@@ -20,21 +20,47 @@ class CustomWidgets {
   }
 
   static Widget buildTextField(
-      TextEditingController controller, String labelText) {
+    TextEditingController controller,
+    String labelText, {
+    TextStyle? style,
+    TextStyle? labelStyle,
+    Color backgroundColor = const Color(0xFFF5F5F5),
+    Color readOnlyBackgroundColor = const Color(0xFFE0E0E0),
+    double borderRadius = 30.0,
+    EdgeInsetsGeometry contentPadding = const EdgeInsets.all(16),
+    bool readOnly = false,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(borderRadius),
+        color: readOnly ? readOnlyBackgroundColor : backgroundColor,
       ),
       child: TextField(
         controller: controller,
+        style: style ??
+            GoogleFonts.openSans(
+              fontSize: 14,
+              color: readOnly ? Colors.grey : Colors.black,
+            ),
+        readOnly: readOnly,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: GoogleFonts.openSans(
-            fontSize: 14,
+          labelStyle: labelStyle ??
+              GoogleFonts.openSans(
+                fontSize: 14,
+                color: readOnly ? Colors.grey : Colors.black,
+              ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+            borderSide: BorderSide.none, // still no visible border lines
           ),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.all(16),
+          contentPadding: contentPadding,
+          filled: true,
+          fillColor: Colors.transparent, // already handled by Container
         ),
       ),
     );

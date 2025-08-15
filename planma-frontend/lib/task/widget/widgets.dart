@@ -94,7 +94,7 @@ class CustomWidgets {
       child: Text(
         title,
         style: GoogleFonts.openSans(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
           color: Color(0xFF173F70),
         ),

@@ -168,7 +168,8 @@ class _EditActivity extends State<EditActivity> {
 
     String activityName = _activityNameController.text.trim();
     String? rawActivityDescription = _activityDescriptionController.text.trim();
-    String? normalizedActivityDescription = rawActivityDescription.isEmpty ? null : rawActivityDescription;
+    String? normalizedActivityDescription =
+        rawActivityDescription.isEmpty ? null : rawActivityDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -258,8 +259,9 @@ class _EditActivity extends State<EditActivity> {
         title: Text(
           'Edit Activity',
           style: GoogleFonts.openSans(
-            color: Color(0xFF173F70),
+            fontSize: 20,
             fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
           ),
         ),
         leading: IconButton(

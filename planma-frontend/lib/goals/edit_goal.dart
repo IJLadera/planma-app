@@ -128,7 +128,8 @@ class _EditGoal extends State<EditGoal> {
 
     String goalName = _goalCodeController.text.trim();
     String? rawGoalDescription = _descriptionController.text.trim();
-    String? normalizedGoalDescription = rawGoalDescription.isEmpty ? null : rawGoalDescription;
+    String? normalizedGoalDescription =
+        rawGoalDescription.isEmpty ? null : rawGoalDescription;
 
     if (goalName.isEmpty) {
       _showError(context, 'Goal name is required.');
@@ -186,8 +187,9 @@ class _EditGoal extends State<EditGoal> {
         title: Text(
           'Edit Goal',
           style: GoogleFonts.openSans(
-            color: Color(0xFF173F70),
+            fontSize: 20,
             fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
           ),
         ),
         leading: IconButton(
@@ -238,7 +240,7 @@ class _EditGoal extends State<EditGoal> {
                         const SizedBox(height: 12),
                         CustomWidgets.buildDropdownField(
                           label: 'Timeframe',
-                          textStyle: GoogleFonts.openSans(fontSize: 16),
+                          textStyle: GoogleFonts.openSans(fontSize: 14),
                           value: _selectedTimeframe,
                           items: _timeframe,
                           onChanged: (value) =>
@@ -269,7 +271,7 @@ class _EditGoal extends State<EditGoal> {
                         const SizedBox(height: 12),
                         CustomWidgets.buildDropdownField(
                           label: 'Goal Type',
-                          textStyle: GoogleFonts.openSans(fontSize: 16),
+                          textStyle: GoogleFonts.openSans(fontSize: 14),
                           value: _selectedGoalType,
                           items: _goalType,
                           onChanged: (String? value) {

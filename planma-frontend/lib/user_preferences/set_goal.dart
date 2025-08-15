@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:planma_app/user_preferences/finished.dart';
@@ -132,7 +133,8 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  minimumSize: const Size(double.infinity, 50),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 110.0, vertical: 15.0),
                 ),
                 child: Text(
                   "Next",
@@ -142,28 +144,31 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
               ),
               const SizedBox(height: 20),
               Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SuccessScreen(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    "Skip for now",
+                child: RichText(
+                  text: TextSpan(
+                    text: 'Skip for now',
                     style: GoogleFonts.openSans(
-                      fontSize: 14,
-                      color: Color(0xFF173F70),
+                      color: const Color(0xFF173F70),
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
                     ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GoalSelectionPage(),
+                          ),
+                        );
+                      },
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }

@@ -11,9 +11,8 @@ class CustomSearchBar extends StatelessWidget {
       child: TextField(
         decoration: InputDecoration(
           hintText: 'Search',
-          hintStyle: GoogleFonts.openSans(
-            // Apply Open Sans to the hint text
-            fontSize: 14,
+          hintStyle: GoogleFonts.openSans( // Apply Open Sans to the hint text
+            fontSize: 16,
             color: Colors.grey,
           ),
           prefixIcon: const Icon(Icons.search),
@@ -21,8 +20,7 @@ class CustomSearchBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        style: GoogleFonts.openSans(
-          // Apply Open Sans to the input text
+        style: GoogleFonts.openSans( // Apply Open Sans to the input text
           fontSize: 16,
           color: Colors.black,
         ),

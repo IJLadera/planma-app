@@ -49,7 +49,7 @@ class SuccessScreen extends StatelessWidget {
                   "Time to start planning!",
                   style: GoogleFonts.openSans(
                     fontSize: 16,
-                    color: Colors.black87,
+                    color: Color(0xFF173F70),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -69,7 +69,7 @@ class SuccessScreen extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF173F70), // Navy blue
+                      backgroundColor: const Color(0xFF173F70), 
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -89,6 +89,7 @@ class SuccessScreen extends StatelessWidget {
           ),
         ),
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }
