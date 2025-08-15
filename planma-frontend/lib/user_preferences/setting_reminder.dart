@@ -135,7 +135,7 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF173F70),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 130.0, vertical: 15.0),
+                      horizontal: 110.0, vertical: 15.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),

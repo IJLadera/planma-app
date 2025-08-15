@@ -215,7 +215,7 @@ class _ToggleButtonsDemoState extends State<ToggleButtonsDemo> {
                   child: Text(
                     label,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.openSans(fontSize: 12, fontWeight: FontWeight.w500),
+                    style: GoogleFonts.openSans(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                 ),
               )
@@ -366,7 +366,7 @@ class ChartContainer3 extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.openSans(
-              fontSize: 16, 
+              fontSize: 20, 
               fontWeight: FontWeight.bold, 
               color: Color(0xFF173F70),
             ),
@@ -465,7 +465,7 @@ class ChartContainer4 extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.openSans(
-              fontSize: 16, 
+              fontSize: 20, 
               fontWeight: FontWeight.bold, 
               color: Color(0xFF173F70),
             ),
@@ -570,7 +570,7 @@ class ChartContainer5 extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.openSans(
-              fontSize: 16, 
+              fontSize: 20, 
               fontWeight: FontWeight.bold, 
               color: Color(0xFF173F70),
             ),

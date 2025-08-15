@@ -40,7 +40,7 @@ class GoalOptionTile extends StatelessWidget {
             Text(
               title,
               style: GoogleFonts.openSans(
-                fontSize: 16,
+                fontSize: 14,
                 color: isSelected ? const Color(0xFF173F70) : Colors.black,
               ),
             ),
