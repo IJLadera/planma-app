@@ -231,9 +231,9 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
-              _buildTitle('Academic Year'),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              CustomWidgets.buildTitle('Academic Year'),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   // Start Year Button
@@ -264,7 +264,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              _buildTitle('Year Level'),
+              CustomWidgets.buildTitle('Year Level'),
               const SizedBox(height: 12),
               CustomWidgets.buildDropdownField(
                 label: 'Choose Year Level',
@@ -282,7 +282,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                 fontSize: 14.0,
               ),
               const SizedBox(height: 12),
-              _buildTitle('Semester'),
+              CustomWidgets.buildTitle('Semester'),
               const SizedBox(height: 12),
               CustomWidgets.buildDropdownField(
                 label: 'Choose Semester',
@@ -300,7 +300,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                 fontSize: 14.0,
               ),
               const SizedBox(height: 12),
-              _buildTitle('Semester Dates'),
+              CustomWidgets.buildTitle('Semester Dates'),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -350,14 +350,6 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
         ),
       ),
       resizeToAvoidBottomInset: false,
-    );
-  }
-
-  Widget _buildTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.openSans(
-          fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
     );
   }
 }

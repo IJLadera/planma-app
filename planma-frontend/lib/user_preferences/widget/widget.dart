@@ -24,14 +24,14 @@ class CustomWidget {
             Text(
               label,
               style: GoogleFonts.openSans(
-                fontSize: 16.0,
+                fontSize: 14.0,
                 color: const Color(0xFF173F70),
               ),
             ),
             Text(
               time.format(context),
               style: GoogleFonts.openSans(
-                fontSize: 16.0,
+                fontSize: 14.0,
                 color: const Color(0xFF173F70),
               ),
             ),
@@ -184,6 +184,17 @@ class CustomWidget {
           const Spacer(),
           const Icon(Icons.calendar_today),
         ],
+      ),
+    );
+  }
+
+    static Widget buildTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.openSans(
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        color: const Color(0xFF173F70),
       ),
     );
   }

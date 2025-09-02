@@ -361,7 +361,7 @@ class _EditEvent extends State<EditEvent> {
                   const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
                     label:
-                        'Choose Event Type', // Updated the label for consistency
+                        'Choose Event Type', 
                     value: _selectedEventType,
                     items: _EventType,
                     onChanged: (String? value) {

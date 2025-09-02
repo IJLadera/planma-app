@@ -145,7 +145,7 @@ class CustomWidget {
           Expanded(
             child: Text(
               message,
-              style: GoogleFonts.openSans(fontSize: 12, color: Colors.white),
+              style: GoogleFonts.openSans(fontSize: 14, color: Colors.white),
               overflow: TextOverflow.ellipsis,
             ),
           ),

@@ -472,7 +472,7 @@ class _EditClassState extends State<EditClass> {
                         Text(
                           'Day of the Week',
                           style: GoogleFonts.openSans(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF173F70),
                           ),

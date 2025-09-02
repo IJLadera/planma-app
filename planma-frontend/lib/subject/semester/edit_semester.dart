@@ -255,7 +255,7 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              _buildTitle('Academic Year'),
+              CustomWidgets.buildTitle('Academic Year'),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -290,7 +290,7 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              _buildTitle('Year Level'),
+              CustomWidgets.buildTitle('Year Level'),
               const SizedBox(height: 12),
               CustomWidgets.buildDropdownField(
                 label: 'Choose Year Level',
@@ -308,7 +308,7 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
                 fontSize: 14.0,
               ),
               const SizedBox(height: 12),
-              _buildTitle('Semester'),
+              CustomWidgets.buildTitle('Semester'),
               const SizedBox(height: 12),
               CustomWidgets.buildDropdownField(
                 label: 'Choose Semester',
@@ -326,7 +326,7 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
                 fontSize: 14.0,
               ),
               const SizedBox(height: 12),
-              _buildTitle('Semester Dates'),
+              CustomWidgets.buildTitle('Semester Dates'),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -376,14 +376,6 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.openSans(
-          fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF173F70)),
     );
   }
 }

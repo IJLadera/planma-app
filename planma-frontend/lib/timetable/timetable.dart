@@ -139,7 +139,7 @@ class _TimetableState extends State<Timetable> {
         const SizedBox(height: 10),
         // Custom Header with centered text and left kebab menu
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           color: Colors.white,
           child: Row(
             children: [
@@ -174,7 +174,7 @@ class _TimetableState extends State<Timetable> {
                 ),
               ),
               // Invisible Placeholder to balance the Row layout
-              const SizedBox(width: 40),
+              const SizedBox(width: 20),
             ],
           ),
         ),

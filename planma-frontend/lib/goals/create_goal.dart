@@ -83,7 +83,8 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
 
     String goalName = _goalNameController.text.trim();
     String? rawGoalDescription = _descriptionController.text.trim();
-    String? normalizedGoalDescription = rawGoalDescription.isEmpty ? null : rawGoalDescription;
+    String? normalizedGoalDescription =
+        rawGoalDescription.isEmpty ? null : rawGoalDescription;
 
     if (goalName.isEmpty) {
       _showError(context, 'Goal name is required.');
@@ -164,8 +165,9 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
         title: Text(
           'Create Goal',
           style: GoogleFonts.openSans(
-            color: const Color(0xFF173F70),
+            fontSize: 20,
             fontWeight: FontWeight.bold,
+            color: Color(0xFF173F70),
           ),
         ),
         leading: IconButton(
