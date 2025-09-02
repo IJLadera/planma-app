@@ -2093,6 +2093,25 @@ class ScheduleEntryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return ScheduleEntry.objects.filter(student_id=self.request.user)
+
+    @action(detail=False, methods=['delete'])
+    def delete_filtered(self, request):
+        category_type = request.query_params.get('category_type')
+        reference_id = request.query_params.get('reference_id')
+
+        if not category_type or not reference_id:
+            return Response({"error": "category_type and reference_id are required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        deleted_count, _ = ScheduleEntry.objects.filter(
+            student_id=request.user,
+            category_type=category_type,
+            reference_id=reference_id
+        ).delete()
+
+        return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
+
+        
     
 # Firebase Cloud Messaging (Push Notifs)
 class FCMTokenViewSet(viewsets.ModelViewSet):
