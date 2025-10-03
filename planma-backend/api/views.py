@@ -32,7 +32,16 @@ class ActivityViewSet(viewsets.ModelViewSet):
     serializer_class = CustomActivitySerializer
 
     def get_queryset(self):
-        return CustomActivity.objects.filter(student_id=self.request.user)
+        queryset = CustomActivity.objects.filter(student_id=self.request.user)
+
+        # Apply scheduled_date filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(scheduled_date__range=[start_date, end_date])
+
+        return queryset
     
     @action(detail=False, methods=['get'])
     def pending_activities(self, request):
@@ -1233,7 +1242,16 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter tasks based on the logged-in user
-        return CustomTask.objects.filter(student_id=self.request.user)
+        queryset = CustomTask.objects.filter(student_id=self.request.user)
+    
+        # Apply scheduled_date filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(scheduled_date__range=[start_date, end_date])
+
+        return queryset
     
     @action(detail=False, methods=['get'])
     def pending_tasks(self, request):

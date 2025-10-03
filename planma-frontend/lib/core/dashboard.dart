@@ -15,6 +15,7 @@ import 'package:planma_app/activities/activity_page.dart';
 import 'package:planma_app/core/widget/button_sheet.dart';
 import 'package:planma_app/core/widget/menu_button.dart';
 import 'package:planma_app/event/event_page.dart';
+import 'package:planma_app/features/authentication/presentation/providers/user_provider.dart';
 import 'package:planma_app/goals/goal_page.dart';
 import 'package:planma_app/models/clock_type.dart';
 import 'package:planma_app/reports/report_page.dart';
@@ -46,6 +47,9 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isAuthenticated) return;
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       try {

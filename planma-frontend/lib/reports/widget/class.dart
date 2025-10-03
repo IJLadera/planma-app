@@ -150,6 +150,19 @@ class SleepRegularity {
   SleepRegularity(this.day, this.startTime, this.endTime);
 }
 
+//-----------------------FEEDBACK ENTRY----------------------------------
+class FeedbackEntry {
+  final String message;
+  final String sentiment; // "positive", "neutral", "negative"
+  final String category;  // "Tasks", "Events", etc.
+
+  FeedbackEntry({
+    required this.message,
+    required this.sentiment,
+    required this.category,
+  });
+}
+
 //--------------------------------------------------------------
 class ToggleButtonsDemo extends StatefulWidget {
   final List<String> labels; // The labels for each toggle button
@@ -366,7 +379,7 @@ class ChartContainer3 extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.openSans(
-              fontSize: 20, 
+              fontSize: 16, 
               fontWeight: FontWeight.bold, 
               color: Color(0xFF173F70),
             ),
@@ -465,7 +478,7 @@ class ChartContainer4 extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.openSans(
-              fontSize: 20, 
+              fontSize: 16, 
               fontWeight: FontWeight.bold, 
               color: Color(0xFF173F70),
             ),
@@ -634,6 +647,62 @@ class ChartContainer5 extends StatelessWidget {
             separatorBuilder: (context, index) => const Divider(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+//-----------------------FEEDBACK AND INSIGHTS BOX----------------------------------
+class InsightBox extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+  final IconData icon;
+  final Color color;
+
+  const InsightBox({
+    super.key,
+    required this.title,
+    required this.children,
+    this.icon = Icons.lightbulb_outline,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Color.fromARGB(255, 255, 248, 226),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent, // hides ExpansionTile divider
+        ),
+        child: ExpansionTile(
+          leading: Icon(icon, color: color),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          childrenPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 0; i < children.length; i++) ...[
+                  children[i],
+                  if (i != children.length - 1) const SizedBox(height: 8), // <-- spacing
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

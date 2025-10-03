@@ -34,6 +34,11 @@ class EventsProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
+    if (_accessToken == null || _accessToken!.isEmpty) {
+      print("Skipping fetchEvents: no access token");
+      return;
+    }
+
     final url = Uri.parse("$_baseApiUrl/events/upcoming_events/");
 
     try {
@@ -59,7 +64,7 @@ class EventsProvider with ChangeNotifier {
             'Failed to fetch Events. Status Code: ${response.statusCode}');
       }
     } catch (error) {
-      rethrow;
+      print("Error fetching events: $error");
     }
   }
 

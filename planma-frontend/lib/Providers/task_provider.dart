@@ -31,10 +31,44 @@ class TaskProvider with ChangeNotifier {
     _baseApiUrl = '$baseUrl/api';
   }
 
+  // Fetch all tasks
+  Future<void> fetchTasks({String? startDate, String? endDate}) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("$_baseApiUrl/tasks/?start_date=$startDate&end_date=$endDate");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+
+        _tasks = data.map((item) => Task.fromJson(item)).toList();
+        notifyListeners();
+      } else {
+        throw Exception(
+            'Failed to fetch tasks. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print("Error fetching tasks: $error");
+    }
+  }
+
   // Fetch pending tasks list
   Future<void> fetchPendingTasks() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
+
+    if (_accessToken == null || _accessToken!.isEmpty) {
+      print("Skipping fetchTasks: no access token");
+      return;
+    }
 
     final url = Uri.parse("$_baseApiUrl/tasks/pending_tasks/");
 
@@ -340,7 +374,7 @@ class TaskProvider with ChangeNotifier {
     return DateFormat('HH:mm:ss').format(dateTime);
   }
 
-  // Utility method to sort activities if it is pending or completed.
+  // Utility method to sort tasks if it is pending or completed.
   void _sortTasks() {
     _pendingTasks = _tasks.where((task) => task.status == 'Pending').toList();
 
@@ -348,5 +382,10 @@ class TaskProvider with ChangeNotifier {
         _tasks.where((task) => task.status == 'Completed').toList();
 
     notifyListeners();
+  }
+
+  Future<int> fetchTaskCount({String? startDate, String? endDate}) async {
+    await fetchTasks(startDate: startDate, endDate: endDate);
+    return _tasks.length;
   }
 }

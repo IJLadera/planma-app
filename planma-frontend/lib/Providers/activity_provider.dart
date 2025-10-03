@@ -29,10 +29,44 @@ class ActivityProvider with ChangeNotifier {
     _baseApiUrl = '$baseUrl/api';
   }
 
+  // Fetch all activities
+  Future<void> fetchActivities({String? startDate, String? endDate}) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _accessToken = sharedPreferences.getString("access");
+
+    final url = Uri.parse("$_baseApiUrl/activities/?start_date=$startDate&end_date=$endDate");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+
+        _activities = data.map((item) => Activity.fromJson(item)).toList();
+        notifyListeners();
+      } else {
+        throw Exception(
+            'Failed to fetch activities. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print("Error fetching activities: $error");
+    }
+  }
+
   // Fetch pending activities list
   Future<void> fetchPendingActivities () async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
+
+    if (_accessToken == null || _accessToken!.isEmpty) {
+      print("Skipping fetchActivities: no access token");
+      return;
+    }
 
     final url = Uri.parse("$_baseApiUrl/activities/pending_activities/");
 
@@ -338,5 +372,10 @@ class ActivityProvider with ChangeNotifier {
         .toList();
 
     notifyListeners();
+  }
+
+  Future<int> fetchActivityCount({String? startDate, String? endDate}) async {
+    await fetchActivities(startDate: startDate, endDate: endDate);
+    return _activities.length;
   }
 }

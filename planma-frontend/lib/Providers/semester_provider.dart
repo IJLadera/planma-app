@@ -29,6 +29,12 @@ class SemesterProvider with ChangeNotifier {
   Future<void> fetchSemesters() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
+
+    if (_accessToken == null || _accessToken!.isEmpty) {
+      print("Skipping fetchSemesters: no access token");
+      return;
+    }
+
     final url = Uri.parse("$_baseApiUrl/semesters/");
 
     try {

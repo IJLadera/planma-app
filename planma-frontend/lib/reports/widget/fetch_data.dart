@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/activity_log_provider.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:planma_app/Providers/attended_class_provider.dart';
 import 'package:planma_app/Providers/attended_events_provider.dart';
 import 'package:planma_app/Providers/goal_progress_provider.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/sleep_provider.dart';
 import 'package:planma_app/Providers/task_log_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/models/activity_time_log_model.dart';
 import 'package:planma_app/models/attended_class_model.dart';
 import 'package:planma_app/models/attended_events_model.dart';
@@ -43,29 +45,16 @@ class ReportsService {
         endDate = DateFormat('yyyy-12-31').format(selectedDate);
         break;
       case 'Semester':
-        final match = semesters.firstWhere(
-          (s) {
-            final start = DateTime.parse(s['sem_start_date']);
-            final end = DateTime.parse(s['sem_end_date']);
-            return !selectedDate.isBefore(start) && !selectedDate.isAfter(end);
-          },
-          orElse: () => {}, // empty map => “not found”
-        );
-
-        if (match.isNotEmpty) {
+        final match = semesterForDate(selectedDate, semesters);
+        if (match != null && match.isNotEmpty) {
           startDate = DateFormat('yyyy-MM-dd')
               .format(DateTime.parse(match['sem_start_date']));
           endDate = DateFormat('yyyy-MM-dd')
               .format(DateTime.parse(match['sem_end_date']));
         } else {
-          // fallback to your original half‑year logic
-          if (selectedDate.month <= 6) {
-            startDate = DateFormat('yyyy-01-01').format(selectedDate);
-            endDate = DateFormat('yyyy-06-30').format(selectedDate);
-          } else {
-            startDate = DateFormat('yyyy-07-01').format(selectedDate);
-            endDate = DateFormat('yyyy-12-31').format(selectedDate);
-          }
+          // No semesters exist at all — fallback to the selected day range
+          startDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+          endDate = startDate;
         }
         break;
       case 'Day':
@@ -127,6 +116,39 @@ class ReportsService {
     return null; // If no semesters are created at all
   }
 
+  static DateTime? _getPreviousRangeDate(
+    String selectedTimeFilter,
+    DateTime selectedDate,
+    List<Map<String, dynamic>> semesters,
+  ) {
+    switch (selectedTimeFilter) {
+      case 'Day':
+        return selectedDate.subtract(const Duration(days: 1));
+      case 'Week':
+        return selectedDate.subtract(const Duration(days: 7));
+      case 'Month':
+        return DateTime(
+            selectedDate.year, selectedDate.month - 1, selectedDate.day);
+      case 'Year':
+        return DateTime(
+            selectedDate.year - 1, selectedDate.month, selectedDate.day);
+      case 'Semester':
+        final current = semesterForDate(selectedDate, semesters);
+        if (current != null && current.isNotEmpty) {
+          final sorted = [...semesters]..sort((a, b) =>
+              DateTime.parse(a['sem_start_date'])
+                  .compareTo(DateTime.parse(b['sem_start_date'])));
+          final idx = sorted.indexWhere((s) => s == current);
+          if (idx > 0) {
+            return DateTime.parse(sorted[idx - 1]['sem_start_date']);
+          }
+        }
+        return null;
+      default:
+        return selectedDate;
+    }
+  }
+
   // ---------- Fetching Data Once ----------
   static Future<List<TaskTimeLog>> fetchTaskLogsOnce({
     required TaskTimeLogProvider taskLogProvider,
@@ -134,7 +156,8 @@ class ReportsService {
     required String selectedTimeFilter,
     required DateTime selectedDate,
   }) async {
-    var dateRange = _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
+    var dateRange =
+        _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
 
     await taskLogProvider.fetchTaskTimeLogs(
       startDate: dateRange['startDate']!,
@@ -142,6 +165,23 @@ class ReportsService {
     );
 
     return taskLogProvider.taskTimeLogs;
+  }
+
+  static Future<int> fetchTaskCountOnce({
+    required TaskProvider taskProvider,
+    required List<Map<String, dynamic>> semesters,
+    required String selectedTimeFilter,
+    required DateTime selectedDate,
+  }) async {
+    var dateRange =
+        _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
+
+    int totalTasks = await taskProvider.fetchTaskCount(
+      startDate: dateRange['startDate']!,
+      endDate: dateRange['endDate']!,
+    );
+
+    return totalTasks;
   }
 
   static Future<List<AttendedEvent>> fetchEventLogsOnce({
@@ -193,6 +233,23 @@ class ReportsService {
     );
 
     return activityLogProvider.activityTimeLogs;
+  }
+
+  static Future<int> fetchActivityCountOnce({
+    required ActivityProvider activityProvider,
+    required List<Map<String, dynamic>> semesters,
+    required String selectedTimeFilter,
+    required DateTime selectedDate,
+  }) async {
+    var dateRange =
+        _calculateDateRange(selectedTimeFilter, selectedDate, semesters);
+
+    int totalActivities = await activityProvider.fetchActivityCount(
+      startDate: dateRange['startDate']!,
+      endDate: dateRange['endDate']!,
+    );
+
+    return totalActivities;
   }
 
   static Future<List<Goal>> fetchGoalsOnce(
@@ -365,6 +422,41 @@ class ReportsService {
     return tasksFinished;
   }
 
+  static Future<Map<String, double>?> fetchPreviousTaskTimeTotal({
+    required TaskTimeLogProvider taskLogProvider,
+    required List<Map<String, dynamic>> semesters,
+    required String selectedTimeFilter,
+    required DateTime selectedDate,
+  }) async {
+    final DateTime? prevDate =
+        _getPreviousRangeDate(selectedTimeFilter, selectedDate, semesters);
+
+    if (prevDate == null) {
+      return null;
+    }
+
+    final prevLogs = await fetchTaskLogsOnce(
+      taskLogProvider: taskLogProvider,
+      semesters: semesters,
+      selectedTimeFilter: selectedTimeFilter,
+      selectedDate: prevDate,
+    );
+
+    final prevSpent = await fetchTaskTimeSpent(
+      taskTimeLogs: prevLogs,
+      selectedTimeFilter: selectedTimeFilter,
+    );
+
+    final double previousTotal = prevSpent.fold(
+      0.0,
+      (sum, item) => sum + item.minutes,
+    );
+
+    return {
+      'previous': previousTotal,
+    };
+  }
+
   // ---------- Events ----------
   // Event Chart 1
   static Future<List<EventAttendancecSummary>> fetchEventAttendanceSummary({
@@ -456,6 +548,43 @@ class ReportsService {
     return eventAttendanceDistribution;
   }
 
+  static Future<Map<String, int>?> fetchPreviousEventTotal({
+    required AttendedEventsProvider attendedEventsProvider,
+    required List<Map<String, dynamic>> semesters,
+    required String selectedTimeFilter,
+    required DateTime selectedDate,
+  }) async {
+    final DateTime? prevDate =
+        _getPreviousRangeDate(selectedTimeFilter, selectedDate, semesters);
+
+    if (prevDate == null) {
+      return null;
+    }
+
+    final prevLogs = await fetchEventLogsOnce(
+      attendedEventsProvider: attendedEventsProvider,
+      semesters: semesters,
+      selectedTimeFilter: selectedTimeFilter,
+      selectedDate: prevDate,
+    );
+
+    final prevSummary = await fetchEventAttendanceSummary(
+      attendedEvents: prevLogs,
+      selectedTimeFilter: selectedTimeFilter,
+    );
+
+    int prevAttended = prevSummary
+        .where((e) => e.attendance == "Attended")
+        .fold(0, (sum, e) => sum + e.attendanceCount);
+
+    int prevTotal = prevSummary.fold(0, (sum, e) => sum + e.attendanceCount);
+
+    return {
+      "previousAttendedCount": prevAttended,
+      "previousTotalEvents": prevTotal,
+    };
+  }
+
   // ---------- Class Schedules ----------
   // Class Schedule Chart 1
   static Future<List<ClassAttendanceSummary>> fetchClassAttendanceSummary({
@@ -521,6 +650,43 @@ class ReportsService {
             .toList();
 
     return classAttendanceDistribution;
+  }
+
+  static Future<Map<String, int>?> fetchPreviousClassTotal({
+    required AttendedClassProvider attendedClassProvider,
+    required List<Map<String, dynamic>> semesters,
+    required String selectedTimeFilter,
+    required DateTime selectedDate,
+  }) async {
+    final DateTime? prevDate =
+        _getPreviousRangeDate(selectedTimeFilter, selectedDate, semesters);
+
+    if (prevDate == null) {
+      return null;
+    }
+
+    final prevLogs = await fetchClassLogsOnce(
+      attendedClassProvider: attendedClassProvider,
+      semesters: semesters,
+      selectedTimeFilter: selectedTimeFilter,
+      selectedDate: prevDate,
+    );
+
+    final prevSummary = await fetchClassAttendanceSummary(
+      attendedClasses: prevLogs,
+      selectedTimeFilter: selectedTimeFilter,
+    );
+
+    int prevAttended = prevSummary
+        .where((e) => e.category == "Attended")
+        .fold(0, (sum, e) => sum + e.count);
+
+    int prevTotal = prevSummary.fold(0, (sum, e) => sum + e.count);
+
+    return {
+      "previousAttendedCount": prevAttended,
+      "previousTotalClasses": prevTotal,
+    };
   }
 
   // ---------- Activities ----------
@@ -640,6 +806,41 @@ class ReportsService {
         .toList();
 
     return activitiesDone;
+  }
+
+  static Future<Map<String, double>?> fetchPreviousActivityTimeTotal({
+    required ActivityTimeLogProvider activityLogProvider,
+    required List<Map<String, dynamic>> semesters,
+    required String selectedTimeFilter,
+    required DateTime selectedDate,
+  }) async {
+    final DateTime? prevDate =
+        _getPreviousRangeDate(selectedTimeFilter, selectedDate, semesters);
+
+    if (prevDate == null) {
+      return null;
+    }
+
+    final prevLogs = await fetchActivityLogsOnce(
+      activityLogProvider: activityLogProvider,
+      semesters: semesters,
+      selectedTimeFilter: selectedTimeFilter,
+      selectedDate: prevDate,
+    );
+
+    final prevSpent = await fetchActivityTimeSpent(
+      activityTimeLogs: prevLogs,
+      selectedTimeFilter: selectedTimeFilter,
+    );
+
+    final double previousTotal = prevSpent.fold(
+      0.0,
+      (sum, item) => sum + item.minutes,
+    );
+
+    return {
+      'previous': previousTotal,
+    };
   }
 
   // ---------- Goals ----------
@@ -814,6 +1015,41 @@ class ReportsService {
     return goalCompletionCount;
   }
 
+  static Future<Map<String, double>?> fetchPreviousGoalTimeTotal({
+    required GoalProgressProvider goalProgressProvider,
+    required List<Map<String, dynamic>> semesters,
+    required String selectedTimeFilter,
+    required DateTime selectedDate,
+  }) async {
+    final DateTime? prevDate =
+        _getPreviousRangeDate(selectedTimeFilter, selectedDate, semesters);
+
+    if (prevDate == null) {
+      return null;
+    }
+
+    final prevLogs = await fetchGoalProgressOnce(
+      goalProgressProvider: goalProgressProvider,
+      semesters: semesters,
+      selectedTimeFilter: selectedTimeFilter,
+      selectedDate: prevDate,
+    );
+
+    final prevSpent = await fetchGoalTimeSpent(
+      goalProgressLogs: prevLogs,
+      selectedTimeFilter: selectedTimeFilter,
+    );
+
+    final double previousTotal = prevSpent.fold(
+      0.0,
+      (sum, item) => sum + item.minutes,
+    );
+
+    return {
+      'previous': previousTotal,
+    };
+  }
+
   // ---------- Sleep ----------
   // Sleep Chart 1
   static Future<List<SleepDuration>> fetchSleepDuration({
@@ -924,5 +1160,40 @@ class ReportsService {
     }
 
     return sleepRegularityByDay;
+  }
+
+  static Future<Map<String, double>?> fetchPreviousSleepTimeTotal({
+    required SleepLogProvider sleepLogProvider,
+    required List<Map<String, dynamic>> semesters,
+    required String selectedTimeFilter,
+    required DateTime selectedDate,
+  }) async {
+    final DateTime? prevDate =
+        _getPreviousRangeDate(selectedTimeFilter, selectedDate, semesters);
+
+    if (prevDate == null) {
+      return null;
+    }
+
+    final prevLogs = await fetchSleepLogsOnce(
+      sleepLogProvider: sleepLogProvider,
+      semesters: semesters,
+      selectedTimeFilter: selectedTimeFilter,
+      selectedDate: prevDate,
+    );
+
+    final prevSpent = await fetchSleepDuration(
+      sleepLogs: prevLogs,
+      selectedTimeFilter: selectedTimeFilter,
+    );
+
+    final double previousTotal = prevSpent.fold(
+      0.0,
+      (sum, item) => sum + (item.hours * 60),
+    );
+
+    return {
+      'previous': previousTotal,
+    };
   }
 }

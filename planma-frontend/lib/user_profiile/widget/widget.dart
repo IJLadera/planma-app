@@ -101,9 +101,10 @@ class CustomWidget {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text("Logout successful")));
     // Successful logout, navigate to login screen
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => LogInPage()),
+      MaterialPageRoute(builder: (context) => const LogInPage()),
+      (route) => false, // clear all previous routes
     );
 
     // if (response != null && response["error"] == null) {
