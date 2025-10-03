@@ -31,8 +31,8 @@ class UserPreferencesProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    if (_accessToken == null) {
-      throw Exception('Access token is missing or invalid');
+    if (_accessToken == null || _accessToken!.isEmpty) {
+      return;
     }
 
     final url = Uri.parse("$_baseApiUrl/userprefs/");

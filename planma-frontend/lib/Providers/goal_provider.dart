@@ -30,6 +30,11 @@ class GoalProvider extends ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
+    if (_accessToken == null || _accessToken!.isEmpty) {
+      print("Skipping fetchGoals: no access token");
+      return;
+    }
+
     final url = Uri.parse("$_baseApiUrl/goals/");
 
     try {

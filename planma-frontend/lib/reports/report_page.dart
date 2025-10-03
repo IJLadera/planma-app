@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/activity_log_provider.dart';
+import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:planma_app/Providers/attended_class_provider.dart';
 import 'package:planma_app/Providers/attended_events_provider.dart';
 import 'package:planma_app/Providers/goal_progress_provider.dart';
@@ -8,6 +9,7 @@ import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/Providers/sleep_provider.dart';
 import 'package:planma_app/Providers/task_log_provider.dart';
+import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/models/activity_time_log_model.dart';
 import 'package:planma_app/models/attended_class_model.dart';
 import 'package:planma_app/models/attended_events_model.dart';
@@ -19,6 +21,7 @@ import 'package:planma_app/reports/widget/bottom_sheet.dart';
 import 'package:planma_app/reports/widget/class.dart';
 import 'package:planma_app/reports/widget/charts.dart'; // Import the new charts file
 import 'package:google_fonts/google_fonts.dart';
+import 'package:planma_app/reports/widget/feedback_service.dart';
 import 'package:planma_app/reports/widget/fetch_data.dart';
 import 'package:provider/provider.dart';
 
@@ -61,6 +64,8 @@ class _ReportsPageState extends State<ReportsPage> {
   List<SleepRegularity> sleepRegularity = [];
   //Placeholder semesters (for semester filtering)
   List<Map<String, dynamic>> semesters = [];
+  //Placeholder feedback entries
+  List<FeedbackEntry> feedbackEntries = [];
 
   @override
   void initState() {
@@ -75,6 +80,10 @@ class _ReportsPageState extends State<ReportsPage> {
         Duration(days: selectedDate.weekday - 1)); // Start of the week
     DateTime endOfWeek =
         startOfWeek.add(const Duration(days: 6)); // End of the week
+
+    // Reset boolean
+    canNavigateForward = true;
+    canNavigateBackward = true;
 
     switch (selectedTimeFilter) {
       case 'Day':
@@ -95,9 +104,11 @@ class _ReportsPageState extends State<ReportsPage> {
         break;
       case 'Semester':
         final semProv = context.read<SemesterProvider>();
-        final semester = ReportsService.semesterForDate(selectedDate, semProv.semesters);
+        final semester =
+            ReportsService.semesterForDate(selectedDate, semProv.semesters);
         if (semester != null) {
-          formattedTimeFilter = '${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}';
+          formattedTimeFilter =
+              '${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}';
           // Allow forward nav only if this isn’t the last known semester
           canNavigateForward = semester != semProv.semesters.last &&
               DateTime.parse(semester['sem_end_date']).isBefore(today);
@@ -198,6 +209,9 @@ class _ReportsPageState extends State<ReportsPage> {
           Provider.of<GoalProgressProvider>(context, listen: false);
       final sleepLogProvider =
           Provider.of<SleepLogProvider>(context, listen: false);
+      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+      final activityProvider =
+          Provider.of<ActivityProvider>(context, listen: false);
 
       // Instantiation of Placeholder Lists
       List<TaskTimeLog>? taskTimeLogs;
@@ -233,6 +247,30 @@ class _ReportsPageState extends State<ReportsPage> {
           taskFinished = await ReportsService.fetchTasksFinished(
               taskTimeLogs: taskTimeLogs,
               selectedTimeFilter: selectedTimeFilter);
+
+          // Retrieve total task count
+          final totalTasks = await ReportsService.fetchTaskCountOnce(
+            taskProvider: taskProvider,
+            semesters: semesters,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+
+          // Retrieve previous total task time for feedback
+          final prevTotals = await ReportsService.fetchPreviousTaskTimeTotal(
+            taskLogProvider: taskLogProvider,
+            semesters: semesters,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+
+          // Generate feedback for Tasks
+          feedbackEntries = FeedbackService.generateTaskFeedback(
+              taskTimeSpent: taskTimeSpent,
+              taskTimeDistribution: taskTimeDistribution,
+              taskFinished: taskFinished,
+              totalTasks: totalTasks,
+              previousTotalMinutes: prevTotals?['previous']);
           break;
         case 'Events':
           attendedEvents = await ReportsService.fetchEventLogsOnce(
@@ -258,6 +296,22 @@ class _ReportsPageState extends State<ReportsPage> {
               await ReportsService.fetchEventAttendanceDistribution(
                   attendedEvents: attendedEvents,
                   selectedTimeFilter: selectedTimeFilter);
+
+          // Retrieve previous event summary for feedback
+          final prevTotals = await ReportsService.fetchPreviousEventTotal(
+            attendedEventsProvider: attendedEventsProvider,
+            semesters: semesters,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+
+          // Generate feedback for Events
+          feedbackEntries = FeedbackService.generateEventFeedback(
+              eventAttendanceSummary: eventAttendanceSummary,
+              eventTypeDistribution: eventTypeDistribution,
+              eventAttendanceDistribution: eventAttendanceDistribution,
+              previousAttendedCount: prevTotals?['previousAttendedCount'],
+              previousTotalEvents: prevTotals?['previousTotalEvents']);
           break;
         case 'Class Schedules':
           attendedClasses = await ReportsService.fetchClassLogsOnce(
@@ -279,10 +333,31 @@ class _ReportsPageState extends State<ReportsPage> {
             attendedClasses: attendedClasses,
             selectedTimeFilter: selectedTimeFilter,
           );
+
+          // Retrieve previous class summary for feedback
+          final prevTotals = await ReportsService.fetchPreviousClassTotal(
+            attendedClassProvider: attendedClassProvider,
+            semesters: semesters,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+
+          // Generate feedback for Class Schedules
+          feedbackEntries = FeedbackService.generateClassScheduleFeedback(
+              classAttendanceSummary: classAttendanceSummary,
+              classAttendanceDistribution: classAttendanceDistribution,
+              previousAttendedCount: prevTotals?['previousAttendedCount'],
+              previousTotalClasses: prevTotals?['previousTotalClasses']);
           break;
         case 'Activities':
           activityTimeLogs = await ReportsService.fetchActivityLogsOnce(
               activityLogProvider: activityLogProvider,
+              semesters: semesters,
+              selectedTimeFilter: selectedTimeFilter,
+              selectedDate: selectedDate);
+
+          taskTimeLogs = await ReportsService.fetchTaskLogsOnce(
+              taskLogProvider: taskLogProvider,
               semesters: semesters,
               selectedTimeFilter: selectedTimeFilter,
               selectedDate: selectedDate);
@@ -296,6 +371,36 @@ class _ReportsPageState extends State<ReportsPage> {
           activitiesDone = await ReportsService.fetchActivitiesDone(
               activityTimeLogs: activityTimeLogs,
               selectedTimeFilter: selectedTimeFilter);
+
+          // Retrieve total activity count
+          final totalActivities = await ReportsService.fetchActivityCountOnce(
+            activityProvider: activityProvider,
+            semesters: semesters,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+
+          // Retrieve previous total activity time for feedback
+          final prevTotals =
+              await ReportsService.fetchPreviousActivityTimeTotal(
+            activityLogProvider: activityLogProvider,
+            semesters: semesters,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+
+          // Process TaskTimeDistribution
+          taskFinished = await ReportsService.fetchTasksFinished(
+              taskTimeLogs: taskTimeLogs,
+              selectedTimeFilter: selectedTimeFilter);
+
+          // Generate feedback for Activities
+          feedbackEntries = FeedbackService.generateActivityFeedback(
+              activitiesTimeSpent: activitiesTimeSpent,
+              activitiesDone: activitiesDone,
+              taskFinished: taskFinished,
+              totalActivities: totalActivities,
+              previousTotalMinutes: prevTotals?['previous']);
           break;
         case 'Goals':
           goals =
@@ -317,8 +422,24 @@ class _ReportsPageState extends State<ReportsPage> {
               goalProgressLogs: goalProgressLogs,
               selectedTimeFilter: selectedTimeFilter);
 
+          // Process GoalCompletionCount
           goalCompletionCount = await ReportsService.fetchGoalCompletionCount(
               goals: goals, goalProgressLogs: goalProgressLogs);
+
+          // Retrieve previous total goal time for feedback
+          final prevTotals = await ReportsService.fetchPreviousGoalTimeTotal(
+            goalProgressProvider: goalProgressProvider,
+            semesters: semesters,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+
+          // Generate feedback for Goals
+          feedbackEntries = FeedbackService.generateGoalFeedback(
+              goalTimeSpent: goalTimeSpent,
+              goalTimeDistribution: goalTimeDistribution,
+              goalCompletionCount: goalCompletionCount,
+              previousTotalMinutes: prevTotals?['previous']);
           break;
         case 'Sleep':
           sleepLogs = await ReportsService.fetchSleepLogsOnce(
@@ -333,6 +454,20 @@ class _ReportsPageState extends State<ReportsPage> {
 
           sleepRegularity = await ReportsService.fetchSleepRegularity(
               sleepLogs: sleepLogs, selectedTimeFilter: selectedTimeFilter);
+
+          // Retrieve previous total sleep time for feedback
+          final prevTotals = await ReportsService.fetchPreviousSleepTimeTotal(
+            sleepLogProvider: sleepLogProvider,
+            semesters: semesters,
+            selectedTimeFilter: selectedTimeFilter,
+            selectedDate: selectedDate,
+          );
+
+          // Generate feedback for Sleep
+          feedbackEntries = FeedbackService.generateSleepFeedback(
+              sleepDuration: sleepDuration,
+              sleepRegularity: sleepRegularity,
+              previousTotalMinutes: prevTotals?['previous']);
       }
 
       if (!mounted)
@@ -351,6 +486,17 @@ class _ReportsPageState extends State<ReportsPage> {
   void _onTimeFilterSelected(String filter) {
     setState(() {
       selectedTimeFilter = filter;
+
+      if (filter == 'Semester') {
+        final semProv = context.read<SemesterProvider>();
+        final sem =
+            ReportsService.semesterForDate(selectedDate, semProv.semesters);
+        if (sem != null && sem.isNotEmpty) {
+          // anchor selectedDate to the semester start so dateRange calculation and the UI header are consistent immediately
+          selectedDate = DateTime.parse(sem['sem_start_date']);
+        }
+      }
+
       _updateFormattedTimeFilter();
       isLoading = true;
     });
@@ -441,8 +587,11 @@ class _ReportsPageState extends State<ReportsPage> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.chevron_left),
-                      onPressed: canNavigateBackward ? () => _navigateDate(-1) : null,
-                      color: canNavigateBackward ? const Color(0xFF173F70) : Colors.white,
+                      onPressed:
+                          canNavigateBackward ? () => _navigateDate(-1) : null,
+                      color: canNavigateBackward
+                          ? const Color(0xFF173F70)
+                          : Colors.white,
                     ),
                     SizedBox(width: 16),
                     Text(
@@ -458,14 +607,17 @@ class _ReportsPageState extends State<ReportsPage> {
                     SizedBox(width: 16),
                     IconButton(
                       icon: const Icon(Icons.chevron_right),
-                      onPressed: canNavigateForward ? () => _navigateDate(1) : null,
-                      color: canNavigateForward ? Color(0xFF173F70) : Colors.white,
+                      onPressed:
+                          canNavigateForward ? () => _navigateDate(1) : null,
+                      color:
+                          canNavigateForward ? Color(0xFF173F70) : Colors.white,
                     ),
                   ],
                 ),
               ],
             ),
           ),
+
           // Scrollable charts
           Expanded(
             child: SingleChildScrollView(
@@ -473,6 +625,60 @@ class _ReportsPageState extends State<ReportsPage> {
                 padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
                 child: Column(
                   children: [
+                    // Feedback and Insights Expandable
+                    InsightBox(
+                      title: "Feedback & Insights",
+                      color: const Color(0xFF173F70),
+                      children: feedbackEntries.isEmpty
+                          ? [
+                              Row(
+                                children: const [
+                                  Icon(Icons.circle,
+                                      size: 10, color: Colors.grey),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      "No data to provide feedback",
+                                      style:
+                                          TextStyle(color: Color(0xFF173F70)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ]
+                          : feedbackEntries.map((entry) {
+                              Color iconColor;
+                              switch (entry.sentiment) {
+                                case "positive":
+                                  iconColor = Colors.green;
+                                  break;
+                                case "neutral":
+                                  iconColor = Colors.orange;
+                                  break;
+                                case "negative":
+                                  iconColor = Colors.red;
+                                  break;
+                                default:
+                                  iconColor = Colors.grey;
+                                  break;
+                              }
+
+                              return Row(
+                                children: [
+                                  Icon(Icons.circle,
+                                      size: 10, color: iconColor),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      entry.message,
+                                      style: const TextStyle(
+                                          color: Color(0xFF173F70)),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                    ),
                     // TASKS category
                     if (selectedCategory == 'Tasks') ...[
                       TaskCharts(

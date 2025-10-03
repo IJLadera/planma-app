@@ -72,6 +72,8 @@ class ReminderConsumer(AsyncWebsocketConsumer):
 
     # Send reminder to WebSocket
     async def reminder_notification(self, event):
+        print(f"[WS] Sending reminder via WebSocket to {self.student_id}: {event}")
+
         reminder_type = event['reminder_type']
         reminder = event['reminder']
 

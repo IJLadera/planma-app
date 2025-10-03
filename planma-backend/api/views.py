@@ -32,7 +32,16 @@ class ActivityViewSet(viewsets.ModelViewSet):
     serializer_class = CustomActivitySerializer
 
     def get_queryset(self):
-        return CustomActivity.objects.filter(student_id=self.request.user)
+        queryset = CustomActivity.objects.filter(student_id=self.request.user)
+
+        # Apply scheduled_date filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(scheduled_date__range=[start_date, end_date])
+
+        return queryset
     
     @action(detail=False, methods=['get'])
     def pending_activities(self, request):
@@ -1233,7 +1242,16 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter tasks based on the logged-in user
-        return CustomTask.objects.filter(student_id=self.request.user)
+        queryset = CustomTask.objects.filter(student_id=self.request.user)
+    
+        # Apply scheduled_date filtering if provided in query params
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(scheduled_date__range=[start_date, end_date])
+
+        return queryset
     
     @action(detail=False, methods=['get'])
     def pending_tasks(self, request):
@@ -2093,6 +2111,25 @@ class ScheduleEntryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return ScheduleEntry.objects.filter(student_id=self.request.user)
+
+    @action(detail=False, methods=['delete'])
+    def delete_filtered(self, request):
+        category_type = request.query_params.get('category_type')
+        reference_id = request.query_params.get('reference_id')
+
+        if not category_type or not reference_id:
+            return Response({"error": "category_type and reference_id are required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        deleted_count, _ = ScheduleEntry.objects.filter(
+            student_id=request.user,
+            category_type=category_type,
+            reference_id=reference_id
+        ).delete()
+
+        return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
+
+        
     
 # Firebase Cloud Messaging (Push Notifs)
 class FCMTokenViewSet(viewsets.ModelViewSet):

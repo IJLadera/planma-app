@@ -37,7 +37,11 @@ def send_sleep_reminders():
 
     channel_layer = get_channel_layer()
 
+    print(f"[SLEEP IN-APP] Found {user_prefs.count()} upcoming sleep to evaluate at {now}")
+
     for pref in user_prefs:
+        print(f"[SLEEP IN-APP] Pref ID={pref.pref_id}, Name={pref.usual_sleep_time}")
+
         # Skip if reminder was already sent today
         if pref.last_sleep_reminder_date == today:
             continue
@@ -50,6 +54,7 @@ def send_sleep_reminders():
         # Calculate when reminder should be sent (30 minutes before sleep time)
         reminder_offset = pref.reminder_offset_time or timedelta(minutes=30)
         reminder_time = sleep_time - reminder_offset
+        print(f"[SLEEP IN-APP] Reminder time for 'Sleep': {reminder_time}")
 
         # If it's time to send the reminder
         if now >= reminder_time and now <= sleep_time:
@@ -67,6 +72,7 @@ def send_sleep_reminders():
                         'reminder': f"Time to prepare for bed - you should be asleep by {formatted_sleep_time}"
                     }
                 )
+                print(f"[SLEEP IN-APP] Sending in-app to {student_id}")
                 # Update last reminder date
                 pref.last_sleep_reminder_date = today
                 pref.save()
@@ -84,9 +90,13 @@ def send_task_reminders():
 
     channel_layer = get_channel_layer()
 
+    print(f"[TASK IN-APP] Found {upcoming_tasks.count()} upcoming tasks to evaluate at {now}")
+
     print('Channel Check')
     print(now)
     for task in upcoming_tasks:
+        print(f"[TASK IN-APP] Task ID={task.task_id}, Name={task.task_name}")
+
         # Get user preferences for reminder timing
         try:
             user_pref = UserPref.objects.get(student_id=task.student_id)
@@ -97,6 +107,7 @@ def send_task_reminders():
 
         # Calculate when reminder should be sent
         reminder_time = task.deadline - reminder_offset
+        print(f"[TASK IN-APP] Reminder time for '{task.task_name}': {reminder_time}")
 
         # print('Time Check')
         # print(now) 
@@ -128,6 +139,7 @@ def send_task_reminders():
                         'reminder': reminder_data
                     }
                 )
+                print(f"[TASK IN-APP] Sending in-app ush to {student_id}")
                 # Mark as sent
                 task.reminder_sent = True
                 task.save()
@@ -145,7 +157,11 @@ def send_event_reminders():
 
     channel_layer = get_channel_layer()
 
+    print(f"[EVENT IN-APP] Found {upcoming_events.count()} upcoming events to evaluate at {now}")
+
     for event in upcoming_events:
+        print(f"[EVENT IN-APP] Event ID={event.event_id}, Name={event.event_name}")
+        
         # Get user preferences for reminder timing
         try:
             user_pref = UserPref.objects.get(student_id=event.student_id)
@@ -161,6 +177,7 @@ def send_event_reminders():
         
         # Calculate when reminder should be sent
         reminder_time = event_datetime - reminder_offset
+        print(f"[EVENT IN-APP] Reminder time for '{event.event_name}': {reminder_time}")
         
         # If it's time to send the reminder (and event hasn't started yet)
         if now >= reminder_time and now < event_datetime:
@@ -187,7 +204,7 @@ def send_event_reminders():
                         'reminder': reminder_data
                     }
                 )
-            
+                print(f"[EVENT IN-APP] Sending in-app to {student_id}")
                 # Mark as sent
                 event.reminder_sent = True
                 event.save()
@@ -205,8 +222,12 @@ def send_class_reminders():
     ).select_related('student_id', 'subject')
     
     channel_layer = get_channel_layer()
+
+    print(f"[CLASS IN-APP] Found {class_schedules.count()} upcoming classes to evaluate at {now}")
     
     for class_schedule in class_schedules:
+        print(f"[CLASS IN-APP] Class ID={class_schedule.classsched_id}, Name={class_schedule.subject.subject_code}")
+
         # Get user preferences for reminder timing
         try:
             user_pref = UserPref.objects.get(student_id=class_schedule.student_id)
@@ -222,6 +243,7 @@ def send_class_reminders():
         
         # Calculate when reminder should be sent
         reminder_time = class_datetime - reminder_offset
+        print(f"[CLASS IN-APP] Reminder time for '{class_schedule.subject.subject_code}': {reminder_time}")
         
         # If it's time to send the reminder (and class hasn't started yet)
         if now >= reminder_time and now < class_datetime:
@@ -246,7 +268,7 @@ def send_class_reminders():
                         'reminder': reminder_data
                     }
                 )
-            
+                print(f"[CLASS IN-APP] Sending in-app to {student_id}")
                 # Update last reminder date
                 class_schedule.last_reminder_date = today
                 class_schedule.save()
@@ -264,8 +286,12 @@ def send_activity_reminders():
     ).select_related('student_id')
     
     channel_layer = get_channel_layer()
+
+    print(f"[ACTIVITY IN-APP] Found {upcoming_activities.count()} upcoming activities to evaluate at {now}")
     
     for activity in upcoming_activities:
+        print(f"[ACTIVITY IN-APP] Activity ID={activity.activity_id}, Name={activity.activity_name}")
+
         # Get user preferences for reminder timing
         try:
             user_pref = UserPref.objects.get(student_id=activity.student_id)
@@ -281,6 +307,7 @@ def send_activity_reminders():
         
         # Calculate when reminder should be sent
         reminder_time = activity_datetime - reminder_offset
+        print(f"[ACTIVITY IN-APP] Reminder time for '{activity.activity_name}': {reminder_time}")
         
         # If it's time to send the reminder (and activity hasn't started yet)
         if now >= reminder_time and now < activity_datetime:
@@ -306,7 +333,7 @@ def send_activity_reminders():
                         'reminder': reminder_data
                     }
                 )
-
+                print(f"[ACTIVITY IN-APP] Sending in-app to {student_id}")
                 # Mark as sent
                 activity.reminder_sent = True
                 activity.save()                       
@@ -323,8 +350,12 @@ def send_goal_reminders():
     ).select_related('student_id')
     
     channel_layer = get_channel_layer()
+
+    print(f"[GOAL IN-APP] Found {active_goals.count()} upcoming goals to evaluate at {now}")
     
     for goal in active_goals:
+        print(f"[GOAL IN-APP] Goal ID={goal.goal_id}, Name={goal.goal_name}")
+
         # Check if it's time to send a reminder based on timeframe
         send_reminder = False
         
@@ -376,7 +407,7 @@ def send_goal_reminders():
                             'reminder': reminder_data
                         }
                     )
-                
+                    print(f"[GOAL IN-APP] Sending in-app to {student_id}")
                     # Update last reminder date
                     goal.last_reminder_date = today
                     goal.save()
@@ -392,12 +423,17 @@ def send_wake_up_reminders():
     ).select_related('student_id')
     
     channel_layer = get_channel_layer()
+
+    print(f"[WAKE IN-APP] Found {user_prefs.count()} upcoming wake to evaluate at {now}")
     
     for pref in user_prefs:
+        print(f"[WAKE IN-APP] Pref ID={pref.pref_id}, Name={pref.usual_wake_time}")
+
         # Create datetime objects for wake-up time today
         wake_time = timezone.make_aware(
             timezone.datetime.combine(today, pref.usual_wake_time)
         )
+        print(f"[WAKE IN-APP] Reminder time for 'Wake Up': {wake_time}")
         
         # If it's within 5 minutes of wake-up time
         if now <= wake_time and now >= (wake_time - timedelta(minutes=5)):
@@ -415,6 +451,7 @@ def send_wake_up_reminders():
                         'reminder': f"Good morning! It's time to wake up. Your scheduled wake-up time is {formatted_wake_time}."
                     }
                 )
+                print(f"[WAKE IN-APP] Sending in-app to {student_id}")
 
 
 # Push Notifications
@@ -426,7 +463,11 @@ def send_sleep_push_reminders():
         student_id__is_active=True
     ).select_related('student_id')
 
+    print(f"[SLEEP PUSH] Found {user_prefs.count()} upcoming sleep to evaluate at {now}")
+
     for pref in user_prefs:
+        print(f"[SLEEP PUSH] Pref ID={pref.pref_id}, Name={pref.usual_sleep_time}")
+
         if pref.last_sleep_reminder_date == today:
             continue
 
@@ -435,6 +476,7 @@ def send_sleep_push_reminders():
         )
         reminder_offset = pref.reminder_offset_time or timedelta(minutes=30)
         reminder_time = sleep_time - reminder_offset
+        print(f"[SLEEP PUSH] Reminder time for 'Sleep': {reminder_time}")
 
         if now >= reminder_time and now <= sleep_time:
             student_id = pref.student_id.student_id
@@ -442,6 +484,8 @@ def send_sleep_push_reminders():
             if not is_user_in_foreground(student_id):
                 title = "Sleep Reminder"
                 body = f"You should be asleep by {sleep_time.strftime('%I:%M %p')}."
+                
+                print(f"[SLEEP PUSH] Sending push to {student_id}: {title} - {body}")
                 send_push_notification.delay(student_id, title, body)
 
                 pref.last_sleep_reminder_date = today
@@ -456,7 +500,11 @@ def send_task_push_reminders():
         deadline__gt=now,
     ).select_related('student_id', 'subject_id')
 
+    print(f"[TASK PUSH] Found {upcoming_tasks.count()} upcoming tasks to evaluate at {now}")
+
     for task in upcoming_tasks:
+        print(f"[TASK PUSH] Task ID={task.task_id}, Name={task.task_name}")
+
         try:
             user_pref = UserPref.objects.get(student_id=task.student_id)
             reminder_offset = user_pref.reminder_offset_time
@@ -464,6 +512,7 @@ def send_task_push_reminders():
             reminder_offset = timedelta(minutes=30)
 
         reminder_time = task.deadline - reminder_offset
+        print(f"[TASK PUSH] Reminder time for '{task.task_name}': {reminder_time}")
 
         if now >= reminder_time:
             student_id = task.student_id.student_id
@@ -473,6 +522,7 @@ def send_task_push_reminders():
                 message = f"{task.task_name} is due soon! Subject: {subject_name}"
                 title = "Task Reminder"
 
+                print(f"[TASK PUSH] Sending push to {student_id}: {title} - {message}")
                 send_push_notification.delay(student_id, title, message)
 
                 # Mark as sent so it doesn't send again
@@ -488,7 +538,11 @@ def send_event_push_reminders():
         scheduled_date__gte=today
     ).select_related('student_id')
 
+    print(f"[EVENT PUSH] Found {upcoming_events.count()} upcoming events to evaluate at {now}")
+
     for event in upcoming_events:
+        print(f"[EVENT PUSH] Event ID={event.event_id}, Name={event.event_name}")
+
         try:
             user_pref = UserPref.objects.get(student_id=event.student_id)
             reminder_offset = user_pref.reminder_offset_time
@@ -499,6 +553,7 @@ def send_event_push_reminders():
             timezone.datetime.combine(event.scheduled_date, event.scheduled_start_time)
         )
         reminder_time = event_datetime - reminder_offset
+        print(f"[EVENT PUSH] Reminder time for '{event.event_name}': {reminder_time}")
 
         if now >= reminder_time and now < event_datetime:
             student_id = event.student_id.student_id
@@ -506,6 +561,8 @@ def send_event_push_reminders():
             if not is_user_in_foreground(student_id):
                 title = "Event Reminder"
                 body = f"{event.event_name} starts soon at {event.scheduled_start_time.strftime('%I:%M %p')}."
+
+                print(f"[EVENT PUSH] Sending push to {student_id}: {title} - {body}")
                 send_push_notification.delay(student_id, title, body)
 
                 event.reminder_sent = True
@@ -521,7 +578,11 @@ def send_class_push_reminders():
         last_reminder_date__lt=today
     ).select_related('student_id', 'subject')
 
+    print(f"[CLASS PUSH] Found {class_schedules.count()} upcoming classes to evaluate at {now}")
+
     for class_schedule in class_schedules:
+        print(f"[CLASS PUSH] Class ID={class_schedule.classsched_id}, Name={class_schedule.subject.subject_code}")
+
         try:
             user_pref = UserPref.objects.get(student_id=class_schedule.student_id)
             reminder_offset = user_pref.reminder_offset_time
@@ -532,6 +593,7 @@ def send_class_push_reminders():
             timezone.datetime.combine(today, class_schedule.scheduled_start_time)
         )
         reminder_time = class_datetime - reminder_offset
+        print(f"[CLASS PUSH] Reminder time for '{class_schedule.subject.subject_code}': {reminder_time}")
 
         if now >= reminder_time and now < class_datetime:
             student_id = class_schedule.student_id.student_id
@@ -539,6 +601,8 @@ def send_class_push_reminders():
             if not is_user_in_foreground(student_id):
                 title = f"Class Reminder"
                 body = f"Your class in {class_schedule.subject.subject_code} starts at {class_schedule.scheduled_start_time.strftime('%I:%M %p')} in {class_schedule.room}."
+
+                print(f"[CLASS PUSH] Sending push to {student_id}: {title} - {body}")
                 send_push_notification.delay(student_id, title, body)
 
                 class_schedule.last_reminder_date = today
@@ -554,7 +618,11 @@ def send_activity_push_reminders():
         scheduled_date__gte=today
     ).select_related('student_id')
 
+    print(f"[ACTIVITY PUSH] Found {upcoming_activities.count()} upcoming activities to evaluate at {now}")
+
     for activity in upcoming_activities:
+        print(f"[ACTIVITY PUSH] Activity ID={activity.activity_id}, Name={activity.activity_name}")
+
         try:
             user_pref = UserPref.objects.get(student_id=activity.student_id)
             reminder_offset = user_pref.reminder_offset_time
@@ -565,6 +633,7 @@ def send_activity_push_reminders():
             timezone.datetime.combine(activity.scheduled_date, activity.scheduled_start_time)
         )
         reminder_time = activity_datetime - reminder_offset
+        print(f"[ACTIVITY PUSH] Reminder time for '{activity.activity_name}': {reminder_time}")
 
         if now >= reminder_time and now < activity_datetime:
             student_id = activity.student_id.student_id
@@ -572,6 +641,8 @@ def send_activity_push_reminders():
             if not is_user_in_foreground(student_id):
                 title = "Activity Reminder"
                 body = f"{activity.activity_name} starts at {activity.scheduled_start_time.strftime('%I:%M %p')}."
+
+                print(f"[ACTIVITY PUSH] Sending push to {student_id}: {title} - {body}")
                 send_push_notification.delay(student_id, title, body)
 
                 activity.reminder_sent = True
@@ -586,7 +657,11 @@ def send_goal_push_reminders():
         last_reminder_date__lt=today
     ).select_related('student_id')
 
+    print(f"[GOAL PUSH] Found {active_goals.count()} upcoming goals to evaluate at {now}")
+
     for goal in active_goals:
+        print(f"[GOAL PUSH] Goal ID={goal.goal_id}, Name={goal.goal_name}")
+
         send_reminder = False
         if goal.timeframe == 'Daily':
             send_reminder = True
@@ -607,6 +682,8 @@ def send_goal_push_reminders():
                 if not is_user_in_foreground(student_id):
                     title = "Goal Reminder"
                     body = f"You have a goal session today for \"{goal.goal_name}\"."
+
+                    print(f"[GOAL PUSH] Sending push to {student_id}: {title} - {body}")
                     send_push_notification.delay(student_id, title, body)
 
                     goal.last_reminder_date = today
@@ -620,10 +697,15 @@ def send_wake_up_push_reminders():
         student_id__is_active=True
     ).select_related('student_id')
 
+    print(f"[WAKE PUSH] Found {user_prefs.count()} upcoming wake to evaluate at {now}")
+
     for pref in user_prefs:
+        print(f"[WAKE PUSH] Pref ID={pref.pref_id}, Name={pref.usual_wake_time}")
+
         wake_time = timezone.make_aware(
             timezone.datetime.combine(today, pref.usual_wake_time)
         )
+        print(f"[WAKE PUSH] Reminder time for 'Wake Up': {wake_time}")
 
         if now <= wake_time and now >= (wake_time - timedelta(minutes=5)):
             student_id = pref.student_id.student_id
@@ -631,6 +713,8 @@ def send_wake_up_push_reminders():
             if not is_user_in_foreground(student_id):
                 title = "Wake-Up Reminder"
                 body = f"Good morning! Your scheduled wake-up time is {wake_time.strftime('%I:%M %p')}."
+
+                print(f"[WAKE PUSH] Sending push to {student_id}: {title} - {body}")
                 send_push_notification.delay(student_id, title, body)
 
 @shared_task
