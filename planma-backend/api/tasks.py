@@ -31,16 +31,14 @@ def send_sleep_reminders():
     today = now.date()
 
     # Get all user preferences
-    user_prefs = UserPref.objects.filter(
-        student_id__is_active=True
-    ).select_related('student_id')
+    user_prefs = UserPref.objects.filter(student_id=student_id)
 
     channel_layer = get_channel_layer()
 
     print(f"[SLEEP IN-APP] Found {user_prefs.count()} upcoming sleep to evaluate at {now}")
 
     for pref in user_prefs:
-        print(f"[SLEEP IN-APP] Pref ID={pref.pref_id}, Name={pref.usual_sleep_time}")
+        print(f"[SLEEP IN-APP] Pref ID={pref.pref_id}, Sleep Time={pref.usual_sleep_time}")
 
         # Skip if reminder was already sent today
         if pref.last_sleep_reminder_date == today:
@@ -80,12 +78,13 @@ def send_sleep_reminders():
 def send_task_reminders():
     """Check for task reminders and send notifications"""
     now = timezone.now()
+    today = now.date()
 
     # Get tasks that are due soon but haven't had reminders sent
     upcoming_tasks = CustomTask.objects.filter(
         reminder_sent=False,
         status__in=['Pending', 'In Progress'],
-        deadline__gt=now,  # Hasn't passed yet
+        scheduled_date__gte=today,
     ).select_related('student_id', 'subject_id')
 
     channel_layer = get_channel_layer()
@@ -465,39 +464,46 @@ def send_sleep_push_reminders():
 
     print(f"[SLEEP PUSH] Found {user_prefs.count()} upcoming sleep to evaluate at {now}")
 
-    for pref in user_prefs:
-        print(f"[SLEEP PUSH] Pref ID={pref.pref_id}, Name={pref.usual_sleep_time}")
+    sent_tokens = set()
 
-        if pref.last_sleep_reminder_date == today:
-            continue
+    for pref in user_prefs:
+        print(f"[SLEEP PUSH] Pref ID={pref.pref_id}, Time={pref.usual_sleep_time}")
 
         sleep_time = timezone.make_aware(
             timezone.datetime.combine(today, pref.usual_sleep_time)
         )
+        
         reminder_offset = pref.reminder_offset_time or timedelta(minutes=30)
         reminder_time = sleep_time - reminder_offset
         print(f"[SLEEP PUSH] Reminder time for 'Sleep': {reminder_time}")
 
+        # Skip if a reminder was already sent one today
+        if pref.last_sleep_reminder_date == today:
+            continue
+
         if now >= reminder_time and now <= sleep_time:
             student_id = pref.student_id.student_id
-
             if not is_user_in_foreground(student_id):
-                title = "Sleep Reminder"
-                body = f"You should be asleep by {sleep_time.strftime('%I:%M %p')}."
+                token = getattr(pref.student_id, "fcm_token", None)
+                if token and token not in sent_tokens:
+                    sent_tokens.add(token)
+                    title = "Sleep Reminder"
+                    body = f"You should be asleep by {sleep_time.strftime('%I:%M %p')}."
                 
-                print(f"[SLEEP PUSH] Sending push to {student_id}: {title} - {body}")
-                send_push_notification.delay(student_id, title, body)
+                    print(f"[SLEEP PUSH] Sending push to {student_id}: {title} - {body}")
+                    send_push_notification.delay(student_id, title, body)
 
-                pref.last_sleep_reminder_date = today
-                pref.save()
+                    pref.last_sleep_reminder_date = today
+                    pref.save()
 
 def send_task_push_reminders():
     now = timezone.now()
+    today = now.date()
 
     upcoming_tasks = CustomTask.objects.filter(
         reminder_sent=False,
         status__in=['Pending', 'In Progress'],
-        deadline__gt=now,
+        scheduled_date__gte=today,
     ).select_related('student_id', 'subject_id')
 
     print(f"[TASK PUSH] Found {upcoming_tasks.count()} upcoming tasks to evaluate at {now}")
@@ -699,8 +705,10 @@ def send_wake_up_push_reminders():
 
     print(f"[WAKE PUSH] Found {user_prefs.count()} upcoming wake to evaluate at {now}")
 
+    sent_tokens = set()
+
     for pref in user_prefs:
-        print(f"[WAKE PUSH] Pref ID={pref.pref_id}, Name={pref.usual_wake_time}")
+        print(f"[WAKE PUSH] Pref ID={pref.pref_id}, Time={pref.usual_wake_time}")
 
         wake_time = timezone.make_aware(
             timezone.datetime.combine(today, pref.usual_wake_time)
@@ -711,11 +719,14 @@ def send_wake_up_push_reminders():
             student_id = pref.student_id.student_id
 
             if not is_user_in_foreground(student_id):
-                title = "Wake-Up Reminder"
-                body = f"Good morning! Your scheduled wake-up time is {wake_time.strftime('%I:%M %p')}."
+                token = getattr(pref.student_id, "fcm_token", None)
+                if token and token not in sent_tokens:
+                    sent_tokens.add(token)
+                    title = "Wake-Up Reminder"
+                    body = f"Good morning! Your scheduled wake-up time is {wake_time.strftime('%I:%M %p')}."
 
-                print(f"[WAKE PUSH] Sending push to {student_id}: {title} - {body}")
-                send_push_notification.delay(student_id, title, body)
+                    print(f"[WAKE PUSH] Sending push to {student_id}: {title} - {body}")
+                    send_push_notification.delay(student_id, title, body)
 
 @shared_task
 def send_all_reminders():
@@ -809,7 +820,7 @@ def send_all_reminders():
     print('All reminder checks completed')
     return True
 
-
+  
 @shared_task
 def send_push_notification(user_id, title, message):
     try:
