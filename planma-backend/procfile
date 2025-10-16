@@ -1,3 +1,0 @@
-web: ./start.sh
-worker: celery -A planmaDB worker --loglevel=info
-beat: celery -A planmaDB beat --loglevel=info

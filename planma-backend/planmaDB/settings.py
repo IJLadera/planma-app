@@ -18,13 +18,13 @@ import environ
 import os
 import firebase_admin
 from firebase_admin import credentials
-import json
+import dj_database_url
 
 load_dotenv()
 
 env = environ.Env(
     # Set casting and default values if needed
-    DB_PORT=(int, 5432),  # Cast DB_PORT to int, default to 5432
+    # DB_PORT=(int, 5432),  # Cast DB_PORT to int, default to 5432
 )
 
 # Read .env file (if it exists)
@@ -33,33 +33,36 @@ environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Initialize Firebase App once
-# if not firebase_admin._apps:
-#     cred = credentials.Certificate(os.path.join(BASE_DIR, 'secrets/firebase-service-account.json'))
-#     firebase_admin.initialize_app(cred)
+# ✅ Define Firebase credential path before using it
+firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
 
-if not firebase_admin._apps:
-    firebase_env = os.getenv("FIREBASE_CREDENTIALS")
-    if firebase_env:
-        # Use credentials from environment (Railway)
-        cred_info = json.loads(firebase_env)
-        cred = credentials.Certificate(cred_info)
-    else:
-        # Fallback to local file (for local development)
-        cred_path = os.path.join(BASE_DIR, 'secrets/firebase-service-account.json')
-        cred = credentials.Certificate(cred_path)
+# Initialize Firebase App once
+if firebase_cred_json and not firebase_admin._apps:
+    cred = credentials.Certificate(json.loads(firebase_cred_json))
     firebase_admin.initialize_app(cred)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-slqnuagt*a5=ri*ch72$pylh4^567(r@j+r6oco3knc(2f5^5t'
-
+# SECRET_KEY = 'django-insecure-slqnuagt*a5=ri*ch72$pylh4^567(r@j+r6oco3knc(2f5^5t'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+
+ALLOWED_HOSTS = [
+    os.getenv("RENDER_EXTERNAL_HOSTNAME", "localhost"),
+    "localhost",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', '')}",
+]
+
+
+# ALLOWED_HOSTS = ['*']
 
 CORS_ALLOW_HEADERS = [
     'content-type',
@@ -74,7 +77,7 @@ AUTH_USER_MODEL = "api.CustomUser"
 INSTALLED_APPS = [
     'daphne',
     'channels',
-    'channels_redis',
+    # ❌ Removed 'channels_redis' here – it's not a Django app, only a backend package.
     'rest_framework',
     'rest_framework_simplejwt',
     'djoser',
@@ -97,19 +100,19 @@ WSGI_APPLICATION = 'planmaDB.wsgi.application'
 # Use ASGI instead of WSGI
 ASGI_APPLICATION = 'planmaDB.asgi.application'
 
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
 # Redis as channel layer (make sure Redis is installed and running)
 CHANNEL_LAYERS = {
     'default': {
         # 'BACKEND': 'channels_redis.core.InMemoryChannelLayer', 
         # For production, use Redis:
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        # 'CONFIG': {
-        #     "hosts": [('127.0.0.1', 6379)],
-        # },
         'CONFIG': {
             # "hosts": [('127.0.0.1', 6379)],
             # "hosts": [('localhost', 6379)],
-            "hosts": [env("REDIS_URL")],
+            # ✅ Render gives full Redis URL automatically:
+            "hosts": [REDIS_URL],
         },
     },
 }
@@ -119,11 +122,11 @@ DJOSER = {
     "SERIALIZERS": {
         "user_create": "api.serializers.CustomUserCreateSerializer",
         "user": "api.serializers.CustomUserSerializer",
+        },
         'LOGIN_FIELD': 'email',  # or 'username' depending on your configuration
         'USER_CREATE_PASSWORD_RETYPE': True,
         # 'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     }
-}
 
 REST_FRAMEWORK={
     'DEFAULT_PERMISSION_CLASSES': (
@@ -147,8 +150,8 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ Added before SecurityMiddleware
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -203,7 +206,8 @@ TEMPLATES = [
 import dj_database_url
 
 DATABASES = {
-    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+    # ✅ fixed: use config() instead of parse() for safer Render parsing
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
 
@@ -244,25 +248,26 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
-# Where collectstatic will copy all static files for production
+# ✅ Added: STATIC_ROOT required by Render for collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (Uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")
-
 # Celery Configuration
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", REDIS_URL)
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", REDIS_URL)
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -300,7 +305,10 @@ LOGGING = {
     },
 }
 
-
+# ✅ Added for HTTPS and security on Render
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
