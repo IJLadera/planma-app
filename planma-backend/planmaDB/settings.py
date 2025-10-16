@@ -96,7 +96,7 @@ CHANNEL_LAYERS = {
         'CONFIG': {
             # "hosts": [('127.0.0.1', 6379)],
             # "hosts": [('localhost', 6379)],
-            "hosts": [os.getenv("REDIS_URL", "redis://localhost:6379/0")],
+            "hosts": [env("REDIS_URL")],
         },
     },
 }
@@ -135,6 +135,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -231,6 +232,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Where collectstatic will copy all static files for production
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # Media files (Uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -241,13 +246,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery Configuration
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 # CELERY_TIMEZONE = 'UTC'
-CELERY_TIMEZONE = 'Asia/Manila'
+CELERY_TIMEZONE = "CELERY_TIMEZONE", default='Asia/Manila'
 CELERY_WORKER_POOL = 'solo'
 CELERY_WORKER_CONCURRENCY = 4
 CELERY_TASK_ANNOTATIONS = {
