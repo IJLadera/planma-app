@@ -93,7 +93,7 @@ class _ReportsPageState extends State<ReportsPage> {
         break;
       case 'Week':
         formattedTimeFilter =
-            '${DateFormat('MMMM d').format(startOfWeek)} — ${DateFormat('MMMM d, y').format(endOfWeek)}';
+            '${DateFormat('MMM d').format(startOfWeek)} — ${DateFormat('MMM d, y').format(endOfWeek)}';
         canNavigateForward =
             endOfWeek.isBefore(DateTime(today.year, today.month, today.day));
         break;
