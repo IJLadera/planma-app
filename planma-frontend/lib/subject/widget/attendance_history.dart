@@ -156,7 +156,7 @@ class _ClassAttendanceHistoryScreenState
           ),
           centerTitle: true,
         ),
-        body: Padding(
+        body: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

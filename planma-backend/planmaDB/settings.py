@@ -163,25 +163,34 @@ TEMPLATES = [
 ]
 
 
+# # Database
+# # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'Planma DB',
+#         'USER': 'postgres',
+#         'PASSWORD': 'planma123',
+#         'HOST': 'localhost', 
+#         'PORT': '5432',
+#     }
+# }
+
+
+# # CORS_ALLOWED_ORIGINS = [
+# #     "http://localhost:52667",  # or whatever port your Flutter app uses
+# #     "http://127.0.0.1:8000",  # also add this if needed
+# # ]
+
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+# -------------------------------------------------------------------
+# Uses Supabase PostgreSQL via .env file
+import dj_database_url
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Planma DB',
-        'USER': 'postgres',
-        'PASSWORD': 'planma123',
-        'HOST': 'localhost', 
-        'PORT': '5432',
-    }
+    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
 }
-
-
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:52667",  # or whatever port your Flutter app uses
-#     "http://127.0.0.1:8000",  # also add this if needed
-# ]
 
 
 
