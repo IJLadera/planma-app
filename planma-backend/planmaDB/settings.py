@@ -33,8 +33,20 @@ environ.Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize Firebase App once
+# if not firebase_admin._apps:
+#     cred = credentials.Certificate(os.path.join(BASE_DIR, 'secrets/firebase-service-account.json'))
+#     firebase_admin.initialize_app(cred)
+
 if not firebase_admin._apps:
-    cred = credentials.Certificate(os.path.join(BASE_DIR, 'secrets/firebase-service-account.json'))
+    firebase_env = os.getenv("FIREBASE_CREDENTIALS")
+    if firebase_env:
+        # Use credentials from environment (Railway)
+        cred_info = json.loads(firebase_env)
+        cred = credentials.Certificate(cred_info)
+    else:
+        # Fallback to local file (for local development)
+        cred_path = os.path.join(BASE_DIR, 'secrets/firebase-service-account.json')
+        cred = credentials.Certificate(cred_path)
     firebase_admin.initialize_app(cred)
 
 # Quick-start development settings - unsuitable for production
