@@ -1,8 +1,10 @@
-# Core dependencies
-Django>=5.0,<6.0
-djangorestframework
-djangorestframework-simplejwt
+asgiref
+Django
 django-cors-headers
+djoser
+djangorestframework
+djangorestframework_simplejwt
+psycopg2
 django-environ
 python-dotenv
 psycopg2-binary
@@ -16,16 +18,7 @@ Pillow
 # Async + WebSocket
 channels
 channels-redis
-daphne
-
-# Background tasks
-celery
-redis
-
-# Auth & API
-djoser
-firebase_admin
-
-# Utility
-asgiref>=3.7.2
 sqlparse
+daphne
+django-celery-beat
+firebase_admin
