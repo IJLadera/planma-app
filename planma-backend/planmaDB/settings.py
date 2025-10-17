@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 from celery.schedules import crontab
 import environ
 import os
+print(os.getenv("REDIS_URL"))
+import json
 import firebase_admin
 from firebase_admin import credentials
 import dj_database_url
@@ -32,6 +34,8 @@ environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+print("🔧 REDIS_URL:", os.getenv("REDIS_URL"))
 
 # ✅ Define Firebase credential path before using it
 firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
@@ -50,17 +54,15 @@ if firebase_cred_json and not firebase_admin._apps:
 # DEBUG = True
 
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
-ALLOWED_HOSTS = [
-    os.getenv("RENDER_EXTERNAL_HOSTNAME", "localhost"),
-    "localhost",
-]
+RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost")
 
-CSRF_TRUSTED_ORIGINS = [
-    f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', '')}",
-]
+ALLOWED_HOSTS = [RAILWAY_DOMAIN, "localhost"]
 
+CSRF_TRUSTED_ORIGINS = []
+if RAILWAY_DOMAIN and RAILWAY_DOMAIN != "localhost":
+    CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_DOMAIN}"]
 
 # ALLOWED_HOSTS = ['*']
 
@@ -77,7 +79,6 @@ AUTH_USER_MODEL = "api.CustomUser"
 INSTALLED_APPS = [
     'daphne',
     'channels',
-    # ❌ Removed 'channels_redis' here – it's not a Django app, only a backend package.
     'rest_framework',
     'rest_framework_simplejwt',
     'djoser',
