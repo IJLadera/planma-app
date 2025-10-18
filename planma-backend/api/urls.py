@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from .views import *
+from django.http import JsonResponse
 
 router = DefaultRouter()
 router.register(r'class-schedules', ClassScheduleViewSet, basename='classschedule')
@@ -25,9 +26,14 @@ router.register(r'schedule', ScheduleEntryViewSet, basename='schedule')
 router.register(r'fcm-token', FCMTokenViewSet, basename='fcm-token')
 router.register(r'your-user', YourUserViewSet, basename='your-user')
 
+# Root view
+def api_root(request):
+    return JsonResponse({"message": "Welcome to Planma API!"})
+
 urlpatterns = [
-    path ('djoser/', include ('djoser.urls')),
+    path('', api_root), 
+    path('djoser/', include('djoser.urls')),
     path('auth/jwt/create/', CustomTokenObtainPairView.as_view(), name='jwt-create'),
-    path ('auth/', include ('djoser.urls.jwt')), 
-    path('', include(router.urls)),
+    path('auth/', include('djoser.urls.jwt')), 
+    path('', include(router.urls)),  # DRF API endpoints
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
