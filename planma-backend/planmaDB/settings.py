@@ -37,10 +37,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 print("🔧 REDIS_URL:", os.getenv("REDIS_URL"))
 
 # ✅ Define Firebase credential path before using it
-firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
-
+firebase_cred_path = os.getenv("FIREBASE_CREDENTIALS_FILE")
 # Initialize Firebase App once
-if firebase_cred_json and not firebase_admin._apps:
+if firebase_cred_path and not firebase_admin._apps:
     cred = credentials.Certificate(json.loads(firebase_cred_json))
     firebase_admin.initialize_app(cred)
 
@@ -57,9 +56,8 @@ load_dotenv(BASE_DIR / ".env")
 DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
 RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost")
-ALLOWED_HOSTS = ['planma-app-production.up.railway.app', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://planma-app-production.up.railway.app']
-
+ALLOWED_HOSTS = [RAILWAY_DOMAIN, 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_DOMAIN}"]
 
 
 # ALLOWED_HOSTS = ['*']
@@ -102,16 +100,22 @@ ASGI_APPLICATION = 'planmaDB.asgi.application'
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # Redis as channel layer (make sure Redis is installed and running)
+import ssl
+
 CHANNEL_LAYERS = {
-    'default': {
+    "default": {
         # 'BACKEND': 'channels_redis.core.InMemoryChannelLayer', 
         # For production, use Redis:
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
             # "hosts": [('127.0.0.1', 6379)],
             # "hosts": [('localhost', 6379)],
             # ✅ Render gives full Redis URL automatically:
-            "hosts": [REDIS_URL],
+            "hosts": [{
+                "address": REDIS_URL,           # Your Redis URL
+                "ssl": True,                    # Enable SSL for rediss://
+                "ssl_cert_reqs": ssl.CERT_NONE, # Disable certificate validation (development only)
+            }],
         },
     },
 }
@@ -264,8 +268,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery Configuration
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -283,6 +287,20 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*'),  # Every minute
     }
 }
+
+# For Upstash rediss://
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'ssl_cert_reqs': ssl.CERT_NONE  # CERT_NONE
+}
+
+CELERY_REDIS_BACKEND_USE_SSL = {
+    'ssl_cert_reqs': ssl.CERT_NONE  # CERT_NONE
+}
+
+print("REDIS_URL =", os.getenv("REDIS_URL"))
+print("CELERY_BROKER_URL =", os.getenv("CELERY_BROKER_URL"))
+print("CELERY_RESULT_BACKEND =", os.getenv("CELERY_RESULT_BACKEND"))
+
 
 # settings.py
 
