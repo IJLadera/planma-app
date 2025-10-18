@@ -57,10 +57,9 @@ load_dotenv(BASE_DIR / ".env")
 DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
 RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost")
-ALLOWED_HOSTS = [RAILWAY_DOMAIN, "localhost"]
-CSRF_TRUSTED_ORIGINS = [
-    f"https://{RAILWAY_DOMAIN}"
-] if RAILWAY_DOMAIN and RAILWAY_DOMAIN != "localhost" else []
+ALLOWED_HOSTS = ['planma-app-production.up.railway.app', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://planma-app-production.up.railway.app']
+
 
 
 # ALLOWED_HOSTS = ['*']
