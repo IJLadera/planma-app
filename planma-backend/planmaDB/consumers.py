@@ -5,7 +5,6 @@ from django.utils.timezone import now
 import asyncio
 from datetime import timedelta
 from channels.db import database_sync_to_async
-from api.utilities import get_sleep_reminders
 import redis
 
 r = redis.Redis()
@@ -108,6 +107,7 @@ class ReminderConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def check_sleep_reminders(self):
+        from api.utilities import get_sleep_reminders
         return [
                 {
                     'sleep_time': "7:10PM",
