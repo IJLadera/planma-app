@@ -22,7 +22,6 @@ import firebase_admin
 from firebase_admin import credentials
 import dj_database_url
 
-load_dotenv()
 
 env = environ.Env(
     # Set casting and default values if needed
@@ -54,15 +53,15 @@ if firebase_cred_json and not firebase_admin._apps:
 # DEBUG = True
 
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
+load_dotenv(BASE_DIR / ".env")
 DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
 RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost")
-
 ALLOWED_HOSTS = [RAILWAY_DOMAIN, "localhost"]
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{RAILWAY_DOMAIN}"
+] if RAILWAY_DOMAIN and RAILWAY_DOMAIN != "localhost" else []
 
-CSRF_TRUSTED_ORIGINS = []
-if RAILWAY_DOMAIN and RAILWAY_DOMAIN != "localhost":
-    CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_DOMAIN}"]
 
 # ALLOWED_HOSTS = ['*']
 
@@ -207,7 +206,6 @@ TEMPLATES = [
 import dj_database_url
 
 DATABASES = {
-    # ✅ fixed: use config() instead of parse() for safer Render parsing
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
