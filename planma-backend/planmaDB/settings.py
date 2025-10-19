@@ -28,11 +28,11 @@ env = environ.Env(
     # DB_PORT=(int, 5432),  # Cast DB_PORT to int, default to 5432
 )
 
-# Read .env file (if it exists)
-environ.Env.read_env()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Read .env file (if it exists)
+environ.Env.read_env(BASE_DIR / "planmaDB" / ".env")
 
 print("🔧 REDIS_URL:", os.getenv("REDIS_URL"))
 
@@ -60,7 +60,7 @@ except Exception as e:
 # DEBUG = True
 
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
-load_dotenv(BASE_DIR / ".env")
+# load_dotenv(BASE_DIR / ".env")
 DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
 RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "planma-production.up.railway.app")
