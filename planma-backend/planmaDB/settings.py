@@ -39,12 +39,12 @@ if os.path.exists(env_path):
 
 
 # Read .env file (if it exists)
-environ.Env.read_env(BASE_DIR / "planmaDB" / ".env")
+environ.Env.read_env(BASE_DIR / ".env")
 
 print("🔧 REDIS_URL:", os.getenv("REDIS_URL"))
 
 # ✅ Define Firebase credential path before using it
-firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_FILE")
+firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
 
 try:
     if firebase_cred_json and not firebase_admin._apps:
