@@ -7,12 +7,15 @@ from datetime import timedelta
 from channels.db import database_sync_to_async
 import redis
 
-r = redis.Redis()
+from django.conf import settings
+r = redis.from_url(settings.CELERY_BROKER_URL, decode_responses=True)
 
 class ReminderConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._reminder_task = None  # Store task reference
+        self.student_id = None
+        self.room_group_name = None
 
     async def connect(self):
         # print(self.scope['url_route']['kwargs']['student_id'])
@@ -20,6 +23,8 @@ class ReminderConsumer(AsyncWebsocketConsumer):
         self.room_group_name = f"user_{self.student_id}"
 
         # On connect, assume foreground
+        await self.set_foreground_status(True)
+
         await self.set_foreground_status(True)
 
         # Join room group
