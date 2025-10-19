@@ -31,6 +31,13 @@ env = environ.Env(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env_path = BASE_DIR / "planmaDB" / ".env"
+
+if os.path.exists(env_path):
+    load_dotenv(env_path)
+
+
+
 # Read .env file (if it exists)
 environ.Env.read_env(BASE_DIR / "planmaDB" / ".env")
 
