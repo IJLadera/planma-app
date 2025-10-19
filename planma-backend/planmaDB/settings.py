@@ -38,10 +38,18 @@ print("🔧 REDIS_URL:", os.getenv("REDIS_URL"))
 
 # ✅ Define Firebase credential path before using it
 firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_FILE")
-# Initialize Firebase App once
-if firebase_cred_json and not firebase_admin._apps:
-    cred = credentials.Certificate(json.loads(firebase_cred_json))
-    firebase_admin.initialize_app(cred)
+
+try:
+    if firebase_cred_json and not firebase_admin._apps:
+        cred_data = json.loads(firebase_cred_json)
+        cred = credentials.Certificate(cred_data)
+        firebase_admin.initialize_app(cred)
+        print("✅ Firebase initialized successfully")
+    else:
+        print("⚠️ Firebase credentials not found or app already initialized")
+except Exception as e:
+    print("❌ Firebase init failed:", e)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -219,8 +227,13 @@ TEMPLATES = [
 import dj_database_url
 
 DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
+
 
 
 
