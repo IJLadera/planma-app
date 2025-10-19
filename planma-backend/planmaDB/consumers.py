@@ -6,9 +6,14 @@ import asyncio
 from datetime import timedelta
 from channels.db import database_sync_to_async
 import redis
-
 from django.conf import settings
-r = redis.from_url(settings.CELERY_BROKER_URL, decode_responses=True)
+
+def get_redis_connection():
+    """
+    Lazily initializes Redis connection only when needed.
+    This prevents startup errors if settings aren't fully loaded yet.
+    """
+    return redis.from_url(settings.CELERY_BROKER_URL, decode_responses=True)
 
 class ReminderConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -23,8 +28,6 @@ class ReminderConsumer(AsyncWebsocketConsumer):
         self.room_group_name = f"user_{self.student_id}"
 
         # On connect, assume foreground
-        await self.set_foreground_status(True)
-
         await self.set_foreground_status(True)
 
         # Join room group
@@ -65,6 +68,7 @@ class ReminderConsumer(AsyncWebsocketConsumer):
             await self.check_reminders()
 
     async def set_foreground_status(self, foreground: bool):
+        r = get_redis_connection()
         key = f"user_online:{self.student_id}"
         if foreground:
             r.set(key, json.dumps({
