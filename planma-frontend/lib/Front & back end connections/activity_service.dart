@@ -17,7 +17,7 @@ class ActivityCreate {
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
-    _baseApiUrl = '$baseUrl/api';
+    _baseApiUrl = baseUrl;
   }
 
 
