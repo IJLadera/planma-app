@@ -1,5 +1,5 @@
 from django.urls import re_path
-from . import consumers
+from planmaDB import consumers
 
 websocket_urlpatterns = [
     re_path(r"ws/reminders/(?P<student_id>[\w-]+)/$", consumers.ReminderConsumer.as_asgi()),
