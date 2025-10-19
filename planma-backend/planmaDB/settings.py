@@ -37,9 +37,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 print("🔧 REDIS_URL:", os.getenv("REDIS_URL"))
 
 # ✅ Define Firebase credential path before using it
-firebase_cred_path = os.getenv("FIREBASE_CREDENTIALS_FILE")
+firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_FILE")
 # Initialize Firebase App once
-if firebase_cred_path and not firebase_admin._apps:
+if firebase_cred_json and not firebase_admin._apps:
     cred = credentials.Certificate(json.loads(firebase_cred_json))
     firebase_admin.initialize_app(cred)
 
@@ -55,9 +55,19 @@ SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
 load_dotenv(BASE_DIR / ".env")
 DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
-RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost")
-ALLOWED_HOSTS = [RAILWAY_DOMAIN, 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_DOMAIN}"]
+RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "planma-production.up.railway.app")
+
+ALLOWED_HOSTS = [
+    RAILWAY_DOMAIN,
+    'planma-production.up.railway.app',
+    'localhost',
+    '127.0.0.1',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{RAILWAY_DOMAIN}",
+    "https://planma-production.up.railway.app"
+]
 
 
 # ALLOWED_HOSTS = ['*']

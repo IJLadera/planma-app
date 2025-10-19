@@ -1,3 +1,3 @@
-web: daphne -b 0.0.0.0 -p 8000 planmaDB.asgi:application
+web: daphne -b 0.0.0.0 -p $PORT planmaDB.asgi:application
 worker: celery -A planmaDB worker --loglevel=info
 beat: celery -A planmaDB beat --loglevel=info
