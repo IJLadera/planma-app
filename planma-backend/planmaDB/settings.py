@@ -93,16 +93,24 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
 RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "planma-app-production.up.railway.app")
 
+# ALLOWED_HOSTS = [
+#     'planma-app-production.up.railway.app',
+#     'localhost',
+#     '127.0.0.1',
+# ]
+
 ALLOWED_HOSTS = [
-    'planma-app-production.up.railway.app',
+    RAILWAY_DOMAIN,
     'localhost',
     '127.0.0.1',
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    f"https://{RAILWAY_DOMAIN}",
-    "https://planma-app-production.up.railway.app"
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     f"https://{RAILWAY_DOMAIN}",
+#     "https://planma-app-production.up.railway.app"
+# ]
+
+CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_DOMAIN}"]
 
 
 # ALLOWED_HOSTS = ['*']
