@@ -94,7 +94,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "planma-app-production.up.railway.app")
 
 ALLOWED_HOSTS = [
-    RAILWAY_DOMAIN,
+    os.environ.get('RAILWAY_DOMAIN', ''),
     'planma-app-production.up.railway.app',
     'localhost',
     '127.0.0.1',
