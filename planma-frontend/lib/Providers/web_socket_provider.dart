@@ -16,7 +16,7 @@ class WebSocketProvider extends ChangeNotifier {
 
   bool _isConnected = false;
   bool get isConnected => _isConnected;
-  
+
   bool _isAuthenticated = false;
   bool get isAuthenticated => _isAuthenticated;
 
@@ -29,7 +29,8 @@ class WebSocketProvider extends ChangeNotifier {
   // Constructor to properly initialize the base URL
   WebSocketProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -39,44 +40,44 @@ class WebSocketProvider extends ChangeNotifier {
   // Initialize WebSocket with authentication check
   Future<void> initialize({BuildContext? context}) async {
     print('Initializing WebSocket provider');
-    
+
     // First check if user is authenticated
     if (!await _checkAuthentication()) {
       print('User is not authenticated, skipping WebSocket connection');
       return;
     }
-    
+
     // User is authenticated, proceed to get student ID
     await _getStudentId();
-    
+
     if (_studentId != null) {
       await _connectWebSocket();
     } else {
       print('Failed to get student ID, cannot connect WebSocket');
-      
+
       // Try to fetch user profile if student_id not found and context is available
       if (context != null) {
         await _tryFetchStudentIdFromProfile(context);
       }
     }
   }
-  
+
   // Check if user is authenticated
   Future<bool> _checkAuthentication() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('access');
       final refreshToken = prefs.getString('refresh');
-      
+
       // Check if tokens exist
       if (accessToken == null && refreshToken == null) {
         _isAuthenticated = false;
         return false;
       }
-      
+
       // You could add token validation logic here
       // For example, check if token is expired
-      
+
       _isAuthenticated = true;
       return true;
     } catch (e) {
@@ -89,32 +90,32 @@ class WebSocketProvider extends ChangeNotifier {
   // Try to get student ID from multiple sources
   Future<void> _getStudentId() async {
     if (!_isAuthenticated) return;
-    
+
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      
+
       // Debug all keys in shared preferences
       final keys = prefs.getKeys();
       print('All SharedPreferences keys:');
       for (var key in keys) {
         print(' - $key: ${prefs.get(key)}');
       }
-      
+
       // Try to get student_id directly
       _studentId = prefs.getString('student_id');
       if (_studentId != null) {
         print('Found student_id in shared preferences: $_studentId');
         return;
       }
-      
+
       // Try to get user profile data which might contain student_id
       final userProfileData = prefs.getString('user_profile');
       if (userProfileData != null) {
         try {
           final profileData = jsonDecode(userProfileData);
-          _studentId = _extractId(profileData, 'student_id') ?? 
-                       _extractId(profileData, 'id');
-          
+          _studentId = _extractId(profileData, 'student_id') ??
+              _extractId(profileData, 'id');
+
           if (_studentId != null) {
             print('Found student_id in user profile data: $_studentId');
             // Save it for future use
@@ -125,7 +126,7 @@ class WebSocketProvider extends ChangeNotifier {
           print('Error parsing user profile data: $e');
         }
       }
-      
+
       // Try to extract from JWT token
       final accessToken = prefs.getString('access');
       if (accessToken != null) {
@@ -137,10 +138,9 @@ class WebSocketProvider extends ChangeNotifier {
           return;
         }
       }
-      
+
       // If we get here, we couldn't find the student_id
       print('Failed to find student_id in shared preferences');
-      
     } catch (e) {
       print('Error getting student ID: $e');
     }
@@ -159,25 +159,25 @@ class WebSocketProvider extends ChangeNotifier {
     try {
       final parts = token.split('.');
       if (parts.length != 3) return null;
-      
+
       // Get the payload part and handle padding
       String payload = parts[1];
       while (payload.length % 4 != 0) {
         payload += '=';
       }
-      
+
       // Decode the base64 string
       final normalized = base64Url.normalize(payload);
       final decoded = utf8.decode(base64Url.decode(normalized));
       final tokenData = jsonDecode(decoded);
-      
+
       print('JWT token payload: $tokenData');
-      
+
       // Try various possible ID field names
-      return tokenData['student_id']?.toString() ?? 
-             tokenData['user_id']?.toString() ?? 
-             tokenData['id']?.toString() ?? 
-             tokenData['sub']?.toString();
+      return tokenData['student_id']?.toString() ??
+          tokenData['user_id']?.toString() ??
+          tokenData['id']?.toString() ??
+          tokenData['sub']?.toString();
     } catch (e) {
       print('Error extracting student ID from token: $e');
       return null;
@@ -187,12 +187,12 @@ class WebSocketProvider extends ChangeNotifier {
   // Try to fetch student ID from user profile API
   Future<void> _tryFetchStudentIdFromProfile(BuildContext context) async {
     if (!_isAuthenticated) return;
-    
+
     try {
       // Example API request (adjust according to your API)
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('access');
-      
+
       if (accessToken != null) {
         final response = await http.get(
           Uri.parse('$_baseApiUrl/user-profile/'),
@@ -201,12 +201,11 @@ class WebSocketProvider extends ChangeNotifier {
             'Content-Type': 'application/json',
           },
         );
-        
+
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          _studentId = data['student_id']?.toString() ?? 
-                       data['id']?.toString();
-          
+          _studentId = data['student_id']?.toString() ?? data['id']?.toString();
+
           if (_studentId != null) {
             print('Fetched student_id from API: $_studentId');
             // Save for future use
@@ -229,14 +228,15 @@ class WebSocketProvider extends ChangeNotifier {
 
     try {
       print('Connecting to WebSocket with student_id: $_studentId');
-      
+
       // Build the WebSocket URL with student ID
-      final wsBase = dotenv.env['WS_URL'] ?? 'ws://localhost:8000';
+      final wsBase = dotenv.env['WS_URL'] ??
+          'ws://https://planma-app-production.up.railway';
       final wsUrl = Uri.parse('$wsBase/ws/reminders/$studentId/');
       print('WebSocket URL: $wsUrl');
-      
+
       _channel = WebSocketChannel.connect(wsUrl);
-      
+
       _subscription = _channel!.stream.listen(
         (dynamic message) {
           _handleMessage(message);
@@ -264,7 +264,7 @@ class WebSocketProvider extends ChangeNotifier {
       _isConnected = true;
       print('WebSocket connected successfully');
       notifyListeners();
-      
+
       // Request initial reminders after connection
       checkReminders();
     } catch (e) {
@@ -281,11 +281,11 @@ class WebSocketProvider extends ChangeNotifier {
   // Handle incoming WebSocket messages
   void _handleMessage(dynamic message) {
     if (!_isAuthenticated) return;
-    
+
     try {
       print('Received WebSocket message: $message');
       final data = jsonDecode(message as String);
-      
+
       if (data['type'] == 'reminder') {
         print('Processing reminder: ${data['reminder_type']}');
         // Forward the reminder to listeners
@@ -321,7 +321,7 @@ class WebSocketProvider extends ChangeNotifier {
     _isAuthenticated = true;
     await initialize();
   }
-  
+
   // Handle user logout
   void onUserLogout() {
     _isAuthenticated = false;

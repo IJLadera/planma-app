@@ -47,7 +47,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _initialProfilePicture = widget.profilePictureUrl;
 
     // Use dotenv to get API_URL and remove trailing slash if present
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -147,7 +148,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         backgroundColor: Colors.white,
       ),
       body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(), 
+        onTap: () => FocusScope.of(context).unfocus(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
           child: Form(

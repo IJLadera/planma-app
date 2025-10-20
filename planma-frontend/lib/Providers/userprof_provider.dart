@@ -31,7 +31,8 @@ class UserProfileProvider with ChangeNotifier {
   // Constructor to properly initialize the base URL
   UserProfileProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }

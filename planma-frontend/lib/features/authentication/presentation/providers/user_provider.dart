@@ -41,7 +41,8 @@ class UserProvider extends ChangeNotifier {
   // Constructor to properly initialize the base URL
   UserProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -74,7 +75,7 @@ class UserProvider extends ChangeNotifier {
       if (userDataString != null) {
         _userData = jsonDecode(userDataString);
       }
-      
+
       await fetchUserData();
 
       // If userData remains null after attempt, assume auth is invalid
@@ -181,10 +182,12 @@ class UserProvider extends ChangeNotifier {
     try {
       //Clear Providers
       if (context != null) {
-        Provider.of<ActivityTimeLogProvider>(context, listen: false).resetState();
+        Provider.of<ActivityTimeLogProvider>(context, listen: false)
+            .resetState();
         Provider.of<ActivityProvider>(context, listen: false).resetState();
         Provider.of<AttendedClassProvider>(context, listen: false).resetState();
-        Provider.of<AttendedEventsProvider>(context, listen: false).resetState();
+        Provider.of<AttendedEventsProvider>(context, listen: false)
+            .resetState();
         Provider.of<ClassScheduleProvider>(context, listen: false).resetState();
         Provider.of<EventsProvider>(context, listen: false).resetState();
         Provider.of<GoalProgressProvider>(context, listen: false).resetState();
@@ -195,7 +198,8 @@ class UserProvider extends ChangeNotifier {
         Provider.of<SleepLogProvider>(context, listen: false).resetState();
         Provider.of<TaskTimeLogProvider>(context, listen: false).resetState();
         Provider.of<TaskProvider>(context, listen: false).resetState();
-        Provider.of<UserPreferencesProvider>(context, listen: false).resetState();
+        Provider.of<UserPreferencesProvider>(context, listen: false)
+            .resetState();
       }
 
       // Clear tokens and user data

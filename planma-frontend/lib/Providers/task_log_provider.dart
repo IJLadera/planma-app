@@ -19,7 +19,8 @@ class TaskTimeLogProvider with ChangeNotifier {
   // Constructor to properly initialize the base URL
   TaskTimeLogProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -27,11 +28,12 @@ class TaskTimeLogProvider with ChangeNotifier {
   }
 
   //Fetch all task time logs
-  Future<void> fetchTaskTimeLogs ({String? startDate, String? endDate}) async {
+  Future<void> fetchTaskTimeLogs({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("$_baseApiUrl/task-logs/?start_date=$startDate&end_date=$endDate");
+    final url = Uri.parse(
+        "$_baseApiUrl/task-logs/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(
@@ -46,8 +48,7 @@ class TaskTimeLogProvider with ChangeNotifier {
         // print(data);
 
         // Parse the response body as a list of task time logs
-        _taskTimeLogs =
-            data.map((item) => TaskTimeLog.fromJson(item)).toList();
+        _taskTimeLogs = data.map((item) => TaskTimeLog.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception(
@@ -64,7 +65,7 @@ class TaskTimeLogProvider with ChangeNotifier {
     required DateTime startTime,
     required DateTime endTime,
     required Duration duration,
-    required DateTime dateLogged, 
+    required DateTime dateLogged,
   }) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -107,7 +108,6 @@ class TaskTimeLogProvider with ChangeNotifier {
       } else {
         throw Exception('Failed to add task time log: ${response.body}');
       }
-
     } catch (error) {
       print('Add task time log error: $error');
       throw Exception('Error adding task time log: $error');

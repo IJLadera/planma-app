@@ -19,7 +19,8 @@ class SleepLogProvider with ChangeNotifier {
   // Constructor to properly initialize the base URL
   SleepLogProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -27,11 +28,12 @@ class SleepLogProvider with ChangeNotifier {
   }
 
   // Fetch all sleep log records
-  Future<void> fetchSleepLogs ({String? startDate, String? endDate}) async {
+  Future<void> fetchSleepLogs({String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("$_baseApiUrl/sleep-logs/?start_date=$startDate&end_date=$endDate");
+    final url = Uri.parse(
+        "$_baseApiUrl/sleep-logs/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(
@@ -46,8 +48,7 @@ class SleepLogProvider with ChangeNotifier {
         // print(data);
 
         // Parse the response body as a list of sleep logs
-        _sleepLogs =
-            data.map((item) => SleepLog.fromJson(item)).toList();
+        _sleepLogs = data.map((item) => SleepLog.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception(
@@ -105,7 +106,6 @@ class SleepLogProvider with ChangeNotifier {
       } else {
         throw Exception('Failed to add sleep log: ${response.body}');
       }
-
     } catch (error) {
       print('Add sleep log error: $error');
       throw Exception('Error adding sleep log: $error');

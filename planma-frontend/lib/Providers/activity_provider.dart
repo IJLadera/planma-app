@@ -22,7 +22,8 @@ class ActivityProvider with ChangeNotifier {
 
   ActivityProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -34,7 +35,8 @@ class ActivityProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("$_baseApiUrl/activities/?start_date=$startDate&end_date=$endDate");
+    final url = Uri.parse(
+        "$_baseApiUrl/activities/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(
@@ -59,7 +61,7 @@ class ActivityProvider with ChangeNotifier {
   }
 
   // Fetch pending activities list
-  Future<void> fetchPendingActivities () async {
+  Future<void> fetchPendingActivities() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
@@ -80,12 +82,14 @@ class ActivityProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final newActivities = data.map((item) => Activity.fromJson(item)).toList();
-        
+        final newActivities =
+            data.map((item) => Activity.fromJson(item)).toList();
+
         // Merge new activities into the master list
-        _activities.addAll(newActivities.where((newActivity) => !_activities.any(
-              (existingActivity) => existingActivity.activityId == newActivity.activityId)));
-            
+        _activities.addAll(newActivities.where((newActivity) =>
+            !_activities.any((existingActivity) =>
+                existingActivity.activityId == newActivity.activityId)));
+
         _sortActivities(); // Reorganize activities
       } else {
         throw Exception(
@@ -97,7 +101,7 @@ class ActivityProvider with ChangeNotifier {
   }
 
   // Fetch pending activities list
-  Future<void> fetchCompletedActivities () async {
+  Future<void> fetchCompletedActivities() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
@@ -113,12 +117,14 @@ class ActivityProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final newActivities = data.map((item) => Activity.fromJson(item)).toList();
-        
+        final newActivities =
+            data.map((item) => Activity.fromJson(item)).toList();
+
         // Merge new activities into the master list
-        _activities.addAll(newActivities.where((newActivity) => !_activities.any(
-              (existingActivity) => existingActivity.activityId == newActivity.activityId)));
-            
+        _activities.addAll(newActivities.where((newActivity) =>
+            !_activities.any((existingActivity) =>
+                existingActivity.activityId == newActivity.activityId)));
+
         _sortActivities(); // Reorganize activities
       } else {
         throw Exception(
@@ -128,11 +134,12 @@ class ActivityProvider with ChangeNotifier {
       print("Error fetching activities: $error");
     }
   }
-  
+
   // Update activity status dynamically
   void updateActivityStatus(int activityId, String newStatus) {
     // Find the activity in the pending list
-    final activityIndex = _pendingActivities.indexWhere((activity) => activity.activityId == activityId);
+    final activityIndex = _pendingActivities
+        .indexWhere((activity) => activity.activityId == activityId);
     if (activityIndex != -1) {
       final activity = _pendingActivities[activityIndex];
       activity.status = newStatus;
@@ -160,13 +167,15 @@ class ActivityProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String? normalizedDesc = activityDesc?.trim().isEmpty == true ? null : activityDesc;
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String? normalizedDesc =
+        activityDesc?.trim().isEmpty == true ? null : activityDesc;
 
     bool isConflict = _activities.any((schedule) =>
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isConflict) {
       throw Exception(
@@ -174,11 +183,14 @@ class ActivityProvider with ChangeNotifier {
     }
 
     bool isDuplicate = _activities.any((schedule) =>
-      schedule.activityName == activityName &&
-      ((schedule.activityDescription?.trim().isEmpty == true ? null : schedule.activityDescription) == normalizedDesc) &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.activityName == activityName &&
+        ((schedule.activityDescription?.trim().isEmpty == true
+                ? null
+                : schedule.activityDescription) ==
+            normalizedDesc) &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isDuplicate) {
       throw Exception(
@@ -210,9 +222,9 @@ class ActivityProvider with ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error_type'] == 'overlap') {
-          throw Exception(
-              'Scheduling overlap: ${responseBody['message']}');
-        } else if (responseBody['error'] == 'Duplicate activity entry detected.') {
+          throw Exception('Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] ==
+            'Duplicate activity entry detected.') {
           throw Exception('Duplicate activity entry detected on the server.');
         } else {
           throw Exception('Error adding activity: ${response.body}');
@@ -220,7 +232,6 @@ class ActivityProvider with ChangeNotifier {
       } else {
         throw Exception('Failed to add activity: ${response.body}');
       }
-
     } catch (error) {
       print('Add activity error: $error');
       throw Exception('Error adding activity: $error');
@@ -241,14 +252,16 @@ class ActivityProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String? normalizedDesc = activityDesc?.trim().isEmpty == true ? null : activityDesc;
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String? normalizedDesc =
+        activityDesc?.trim().isEmpty == true ? null : activityDesc;
 
     bool isConflict = _activities.any((schedule) =>
-      schedule.activityId != activityId &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.activityId != activityId &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isConflict) {
       throw Exception(
@@ -256,11 +269,14 @@ class ActivityProvider with ChangeNotifier {
     }
 
     bool isDuplicate = _activities.any((schedule) =>
-      schedule.activityName == activityName &&
-      ((schedule.activityDescription?.trim().isEmpty == true ? null : schedule.activityDescription) == normalizedDesc) &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.activityName == activityName &&
+        ((schedule.activityDescription?.trim().isEmpty == true
+                ? null
+                : schedule.activityDescription) ==
+            normalizedDesc) &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isDuplicate) {
       throw Exception(
@@ -297,9 +313,9 @@ class ActivityProvider with ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error_type'] == 'overlap') {
-          throw Exception(
-              'Scheduling overlap: ${responseBody['message']}');
-        } else if (responseBody['error'] == 'Duplicate activity entry detected.') {
+          throw Exception('Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] ==
+            'Duplicate activity entry detected.') {
           throw Exception('Duplicate activity entry detected on the server.');
         } else {
           throw Exception('Error adding activity: ${response.body}');
@@ -329,7 +345,8 @@ class ActivityProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _activities.removeWhere((schedule) => schedule.activityId == activityId);
+        _activities
+            .removeWhere((schedule) => schedule.activityId == activityId);
         _sortActivities();
         notifyListeners();
       } else {
@@ -338,9 +355,9 @@ class ActivityProvider with ChangeNotifier {
       }
     } catch (error) {
       rethrow;
-    }    
+    }
   }
-  
+
   void resetState() {
     _activities = [];
     notifyListeners();
@@ -361,14 +378,11 @@ class ActivityProvider with ChangeNotifier {
 
   // Utility method to sort activities if it is pending or completed.
   void _sortActivities() {
-    _pendingActivities = _activities
-        .where((activity) =>
-            activity.status == 'Pending')
-        .toList();
+    _pendingActivities =
+        _activities.where((activity) => activity.status == 'Pending').toList();
 
     _completedActivities = _activities
-        .where((activity) =>
-            activity.status == 'Completed')
+        .where((activity) => activity.status == 'Completed')
         .toList();
 
     notifyListeners();
