@@ -20,9 +20,10 @@ class EventsProvider with ChangeNotifier {
   // Base API URL - adjust this to match your backend URL
   late final String _baseApiUrl;
 
-  EventsProvider(){
+  EventsProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -145,8 +146,10 @@ class EventsProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String? normalizedDesc = eventDesc?.trim().isEmpty == true ? null : eventDesc;
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String? normalizedDesc =
+        eventDesc?.trim().isEmpty == true ? null : eventDesc;
 
     bool isConflict = _events.any((schedule) =>
         schedule.scheduledDate == scheduledDate &&
@@ -160,7 +163,10 @@ class EventsProvider with ChangeNotifier {
 
     bool isDuplicate = _events.any((schedule) =>
         schedule.eventName == eventName &&
-        ((schedule.eventDesc?.trim().isEmpty == true ? null : schedule.eventDesc) == normalizedDesc) &&
+        ((schedule.eventDesc?.trim().isEmpty == true
+                ? null
+                : schedule.eventDesc) ==
+            normalizedDesc) &&
         schedule.scheduledDate == scheduledDate &&
         schedule.scheduledStartTime == formattedStartTime &&
         schedule.scheduledEndTime == formattedEndTime);
@@ -197,8 +203,7 @@ class EventsProvider with ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error_type'] == 'overlap') {
-          throw Exception(
-              'Scheduling overlap: ${responseBody['message']}');
+          throw Exception('Scheduling overlap: ${responseBody['message']}');
         } else if (responseBody['error'] == 'Duplicate event entry detected.') {
           throw Exception('Duplicate event entry detected on the server.');
         } else {
@@ -229,8 +234,10 @@ class EventsProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String? normalizedDesc = eventDesc?.trim().isEmpty == true ? null : eventDesc;
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String? normalizedDesc =
+        eventDesc?.trim().isEmpty == true ? null : eventDesc;
 
     bool isConflict = _events.any((schedule) =>
         schedule.eventId != eventId &&
@@ -245,7 +252,10 @@ class EventsProvider with ChangeNotifier {
 
     bool isDuplicate = _events.any((schedule) =>
         schedule.eventName == eventName &&
-        ((schedule.eventDesc?.trim().isEmpty == true ? null : schedule.eventDesc) == normalizedDesc) &&
+        ((schedule.eventDesc?.trim().isEmpty == true
+                ? null
+                : schedule.eventDesc) ==
+            normalizedDesc) &&
         schedule.scheduledDate == scheduledDate &&
         schedule.scheduledStartTime == formattedStartTime &&
         schedule.scheduledEndTime == formattedEndTime);
@@ -286,8 +296,7 @@ class EventsProvider with ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error_type'] == 'overlap') {
-          throw Exception(
-              'Scheduling overlap: ${responseBody['message']}');
+          throw Exception('Scheduling overlap: ${responseBody['message']}');
         } else if (responseBody['error'] == 'Duplicate event entry detected.') {
           throw Exception('Duplicate event entry detected on the server.');
         } else {

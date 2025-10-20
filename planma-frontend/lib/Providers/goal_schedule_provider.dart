@@ -23,7 +23,8 @@ class GoalScheduleProvider extends ChangeNotifier {
   // Constructor to properly initialize the base URL
   GoalScheduleProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -92,11 +93,12 @@ class GoalScheduleProvider extends ChangeNotifier {
   }
 
   // Fetch pending goal schedules per goal
-  Future<void> fetchPendingGoalSchedules (int goalId) async {
+  Future<void> fetchPendingGoalSchedules(int goalId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("$_baseApiUrl/goal-schedules/pending_goal_schedules/?goal_id=$goalId");
+    final url = Uri.parse(
+        "$_baseApiUrl/goal-schedules/pending_goal_schedules/?goal_id=$goalId");
 
     try {
       final response = await http.get(
@@ -108,11 +110,14 @@ class GoalScheduleProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final newSchedules = data.map((item) => GoalSchedule.fromJson(item)).toList();
+        final newSchedules =
+            data.map((item) => GoalSchedule.fromJson(item)).toList();
 
         // Merge new schedules into the master list
-        _goalschedules.addAll(newSchedules.where((newSchedule) => !_goalschedules.any(
-              (existingSchedule) => existingSchedule.goalScheduleId == newSchedule.goalScheduleId)));
+        _goalschedules.addAll(newSchedules.where((newSchedule) =>
+            !_goalschedules.any((existingSchedule) =>
+                existingSchedule.goalScheduleId ==
+                newSchedule.goalScheduleId)));
 
         _sortGoalSchedules(); // Reorganize goal schedules
       } else {
@@ -125,11 +130,12 @@ class GoalScheduleProvider extends ChangeNotifier {
   }
 
   // Fetch completed goal schedules per goal
-  Future<void> fetchCompletedGoalSchedules (int goalId) async {
+  Future<void> fetchCompletedGoalSchedules(int goalId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("$_baseApiUrl/goal-schedules/completed_goal_schedules/?goal_id=$goalId");
+    final url = Uri.parse(
+        "$_baseApiUrl/goal-schedules/completed_goal_schedules/?goal_id=$goalId");
 
     try {
       final response = await http.get(
@@ -141,11 +147,14 @@ class GoalScheduleProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final newSchedules = data.map((item) => GoalSchedule.fromJson(item)).toList();
+        final newSchedules =
+            data.map((item) => GoalSchedule.fromJson(item)).toList();
 
         // Merge new schedules into the master list
-        _goalschedules.addAll(newSchedules.where((newSchedule) => !_goalschedules.any(
-              (existingSchedule) => existingSchedule.goalScheduleId == newSchedule.goalScheduleId)));
+        _goalschedules.addAll(newSchedules.where((newSchedule) =>
+            !_goalschedules.any((existingSchedule) =>
+                existingSchedule.goalScheduleId ==
+                newSchedule.goalScheduleId)));
 
         _sortGoalSchedules(); // Reorganize goal schedules
       } else {
@@ -160,7 +169,8 @@ class GoalScheduleProvider extends ChangeNotifier {
   // Update goal schedule status dynamically
   void updateGoalScheduleStatus(int goalScheduleId, String newStatus) {
     // Find the goal schedule in the pending list
-    final scheduleIndex = _pendingGoalschedules.indexWhere((schedule) => schedule.goalScheduleId == goalScheduleId);
+    final scheduleIndex = _pendingGoalschedules
+        .indexWhere((schedule) => schedule.goalScheduleId == goalScheduleId);
     if (scheduleIndex != -1) {
       final schedule = _pendingGoalschedules[scheduleIndex];
       schedule.status = newStatus;
@@ -187,12 +197,13 @@ class GoalScheduleProvider extends ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
 
     bool isConflict = _goalschedules.any((schedule) =>
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isConflict) {
       throw Exception(
@@ -200,10 +211,10 @@ class GoalScheduleProvider extends ChangeNotifier {
     }
 
     bool isDuplicate = _goalschedules.any((schedule) =>
-      schedule.goal?.goalId == goalId &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.goal?.goalId == goalId &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isDuplicate) {
       throw Exception(
@@ -235,9 +246,9 @@ class GoalScheduleProvider extends ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error_type'] == 'overlap') {
-          throw Exception(
-              'Scheduling overlap: ${responseBody['message']}');
-        } else if (responseBody['error'] == 'Duplicate goal schedule detected.') {
+          throw Exception('Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] ==
+            'Duplicate goal schedule detected.') {
           throw Exception('Duplicate goal schedule detected on the server.');
         } else {
           throw Exception('Error adding goal schedule: ${response.body}');
@@ -245,7 +256,6 @@ class GoalScheduleProvider extends ChangeNotifier {
       } else {
         throw Exception('Failed to add goal schedule: ${response.body}');
       }
-
     } catch (error) {
       print('Add goal schedule error: $error');
       throw Exception('Error adding goal schedule: $error');
@@ -265,12 +275,13 @@ class GoalScheduleProvider extends ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
 
     bool isConflict = _goalschedules.any((schedule) =>
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isConflict) {
       throw Exception(
@@ -278,10 +289,10 @@ class GoalScheduleProvider extends ChangeNotifier {
     }
 
     bool isDuplicate = _goalschedules.any((schedule) =>
-      schedule.goal?.goalId == goalId &&
-      schedule.scheduledDate == scheduledDate &&
-      schedule.scheduledStartTime == formattedStartTime &&
-      schedule.scheduledEndTime == formattedEndTime);
+        schedule.goal?.goalId == goalId &&
+        schedule.scheduledDate == scheduledDate &&
+        schedule.scheduledStartTime == formattedStartTime &&
+        schedule.scheduledEndTime == formattedEndTime);
 
     if (isDuplicate) {
       throw Exception(
@@ -306,9 +317,10 @@ class GoalScheduleProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final updatedSchedule = GoalSchedule.fromJson(json.decode(response.body));
-        final index = _goalschedules
-            .indexWhere((schedule) => schedule.goalScheduleId == goalScheduleId);
+        final updatedSchedule =
+            GoalSchedule.fromJson(json.decode(response.body));
+        final index = _goalschedules.indexWhere(
+            (schedule) => schedule.goalScheduleId == goalScheduleId);
         if (index != -1) {
           _goalschedules[index] = updatedSchedule;
           _sortGoalSchedules();
@@ -317,9 +329,9 @@ class GoalScheduleProvider extends ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error_type'] == 'overlap') {
-          throw Exception(
-              'Scheduling overlap: ${responseBody['message']}');
-        } else if (responseBody['error'] == 'Duplicate goal schedule detected.') {
+          throw Exception('Scheduling overlap: ${responseBody['message']}');
+        } else if (responseBody['error'] ==
+            'Duplicate goal schedule detected.') {
           throw Exception('Duplicate goal schedule detected on the server.');
         } else {
           throw Exception('Error adding goal schedule: ${response.body}');
@@ -331,7 +343,7 @@ class GoalScheduleProvider extends ChangeNotifier {
       print('Update goal schedule error: $error');
       throw Exception('Error updating goal schedule: $error');
     }
-  }  
+  }
 
   // Delete a goal schedule
   Future<void> deleteGoalSchedule(int goalScheduleId) async {
@@ -349,8 +361,8 @@ class GoalScheduleProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 204) {
-        _goalschedules
-            .removeWhere((schedule) => schedule.goalScheduleId == goalScheduleId);
+        _goalschedules.removeWhere(
+            (schedule) => schedule.goalScheduleId == goalScheduleId);
         _sortGoalSchedules();
         notifyListeners();
       } else {
@@ -359,7 +371,7 @@ class GoalScheduleProvider extends ChangeNotifier {
       }
     } catch (error) {
       rethrow;
-    }    
+    }
   }
 
   void resetState() {
@@ -383,13 +395,11 @@ class GoalScheduleProvider extends ChangeNotifier {
   // Utility method to sort activities if it is pending or completed.
   void _sortGoalSchedules() {
     _pendingGoalschedules = _goalschedules
-        .where((schedule) =>
-            schedule.status == 'Pending')
+        .where((schedule) => schedule.status == 'Pending')
         .toList();
 
     _completedGoalschedules = _goalschedules
-        .where((schedule) =>
-            schedule.status == 'Completed')
+        .where((schedule) => schedule.status == 'Completed')
         .toList();
 
     notifyListeners();

@@ -4,7 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class FCMService {
-  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  static final FirebaseMessaging _firebaseMessaging =
+      FirebaseMessaging.instance;
 
   static Future<void> initFCM(String authToken) async {
     String? token = await _firebaseMessaging.getToken();
@@ -20,7 +21,8 @@ class FCMService {
   }
 
   static Future<void> _sendTokenToServer(String token, String authToken) async {
-    final baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000/';
+    final baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway/';
 
     await http.post(
       Uri.parse("${baseUrl}api/fcm-token/register/"),

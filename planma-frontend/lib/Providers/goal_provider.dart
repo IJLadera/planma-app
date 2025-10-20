@@ -18,7 +18,8 @@ class GoalProvider extends ChangeNotifier {
   // Constructor to properly initialize the base URL
   GoalProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -74,7 +75,8 @@ class GoalProvider extends ChangeNotifier {
     _accessToken = sharedPreferences.getString("access");
 
     int formattedTargetHours = targetHours.inHours;
-    String? normalizedDesc = goalDescription?.trim().isEmpty == true ? null : goalDescription;
+    String? normalizedDesc =
+        goalDescription?.trim().isEmpty == true ? null : goalDescription;
 
     bool isDuplicate = _goals.any((schedule) =>
         schedule.goalName == goalName &&
@@ -143,7 +145,8 @@ class GoalProvider extends ChangeNotifier {
     _accessToken = sharedPreferences.getString("access");
 
     int formattedTargetHours = targetHours.inHours;
-    String? normalizedDesc = goalDescription?.trim().isEmpty == true ? null : goalDescription;
+    String? normalizedDesc =
+        goalDescription?.trim().isEmpty == true ? null : goalDescription;
 
     bool isDuplicate = _goals.any((schedule) =>
         schedule.goalName == goalName &&

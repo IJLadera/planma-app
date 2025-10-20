@@ -24,7 +24,8 @@ class TaskProvider with ChangeNotifier {
   // Constructor to properly initialize the base URL
   TaskProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -36,7 +37,8 @@ class TaskProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("$_baseApiUrl/tasks/?start_date=$startDate&end_date=$endDate");
+    final url = Uri.parse(
+        "$_baseApiUrl/tasks/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(
@@ -164,8 +166,10 @@ class TaskProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String formattedDeadline = DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedDeadline =
+        DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
     String? normalizedDesc = taskDesc?.trim().isEmpty == true ? null : taskDesc;
 
     bool isConflict = _tasks.any((schedule) =>
@@ -180,7 +184,10 @@ class TaskProvider with ChangeNotifier {
 
     bool isDuplicate = _tasks.any((schedule) =>
         schedule.taskName == taskName &&
-        ((schedule.taskDescription?.trim().isEmpty == true ? null : schedule.taskDescription) == normalizedDesc) &&
+        ((schedule.taskDescription?.trim().isEmpty == true
+                ? null
+                : schedule.taskDescription) ==
+            normalizedDesc) &&
         schedule.scheduledDate == scheduledDate &&
         schedule.scheduledStartTime == formattedStartTime &&
         schedule.scheduledEndTime == formattedEndTime &&
@@ -219,8 +226,7 @@ class TaskProvider with ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error_type'] == 'overlap') {
-          throw Exception(
-              'Scheduling overlap: ${responseBody['message']}');
+          throw Exception('Scheduling overlap: ${responseBody['message']}');
         } else if (responseBody['error'] == 'Duplicate task entry detected.') {
           throw Exception('Duplicate task entry detected on the server.');
         } else {
@@ -251,8 +257,10 @@ class TaskProvider with ChangeNotifier {
 
     String formattedStartTime = _formatTimeOfDay(startTime);
     String formattedEndTime = _formatTimeOfDay(endTime);
-    String formattedScheduledDate = DateFormat('yyyy-MM-dd').format(scheduledDate);
-    String formattedDeadline = DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
+    String formattedScheduledDate =
+        DateFormat('yyyy-MM-dd').format(scheduledDate);
+    String formattedDeadline =
+        DateFormat("yyyy-MM-dd'T'HH:mm").format(deadline);
     String? normalizedDesc = taskDesc?.trim().isEmpty == true ? null : taskDesc;
 
     bool isConflict = _tasks.any((schedule) =>
@@ -268,7 +276,10 @@ class TaskProvider with ChangeNotifier {
 
     bool isDuplicate = _tasks.any((schedule) =>
         schedule.taskName == taskName &&
-        ((schedule.taskDescription?.trim().isEmpty == true ? null : schedule.taskDescription) == normalizedDesc) &&
+        ((schedule.taskDescription?.trim().isEmpty == true
+                ? null
+                : schedule.taskDescription) ==
+            normalizedDesc) &&
         schedule.scheduledDate == scheduledDate &&
         schedule.scheduledStartTime == formattedStartTime &&
         schedule.scheduledEndTime == formattedEndTime &&
@@ -312,8 +323,7 @@ class TaskProvider with ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error_type'] == 'overlap') {
-          throw Exception(
-              'Scheduling overlap: ${responseBody['message']}');
+          throw Exception('Scheduling overlap: ${responseBody['message']}');
         } else if (responseBody['error'] == 'Duplicate task entry detected.') {
           throw Exception('Duplicate task entry detected on the server.');
         } else {

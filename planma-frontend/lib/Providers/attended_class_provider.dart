@@ -19,7 +19,8 @@ class AttendedClassProvider with ChangeNotifier {
   // Constructor to properly initialize the base URL
   AttendedClassProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -27,7 +28,8 @@ class AttendedClassProvider with ChangeNotifier {
   }
 
   // Fetch all attendance logs
-  Future<void> fetchAttendedClasses({String? startDate, String? endDate}) async {
+  Future<void> fetchAttendedClasses(
+      {String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
@@ -45,7 +47,8 @@ class AttendedClassProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        _attendedClasses = data.map((item) => AttendedClass.fromJson(item)).toList();
+        _attendedClasses =
+            data.map((item) => AttendedClass.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception('Failed to load attended classes');
@@ -60,7 +63,8 @@ class AttendedClassProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("$_baseApiUrl/attended-classes/?classsched_id=$classScheduleId");
+    final url = Uri.parse(
+        "$_baseApiUrl/attended-classes/?classsched_id=$classScheduleId");
 
     try {
       final response = await http.get(
@@ -72,7 +76,8 @@ class AttendedClassProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        _attendedClasses = data.map((item) => AttendedClass.fromJson(item)).toList();
+        _attendedClasses =
+            data.map((item) => AttendedClass.fromJson(item)).toList();
         notifyListeners();
       } else {
         throw Exception('Failed to load attended classes');
@@ -90,7 +95,8 @@ class AttendedClassProvider with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    String formattedAttendedDate = DateFormat('yyyy-MM-dd').format(attendedDate);
+    String formattedAttendedDate =
+        DateFormat('yyyy-MM-dd').format(attendedDate);
 
     final url = Uri.parse("$_baseApiUrl/attended-classes/mark_attendance/");
 
@@ -109,7 +115,8 @@ class AttendedClassProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 201) {
-        final newAttendance = AttendedClass.fromJson(json.decode(response.body));
+        final newAttendance =
+            AttendedClass.fromJson(json.decode(response.body));
         _attendedClasses.add(newAttendance);
         notifyListeners();
       } else if (response.statusCode == 200) {

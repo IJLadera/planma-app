@@ -18,7 +18,8 @@ class ActivityTimeLogProvider with ChangeNotifier {
 
   ActivityTimeLogProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -26,11 +27,13 @@ class ActivityTimeLogProvider with ChangeNotifier {
   }
 
   //Fetch all activity time logs
-  Future<void> fetchActivityTimeLogs ({String? startDate, String? endDate}) async {
+  Future<void> fetchActivityTimeLogs(
+      {String? startDate, String? endDate}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
 
-    final url = Uri.parse("$_baseApiUrl/activity-logs/?start_date=$startDate&end_date=$endDate");
+    final url = Uri.parse(
+        "$_baseApiUrl/activity-logs/?start_date=$startDate&end_date=$endDate");
 
     try {
       final response = await http.get(
@@ -62,7 +65,7 @@ class ActivityTimeLogProvider with ChangeNotifier {
     required DateTime startTime,
     required DateTime endTime,
     required Duration duration,
-    required DateTime dateLogged, 
+    required DateTime dateLogged,
   }) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -98,14 +101,14 @@ class ActivityTimeLogProvider with ChangeNotifier {
         // Handle duplicate check from the backend
         final responseBody = json.decode(response.body);
         if (responseBody['error'] == 'Duplicate activity time log detected.') {
-          throw Exception('Duplicate activity time log detected on the server.');
+          throw Exception(
+              'Duplicate activity time log detected on the server.');
         } else {
           throw Exception('Error adding activity time log: ${response.body}');
         }
       } else {
         throw Exception('Failed to add activity time log: ${response.body}');
       }
-
     } catch (error) {
       print('Add activity time log error: $error');
       throw Exception('Error adding activity time log: $error');

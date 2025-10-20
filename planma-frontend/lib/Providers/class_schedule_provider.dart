@@ -31,7 +31,8 @@ class ClassScheduleProvider with ChangeNotifier {
   // Constructor to properly initialize the base URL
   ClassScheduleProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
+    String baseUrl = dotenv.env['API_URL'] ??
+        'http://https://planma-app-production.up.railway';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -59,7 +60,8 @@ class ClassScheduleProvider with ChangeNotifier {
       },
       orElse: () {
         // No active semester; fallback to the last active semester
-        print("No active semester found. Attempting to use the last active semester.");
+        print(
+            "No active semester found. Attempting to use the last active semester.");
         semesterProvider.semesters.sort((a, b) {
           DateTime aEndDate = DateTime.parse(a['sem_end_date']);
           DateTime bEndDate = DateTime.parse(b['sem_end_date']);
@@ -84,7 +86,8 @@ class ClassScheduleProvider with ChangeNotifier {
     // Fetch subjects for the active semester
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
-    final url = Uri.parse("$_baseApiUrl/subjects/?semester_id=$_activeSemesterId");
+    final url =
+        Uri.parse("$_baseApiUrl/subjects/?semester_id=$_activeSemesterId");
 
     try {
       final response = await http.get(
@@ -106,7 +109,6 @@ class ClassScheduleProvider with ChangeNotifier {
       throw Exception('Error fetching subjects: $error');
     }
   }
-
 
   //Fetch existing subject details
   Future<void> fetchSubjectDetails(String subjectCode) async {
@@ -151,8 +153,8 @@ class ClassScheduleProvider with ChangeNotifier {
     }
 
     // Construct the URL with semester_id
-    final url =
-        Uri.parse("$_baseApiUrl/class-schedules/?semester_id=$selectedSemesterId");
+    final url = Uri.parse(
+        "$_baseApiUrl/class-schedules/?semester_id=$selectedSemesterId");
 
     try {
       final response = await http.get(
