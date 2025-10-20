@@ -43,7 +43,7 @@ firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
 
 try:
     if firebase_cred_json and not firebase_admin._apps:
-        cred_dict = json.loads(firebase_cred_json)
+        cred_dict = json.loads(firebase_cred_json.replace('\\n', '\n'))
 
         from tempfile import NamedTemporaryFile
         with NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as temp_file:
