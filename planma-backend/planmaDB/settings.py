@@ -41,11 +41,31 @@ else:
 # ✅ Define Firebase credential path before using it
 firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
 
+# try:
+#     if firebase_cred_json and not firebase_admin._apps:
+#         cred_dict = json.loads(firebase_cred_json.replace('\\n', '\n'))
+      
+#         from tempfile import NamedTemporaryFile
+#         with NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as temp_file:
+#             json.dump(cred_dict, temp_file)
+#             temp_file.flush()
+#             cred = credentials.Certificate(temp_file.name)
+
+#         firebase_admin.initialize_app(cred)
+#         print("✅ Firebase initialized successfully")
+#     else:
+#         print("⚠️ Firebase credentials not found or app already initialized")
+# except Exception as e:
+#     print("❌ Firebase init failed:", e)
+
 try:
     if firebase_cred_json and not firebase_admin._apps:
-        cred_dict = json.loads(firebase_cred_json.replace('\\n', '\n'))
+        # Replace escaped newlines
+        cred_dict = json.loads(firebase_cred_json)
+        cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
 
         from tempfile import NamedTemporaryFile
+
         with NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as temp_file:
             json.dump(cred_dict, temp_file)
             temp_file.flush()
@@ -57,7 +77,6 @@ try:
         print("⚠️ Firebase credentials not found or app already initialized")
 except Exception as e:
     print("❌ Firebase init failed:", e)
-
 
 
 # Quick-start development settings - unsuitable for production
