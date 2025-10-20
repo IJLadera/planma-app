@@ -79,18 +79,18 @@ SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
 # load_dotenv(BASE_DIR / ".env")
 DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
-RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "planma-production.up.railway.app")
+RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "planma-app-production.up.railway.app")
 
 ALLOWED_HOSTS = [
     RAILWAY_DOMAIN,
-    'planma-production.up.railway.app',
+    'planma-app-production.up.railway.app',
     'localhost',
     '127.0.0.1',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{RAILWAY_DOMAIN}",
-    "https://planma-production.up.railway.app"
+    "https://planma-app-production.up.railway.app"
 ]
 
 
