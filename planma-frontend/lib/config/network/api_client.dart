@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiClient {
-  final String _baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000/api';
-
+final String _baseUrl = "https://planma-app-production.up.railway.app/api/";
   ApiClient();
 
   Future<dynamic> get(String endpoint, {Map<String, String>? headers}) async {
