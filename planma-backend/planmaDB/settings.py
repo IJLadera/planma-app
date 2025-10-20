@@ -31,10 +31,12 @@ env = environ.Env(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env_path = BASE_DIR / "planmaDB" / ".env"
+if os.path.exists(BASE_DIR / ".env") or os.path.exists(BASE_DIR / "planmaDB" / ".env"):
+    load_dotenv(BASE_DIR / ".env")
+    print("✅ Loaded local .env file for development")
+else:
+    print("ℹ️ No local .env file found — using Railway environment variables")
 
-if os.path.exists(env_path):
-    load_dotenv(env_path)
 
 
 
@@ -50,7 +52,6 @@ try:
     if firebase_cred_json and not firebase_admin._apps:
         cred_dict = json.loads(firebase_cred_json)
 
-        # ✅ Write JSON to a temporary file for Firebase SDK
         from tempfile import NamedTemporaryFile
         with NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as temp_file:
             json.dump(cred_dict, temp_file)
@@ -59,12 +60,11 @@ try:
 
         firebase_admin.initialize_app(cred)
         print("✅ Firebase initialized successfully")
-
     else:
         print("⚠️ Firebase credentials not found or app already initialized")
-
 except Exception as e:
     print("❌ Firebase init failed:", e)
+
 
 
 # Quick-start development settings - unsuitable for production
