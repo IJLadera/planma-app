@@ -31,19 +31,12 @@ env = environ.Env(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-if os.path.exists(BASE_DIR / ".env") or os.path.exists(BASE_DIR / "planmaDB" / ".env"):
-    load_dotenv(BASE_DIR / ".env")
+if os.path.exists(BASE_DIR / ".env"):
     print("✅ Loaded local .env file for development")
+    load_dotenv(BASE_DIR / ".env")
 else:
-    print("ℹ️ No local .env file found — using Railway environment variables")
+    print("ℹ️ Running on Railway — using injected environment variables")
 
-
-
-
-# Read .env file (if it exists)
-environ.Env.read_env(BASE_DIR / ".env")
-
-print("🔧 REDIS_URL:", os.getenv("REDIS_URL"))
 
 # ✅ Define Firebase credential path before using it
 firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
