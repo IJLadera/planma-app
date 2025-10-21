@@ -68,8 +68,8 @@ class _DashboardState extends State<Dashboard> {
     });
 
     // Use dotenv to get API_URL and remove trailing slash if present
-    String baseUrl = dotenv.env['API_URL'] ??
-        'http://https://planma-app-production.up.railway';
+    String baseUrl =
+        dotenv.env['API_URL'] ?? 'http://planma-app-production.up.railway.app';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }

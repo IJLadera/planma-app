@@ -23,7 +23,7 @@ class Config {
 
     // Default to localhost if API_URL is not provided
     if (baseUrl == null || baseUrl.isEmpty) {
-      baseUrl = 'http://https://planma-app-production.up.railway';
+      baseUrl = 'http://planma-app-production.up.railway.app';
     }
 
     // Remove trailing slash if present
