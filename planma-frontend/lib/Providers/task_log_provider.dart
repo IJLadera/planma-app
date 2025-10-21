@@ -19,8 +19,8 @@ class TaskTimeLogProvider with ChangeNotifier {
   // Constructor to properly initialize the base URL
   TaskTimeLogProvider() {
     // Remove trailing slash if present in API_URL
-    String baseUrl = dotenv.env['API_URL'] ??
-        'http://https://planma-app-production.up.railway';
+    String baseUrl =
+        dotenv.env['API_URL'] ?? 'http://planma-app-production.up.railway.app';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
