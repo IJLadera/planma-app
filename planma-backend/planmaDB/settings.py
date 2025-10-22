@@ -257,13 +257,18 @@ TEMPLATES = [
 import dj_database_url
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=60,
-        ssl_require=True
-    )
+    'default': {
+        **dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=60,  # ✅ Keep connections alive for 60s (prevents pool exhaustion)
+            ssl_require=True
+        ),
+        'CONN_MAX_AGE': 60,  # ✅ Reuse DB connections instead of closing after each request
+        'OPTIONS': {
+            'connect_timeout': 10,
+        },
+    }
 }
-
 
 
 
