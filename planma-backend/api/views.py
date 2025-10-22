@@ -714,8 +714,6 @@ class UserPreferenceView(viewsets.ModelViewSet):
 
 # User/Student
 class CustomUserViewSet(UserViewSet):
-    parser_classes = [MultiPartParser, FormParser]  
-    
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         if response.status_code == 201:  # Account successfully created
