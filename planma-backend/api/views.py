@@ -23,6 +23,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from api.models import CustomUser
+from supabase_storage import upload_profile_picture  # 👈 import your helper
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -738,9 +739,20 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            if 'profile_picture' in request.FILES:  # Handle file upload
-                user.profile_picture = request.FILES['profile_picture']
-                user.save()
+            if 'profile_picture' in request.FILES:
+                file = request.FILES['profile_picture']
+                filename = f"profile_{user.id}.jpg"
+
+                # ✅ Upload to Supabase Storage
+                try:
+                    uploaded_url = upload_profile_picture(file, filename)
+                    user.profile_picture = uploaded_url  # Save the Supabase public URL
+                    user.save()
+                except Exception as e:
+                    return Response(
+                        {"error": f"Failed to upload to Supabase: {str(e)}"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
