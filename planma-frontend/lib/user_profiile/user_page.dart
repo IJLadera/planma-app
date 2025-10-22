@@ -433,6 +433,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     title: Text('Sleep & Wake Time'),
                     trailing: Icon(Icons.arrow_forward_ios),
                     onTap: () {
+                      if (sleepTime == null || wakeTime == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Please wait for your preferences to load.'),
+                          ),
+                        );
+                        return;
+                      }
                       _showTimePickerDialog(context, userPreferencesProvider);
                     },
                   ),
