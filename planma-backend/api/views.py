@@ -741,7 +741,7 @@ class CustomUserViewSet(UserViewSet):
         if serializer.is_valid():
             if 'profile_picture' in request.FILES:
                 file = request.FILES['profile_picture']
-                filename = f"profile_{user.id}.jpg"
+                filename = f"profile_{user.pk}.jpg"
 
                 # ✅ Upload to Supabase Storage
                 try:
