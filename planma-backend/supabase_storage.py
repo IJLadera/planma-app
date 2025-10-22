@@ -1,17 +1,19 @@
+from supabase import create_client
 import os
-from supabase import create_client, Client
 
-def get_supabase_client() -> Client:
-    SUPABASE_URL = os.getenv("SUPABASE_URL")
-    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        raise ValueError("Missing Supabase credentials. Check your environment variables.")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-    return create_client(SUPABASE_URL, SUPABASE_KEY)
+def upload_profile_picture(file, filename):
+    # Upload the file to Supabase bucket
+    res = supabase.storage.from_("profile_pictures").upload(filename, file)
+    
+    # Check for upload error
+    if hasattr(res, "error") and res.error:
+        raise Exception(res.error.message)
 
-def upload_profile_picture(file_path: str, file_name: str, bucket_name: str = "profile_pictures"):
-    supabase = get_supabase_client()  # ✅ Create client when function runs
-    with open(file_path, "rb") as f:
-        res = supabase.storage.from_(bucket_name).upload(file_name, f, {"upsert": True})
-    return res
+    # ✅ Return the public Supabase URL
+    public_url = f"{SUPABASE_URL}/storage/v1/object/public/profile_pictures/{filename}"
+    return public_url
