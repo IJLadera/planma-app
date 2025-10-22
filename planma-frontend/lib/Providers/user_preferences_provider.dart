@@ -156,6 +156,8 @@ class UserPreferencesProvider with ChangeNotifier {
         }
         notifyListeners();
       } else {
+        print("⚠️ Failed to update: ${response.statusCode}");
+        print("Body: ${response.body}");
         throw Exception('Failed to update sleep and wake times');
       }
     } catch (error) {
