@@ -150,6 +150,8 @@ WSGI_APPLICATION = 'planmaDB.wsgi.application'
 # Use ASGI instead of WSGI
 ASGI_APPLICATION = 'planmaDB.asgi.application'
 
+import ssl
+
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 CHANNEL_LAYERS = {
