@@ -1,8 +1,9 @@
 from django.utils import timezone
 from datetime import timedelta
+from .models import UserPref
 
 def get_sleep_reminders(student_id: UserPref):
-    from .models import UserPref
+    
     
     now = timezone.now()
     today = now.date()
