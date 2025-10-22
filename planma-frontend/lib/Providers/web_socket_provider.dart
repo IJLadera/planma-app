@@ -30,7 +30,7 @@ class WebSocketProvider extends ChangeNotifier {
   WebSocketProvider() {
     // Remove trailing slash if present in API_URL
     String baseUrl =
-        dotenv.env['API_URL'] ?? 'http://planma-app-production.up.railway.app';
+        dotenv.env['API_URL'] ?? 'https://planma-app-production.up.railway.app';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -230,8 +230,8 @@ class WebSocketProvider extends ChangeNotifier {
       print('Connecting to WebSocket with student_id: $_studentId');
 
       // Build the WebSocket URL with student ID
-      final wsBase = dotenv.env['WS_URL'] ??
-          'ws://https://planma-app-production.up.railway';
+      final wsBase =
+          dotenv.env['WS_URL'] ?? 'wss://planma-app-production.up.railway.app';
       final wsUrl = Uri.parse('$wsBase/ws/reminders/$studentId/');
       print('WebSocket URL: $wsUrl');
 

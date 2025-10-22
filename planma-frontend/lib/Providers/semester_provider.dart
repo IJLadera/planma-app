@@ -19,7 +19,7 @@ class SemesterProvider with ChangeNotifier {
   SemesterProvider() {
     // Remove trailing slash if present in API_URL
     String baseUrl =
-        dotenv.env['API_URL'] ?? 'http://planma-app-production.up.railway.app';
+        dotenv.env['API_URL'] ?? 'https://planma-app-production.up.railway.app';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }

@@ -9,8 +9,7 @@ class AuthLogin {
   // Constructor to properly initialize the base URL
   AuthLogin() {
     // Remove trailing slash if present in API_URL
-    String baseUrl =
-        dotenv.env['API_URL'] ?? 'http://planma-app-production.up.railway.app';
+    String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }

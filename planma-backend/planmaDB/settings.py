@@ -152,9 +152,6 @@ ASGI_APPLICATION = 'planmaDB.asgi.application'
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
-# Redis as channel layer (make sure Redis is installed and running)
-import ssl
-
 CHANNEL_LAYERS = {
     "default": {
         # 'BACKEND': 'channels_redis.core.InMemoryChannelLayer', 
@@ -164,11 +161,7 @@ CHANNEL_LAYERS = {
             # "hosts": [('127.0.0.1', 6379)],
             # "hosts": [('localhost', 6379)],
             # ✅ Render gives full Redis URL automatically:
-            "hosts": [{
-                "address": REDIS_URL,           # Your Redis URL
-                "ssl": True,                    # Enable SSL for rediss://
-                "ssl_cert_reqs": ssl.CERT_NONE, # Disable certificate validation (development only)
-            }],
+            "hosts": [REDIS_URL],
         },
     },
 }

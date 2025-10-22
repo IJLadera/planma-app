@@ -21,8 +21,8 @@ class FCMService {
   }
 
   static Future<void> _sendTokenToServer(String token, String authToken) async {
-    final baseUrl =
-        dotenv.env['API_URL'] ?? 'http://planma-app-production.up.railway.app/';
+    final baseUrl = dotenv.env['API_URL'] ??
+        'https://planma-app-production.up.railway.app/';
 
     await http.post(
       Uri.parse("${baseUrl}api/fcm-token/register/"),
