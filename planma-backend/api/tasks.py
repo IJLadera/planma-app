@@ -6,6 +6,7 @@ from datetime import timedelta
 from celery import shared_task
 from firebase_admin import messaging
 import redis
+import os
 import json
 from .models import (
     CustomEvents, UserPref, CustomTask, CustomClassSchedule, CustomActivity,
@@ -13,7 +14,7 @@ from .models import (
 )
 
 def is_user_in_foreground(user_id):
-    r = redis.Redis()
+    r = redis.Redis.from_url(os.getenv("REDIS_URL"), ssl_cert_reqs=None)
     key = f"user_online:{user_id}"
     if not r.exists(key):
         return False
