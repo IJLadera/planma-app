@@ -37,8 +37,8 @@ class WebSocketService {
       }
 
       // Create WebSocket connection
-      final wsBase = dotenv.env['WS_URL'] ??
-          'ws://https://planma-app-production.up.railway';
+      final wsBase =
+          dotenv.env['WS_URL'] ?? 'wss://planma-app-production.up.railway.app';
       final wsUrl = Uri.parse('$wsBase/ws/reminders/$_studentId/');
       _channel = WebSocketChannel.connect(wsUrl);
 
