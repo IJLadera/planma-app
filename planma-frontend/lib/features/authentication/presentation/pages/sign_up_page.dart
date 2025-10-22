@@ -71,6 +71,7 @@ class _SignUpPageState extends State<SignUpPage> {
           username: userNameController.text,
           email: emailController.text,
           password: passwordController.text,
+          rePassword: confirmPasswordController.text,
         );
 
         // Remove the signing up message

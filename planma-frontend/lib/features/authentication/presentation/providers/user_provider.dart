@@ -228,6 +228,7 @@ class UserProvider extends ChangeNotifier {
     required String username,
     required String email,
     required String password,
+    required String rePassword,
   }) async {
     try {
       final response = await http.post(
@@ -239,6 +240,7 @@ class UserProvider extends ChangeNotifier {
           'username': username,
           'email': email,
           'password': password,
+          're_password': rePassword,
         }),
       );
 
