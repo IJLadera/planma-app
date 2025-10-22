@@ -29,6 +29,11 @@ class CustomUserSerializer(UserSerializer):
         model = CustomUser
         fields = ('student_id', 'username', 'firstname', 'lastname', 'profile_picture')  
 
+    def get_profile_picture(self, obj):
+        if obj.profile_picture:
+            # ✅ Return the stored URL directly (Supabase public URL)
+            return str(obj.profile_picture)
+        return None
 
 class CustomEventSerializer(serializers.ModelSerializer):
     student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
