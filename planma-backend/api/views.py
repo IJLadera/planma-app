@@ -747,7 +747,7 @@ class CustomUserViewSet(UserViewSet):
                 try:
                     uploaded_url = upload_profile_picture(file, filename)
                     user.profile_picture = uploaded_url  # Save the Supabase public URL
-                    user.save()
+
                 except Exception as e:
                     return Response(
                         {"error": f"Failed to upload to Supabase: {str(e)}"},
