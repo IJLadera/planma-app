@@ -11,23 +11,25 @@ def get_supabase_client():
 
 def upload_profile_picture(file, filename):
     SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET")
-    if not SUPABASE_BUCKET:
-        raise Exception("SUPABASE_BUCKET not set in environment variables.")
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+
+    if not SUPABASE_BUCKET or not SUPABASE_URL:
+        raise Exception("Supabase environment variables missing.")
 
     supabase = get_supabase_client()
 
-    # ✅ Read file bytes
+    # Read bytes
     file_bytes = file.read()
 
-    # ✅ Upload file
-    res = supabase.storage.from_(SUPABASE_BUCKET).upload(filename, file_bytes)
+    # Upload the file (allow overwrite)
+    res = supabase.storage.from_(SUPABASE_BUCKET).upload(filename, file_bytes, {"upsert": True})
 
     if hasattr(res, "error") and res.error:
         raise Exception(res.error.message)
 
-    # ✅ Return correctly formatted public URL
-    supabase_url = os.getenv("SUPABASE_URL").rstrip("/")  # Remove trailing slash
+    # ✅ Force full Supabase public URL (instead of relative)
+    supabase_url = SUPABASE_URL.rstrip("/")
     public_url = f"{supabase_url}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
 
+    print(f"✅ Uploaded to Supabase: {public_url}")
     return public_url
-
