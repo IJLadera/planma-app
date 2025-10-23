@@ -5,21 +5,26 @@ from supabase import create_client
 def get_supabase_client():
     SUPABASE_URL = os.getenv("SUPABASE_URL")
     SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        raise Exception("Supabase credentials missing. Check environment variables.")
     return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def upload_profile_picture(file, filename):
     SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET")
+    if not SUPABASE_BUCKET:
+        raise Exception("SUPABASE_BUCKET not set in environment variables.")
 
-    # ✅ Create the client only when needed
     supabase = get_supabase_client()
 
-    # Upload the file to Supabase bucket
-    res = supabase.storage.from_(SUPABASE_BUCKET).upload(filename, file)
+    # ✅ Read file bytes (important!)
+    file_bytes = file.read()
 
-    # Check for upload error
+    # ✅ Upload file
+    res = supabase.storage.from_(SUPABASE_BUCKET).upload(filename, file_bytes)
+
     if hasattr(res, "error") and res.error:
         raise Exception(res.error.message)
 
-    # ✅ Return the public Supabase URL
+    # ✅ Return public URL
     public_url = f"{os.getenv('SUPABASE_URL')}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
     return public_url
