@@ -16,7 +16,7 @@ def upload_profile_picture(file, filename):
 
     supabase = get_supabase_client()
 
-    # ✅ Read file bytes (important!)
+    # ✅ Read file bytes
     file_bytes = file.read()
 
     # ✅ Upload file
@@ -25,6 +25,9 @@ def upload_profile_picture(file, filename):
     if hasattr(res, "error") and res.error:
         raise Exception(res.error.message)
 
-    # ✅ Return public URL
-    public_url = f"{os.getenv('SUPABASE_URL')}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
+    # ✅ Return correctly formatted public URL
+    supabase_url = os.getenv("SUPABASE_URL").rstrip("/")  # Remove trailing slash
+    public_url = f"{supabase_url}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
+
     return public_url
+
