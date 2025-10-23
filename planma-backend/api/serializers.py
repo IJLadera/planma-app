@@ -23,7 +23,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         fields = ('student_id', 'email', 'password', 'firstname', 'lastname', 'username')
 
 class CustomUserSerializer(UserSerializer):
-    profile_picture = serializers.CharField(required=False, allow_null=True)
+    profile_picture = serializers.URLField(required=False, allow_null=True)
 
     class Meta(UserSerializer.Meta):
         model = CustomUser
