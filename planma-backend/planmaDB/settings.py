@@ -30,10 +30,15 @@ env = environ.Env(
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+local_env = BASE_DIR / "planmaDB" / ".env"
+root_env = BASE_DIR / ".env"
 
-if os.path.exists(BASE_DIR / ".env"):
-    print("✅ Loaded local .env file for development")
-    load_dotenv(BASE_DIR / ".env")
+if os.path.exists(local_env):
+    print("✅ Loaded .env from planmaDB/")
+    load_dotenv(local_env)
+elif os.path.exists(root_env):
+    print("✅ Loaded .env from project root")
+    load_dotenv(root_env)
 else:
     print("ℹ️ Running on Railway — using injected environment variables")
 

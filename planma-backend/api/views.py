@@ -23,7 +23,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from api.models import CustomUser
-from supabase_storage import upload_profile_picture  # 👈 import your helper
+from supabase_storage import upload_profile_picture
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
