@@ -732,9 +732,11 @@ class CustomUserViewSet(UserViewSet):
 
         supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-        file_path = f"{SUPABASE_BUCKET}/{filename}"  # profile_picture/profile_1.jpg
-        supabase.storage.from_(SUPABASE_BUCKET).upload(file_path, file)
-        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{file_path}"
+        file_path = f"{filename}"  # Just the filename, not the bucket again
+        supabase.storage.from_(SUPABASE_BUCKET).upload(file_path, file, {"upsert": True})
+
+        # ✅ Proper Supabase public URL
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{file_path}"
         return public_url
 
     def get_user_from_request(self, data):  
@@ -759,7 +761,7 @@ class CustomUserViewSet(UserViewSet):
 
                 # ✅ Upload to Supabase Storage
                 try:
-                    uploaded_url = upload_profile_picture(file, filename)
+                    uploaded_url = self.upload_profile_picture(file, filename)
                     user.profile_picture = uploaded_url  # Save Supabase public URL
 
                 except Exception as e:
