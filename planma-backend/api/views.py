@@ -23,6 +23,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from api.models import CustomUser
+import os
+from django.http import JsonResponse
+from supabase import create_client, Client
 from supabase_storage import upload_profile_picture
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -722,6 +725,17 @@ class CustomUserViewSet(UserViewSet):
             response.data['refresh'] = str(refresh)
             response.data['access'] = str(refresh.access_token)
         return response
+    def upload_profile_picture(file, filename):
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+        SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET")
+
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+        file_path = f"{SUPABASE_BUCKET}/{filename}"  # profile_picture/profile_1.jpg
+        supabase.storage.from_(SUPABASE_BUCKET).upload(file_path, file)
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{file_path}"
+        return public_url
 
     def get_user_from_request(self, data):  
         from django.contrib.auth import get_user_model
@@ -746,15 +760,16 @@ class CustomUserViewSet(UserViewSet):
                 # ✅ Upload to Supabase Storage
                 try:
                     uploaded_url = upload_profile_picture(file, filename)
-                    user.profile_picture = uploaded_url  # Save the Supabase public URL
+                    user.profile_picture = uploaded_url  # Save Supabase public URL
 
                 except Exception as e:
                     return Response(
                         {"error": f"Failed to upload to Supabase: {str(e)}"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
+
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"image_url": user.profile_picture}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

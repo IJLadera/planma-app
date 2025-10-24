@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
 
 class ImageUpload extends StatefulWidget {
   @override
@@ -82,8 +83,8 @@ class _ImageUploadState extends State<ImageUpload> {
       if (response.statusCode == 200) {
         var responseData = await http.Response.fromStream(response);
         // Assuming the response contains the image URL or success data
-        String imageUrl =
-            responseData.body; // Update based on your API response format
+        final Map<String, dynamic> responseJson = jsonDecode(responseData.body);
+        String imageUrl = responseJson['image_url'];
 
         // Save the image URL in SharedPreferences
         prefs.setString('profilePicture', imageUrl);
