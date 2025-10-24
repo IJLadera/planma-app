@@ -779,6 +779,7 @@ class CustomUserViewSet(UserViewSet):
             # ✅ Generate public URL
             public_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
             data['profile_picture'] = public_url
+            user.profile_picture = public_url
 
         serializer = CustomUserSerializer(user, data=data, partial=True)
         if serializer.is_valid():
