@@ -324,7 +324,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     // Ensure the URL is absolute
     String getFullImageUrl(String? url) {
       if (url == null || url.isEmpty) return '';
-      return url.startsWith('http') ? url : '$_baseApiUrl/$url';
+
+      // If already an absolute URL, return as is
+      if (url.startsWith('http')) return url;
+
+      // Ensure exactly one slash between base URL and path
+      if (url.startsWith('/')) {
+        return '$_baseApiUrl$url';
+      } else {
+        return '$_baseApiUrl/$url';
+      }
     }
 
     String profilePictureFullUrl = getFullImageUrl(profilePictureUrl);
