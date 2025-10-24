@@ -725,24 +725,29 @@ class CustomUserViewSet(UserViewSet):
             response.data['refresh'] = str(refresh)
             response.data['access'] = str(refresh.access_token)
         return response
-    def upload_profile_picture(file, filename):
-        SUPABASE_URL = os.getenv("SUPABASE_URL")
-        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-        SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET")
-
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-        file_path = f"{filename}"  # Just the filename, not the bucket again
-        supabase.storage.from_(SUPABASE_BUCKET).upload(file_path, file, {"upsert": True})
-
-        # ✅ Proper Supabase public URL
-        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{file_path}"
-        return public_url
-
+    
     def get_user_from_request(self, data):  
         from django.contrib.auth import get_user_model
         User = get_user_model()
         return User.objects.get(email=data.get("email"))
+    
+    def upload_profile_picture(self, file):
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+        SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "profile_picture")
+
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+        # Generate a unique filename
+        filename = f"{uuid.uuid4}_{file.name}"
+        file_content = file.read()
+        
+        # Upload to Supabase Storage
+        supabase.storage.from_(SUPABASE_BUCKET).upload(filename, file_content)
+
+        # ✅ Proper Supabase public URL
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
+        return public_url
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
@@ -753,25 +758,32 @@ class CustomUserViewSet(UserViewSet):
     @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated])
     def update_profile(self, request):
         user = request.user
-        serializer = CustomUserSerializer(user, data=request.data, partial=True)
+        data = request.data.copy()
+
+        if 'profile_picture' in request.FILES:
+            from supabase import create_client
+            import os, uuid
+
+            SUPABASE_URL = os.getenv("SUPABASE_URL")
+            SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+            SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "profile_picture")
+
+            supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+            image_file = request.FILES['profile_picture']
+            filename = f"{uuid.uuid4()}_{image_file.name}"
+            file_content = image_file.read()
+
+            # ✅ Upload to Supabase
+            supabase_client.storage.from_(SUPABASE_BUCKET).upload(filename, file_content)
+
+            # ✅ Generate public URL
+            public_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
+            data['profile_picture'] = public_url
+
+        serializer = CustomUserSerializer(user, data=data, partial=True)
         if serializer.is_valid():
-            if 'profile_picture' in request.FILES:
-                file = request.FILES['profile_picture']
-                filename = f"profile_{user.pk}.jpg"
-
-                # ✅ Upload to Supabase Storage
-                try:
-                    uploaded_url = self.upload_profile_picture(file, filename)
-                    user.profile_picture = uploaded_url  # Save Supabase public URL
-
-                except Exception as e:
-                    return Response(
-                        {"error": f"Failed to upload to Supabase: {str(e)}"},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                    )
-
             serializer.save()
-            return Response({"image_url": user.profile_picture}, status=status.HTTP_200_OK)
+            return Response({"image_url": serializer.data['profile_picture']})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

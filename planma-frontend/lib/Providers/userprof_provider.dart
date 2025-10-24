@@ -89,16 +89,9 @@ class UserProfileProvider with ChangeNotifier {
       if (imageFile != null) {
         print("Uploading Image: ${imageFile.name}, Path: ${imageFile.path}");
         if (kIsWeb) {
-          print("bangpusi");
           Uint8List? bytes = await imageFile.readAsBytes();
-          String fileName = imageFile.name.isNotEmpty
-              ? imageFile.name
-              : "profile.jpg"; // Default name if missing
-          String mimeType = lookupMimeType(imageFile.name) ?? 'image/jpeg';
-
-          print("Detected MIME Type: $mimeType");
-          print("Image Bytes Length: ${bytes.length}");
-
+          String fileName =
+              imageFile.name.isNotEmpty ? imageFile.name : "profile.jpg";
           request.files.add(http.MultipartFile.fromBytes(
             'profile_picture',
             bytes,
@@ -108,30 +101,25 @@ class UserProfileProvider with ChangeNotifier {
           if (!File(imageFile.path).existsSync()) {
             throw Exception("File does not exist: ${imageFile.path}");
           }
-          print("bangdik");
-
           request.files.add(await http.MultipartFile.fromPath(
               'profile_picture', imageFile.path));
         }
       }
 
-      print("Request Fields: ${request.fields}");
-      print("Headers: ${request.headers}");
-
       var response = await request.send();
-      // var responseBody = await response.stream.bytesToString();
-      // print("Response Body: $responseBody");
 
       if (response.statusCode == 200) {
         var responseData = await response.stream.bytesToString();
         final data = json.decode(responseData);
         print("Response Body: $responseData");
 
-        _firstName = data['firstname'];
-        _lastName = data['lastname'];
-        _username = data['username'];
-        _profilePicture =
-            data['profile_picture']; // Update stored profile picture
+        if (data['image_url'] != null) {
+          _profilePicture = data['image_url'];
+        }
+
+        _firstName = firstName;
+        _lastName = lastName;
+        _username = username;
         notifyListeners();
       } else {
         throw Exception(
