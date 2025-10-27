@@ -4,6 +4,8 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from .views import *
 from django.http import JsonResponse
+from django.conf import settings  # <-- Add this
+from django.conf.urls.static import static  # <-- Add this
 
 router = DefaultRouter()
 router.register(r'class-schedules', ClassScheduleViewSet, basename='classschedule')
@@ -31,9 +33,9 @@ def api_root(request):
     return JsonResponse({"message": "Welcome to Planma API!"})
 
 urlpatterns = [
-    path('', api_root), 
+    path('', api_root),
     path('djoser/', include('djoser.urls')),
     path('auth/jwt/create/', CustomTokenObtainPairView.as_view(), name='jwt-create'),
-    path('auth/', include('djoser.urls.jwt')), 
-    path('', include(router.urls)),  # DRF API endpoints
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('auth/', include('djoser.urls.jwt')),
+    path('', include(router.urls)),
+]

@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     'djoser',
     'corsheaders',
     'django_celery_beat',
+    'storages',
 
     # 'api.apps.ApiConfig',
     'api',
@@ -317,6 +318,27 @@ STATIC_URL = '/static/'
 
 # ✅ Added: STATIC_ROOT required by Render for collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+AWS_ACCESS_KEY_ID = os.environ.get("SUPABASE_S3_ACCESS_KEY")
+AWS_SECRET_ACCESS_KEY = os.environ.get("SUPABASE_S3_SECRET_KEY")
+
+SUPABASE_BUCKET_NAME = os.environ.get("SUPABASE_BUCKET")
+SUPABASE_URL_RAW = os.environ.get("SUPABASE_URL")  # e.g., "tprkyvoedwfphmxhpevw.supabase.co"
+
+#    (This code handles if it has "https://" or not)
+SUPABASE_PROJECT_ID = SUPABASE_URL_RAW.replace("https://", "").split('.')[0]
+
+#    (Make sure 'storages' is in your INSTALLED_APPS)
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+AWS_STORAGE_BUCKET_NAME = SUPABASE_BUCKET_NAME
+AWS_S3_REGION_NAME = 'us-east-1' # From your config
+AWS_S3_ENDPOINT_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/s3'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False # Optional, but good to have
+
+MEDIA_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/{SUPABASE_BUCKET_NAME}/'
+
 
 
 
