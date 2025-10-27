@@ -69,7 +69,7 @@ class _DashboardState extends State<Dashboard> {
 
     // Use dotenv to get API_URL and remove trailing slash if present
     String baseUrl =
-        dotenv.env['API_URL'] ?? 'http://planma-app-production.up.railway.app';
+        dotenv.env['API_URL'] ?? 'https://planma-app-production.up.railway.app';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -151,10 +151,21 @@ class _DashboardState extends State<Dashboard> {
     String? profilePictureUrl =
         context.watch<UserProfileProvider>().profilePicture;
 
-    // Ensure the URL is absolute
-    String getFullImageUrl(String? url) {
-      if (url == null || url.isEmpty) return '';
-      return url.startsWith('http') ? url : '$_baseApiUrl$url';
+    String getFullImageUrl(String? relativeUrl) {
+      // Define your base URL here
+      const String baseApiUrl = 'https://planma-app-production.up.railway.app';
+
+      if (relativeUrl == null || relativeUrl.isEmpty) {
+        return ''; // Return empty string if there's no URL
+      }
+
+      // If the URL is already a full URL, use it directly.
+      if (relativeUrl.startsWith('http')) {
+        return relativeUrl;
+      }
+
+      // Otherwise, construct the full URL, including the '/media/' path.
+      return '$baseApiUrl/media/$relativeUrl';
     }
 
     String profilePictureFullUrl = getFullImageUrl(profilePictureUrl);

@@ -25,6 +25,13 @@ class UserProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setProfilePicture(String url) {
+    _profilePicture = url;
+    notifyListeners();
+    // You might also want to save to SharedPreferences here if that's your source of truth
+    // _saveProfilePictureToPrefs(url);
+  }
+
   // Base API URL - adjust this to match your backend URL
   late final String _baseApiUrl;
 
@@ -55,7 +62,7 @@ class UserProfileProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print(data.toString());
+        print("fetchUserProfile response data: ${data.toString()}");
         _firstName = data['firstname'];
         _lastName = data['lastname'];
         _username = data['username'];
@@ -111,7 +118,7 @@ class UserProfileProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         var responseData = await response.stream.bytesToString();
         final data = json.decode(responseData);
-        print("Response Body: $responseData");
+        print("updateUserProfile response data: $responseData");
 
         if (data['image_url'] != null) {
           _profilePicture = data['image_url'];

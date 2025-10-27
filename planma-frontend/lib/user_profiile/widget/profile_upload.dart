@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:planma_app/Providers/userprof_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
@@ -25,8 +27,10 @@ class _ImageUploadState extends State<ImageUpload> {
     // Remove trailing slash if present in API_URL
     String baseUrl =
         dotenv.env['API_URL'] ?? 'https://planma-app-production.up.railway.app';
-    if (baseUrl.endsWith('/'))
+
+    if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+    }
     _baseApiUrl = baseUrl;
   }
 
@@ -69,6 +73,9 @@ class _ImageUploadState extends State<ImageUpload> {
 
       if (accessToken == null) {
         _showMessage('Access token is missing!');
+        setState(() {
+          _isLoading = false;
+        });
         return;
       }
 
@@ -82,9 +89,21 @@ class _ImageUploadState extends State<ImageUpload> {
 
       if (response.statusCode == 200) {
         var responseData = await http.Response.fromStream(response);
-        // Assuming the response contains the image URL or success data
         final Map<String, dynamic> responseJson = jsonDecode(responseData.body);
-        String imageUrl = responseJson['image_url'];
+
+        // Extract filename from response (or fallback to full URL)
+        String imageUrl = responseJson['image_url'] ?? '';
+
+        if (imageUrl.isEmpty) {
+          _showMessage('Failed to get image URL from backend response.');
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .setProfilePicture(imageUrl);
 
         // Save the image URL in SharedPreferences
         prefs.setString('profilePicture', imageUrl);

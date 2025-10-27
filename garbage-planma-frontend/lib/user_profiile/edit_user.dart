@@ -48,7 +48,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     // Use dotenv to get API_URL and remove trailing slash if present
     String baseUrl =
-        dotenv.env['API_URL'] ?? 'http://planma-app-production.up.railway.app';
+        dotenv.env['API_URL'] ?? 'https://planma-app-production.up.railway.app';
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -56,8 +56,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     // Ensure the URL is absolute
     String getFullImageUrl(String? url) {
-      if (url == null || url.isEmpty) return '';
-      return url.startsWith('http') ? url : '$_baseApiUrl$url';
+      if (url == null || url.isEmpty) {
+        return ''; // Return empty string if there's no URL
+      }
+
+      // If the URL from the backend is already a full valid URL, use it directly.
+      if (url.startsWith('http')) {
+        return url;
+      }
+
+      // Otherwise, construct the full URL.
+      // This correctly adds the '/media/' part and the slash.
+      return '$_baseApiUrl/media/$url';
     }
 
     initProfilePictureFullUrl = getFullImageUrl(_initialProfilePicture);
