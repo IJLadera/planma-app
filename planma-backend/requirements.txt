@@ -11,6 +11,8 @@ psycopg2-binary
 dj-database-url
 whitenoise
 supabase
+django-storages
+boto3
 
 # Django extensions
 django-extensions
