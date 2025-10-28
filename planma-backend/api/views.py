@@ -25,8 +25,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from api.models import CustomUser
 import os
 from django.http import JsonResponse
-from supabase import create_client, Client
-from supabase_storage import upload_profile_picture
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -756,7 +754,9 @@ class CustomUserViewSet(UserViewSet):
         serializer = CustomUserSerializer(user, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"image_url": serializer.data['profile_picture']})
+            # ✅ THIS IS THE CORRECT RESPONSE
+            # It sends back the full, updated user object
+            return Response(serializer.data, status=status.HTTP_200_OK) 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
