@@ -151,21 +151,20 @@ class _DashboardState extends State<Dashboard> {
     String? profilePictureUrl =
         context.watch<UserProfileProvider>().profilePicture;
 
-    String getFullImageUrl(String? relativeUrl) {
-      // Define your base URL here
-      const String baseApiUrl = 'https://planma-app-production.up.railway.app';
-
-      if (relativeUrl == null || relativeUrl.isEmpty) {
+    // Ensure the URL is absolute
+    String getFullImageUrl(String? url) {
+      if (url == null || url.isEmpty) {
         return ''; // Return empty string if there's no URL
       }
 
-      // If the URL is already a full URL, use it directly.
-      if (relativeUrl.startsWith('http')) {
-        return relativeUrl;
+      // If the URL from the backend is already a full valid URL, use it directly.
+      if (url.startsWith('http')) {
+        return url;
       }
 
-      // Otherwise, construct the full URL, including the '/media/' path.
-      return '$baseApiUrl/media/$relativeUrl';
+      // Otherwise, construct the full URL.
+      // This correctly adds the '/media/' part and the slash.
+      return '$_baseApiUrl/media/$url';
     }
 
     String profilePictureFullUrl = getFullImageUrl(profilePictureUrl);

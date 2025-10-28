@@ -223,26 +223,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 SizedBox(height: 30),
                 // Save Changes Button
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // ✅ 1. Make the function async
                     if (_formKey.currentState!.validate()) {
-                      XFile? imageFile;
+                      setState(() {
+                        _isLoading = true; // Show loading indicator
+                      });
 
+                      XFile? imageFile;
                       if (kIsWeb && _webImage != null) {
                         imageFile = XFile.fromData(_webImage!);
                       } else if (_image != null) {
                         imageFile = XFile(_image!.path);
                       }
 
-                      context.read<UserProfileProvider>().updateUserProfile(
-                          firstNameController.text,
-                          lastNameController.text,
-                          usernameController.text,
-                          imageFile: imageFile);
-                      Navigator.pop(context, {
-                        'username': usernameController.text,
-                        'firstName': firstNameController.text,
-                        'lastName': lastNameController.text,
-                      });
+                      try {
+                        // ✅ 2. Await the provider call
+                        await context
+                            .read<UserProfileProvider>()
+                            .updateUserProfile(
+                                firstNameController.text,
+                                lastNameController.text,
+                                usernameController.text,
+                                imageFile: imageFile);
+
+                        // ✅ 3. Pop WITHOUT sending any data. The provider has already
+                        //       updated the state for the previous screen.
+                        if (mounted) {
+                          // Check if the widget is still in the tree
+                          Navigator.pop(context);
+                        }
+                      } catch (e) {
+                        // Handle any errors that might occur
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text("Failed to update profile: $e")),
+                          );
+                        }
+                      } finally {
+                        // Hide loading indicator
+                        if (mounted) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
