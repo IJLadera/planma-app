@@ -319,27 +319,37 @@ STATIC_URL = '/static/'
 # ✅ Added: STATIC_ROOT required by Render for collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-
-SUPABASE_BUCKET_NAME = os.environ.get("SUPABASE_BUCKET")
-SUPABASE_URL_RAW = os.environ.get("SUPABASE_URL")  # e.g., "tprkyvoedwfphmxhpevw.supabase.co"
-
-#    (This code handles if it has "https://" or not)
-SUPABASE_PROJECT_ID = SUPABASE_URL_RAW.replace("https://", "").split('.')[0]
-
-#    (Make sure 'storages' is in your INSTALLED_APPS)
+# Set the default file storage backend to S3 Boto3.
+# This tells Django to use django-storages for all file uploads.
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-AWS_STORAGE_BUCKET_NAME = SUPABASE_BUCKET_NAME
-AWS_S3_REGION_NAME = 'us-east-1' # From your config
+# --- Get Bucket and Project Info Directly from Environment Variables ---
+# This is more robust than calculating it from a URL.
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET")
+SUPABASE_PROJECT_ID = os.getenv("SUPABASE_PROJECT_ID") # Reads the new variable you created
+
+# --- Configure Boto3 (the underlying AWS S3 library) ---
+
+# Set the bucket name for uploads.
+AWS_STORAGE_BUCKET_NAME = SUPABASE_BUCKET
+
+# Set the region. Reads from environment, with a fallback.
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
+
+# Set the custom endpoint URL to point to your Supabase project.
+# This is how we tell the AWS library to talk to Supabase instead of AWS.
 AWS_S3_ENDPOINT_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/s3'
+
+# Use S3v4 signature version, which is required by Supabase.
 AWS_S3_SIGNATURE_VERSION = 's3v4'
-AWS_S3_FILE_OVERWRITE = False # Optional, but good to have
 
-MEDIA_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/{SUPABASE_BUCKET_NAME}/'
+# Set to False to prevent overwriting files with the same name.
+# Django-storages will automatically add a random suffix instead.
+AWS_S3_FILE_OVERWRITE = False
 
-
+# --- Public URL for Media Files ---
+# This defines the public-facing URL for your uploaded files.
+MEDIA_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/{SUPABASE_BUCKET}/'
 
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
