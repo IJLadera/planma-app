@@ -319,8 +319,8 @@ STATIC_URL = '/static/'
 # ✅ Added: STATIC_ROOT required by Render for collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-AWS_ACCESS_KEY_ID = os.environ.get("SUPABASE_S3_ACCESS_KEY")
-AWS_SECRET_ACCESS_KEY = os.environ.get("SUPABASE_S3_SECRET_KEY")
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 SUPABASE_BUCKET_NAME = os.environ.get("SUPABASE_BUCKET")
 SUPABASE_URL_RAW = os.environ.get("SUPABASE_URL")  # e.g., "tprkyvoedwfphmxhpevw.supabase.co"
