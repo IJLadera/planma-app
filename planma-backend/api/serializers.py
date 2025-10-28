@@ -22,18 +22,13 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         model = CustomUser
         fields = ('student_id', 'email', 'password', 'firstname', 'lastname', 'username')
 
-class CustomUserSerializer(UserSerializer):
-    profile_picture = serializers.URLField(required=False, allow_null=True)
+# api/serializers.py
 
+class CustomUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         model = CustomUser
-        fields = ('student_id', 'username', 'email', 'firstname', 'lastname', 'profile_picture')  
+        fields = ('student_id', 'username', 'email', 'firstname', 'lastname', 'profile_picture')
 
-    def get_profile_picture(self, obj):
-        if obj.profile_picture:
-            # ✅ Return the stored URL directly (Supabase public URL)
-            return str(obj.profile_picture)
-        return None
 
 class CustomEventSerializer(serializers.ModelSerializer):
     student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())

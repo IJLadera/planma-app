@@ -730,25 +730,7 @@ class CustomUserViewSet(UserViewSet):
         from django.contrib.auth import get_user_model
         User = get_user_model()
         return User.objects.get(email=data.get("email"))
-    
-    def upload_profile_picture(self, file):
-        SUPABASE_URL = os.getenv("SUPABASE_URL")
-        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-        SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "profile_picture")
 
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-        # Generate a unique filename
-        filename = f"{uuid.uuid4}_{file.name}"
-        file_content = file.read()
-        
-        # Upload to Supabase Storage
-        supabase.storage.from_(SUPABASE_BUCKET).upload(filename, file_content)
-
-        # ✅ Proper Supabase public URL
-        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
-        return public_url
-    
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
         """Custom override for /users/me/ to include profile_picture"""
@@ -760,26 +742,16 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         data = request.data.copy()
 
+         # ✅ Automatically handle profile_picture upload via django-storages
         if 'profile_picture' in request.FILES:
-            from supabase import create_client
-            import os, uuid
-
-            SUPABASE_URL = os.getenv("SUPABASE_URL")
-            SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-            SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "profile_picture")
-
-            supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
-            image_file = request.FILES['profile_picture']
-            filename = f"{uuid.uuid4()}_{image_file.name}"
-            file_content = image_file.read()
-
-            # ✅ Upload to Supabase
-            supabase_client.storage.from_(SUPABASE_BUCKET).upload(filename, file_content)
-
-            # ✅ Generate public URL
-            public_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{filename}"
-            data['profile_picture'] = public_url
-            user.profile_picture = public_url
+            user.profile_picture = request.FILES['profile_picture']
+            # Remove profile_picture from data so serializer doesn’t conflict
+            if 'profile_picture' in data:
+                del data['profile_picture']
+        
+        elif 'profile_picture' in data and data['profile_picture'] is None:
+            user.profile_picture.delete(save=False)
+            user.profile_picture = None
 
         serializer = CustomUserSerializer(user, data=data, partial=True)
         if serializer.is_valid():
