@@ -8,6 +8,10 @@ import uuid
 from django.conf import settings
 from django_enumfield import enum
 
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/profile_pictures/<student_id>/<filename>
+    return f'profile_pictures/{instance.student_id}/{filename}'
+
 class AppUserManager(BaseUserManager):
     def create_user(self,firstname, lastname, email, username, password=None):
             if not email:
@@ -45,7 +49,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     email=models.EmailField(max_length=255,unique=True)
     username = models.CharField(max_length=50)
     password=models.CharField(max_length=288)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)  
+    profile_picture = models.ImageField(upload_to=user_directory_path, blank=True, null=True)  
     is_staff=models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     objects = AppUserManager()
