@@ -321,7 +321,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Set the default file storage backend to S3 Boto3.
 # This tells Django to use django-storages for all file uploads.
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'supabase_storage.storage.SupabaseStorage'
 
 # --- Get Bucket and Project Info Directly from Environment Variables ---
 # This is more robust than calculating it from a URL.
