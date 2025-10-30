@@ -735,28 +735,49 @@ class CustomUserViewSet(UserViewSet):
         serializer = CustomUserSerializer(request.user, context={"request": request})
         return Response(serializer.data)
     
+
+
     @action(detail=False, methods=['put'], permission_classes=[IsAuthenticated])
     def update_profile(self, request):
         user = request.user
         data = request.data.copy()
 
-         # ✅ Automatically handle profile_picture upload via django-storages
+        # Handle the file upload automatically
         if 'profile_picture' in request.FILES:
             user.profile_picture = request.FILES['profile_picture']
-            # Remove profile_picture from data so serializer doesn’t conflict
             if 'profile_picture' in data:
                 del data['profile_picture']
         
+        # Handle deleting the picture
         elif 'profile_picture' in data and data['profile_picture'] is None:
             user.profile_picture.delete(save=False)
             user.profile_picture = None
 
         serializer = CustomUserSerializer(user, data=data, partial=True)
+
         if serializer.is_valid():
-            serializer.save()
-            # ✅ THIS IS THE CORRECT RESPONSE
-            # It sends back the full, updated user object
-            return Response(serializer.data, status=status.HTTP_200_OK) 
+            # =================================================================
+            # ✅ THIS IS THE NEW DEBUGGING CODE
+            # =================================================================
+            try:
+                # This save() call is where the text AND the file upload happens.
+                # If the upload fails, it will throw an exception here.
+                serializer.save()
+            except Exception as e:
+                # If the save fails, print the exact error to the logs.
+                print("--- UPLOAD FAILED: EXCEPTION CAUGHT ---")
+                print(e)
+                print("--------------------------------------")
+                # Return an error response so the frontend knows it failed.
+                return Response(
+                    {"error": "File upload failed.", "details": str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            # =================================================================
+            
+            # If the save was successful, return the full user object.
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
