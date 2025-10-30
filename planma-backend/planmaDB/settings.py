@@ -16,17 +16,14 @@ from dotenv import load_dotenv
 from celery.schedules import crontab
 import environ
 import os
-print(os.getenv("REDIS_URL"))
 import json
 import firebase_admin
 from firebase_admin import credentials
 import dj_database_url
+import ssl
 
 
-env = environ.Env(
-    # Set casting and default values if needed
-    # DB_PORT=(int, 5432),  # Cast DB_PORT to int, default to 5432
-)
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,23 +42,6 @@ else:
 
 # ✅ Define Firebase credential path before using it
 firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
-
-# try:
-#     if firebase_cred_json and not firebase_admin._apps:
-#         cred_dict = json.loads(firebase_cred_json.replace('\\n', '\n'))
-      
-#         from tempfile import NamedTemporaryFile
-#         with NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as temp_file:
-#             json.dump(cred_dict, temp_file)
-#             temp_file.flush()
-#             cred = credentials.Certificate(temp_file.name)
-
-#         firebase_admin.initialize_app(cred)
-#         print("✅ Firebase initialized successfully")
-#     else:
-#         print("⚠️ Firebase credentials not found or app already initialized")
-# except Exception as e:
-#     print("❌ Firebase init failed:", e)
 
 try:
     if firebase_cred_json and not firebase_admin._apps:
@@ -87,44 +67,21 @@ except Exception as e:
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-slqnuagt*a5=ri*ch72$pylh4^567(r@j+r6oco3knc(2f5^5t'
-# SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
-# load_dotenv(BASE_DIR / ".env")
 DEBUG = os.getenv("DEBUG", "False").lower() in ["1", "true", "yes"]
 
-RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN", "planma-app-production.up.railway.app")
-
-# ALLOWED_HOSTS = [
-#     'planma-app-production.up.railway.app',
-#     'localhost',
-#     '127.0.0.1',
-# ]
+RAILWAY_DOMAIN = os.getenv("RAILWAY_PUBLIC_DOMAIN")
 
 ALLOWED_HOSTS = [
     RAILWAY_DOMAIN,
     'localhost',
     '127.0.0.1',
-]
-
-# CSRF_TRUSTED_ORIGINS = [
-#     f"https://{RAILWAY_DOMAIN}",
-#     "https://planma-app-production.up.railway.app"
-# ]
-
-CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_DOMAIN}"]
+] if RAILWAY_DOMAIN else ['localhost', '127.0.0.1']
 
 
-# ALLOWED_HOSTS = ['*']
+if RAILWAY_DOMAIN:
+    CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_DOMAIN}"]
 
-CORS_ALLOW_HEADERS = [
-    'content-type',
-    'authorization',
-    'X-CSRFToken',
-]
 
 AUTH_USER_MODEL = "api.CustomUser"
 
@@ -138,7 +95,7 @@ INSTALLED_APPS = [
     'djoser',
     'corsheaders',
     'django_celery_beat',
-    'storages',
+    'storages',  # The django-storages app
 
     # 'api.apps.ApiConfig',
     'api',
@@ -156,19 +113,12 @@ WSGI_APPLICATION = 'planmaDB.wsgi.application'
 # Use ASGI instead of WSGI
 ASGI_APPLICATION = 'planmaDB.asgi.application'
 
-import ssl
-
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 CHANNEL_LAYERS = {
     "default": {
-        # 'BACKEND': 'channels_redis.core.InMemoryChannelLayer', 
-        # For production, use Redis:
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            # "hosts": [('127.0.0.1', 6379)],
-            # "hosts": [('localhost', 6379)],
-            # ✅ Render gives full Redis URL automatically:
             "hosts": [REDIS_URL],
         },
     },
@@ -180,9 +130,8 @@ DJOSER = {
         "user_create": "api.serializers.CustomUserCreateSerializer",
         "user": "api.serializers.CustomUserSerializer",
         },
-        'LOGIN_FIELD': 'email',  # or 'username' depending on your configuration
+        'LOGIN_FIELD': 'email',
         'USER_CREATE_PASSWORD_RETYPE': True,
-        # 'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     }
 
 REST_FRAMEWORK={
@@ -207,7 +156,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ Added before SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -215,7 +164,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'planmaDB.urls'
@@ -236,168 +184,112 @@ TEMPLATES = [
     },
 ]
 
-
-# # Database
-# # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'Planma DB',
-#         'USER': 'postgres',
-#         'PASSWORD': 'planma123',
-#         'HOST': 'localhost', 
-#         'PORT': '5432',
-#     }
-# }
-
-
-# # CORS_ALLOWED_ORIGINS = [
-# #     "http://localhost:52667",  # or whatever port your Flutter app uses
-# #     "http://127.0.0.1:8000",  # also add this if needed
-# # ]
-
 # Database
-# -------------------------------------------------------------------
 # Uses Supabase PostgreSQL via .env file
-import dj_database_url
-
 database_url = os.getenv("DATABASE_URL")
-print("✅ DATABASE_URL from env:", database_url)
-
-DATABASES = {
-    "default": dj_database_url.parse(
-        database_url,
-        conn_max_age=60,
-        ssl_require=True
-    )
-}
-
-DATABASES["default"]["OPTIONS"] = {"connect_timeout": 10}
-
-
-
-
+if database_url:
+    print("✅ DATABASE_URL found, configuring for production.")
+    DATABASES = {
+        "default": dj_database_url.parse(
+            database_url,
+            conn_max_age=60,
+            ssl_require=True
+        )
+    }
+    DATABASES["default"]["OPTIONS"] = {"connect_timeout": 10}
+else:
+    print("⚠️ DATABASE_URL not found. Falling back to local SQLite.")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
-# TIME_ZONE = 'UTC'
 TIME_ZONE = 'Asia/Manila'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
+# --- Static and Media File Configuration ---
+
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = '/static/'
-
-# ✅ Added: STATIC_ROOT required by Render for collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Set the default file storage backend to S3 Boto3.
-# This tells Django to use django-storages for all file uploads.
-DEFAULT_FILE_STORAGE = 'supabase_storage.storage.SupabaseStorage'
+# --- Supabase Storage Settings ---
 
-# --- Get Bucket and Project Info Directly from Environment Variables ---
-# This is more robust than calculating it from a URL.
+# ✅ CORRECTED: This is the right backend for django-storages with an S3-compatible service.
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET")
-SUPABASE_PROJECT_ID = os.getenv("SUPABASE_PROJECT_ID") # Reads the new variable you created
+SUPABASE_PROJECT_ID = os.getenv("SUPABASE_PROJECT_ID")
 
 # --- Configure Boto3 (the underlying AWS S3 library) ---
 
-# Set the bucket name for uploads.
+# ✅ ADDED: Load the service role keys from your environment variables.
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+
 AWS_STORAGE_BUCKET_NAME = SUPABASE_BUCKET
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1") # Region doesn't matter for Supabase
 
-# Set the region. Reads from environment, with a fallback.
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
+# ✅ CORRECTED: Use the recommended endpoint URL format.
+AWS_S3_ENDPOINT_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1'
 
-# Set the custom endpoint URL to point to your Supabase project.
-# This is how we tell the AWS library to talk to Supabase instead of AWS.
-AWS_S3_ENDPOINT_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/s3'
-
-# Use S3v4 signature version, which is required by Supabase.
 AWS_S3_SIGNATURE_VERSION = 's3v4'
-
-# Set to False to prevent overwriting files with the same name.
-# Django-storages will automatically add a random suffix instead.
-AWS_S3_FILE_OVERWRITE = False
+AWS_S3_FILE_OVERWRITE = False # Recommended to avoid accidental file replacement
 
 # --- Public URL for Media Files ---
 # This defines the public-facing URL for your uploaded files.
 MEDIA_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/{SUPABASE_BUCKET}/'
-
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Note: MEDIA_ROOT is not needed when using a remote storage backend like S3/Supabase.
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery Configuration
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'UTC'
 CELERY_TIMEZONE = 'Asia/Manila'
 CELERY_WORKER_POOL = 'solo'
 CELERY_WORKER_CONCURRENCY = 4
-CELERY_TASK_ANNOTATIONS = {
-    
-}
 
 CELERY_BEAT_SCHEDULE = {
     'check-reminders-every-minute': {
         'task': 'api.tasks.send_all_reminders',
-        'schedule': crontab(minute='*'),  # Every minute
+        'schedule': crontab(minute='*'),
     }
 }
 
-# For Upstash rediss://
+# For Upstash rediss:// with SSL
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'ssl_cert_reqs': ssl.CERT_NONE  # CERT_NONE
+    'ssl_cert_reqs': ssl.CERT_NONE
 }
-
 CELERY_REDIS_BACKEND_USE_SSL = {
-    'ssl_cert_reqs': ssl.CERT_NONE  # CERT_NONE
+    'ssl_cert_reqs': ssl.CERT_NONE
 }
 
-print("REDIS_URL =", os.getenv("REDIS_URL"))
-print("CELERY_BROKER_URL =", os.getenv("CELERY_BROKER_URL"))
-print("CELERY_RESULT_BACKEND =", os.getenv("CELERY_RESULT_BACKEND"))
 
-
-# settings.py
-
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -415,7 +307,7 @@ LOGGING = {
     },
 }
 
-# ✅ Added for HTTPS and security on Render
+# ✅ Added for HTTPS and security on Railway/Render
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
