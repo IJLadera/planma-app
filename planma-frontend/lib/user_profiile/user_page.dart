@@ -314,12 +314,34 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String? username = context.watch<UserProfileProvider>().username;
-    String? firstName = context.watch<UserProfileProvider>().firstName;
-    String? lastName = context.watch<UserProfileProvider>().lastName;
-    String? profilePictureUrl =
-        context.watch<UserProfileProvider>().profilePicture;
+    final userProvider = context.watch<UserProfileProvider>();
+
+    // Get the user data from the provider
+    final username = userProvider.username;
+    final firstName = userProvider.firstName;
+    final lastName = userProvider.lastName;
+    final profilePictureUrl = userProvider.profilePicture;
+
     final userPreferencesProvider = context.watch<UserPreferencesProvider>();
+
+    if (username == null || firstName == null || lastName == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'User Profile',
+            style: GoogleFonts.openSans(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF173F70),
+            ),
+          ),
+          backgroundColor: Color(0xFFFFFFFF),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     // Ensure the URL is absolute
     String getFullImageUrl(String? url) {
@@ -400,22 +422,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditProfileScreen(
-                      username: username!,
-                      firstName: firstName!,
-                      lastName: lastName!,
+                      username: username,
+                      firstName: firstName,
+                      lastName: lastName,
                       profilePictureUrl: profilePictureUrl,
                     ),
                   ),
                 );
-
-                if (updatedData != null) {
-                  setState(() {
-                    username = updatedData['username'];
-                    firstName = updatedData['firstName'];
-                    lastName = updatedData['lastName'];
-                    profilePictureUrl = updatedData['profile_picture'];
-                  });
-                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),
