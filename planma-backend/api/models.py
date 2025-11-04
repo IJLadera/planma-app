@@ -49,7 +49,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     email=models.EmailField(max_length=255,unique=True)
     username = models.CharField(max_length=50)
     password=models.CharField(max_length=288)
-    profile_picture = models.ImageField(upload_to=user_directory_path, blank=True, null=True)  
+    profile_picture = models.URLField(max_length=500, blank=True, null=True)
     is_staff=models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     objects = AppUserManager()

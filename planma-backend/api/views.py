@@ -740,10 +740,21 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         data = request.data.copy()
 
+        from supabase_storage import upload_profile_picture
          # ✅ Automatically handle profile_picture upload via django-storages
         if 'profile_picture' in request.FILES:
-            user.profile_picture = request.FILES['profile_picture']
-            # Remove profile_picture from data so serializer doesn’t conflict
+            file = request.FILES['profile_picture']
+            filename = f"{user.student_id}_{file.name}"
+            
+            try:
+                # ✅ Upload to Supabase
+                uploaded_url = upload_profile_picture(file, filename)
+                user.profile_picture = uploaded_url  # Save URL instead of file object
+            except Exception as e:
+                return Response(
+                    {"error": f"Upload failed: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
             if 'profile_picture' in data:
                 del data['profile_picture']
         
