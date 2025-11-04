@@ -241,21 +241,22 @@ SUPABASE_PROJECT_ID = os.getenv("SUPABASE_PROJECT_ID")
 # --- Configure Boto3 (the underlying AWS S3 library) ---
 
 # ✅ ADDED: Load the service role keys from your environment variables.
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+# AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
-AWS_STORAGE_BUCKET_NAME = SUPABASE_BUCKET
+# AWS_STORAGE_BUCKET_NAME = SUPABASE_BUCKET
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1") # Region doesn't matter for Supabase
 
 # ✅ CORRECTED: Use the recommended endpoint URL format.
-AWS_S3_ENDPOINT_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1'
+# AWS_S3_ENDPOINT_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1'
 
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False # Recommended to avoid accidental file replacement
 
 # --- Public URL for Media Files ---
 # This defines the public-facing URL for your uploaded files.
-MEDIA_URL = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/{SUPABASE_BUCKET}/'
+MEDIA_URL = f"https://{os.getenv('SUPABASE_PROJECT_ID')}.supabase.co/storage/v1/object/public/{os.getenv('SUPABASE_BUCKET')}/"
+MEDIA_ROOT = BASE_DIR / "media"
 # Note: MEDIA_ROOT is not needed when using a remote storage backend like S3/Supabase.
 
 
