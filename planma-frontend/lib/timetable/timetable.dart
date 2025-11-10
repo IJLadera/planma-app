@@ -48,43 +48,66 @@ class _TimetableState extends State<Timetable> {
     final provider = Provider.of<ScheduleEntryProvider>(context, listen: false);
     await provider.fetchScheduleEntries();
 
+    List<ScheduleEntry> entries = provider.scheduleEntries;
     List<Appointment> tempAppointments = [];
 
-    for (var entry in provider.scheduleEntries) {
-      String name = "Unknown";
-      String status = "Pending";
+    if (entries.isEmpty) {
+      setState(() {
+        _appointments = [];
+        _dataSource = _AppointmentDataSource([]);
+      });
+      return;
+    }
 
-      if (entry.categoryType == "Event") {
-        name = await provider.fetchEventName(entry.referenceId);
-      } else if (entry.categoryType == "Task") {
-        Map<String, dynamic> taskDetails =
-            await provider.fetchTaskDetails(entry.referenceId);
-        name = taskDetails["task_name"] ?? "Unknown";
-        status = taskDetails["status"] ?? "Pending";
-      } else if (entry.categoryType == "Activity") {
-        Map<String, dynamic> activityDetails =
-            await provider.fetchActivityDetails(entry.referenceId);
-        name = activityDetails["activity_name"] ?? "Unknown";
-        status = activityDetails["status"] ?? "Pending";
-      } else if (entry.categoryType == "Goal") {
-        Map<String, dynamic> goalDetails =
-            await provider.fetchGoalDetails(entry.referenceId);
-        name = goalDetails["goal_name"] ?? "Unknown";
-        status = goalDetails["status"] ?? "Pending";
-      } else if (entry.categoryType == "Class") {
-        name = await provider.fetchClassDetails(entry.referenceId);
-      }
+    // --- Group by category_type + reference_id ---
+    Map<String, List<ScheduleEntry>> grouped = {};
+    for (var entry in entries) {
+      String key = "${entry.categoryType}-${entry.referenceId}";
+      grouped.putIfAbsent(key, () => []).add(entry);
+    }
+
+    // --- Prepare filters for bulk request ---
+    List<Map<String, dynamic>> filters = grouped.values
+        .map((group) => {
+              "category_type": group.first.categoryType,
+              "reference_id": group.first.referenceId,
+            })
+        .toList();
+
+    // --- Fetch all related info in one bulk call ---
+    var bulkResponse = await provider.fetchBulkFilteredEntries(filters);
+    if (bulkResponse == null) return;
+
+    // --- Map results for quick lookup ---
+    Map<String, dynamic> relatedInfoMap = {
+      for (var item in bulkResponse)
+        "${item['category_type']}-${item['reference_id']}": item["related_info"]
+    };
+
+    // --- Create Appointments ---
+    for (var entry in entries) {
+      String groupKey = "${entry.categoryType}-${entry.referenceId}";
+      var relatedInfo =
+          relatedInfoMap[groupKey] ?? {"name": "Unknown", "status": "Pending"};
+
+      String name = relatedInfo["name"] ?? "Unknown";
+      String status = relatedInfo["status"] ?? "Pending";
 
       Color appointmentColor = _getCategoryColor(entry.categoryType);
       if (status == "Completed") {
         appointmentColor = appointmentColor.withOpacity(0.4);
       }
 
+      // Build DateTime objects safely
+      DateTime date = entry.scheduledDate;
+      DateTime start = DateTime.parse(
+          "${date.toIso8601String().split('T')[0]}T${entry.scheduledStartTime}");
+      DateTime end = DateTime.parse(
+          "${date.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}");
+
       tempAppointments.add(Appointment(
-        startTime: DateTime.parse(
-            '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledStartTime}'),
-        endTime: DateTime.parse(
-            '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}'),
+        startTime: start,
+        endTime: end,
         subject: name,
         color: appointmentColor,
         notes: status,

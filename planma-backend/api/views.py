@@ -2153,6 +2153,168 @@ class ScheduleEntryViewSet(viewsets.ModelViewSet):
         ).delete()
 
         return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'])
+    def filter(self, request):
+        category_type = request.query_params.get('category_type')
+        reference_id = request.query_params.get('reference_id')
+
+        if not category_type or not reference_id:
+            return Response(
+                {"error": "category_type and reference_id are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        entries = ScheduleEntry.objects.filter(
+            student_id=request.user,
+            category_type=category_type,
+            reference_id=reference_id
+        )
+
+        # --- Fetch related object details ---
+        try:
+            if category_type == "Event":
+                from .models import CustomEvents
+                event = CustomEvents.objects.filter(event_id=reference_id).values("event_name").first()
+                if event:
+                    related_info = {"name": event["event_name"], "status": None}
+
+            elif category_type == "Task":
+                from .models import CustomTask
+                task = CustomTask.objects.filter(task_id=reference_id).values("task_name", "status").first()
+                if task:
+                    related_info = {"name": task["task_name"], "status": task["status"]}
+
+            elif category_type == "Activity":
+                from .models import CustomActivity
+                activity = CustomActivity.objects.filter(activity_id=reference_id).values("activity_name", "status").first()
+                if activity:
+                    related_info = {"name": activity["activity_name"], "status": activity["status"]}
+
+            elif category_type == "Goal":
+                from .models import GoalSchedule
+                goal_sched = (
+                    GoalSchedule.objects.filter(goalschedule_id=reference_id)
+                    .select_related("goal_id")
+                    .first()
+                )
+                if goal_sched:
+                    related_info = {
+                        "name": goal_sched.goal_id.goal_name,
+                        "status": goal_sched.status,
+                    }
+
+            elif category_type == "Class":
+                from .models import CustomClassSchedule
+                class_sched = (
+                    CustomClassSchedule.objects.filter(classsched_id=reference_id)
+                    .select_related("subject")
+                    .first()
+                )
+                if class_sched:
+                    related_info = {
+                        "name": class_sched.subject.subject_code,
+                        "status": None,
+                    }
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serializer = self.get_serializer(entries, many=True)
+        return Response(
+            {
+                "related_info": related_info,
+                "entries": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+    
+    @action(detail=False, methods=['post'])
+    def bulk_filter(self, request):
+        """
+        Accepts a list of {category_type, reference_id} objects in the request body.
+        Returns related_info + entries for each pair.
+        """
+        data = request.data.get('filters', [])
+        if not isinstance(data, list) or not data:
+            return Response(
+                {"error": "Expected 'filters' to be a non-empty list."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        results = []
+
+        for item in data:
+            category_type = item.get('category_type')
+            reference_id = item.get('reference_id')
+            if not category_type or not reference_id:
+                continue
+
+            entries = ScheduleEntry.objects.filter(
+                student_id=request.user,
+                category_type=category_type,
+                reference_id=reference_id
+            )
+
+            related_info = {"name": "Unknown", "status": None}
+
+            try:
+                if category_type == "Event":
+                    from .models import CustomEvents
+                    event = CustomEvents.objects.filter(event_id=reference_id).values("event_name").first()
+                    if event:
+                        related_info = {"name": event["event_name"], "status": None}
+
+                elif category_type == "Task":
+                    from .models import CustomTask
+                    task = CustomTask.objects.filter(task_id=reference_id).values("task_name", "status").first()
+                    if task:
+                        related_info = {"name": task["task_name"], "status": task["status"]}
+
+                elif category_type == "Activity":
+                    from .models import CustomActivity
+                    activity = CustomActivity.objects.filter(activity_id=reference_id).values("activity_name", "status").first()
+                    if activity:
+                        related_info = {"name": activity["activity_name"], "status": activity["status"]}
+
+                elif category_type == "Goal":
+                    from .models import GoalSchedule
+                    goal_sched = (
+                        GoalSchedule.objects.filter(goalschedule_id=reference_id)
+                        .select_related("goal_id")
+                        .first()
+                    )
+                    if goal_sched:
+                        related_info = {
+                            "name": goal_sched.goal_id.goal_name,
+                            "status": goal_sched.status,
+                        }
+
+                elif category_type == "Class":
+                    from .models import CustomClassSchedule
+                    class_sched = (
+                        CustomClassSchedule.objects.filter(classsched_id=reference_id)
+                        .select_related("subject")
+                        .first()
+                    )
+                    if class_sched:
+                        related_info = {
+                            "name": class_sched.subject.subject_code,
+                            "status": None,
+                        }
+
+            except Exception as e:
+                related_info = {"name": "Error: " + str(e), "status": None}
+
+            serializer = self.get_serializer(entries, many=True)
+            results.append({
+                "category_type": category_type,
+                "reference_id": reference_id,
+                "related_info": related_info,
+                "entries": serializer.data
+            })
+
+        return Response(results, status=status.HTTP_200_OK)
 
         
     

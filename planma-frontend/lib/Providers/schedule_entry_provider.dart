@@ -26,6 +26,27 @@ class ScheduleEntryProvider with ChangeNotifier {
     _baseApiUrl = '$baseUrl/api';
   }
 
+  Future<Map<String, dynamic>?> fetchFilteredEntries(
+      String categoryType, String referenceId) async {
+    final url = Uri.parse(
+        '$_baseApiUrl/schedule/filter/?category_type=$categoryType&reference_id=$referenceId');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      debugPrint("Failed to fetch filtered entries: ${response.body}");
+      return null;
+    }
+  }
+
   Future<void> fetchScheduleEntries() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     _accessToken = sharedPreferences.getString("access");
@@ -54,162 +75,23 @@ class ScheduleEntryProvider with ChangeNotifier {
     }
   }
 
-  Future<String> fetchEventName(int referenceId) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    _accessToken = sharedPreferences.getString("access");
+  Future<List<dynamic>?> fetchBulkFilteredEntries(
+      List<Map<String, dynamic>> filters) async {
+    final url = Uri.parse("$_baseApiUrl/schedule/bulk_filter/");
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'filters': filters}),
+    );
 
-    final url = Uri.parse("$_baseApiUrl/events/$referenceId/");
-
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return data["event_name"];
-      } else {
-        return "Unknown Event";
-      }
-    } catch (error) {
-      print("Error fetching event name: $error");
-      return "Unknown Event";
-    }
-  }
-
-  Future<Map<String, dynamic>> fetchTaskDetails(int referenceId) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    _accessToken = sharedPreferences.getString("access");
-
-    final url = Uri.parse("$_baseApiUrl/tasks/$referenceId/");
-
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return {
-          "task_name": data["task_name"],
-          "status": data["status"] ?? "Pending", // Default to "Pending" if null
-        };
-      } else {
-        return {
-          "task_name": "Unknown Task",
-          "status": "Unknown Status",
-        };
-      }
-    } catch (error) {
-      print("Error fetching task details: $error");
-      return {
-        "task_name": "Unknown Task",
-        "status": "Unknown Status",
-      };
-    }
-  }
-
-  Future<Map<String, dynamic>> fetchActivityDetails(int referenceId) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    _accessToken = sharedPreferences.getString("access");
-
-    final url = Uri.parse("$_baseApiUrl/activities/$referenceId/");
-
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return {
-          "activity_name": data["activity_name"],
-          "status": data["status"] ?? "Pending", // Default to "Pending" if null
-        };
-      } else {
-        return {
-          "activity_name": "Unknown Activity",
-          "status": "Unknown Status",
-        };
-      }
-    } catch (error) {
-      print("Error fetching activity details: $error");
-      return {
-        "activity_name": "Unknown Task",
-        "status": "Unknown Status",
-      };
-    }
-  }
-
-  Future<Map<String, dynamic>> fetchGoalDetails(int referenceId) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    _accessToken = sharedPreferences.getString("access");
-
-    final url = Uri.parse("$_baseApiUrl/goal-schedules/$referenceId/");
-
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return {
-          "goal_name": data["goal_id"]?["goal_name"] ?? "Unknown Goal",
-          "status": data.containsKey("status")
-              ? data["status"]
-              : "Pending", // Default to "Pending" if null
-        };
-      } else {
-        return {
-          "goal_name": "Unknown Goal",
-          "status": "Unknown Status",
-        };
-      }
-    } catch (error) {
-      print("Error fetching Goal details: $error");
-      return {
-        "goal_name": "Unknown Goal",
-        "status": "Unknown Status",
-      };
-    }
-  }
-
-  Future<String> fetchClassDetails(int referenceId) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    _accessToken = sharedPreferences.getString("access");
-
-    final url = Uri.parse("$_baseApiUrl/class-schedules/$referenceId/");
-
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        return data["subject"]?["subject_code"] ?? "Unknown Classs";
-      } else {
-        return "Unknown Class";
-      }
-    } catch (error) {
-      print("Error fetching class details: $error");
-      return "Unknown Class";
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      debugPrint("Failed to fetch bulk filtered entries: ${response.body}");
+      return null;
     }
   }
 
