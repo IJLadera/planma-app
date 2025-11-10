@@ -348,11 +348,17 @@ class _AddEventScreen extends State<AddEventScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     _isLoading = true; // Show loading indicator
                   });
-                  _createEvent;
+
+                  await _createEvent();
+
+                  setState(() {
+                    _isLoading =
+                        false; // Hide loading indicator after submission
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
