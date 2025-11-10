@@ -92,6 +92,10 @@ class UserProfileProvider with ChangeNotifier {
       request.fields['lastname'] = lastName;
       request.fields['username'] = username;
 
+      await fetchUserProfile(); // Refresh user data from backend
+
+      notifyListeners(); // This triggers rebuild in UserProfileScreen
+
       // If an image is provided, attach it as a file
       if (imageFile != null) {
         print("Uploading Image: ${imageFile.name}, Path: ${imageFile.path}");

@@ -20,7 +20,8 @@ class CustomCalendar extends StatefulWidget {
 class _CalendarViewState extends State<CustomCalendar> {
   bool isCalendarActive = true; // Track which view is currently active
   DateTime focusedDay = DateTime.now(); // Tracks the currently displayed month
-  DateTime selectedDay = DateTime.now(); // Tracks the selected day
+  DateTime selectedDay = DateTime(DateTime.now().year, DateTime.now().month,
+      DateTime.now().day); // Tracks the selected day
   Map<DateTime, List<Map<String, String>>> events = {};
 
   @override
@@ -272,9 +273,7 @@ class _CalendarViewState extends State<CustomCalendar> {
                         });
                       },
                       eventLoader: (day) {
-                        List<Map<String, String>> loadedEvents =
-                            _getEventsForDay(day);
-                        return loadedEvents;
+                        return events.isEmpty ? [] : _getEventsForDay(day);
                       },
                       onPageChanged: (focused) {
                         setState(() {
@@ -349,10 +348,11 @@ class _CalendarViewState extends State<CustomCalendar> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: events
                                 .map((event) {
-                                  String categoryType =
-                                      event is Map<String, String>
+                                  String categoryType = (event is ScheduleEntry)
+                                      ? event.categoryType
+                                      : (event is Map<String, String>
                                           ? event["categoryType"] ?? "Unknown"
-                                          : "Unknown";
+                                          : "Unknown");
 
                                   // Limits marker number per categoryType
                                   if (uniqueCategories.contains(categoryType))
@@ -382,8 +382,10 @@ class _CalendarViewState extends State<CustomCalendar> {
                   ),
                   SizedBox(height: 20),
                   Expanded(
-                    child: ListView(
-                      children: _getEventsForDay(selectedDay).map((event) {
+                    child: ListView.builder(
+                      itemCount: _getEventsForDay(selectedDay).length,
+                      itemBuilder: (context, index) {
+                        final event = _getEventsForDay(selectedDay)[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 4.0, horizontal: 10.0),
@@ -406,10 +408,9 @@ class _CalendarViewState extends State<CustomCalendar> {
                                       color: Color(0xFF173F70),
                                     ),
                                   ),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    event[
-                                        "timeRange"]!, // Replace with actual details if available
+                                    event["timeRange"]!,
                                     style: GoogleFonts.openSans(
                                       fontSize: 14,
                                       color: Colors.grey[700],
@@ -420,7 +421,7 @@ class _CalendarViewState extends State<CustomCalendar> {
                             ),
                           ),
                         );
-                      }).toList(),
+                      },
                     ),
                   ),
                 ],

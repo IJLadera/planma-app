@@ -22,6 +22,7 @@ class _AddGoalSession extends State<AddGoalSession> {
   final TextEditingController _endTimeController = TextEditingController();
 
   DateTime? _scheduledDate;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -292,7 +293,12 @@ class _AddGoalSession extends State<AddGoalSession> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () => _submitForm(context),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true; // Show loading indicator
+                  });
+                  _submitForm(context);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
@@ -301,13 +307,15 @@ class _AddGoalSession extends State<AddGoalSession> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
-                child: Text(
-                  'Add Goal Session',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Add Goal Session',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -317,4 +325,3 @@ class _AddGoalSession extends State<AddGoalSession> {
     );
   }
 }
-

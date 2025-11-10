@@ -19,6 +19,7 @@ class _AddActivityState extends State<AddActivityScreen> {
   final _endTimeController = TextEditingController();
 
   DateTime? _scheduledDate;
+  bool _isLoading = false;
 
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
@@ -120,7 +121,8 @@ class _AddActivityState extends State<AddActivityScreen> {
 
     String activityName = _activityNameController.text.trim();
     String? rawActivityDescription = _activityDescriptionController.text.trim();
-    String? normalizedActivityDescription = rawActivityDescription.isEmpty ? null : rawActivityDescription;
+    String? normalizedActivityDescription =
+        rawActivityDescription.isEmpty ? null : rawActivityDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -296,7 +298,12 @@ class _AddActivityState extends State<AddActivityScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () => _createActivity(context),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true; // Show loading indicator
+                  });
+                  _createActivity(context);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
@@ -304,13 +311,15 @@ class _AddActivityState extends State<AddActivityScreen> {
                   ),
                   padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
-                child: Text(
-                  'Create Activity',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Edit Activity',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],

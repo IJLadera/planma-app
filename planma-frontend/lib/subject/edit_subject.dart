@@ -27,6 +27,7 @@ class _EditClassState extends State<EditClass> {
   String? selectedSemester;
   int? selectedSemesterId;
   String? selectedDay;
+  bool _isLoading = false;
 
   final Map<String, String> dayAbbreviationToFull = {
     'S': 'Sunday',
@@ -551,7 +552,12 @@ class _EditClassState extends State<EditClass> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14.0, vertical: 20.0),
                   child: ElevatedButton(
-                    onPressed: () => _editClassSchedule(context),
+                    onPressed: () {
+                      setState(() {
+                        _isLoading = true; // Show loading indicator
+                      });
+                      _editClassSchedule(context);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70),
                       shape: RoundedRectangleBorder(
@@ -560,13 +566,15 @@ class _EditClassState extends State<EditClass> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 15, horizontal: 100),
                     ),
-                    child: Text(
-                      'Edit Class Schedule',
-                      style: GoogleFonts.openSans(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Edit Class Schedule',
+                            style: GoogleFonts.openSans(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],

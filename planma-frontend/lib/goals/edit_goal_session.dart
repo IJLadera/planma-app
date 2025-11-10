@@ -21,6 +21,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
   late TextEditingController _endTimeController;
 
   DateTime? _scheduledDate;
+  bool _isLoading = false;
 
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
@@ -316,7 +317,12 @@ class _EditGoalSessionState extends State<EditGoalSession> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () => _editGoalSession(context),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true; // Show loading indicator
+                  });
+                  _editGoalSession(context);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
@@ -325,13 +331,15 @@ class _EditGoalSessionState extends State<EditGoalSession> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
-                child: Text(
-                  'Edit Goal Session',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Edit Goal Session',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],

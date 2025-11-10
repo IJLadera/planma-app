@@ -29,6 +29,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
   int? selectedSemesterId;
   String? selectedSemId;
   String? _selectedDay;
+  bool _isLoading = false;
 
   final Map<String, String> dayAbbreviationToFull = {
     'S': 'Sunday',
@@ -553,7 +554,12 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 20.0),
                   child: ElevatedButton(
-                    onPressed: () => _submitClassSchedule(context),
+                    onPressed: () {
+                      setState(() {
+                        _isLoading = true; // Show loading indicator
+                      });
+                      _submitClassSchedule(context);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70),
                       shape: RoundedRectangleBorder(
@@ -562,11 +568,15 @@ class _AddClassScreenState extends State<AddClassScreen> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 15, horizontal: 100),
                     ),
-                    child: Text('Add Schedule',
-                        style: GoogleFonts.openSans(
-                          fontSize: 16,
-                          color: Colors.white,
-                        )),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Add Class Schedule',
+                            style: GoogleFonts.openSans(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],

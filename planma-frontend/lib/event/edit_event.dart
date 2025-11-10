@@ -24,6 +24,7 @@ class _EditEvent extends State<EditEvent> {
   DateTime? _scheduledDate;
   String? _selectedEventType;
   final List<String> _EventType = ['Academic', 'Personal'];
+  bool _isLoading = false;
 
   void _selectDate(BuildContext context, DateTime? initialDate) async {
     final pickedDate = await showDatePicker(
@@ -173,7 +174,8 @@ class _EditEvent extends State<EditEvent> {
 
     String eventName = _eventNameController.text.trim();
     String? rawEventDescription = _descriptionController.text.trim();
-    String? normalizedEventDescription = rawEventDescription.isEmpty ? null : rawEventDescription;
+    String? normalizedEventDescription =
+        rawEventDescription.isEmpty ? null : rawEventDescription;
     String location = _eventLocationController.text.trim();
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
@@ -360,8 +362,7 @@ class _EditEvent extends State<EditEvent> {
                   ),
                   const SizedBox(height: 12),
                   CustomWidgets.buildDropdownField(
-                    label:
-                        'Choose Event Type', 
+                    label: 'Choose Event Type',
                     value: _selectedEventType,
                     items: _EventType,
                     onChanged: (String? value) {
@@ -382,7 +383,12 @@ class _EditEvent extends State<EditEvent> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () => _editEvent(context),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true; // Show loading indicator
+                  });
+                  _editEvent;
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
@@ -390,13 +396,15 @@ class _EditEvent extends State<EditEvent> {
                   ),
                   padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
-                child: Text(
-                  'Edit Event',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Edit Event',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],

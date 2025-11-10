@@ -25,6 +25,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
   DateTime? _scheduledDate;
   DateTime? _deadline;
   int? _subject;
+  bool _isLoading = false;
 
   // Method to select date
   Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
@@ -134,11 +135,13 @@ class _CreateTaskState extends State<AddTaskScreen> {
 
   void _submitTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
-    final subjects = Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
+    final subjects =
+        Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
 
     String taskName = _taskNameController.text.trim();
     String? rawTaskDescription = _descriptionController.text.trim();
-    String? normalizedTaskDescription = rawTaskDescription.isEmpty ? null : rawTaskDescription;
+    String? normalizedTaskDescription =
+        rawTaskDescription.isEmpty ? null : rawTaskDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
     final startTime = _stringToTimeOfDay(startTimeString);
@@ -400,7 +403,12 @@ class _CreateTaskState extends State<AddTaskScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () => _submitTask(context),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true; // Show loading indicator
+                  });
+                  _submitTask(context);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
@@ -409,13 +417,15 @@ class _CreateTaskState extends State<AddTaskScreen> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
-                child: Text(
-                  'Create Task',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Create Task',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],

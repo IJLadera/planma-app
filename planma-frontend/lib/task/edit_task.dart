@@ -28,6 +28,7 @@ class _EditTask extends State<EditTask> {
   DateTime? _scheduledDate;
   DateTime? _deadline;
   int? _subject;
+  bool _isLoading = false;
 
   // Method to select date
   Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
@@ -204,7 +205,8 @@ class _EditTask extends State<EditTask> {
 
     String taskName = _taskNameController.text.trim();
     String? rawTaskDescription = _descriptionController.text.trim();
-    String? normalizedTaskDescription = rawTaskDescription.isEmpty ? null : rawTaskDescription;
+    String? normalizedTaskDescription =
+        rawTaskDescription.isEmpty ? null : rawTaskDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -427,7 +429,12 @@ class _EditTask extends State<EditTask> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () => _editTask(context),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true; // Show loading indicator
+                  });
+                  _editTask(context);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
@@ -436,13 +443,15 @@ class _EditTask extends State<EditTask> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
-                child: Text(
-                  'Edit Task',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Edit Task',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],
