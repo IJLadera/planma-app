@@ -24,6 +24,7 @@ class _AddEventScreen extends State<AddEventScreen> {
   final List<String> _eventTypes = ['Academic', 'Personal'];
 
   bool _isSubmitting = false;
+  bool _isLoading = false;
 
   // Method to select date
   void _selectDate(BuildContext context, DateTime? initialDate) async {
@@ -132,7 +133,8 @@ class _AddEventScreen extends State<AddEventScreen> {
     String eventName = _eventNameController.text.trim();
     String location = _eventLocationController.text.trim();
     String? rawEventDescription = _eventDescController.text.trim();
-    String? normalizedEventDescription = rawEventDescription.isEmpty ? null : rawEventDescription;
+    String? normalizedEventDescription =
+        rawEventDescription.isEmpty ? null : rawEventDescription;
     String startTimeString = _startTimeController.text.trim();
     String endTimeString = _endTimeController.text.trim();
 
@@ -209,8 +211,7 @@ class _AddEventScreen extends State<AddEventScreen> {
       String errorMessage;
 
       if (error.toString().contains('Scheduling overlap')) {
-        errorMessage =
-            'This time slot overlaps with another event.';
+        errorMessage = 'This time slot overlaps with another event.';
       } else if (error.toString().contains('Duplicate event entry detected')) {
         errorMessage = 'This event already exists.';
       } else {
@@ -347,7 +348,12 @@ class _AddEventScreen extends State<AddEventScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: _createEvent,
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true; // Show loading indicator
+                  });
+                  _createEvent;
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(
@@ -356,13 +362,15 @@ class _AddEventScreen extends State<AddEventScreen> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                 ),
-                child: Text(
-                  'Create Event',
-                  style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Create Event',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],

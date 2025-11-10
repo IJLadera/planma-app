@@ -24,6 +24,7 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
   String? _selectedYearLevel;
   String? _selectedStartYear;
   String? _selectedEndYear;
+  bool _isLoading = false;
 
   final List<String> _semesterOptions = ['1st Semester', '2nd Semester'];
   final List<String> _yearLevelOptions = [
@@ -356,7 +357,12 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16.0, vertical: 20.0),
                 child: ElevatedButton(
-                  onPressed: () => _submitSemester(context),
+                  onPressed: () {
+                    setState(() {
+                      _isLoading = true; // Show loading indicator
+                    });
+                    _submitSemester(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),
                     shape: RoundedRectangleBorder(
@@ -365,11 +371,15 @@ class _EditSemesterScreenState extends State<EditSemesterScreen> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 100),
                   ),
-                  child: Text(
-                    'Edit Semester',
-                    style:
-                        GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          'Edit Semester',
+                          style: GoogleFonts.openSans(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ],

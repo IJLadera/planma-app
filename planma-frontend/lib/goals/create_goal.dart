@@ -25,6 +25,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
   String? _selectedTimeframe;
   // Duration variables
   Duration _targetDuration = Duration();
+  bool _isLoading = false;
 
   // Dropdown options
   final List<String> _goalTypes = ['Academic', 'Personal'];
@@ -311,7 +312,12 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 20.0),
                   child: ElevatedButton(
-                    onPressed: () => _submitGoal(context),
+                    onPressed: () {
+                      setState(() {
+                        _isLoading = true; // Show loading indicator
+                      });
+                      _submitGoal(context);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70),
                       shape: RoundedRectangleBorder(
@@ -320,11 +326,15 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 15, horizontal: 100),
                     ),
-                    child: Text('Add Goal',
-                        style: GoogleFonts.openSans(
-                          fontSize: 16,
-                          color: Colors.white,
-                        )),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Create Goal',
+                            style: GoogleFonts.openSans(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],

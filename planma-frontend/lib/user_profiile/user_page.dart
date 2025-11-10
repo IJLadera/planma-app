@@ -51,9 +51,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         await context.read<UserPreferencesProvider>().fetchUserPreferences();
+
+        // Check if widget is still active before doing anything
+        if (!mounted) return;
+
         final userPreferences =
             context.read<UserPreferencesProvider>().userPreferences;
+
         if (userPreferences.isNotEmpty) {
+          // Safe to call setState
           setState(() {
             sleepTime =
                 CustomWidget.parseTimeOfDay(userPreferences[0].usualSleepTime);
@@ -61,11 +67,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 CustomWidget.parseTimeOfDay(userPreferences[0].usualWakeTime);
             reminderOffsetTime =
                 formatReminderOffset(userPreferences[0].reminderOffsetTime);
-            // print('Reminder Time: $reminderOffsetTime');
           });
         }
       } catch (error) {
-        print('Error fetching preferences: $error'); // Debugging line
+        print('Error fetching preferences: $error');
+
+        // Check again before using context
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error fetching preferences: $error")),
         );
@@ -418,7 +426,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                final updatedData = await Navigator.push(
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditProfileScreen(
@@ -429,6 +437,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
                   ),
                 );
+                await context.read<UserProfileProvider>().fetchUserProfile();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF173F70),

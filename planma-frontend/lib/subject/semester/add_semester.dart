@@ -22,6 +22,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
   String? _selectedYearLevel;
   String? _selectedStartYear;
   String? _selectedEndYear;
+  bool _isLoading = false;
 
   final List<String> _semesterOptions = ['1st Semester', '2nd Semester'];
   final List<String> _yearLevelOptions = [
@@ -329,7 +330,12 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16.0, vertical: 20.0),
                 child: ElevatedButton(
-                  onPressed: () => _submitSemester(context),
+                  onPressed: () {
+                    setState(() {
+                      _isLoading = true; // Show loading indicator
+                    });
+                    _submitSemester(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),
                     shape: RoundedRectangleBorder(
@@ -338,11 +344,15 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 100),
                   ),
-                  child: Text(
-                    'Add Semester',
-                    style:
-                        GoogleFonts.openSans(fontSize: 16, color: Colors.white),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          'Create Semester',
+                          style: GoogleFonts.openSans(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ],

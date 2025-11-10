@@ -25,6 +25,7 @@ class _EditGoal extends State<EditGoal> {
   int? _selectedSemesterId;
   String? _selectedSemester;
   String? _selectedTimeframe;
+  bool _isLoading = false;
 
   Duration _targetDuration = Duration();
 
@@ -361,7 +362,12 @@ class _EditGoal extends State<EditGoal> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 20.0),
                   child: ElevatedButton(
-                    onPressed: () => _editGoal(context),
+                    onPressed: () {
+                      setState(() {
+                        _isLoading = true; // Show loading indicator
+                      });
+                      _editGoal(context);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70),
                       padding: const EdgeInsets.symmetric(
@@ -369,13 +375,15 @@ class _EditGoal extends State<EditGoal> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text(
-                      'Edit Goal',
-                      style: GoogleFonts.openSans(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Edit Goal',
+                            style: GoogleFonts.openSans(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],
