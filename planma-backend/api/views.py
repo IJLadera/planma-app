@@ -1810,27 +1810,48 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
     def add_schedule(self, request):
         data = request.data
 
-        # Extract data from request
+        # ✅ Support both single and batch payloads
+        if isinstance(data, list):
+            created_schedules = []
+            for entry in data:
+                result = self._create_goal_schedule(entry, request)
+                if isinstance(result, Response):
+                    return result  # Stop if an error occurs
+                created_schedules.append(result)
+
+            serializer = self.get_serializer(created_schedules, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        else:
+            result = self._create_goal_schedule(data, request)
+            if isinstance(result, Response):
+                return result
+            serializer = self.get_serializer(result)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # 🧩 helper function to handle creation logic for single entries
+    def _create_goal_schedule(self, data, request):
         goal_id = data.get('goal_id')
         scheduled_date = data.get('scheduled_date')
         scheduled_start_time = data.get('scheduled_start_time')
         scheduled_end_time = data.get('scheduled_end_time')
+        status_value = data.get('status', 'Pending')  # default = Pending
 
-        # Validate input
-        if not all([scheduled_date, scheduled_start_time, scheduled_end_time]):
-            return Response({'error': 'All fields are required except student_id.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+        if not all([goal_id, scheduled_date, scheduled_start_time, scheduled_end_time]):
+            return Response(
+                {'error': 'All fields are required except student_id.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
-            # Fetch the CustomUser instance
             goal = get_object_or_404(Goals, goal_id=goal_id)
-
             student = CustomUser.objects.get(student_id=request.user.student_id)
 
-            # Check for duplicate goal instance
+            # Prevent duplicates
             duplicate = GoalSchedule.objects.filter(
-                Q(goal_id=goal) &
-                Q(scheduled_date=scheduled_date) &
-                Q(scheduled_start_time=scheduled_start_time) &
+                Q(goal_id=goal),
+                Q(scheduled_date=scheduled_date),
+                Q(scheduled_start_time=scheduled_start_time),
                 Q(scheduled_end_time=scheduled_end_time)
             ).exists()
 
@@ -1839,41 +1860,45 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
                     {'error': 'Duplicate goal instance detected.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Check for overlapping schedules
+
+            # Prevent overlaps
             overlapping_schedules = ScheduleEntry.objects.filter(
                 student_id=student,
                 scheduled_date=scheduled_date
             ).filter(
-                Q(scheduled_start_time__lt=scheduled_end_time, scheduled_end_time__gt=scheduled_start_time)
+                Q(scheduled_start_time__lt=scheduled_end_time,
+                  scheduled_end_time__gt=scheduled_start_time)
             )
 
             if overlapping_schedules.exists():
-                return Response({'error_type': 'overlap', 'message': 'This time slot is already occupied. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        'error_type': 'overlap',
+                        'message': 'This time slot is already occupied. Please choose another time.'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-            # Create Goal Schedule
-            goalSchedule = GoalSchedule.objects.create(
+            # Create GoalSchedule
+            goal_schedule = GoalSchedule.objects.create(
                 goal_id=goal,
                 scheduled_date=scheduled_date,
                 scheduled_start_time=scheduled_start_time,
                 scheduled_end_time=scheduled_end_time,
-                status='Pending',
+                status=status_value,
             )
 
-            # Create ScheduleEntry
+            # Create corresponding ScheduleEntry
             ScheduleEntry.objects.create(
                 category_type='Goal',
-                reference_id=goalSchedule.goalschedule_id,  # FK reference to the created goal schedule
+                reference_id=goal_schedule.goalschedule_id,
                 student_id=student,
                 scheduled_date=scheduled_date,
                 scheduled_start_time=scheduled_start_time,
                 scheduled_end_time=scheduled_end_time
             )
-            print(f"ScheduleEntry created successfully!")
 
-            # Serialize and return the created data
-            serializer = self.get_serializer(goalSchedule)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return goal_schedule
 
         except CustomUser.DoesNotExist:
             return Response(
@@ -1883,15 +1908,10 @@ class GoalScheduleViewSet(viewsets.ModelViewSet):
         except ValidationError as ve:
             return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
         except IntegrityError:
-            return Response(
-                {'error': 'A database integrity error occurred.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'A database integrity error occurred.'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(
-                {'error': f'An error occurred: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'An error occurred: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
