@@ -347,6 +347,8 @@ class ReportsService {
 
     double totalMinutes = totalDuration.inMinutes.toDouble();
 
+    totalMinutes = double.parse(totalMinutes.toStringAsFixed(1));
+
     // Convert map to TaskTimeSpent
     List<TaskTimeSpent> taskTimeSpent = timeSpentByDay.entries.map((entry) {
       double minutes = entry.value.inMinutes.toDouble();
@@ -743,6 +745,8 @@ class ReportsService {
 
     double totalMinutes = totalDuration.inMinutes.toDouble();
 
+    totalMinutes = double.parse(totalMinutes.toStringAsFixed(1));
+
     // Convert map to ActivitiesTimeSpent
     List<ActivitiesTimeSpent> activityTimeSpent =
         activityTimeSpentByDay.entries.map((entry) {
@@ -896,6 +900,8 @@ class ReportsService {
     }
 
     double totalMinutes = totalDuration.inMinutes.toDouble();
+
+    totalMinutes = double.parse(totalMinutes.toStringAsFixed(1));
 
     // Convert map to ActivitiesTimeSpent
     List<GoalTimeSpent> goalTimeSpent = goalTimeSpentByDay.entries.map((entry) {
@@ -1106,9 +1112,16 @@ class ReportsService {
         ? totalDuration.inMinutes / 60 / sleepLogs.length
         : 0;
 
+    // Limit to 1 or 2 decimal points, e.g., 2 decimal points
+    averageHours = double.parse(averageHours.toStringAsFixed(1));
+
     // Convert map to SleepDuration
     List<SleepDuration> sleepDuration = sleepDurationByDay.entries.map((entry) {
       double hours = entry.value.inMinutes / 60;
+
+      // Limit hours to 2 decimal points
+      hours = double.parse(hours.toStringAsFixed(2));
+
       return SleepDuration(entry.key, hours, averageHours);
     }).toList();
 
