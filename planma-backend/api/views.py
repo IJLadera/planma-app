@@ -2084,6 +2084,24 @@ class SleepLogViewSet(viewsets.ModelViewSet):
     def log_time(self, request):
         data = request.data
 
+        # Check if data is a list (batch) or dict (single)
+        if isinstance(data, list):
+            created_logs = []
+            for entry in data:
+                result = self._create_sleep_log(entry, request)
+                if isinstance(result, Response):
+                    return result  # Return early on error
+                created_logs.append(result)
+            serializer = self.get_serializer(created_logs, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            result = self._create_sleep_log(data, request)
+            if isinstance(result, Response):
+                return result
+            serializer = self.get_serializer(result)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _create_sleep_log(self, data, request):
         start_time = data.get('start_time')
         end_time = data.get('end_time')
         duration = data.get('duration')
@@ -2092,19 +2110,13 @@ class SleepLogViewSet(viewsets.ModelViewSet):
 
         # Validate input
         if not all([start_time, end_time, duration, date_logged]):
-            return Response(
-                {'error': 'Missing fields.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            # Fetch the CustomUser instance
-            student = CustomUser.objects.get(student_id=student_id)
+            return Response({'error': 'Missing fields.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            student = CustomUser.objects.get(student_id=student_id)
             hours, minutes, seconds = map(int, duration.split(':'))
             duration_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
-            # Create Sleep Log
             sleep = SleepLog.objects.create(
                 student_id=student,
                 start_time=start_time,
@@ -2112,21 +2124,13 @@ class SleepLogViewSet(viewsets.ModelViewSet):
                 duration=duration_timedelta,
                 date_logged=date_logged
             )
-
-            # Serialize and return the created data
-            serializer = self.get_serializer(sleep)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+            return sleep
         except CustomUser.DoesNotExist:
-            return Response(
-                {'error': 'Authenticated user not found in CustomUser table.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'Authenticated user not found in CustomUser table.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(
-                {'error': f'An error occurred: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'An error occurred: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # Schedule Entry

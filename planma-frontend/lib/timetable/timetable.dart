@@ -46,68 +46,28 @@ class _TimetableState extends State<Timetable> {
 
   Future<void> _loadScheduleEntries() async {
     final provider = Provider.of<ScheduleEntryProvider>(context, listen: false);
-    await provider.fetchScheduleEntries();
+    await provider.loadScheduleEntriesWithRelated(); // will skip refetch if already loaded
 
-    List<ScheduleEntry> entries = provider.scheduleEntries;
     List<Appointment> tempAppointments = [];
 
-    if (entries.isEmpty) {
-      setState(() {
-        _appointments = [];
-        _dataSource = _AppointmentDataSource([]);
-      });
-      return;
-    }
-
-    // --- Group by category_type + reference_id ---
-    Map<String, List<ScheduleEntry>> grouped = {};
-    for (var entry in entries) {
-      String key = "${entry.categoryType}-${entry.referenceId}";
-      grouped.putIfAbsent(key, () => []).add(entry);
-    }
-
-    // --- Prepare filters for bulk request ---
-    List<Map<String, dynamic>> filters = grouped.values
-        .map((group) => {
-              "category_type": group.first.categoryType,
-              "reference_id": group.first.referenceId,
-            })
-        .toList();
-
-    // --- Fetch all related info in one bulk call ---
-    var bulkResponse = await provider.fetchBulkFilteredEntries(filters);
-    if (bulkResponse == null) return;
-
-    // --- Map results for quick lookup ---
-    Map<String, dynamic> relatedInfoMap = {
-      for (var item in bulkResponse)
-        "${item['category_type']}-${item['reference_id']}": item["related_info"]
-    };
-
-    // --- Create Appointments ---
-    for (var entry in entries) {
+    for (var entry in provider.scheduleEntries) {
       String groupKey = "${entry.categoryType}-${entry.referenceId}";
-      var relatedInfo =
-          relatedInfoMap[groupKey] ?? {"name": "Unknown", "status": "Pending"};
+      var relatedInfo = provider.relatedInfoMap[groupKey] ??
+          {"name": "Unknown", "status": null};
 
-      String name = relatedInfo["name"] ?? "Unknown";
-      String status = relatedInfo["status"] ?? "Pending";
+      String name = relatedInfo["name"];
+      String? status = relatedInfo["status"];
 
       Color appointmentColor = _getCategoryColor(entry.categoryType);
       if (status == "Completed") {
         appointmentColor = appointmentColor.withOpacity(0.4);
       }
 
-      // Build DateTime objects safely
-      DateTime date = entry.scheduledDate;
-      DateTime start = DateTime.parse(
-          "${date.toIso8601String().split('T')[0]}T${entry.scheduledStartTime}");
-      DateTime end = DateTime.parse(
-          "${date.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}");
-
       tempAppointments.add(Appointment(
-        startTime: start,
-        endTime: end,
+        startTime: DateTime.parse(
+            '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledStartTime}'),
+        endTime: DateTime.parse(
+            '${entry.scheduledDate.toIso8601String().split('T')[0]}T${entry.scheduledEndTime}'),
         subject: name,
         color: appointmentColor,
         notes: status,
