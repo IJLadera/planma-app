@@ -76,10 +76,9 @@ class _ReportsPageState extends State<ReportsPage> {
 
   void _updateFormattedTimeFilter() {
     DateTime today = DateTime.now();
-    DateTime startOfWeek = selectedDate.subtract(
-        Duration(days: selectedDate.weekday - 1)); // Start of the week
-    DateTime endOfWeek =
-        startOfWeek.add(const Duration(days: 6)); // End of the week
+    DateTime startOfWeek =
+        selectedDate.subtract(Duration(days: selectedDate.weekday - 1));
+    DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
 
     // Reset boolean
     canNavigateForward = true;
@@ -91,34 +90,51 @@ class _ReportsPageState extends State<ReportsPage> {
         canNavigateForward =
             selectedDate.isBefore(DateTime(today.year, today.month, today.day));
         break;
+
       case 'Week':
         formattedTimeFilter =
             '${DateFormat('MMM d').format(startOfWeek)} — ${DateFormat('MMM d, y').format(endOfWeek)}';
         canNavigateForward =
             endOfWeek.isBefore(DateTime(today.year, today.month, today.day));
         break;
+
       case 'Month':
         formattedTimeFilter = DateFormat('MMMM yyyy').format(selectedDate);
         canNavigateForward =
             selectedDate.isBefore(DateTime(today.year, today.month, 1));
         break;
+
       case 'Semester':
         final semProv = context.read<SemesterProvider>();
-        final semester =
-            ReportsService.semesterForDate(selectedDate, semProv.semesters);
+        final sems = [
+          ...semProv.semesters
+        ]; // FIX: ensure fresh copy of semesters
+        if (sems.isEmpty) {
+          formattedTimeFilter = 'No semester';
+          canNavigateForward = false;
+          canNavigateBackward = false;
+          break;
+        }
+
+        // ✅ FIX: Sort semesters chronologically (important!)
+        sems.sort((a, b) => DateTime.parse(a['sem_start_date'])
+            .compareTo(DateTime.parse(b['sem_start_date'])));
+
+        final semester = ReportsService.semesterForDate(selectedDate, sems);
         if (semester != null) {
+          // FIX: use index to determine navigation availability
+          final currentIndex = sems.indexOf(semester);
           formattedTimeFilter =
               '${semester['acad_year_start']} - ${semester['acad_year_end']} ${semester['semester']}';
-          // Allow forward nav only if this isn’t the last known semester
-          canNavigateForward = semester != semProv.semesters.last &&
-              DateTime.parse(semester['sem_end_date']).isBefore(today);
-          canNavigateBackward = semester != semesters.first;
+          canNavigateBackward = currentIndex > 0; // FIX
+          canNavigateForward = currentIndex < sems.length - 1; // FIX
         } else {
           formattedTimeFilter = 'No semester';
           canNavigateForward = false;
           canNavigateBackward = false;
         }
         break;
+
       case 'Year':
         formattedTimeFilter = DateFormat('yyyy').format(selectedDate);
         canNavigateForward = selectedDate.year < today.year;
@@ -178,18 +194,24 @@ class _ReportsPageState extends State<ReportsPage> {
 
   void _shiftSemester(int step) {
     final semProv = context.read<SemesterProvider>();
-    if (semProv.semesters.isEmpty) return;
+    final sems = [...semProv.semesters];
+    if (sems.isEmpty) return;
 
-    final sems = [...semProv.semesters]..sort((a, b) =>
-        DateTime.parse(a['sem_start_date'])
-            .compareTo(DateTime.parse(b['sem_start_date'])));
+    // ✅ FIX: Sort semesters by start date to ensure correct order
+    sems.sort((a, b) => DateTime.parse(a['sem_start_date'])
+        .compareTo(DateTime.parse(b['sem_start_date'])));
 
     final current = ReportsService.semesterForDate(selectedDate, sems);
-    if (current == null) return; // no match – do nothing
+    if (current == null) {
+      // FIX: default to first semester if no match
+      selectedDate = DateTime.parse(sems.first['sem_start_date']);
+      return;
+    }
 
     final idx = sems.indexOf(current) + step;
-    if (idx < 0 || idx >= sems.length) return; // out of range – do nothing
+    if (idx < 0 || idx >= sems.length) return; // FIX: boundary check
 
+    // ✅ FIX: Move to the next/previous semester start date
     selectedDate = DateTime.parse(sems[idx]['sem_start_date']);
   }
 
