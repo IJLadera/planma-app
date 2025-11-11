@@ -280,40 +280,47 @@ class ActivityTimeLogViewSet(viewsets.ModelViewSet):
     def log_time(self, request):
         data = request.data
 
+        # Handle batch vs single record
+        if isinstance(data, list):
+            created_logs = []
+            for entry in data:
+                result = self._create_activity_log(entry, request)
+                if isinstance(result, Response):
+                    return result  # Return early on error
+                created_logs.append(result)
+            serializer = self.get_serializer(created_logs, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            result = self._create_activity_log(data, request)
+            if isinstance(result, Response):
+                return result
+            serializer = self.get_serializer(result)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _create_activity_log(self, data, request):
         activity_id = data.get('activity_id')
         start_time = data.get('start_time')
         end_time = data.get('end_time')
         duration = data.get('duration')
         date_logged = data.get('date_logged')
 
-        # Validate input
         if not all([activity_id, start_time, end_time, duration, date_logged]):
-            return Response(
-                {'error': 'Missing fields.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'Missing fields.'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Validate the activity exists
             activity = CustomActivity.objects.get(activity_id=activity_id, student_id=request.user)
 
-            # Check if a time log already exists for the same activity and date
-            existing_log = ActivityTimeLog.objects.filter(
-                activity_id=activity,
-                date_logged=date_logged
-            ).first()
-
+            # Check for existing log
+            existing_log = ActivityTimeLog.objects.filter(activity_id=activity, date_logged=date_logged).first()
             if existing_log:
                 return Response(
-                    {'error': 'A time log for this activity and date already exists.'},
+                    {'error': f'Time log already exists for activity {activity_id} on {date_logged}.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Convert duration from string to timedelta
+
             hours, minutes, seconds = map(int, duration.split(':'))
             duration_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
-            # Create the time log
             log = ActivityTimeLog.objects.create(
                 activity_id=activity,
                 start_time=start_time,
@@ -322,24 +329,18 @@ class ActivityTimeLogViewSet(viewsets.ModelViewSet):
                 date_logged=date_logged
             )
 
-            # Update the activity status to "Completed"
+            # Update status to Completed
             activity.status = "Completed"
             activity.save()
 
-            # Serialize and return the created time log
-            serializer = self.get_serializer(log)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return log
 
         except CustomActivity.DoesNotExist:
-            return Response(
-                {'error': 'Activity not found or not associated with the logged-in user.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'error': f'Activity {activity_id} not found or not associated with the logged-in user.'},
+                            status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response(
-                {'error': f'An error occurred: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'An error occurred: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
@@ -1214,22 +1215,37 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
     def mark_attendance(self, request):
         data = request.data
 
+        # Handle batch vs single record
+        if isinstance(data, list):
+            created_attendances = []
+            for entry in data:
+                result = self._create_attendance(entry, request)
+                if isinstance(result, Response):
+                    return result  # Return early on error
+                created_attendances.append(result)
+            serializer = self.get_serializer(created_attendances, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            result = self._create_attendance(data, request)
+            if isinstance(result, Response):
+                return result
+            serializer = self.get_serializer(result)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _create_attendance(self, data, request):
         classsched_id = data.get('classsched_id')
         attendance_date = data.get('attendance_date')
         attendance_status = data.get('status', "Did Not Attend")
 
-        # Validate input
         if not all([classsched_id, attendance_date]):
             return Response(
                 {'error': 'classsched_id and attendance_date are required.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
-            # Validate the class exists
             classes = CustomClassSchedule.objects.get(classsched_id=classsched_id, student_id=request.user)
 
-            # Check if attendance already exists for the class
             attendance, created = AttendedClass.objects.get_or_create(
                 classsched_id=classes,
                 attendance_date=attendance_date,
@@ -1237,17 +1253,11 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
             )
 
             if not created:
-                # Update the existing attendance record
+                # Update existing
                 attendance.status = attendance_status
                 attendance.save()
-                return Response(
-                    {'message': 'Attendance updated successfully.'},
-                    status=status.HTTP_200_OK
-                )
 
-            # Serialize and return the new attendance
-            serializer = self.get_serializer(attendance)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return attendance
 
         except CustomClassSchedule.DoesNotExist:
             return Response(
@@ -1542,40 +1552,46 @@ class TaskTimeLogViewSet(viewsets.ModelViewSet):
     def log_time(self, request):
         data = request.data
 
+        # Handle batch vs single record
+        if isinstance(data, list):
+            created_logs = []
+            for entry in data:
+                result = self._create_task_log(entry, request)
+                if isinstance(result, Response):
+                    return result  # Return early on error
+                created_logs.append(result)
+            serializer = self.get_serializer(created_logs, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            result = self._create_task_log(data, request)
+            if isinstance(result, Response):
+                return result
+            serializer = self.get_serializer(result)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _create_task_log(self, data, request):
         task_id = data.get('task_id')
         start_time = data.get('start_time')
         end_time = data.get('end_time')
         duration = data.get('duration')
         date_logged = data.get('date_logged')
 
-        # Validate input
         if not all([task_id, start_time, end_time, duration, date_logged]):
-            return Response(
-                {'error': 'Missing fields.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': 'Missing fields.'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Validate the task exists
             task = CustomTask.objects.get(task_id=task_id, student_id=request.user)
 
-            # Check if a time log already exists for the same task and date
-            existing_log = TaskTimeLog.objects.filter(
-                task_id=task,
-                date_logged=date_logged
-            ).first()
-
+            # Check if a log already exists for the same task and date
+            existing_log = TaskTimeLog.objects.filter(task_id=task, date_logged=date_logged).first()
             if existing_log:
-                return Response(
-                    {'error': 'A time log for this task and date already exists.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                # Optionally, you can update the existing log instead of returning error
+                return Response({'error': f'Time log already exists for task {task_id} on {date_logged}.'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
-            # Convert duration from string to timedelta
             hours, minutes, seconds = map(int, duration.split(':'))
             duration_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
-            # Create the time log
             log = TaskTimeLog.objects.create(
                 task_id=task,
                 start_time=start_time,
@@ -1588,20 +1604,14 @@ class TaskTimeLogViewSet(viewsets.ModelViewSet):
             task.status = "Completed"
             task.save()
 
-            # Serialize and return the created time log
-            serializer = self.get_serializer(log)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return log
 
         except CustomTask.DoesNotExist:
-            return Response(
-                {'error': 'Task not found or not associated with the logged-in user.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'error': f'Task {task_id} not found or not associated with the logged-in user.'},
+                            status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response(
-                {'error': f'An error occurred: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'An error occurred: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # Goals
 class GoalViewSet(viewsets.ModelViewSet):
@@ -1992,6 +2002,24 @@ class GoalProgressViewSet(viewsets.ModelViewSet):
     def log_time(self, request):
         data = request.data
 
+        # Handle batch vs single record
+        if isinstance(data, list):
+            created_logs = []
+            for entry in data:
+                result = self._create_goal_progress_log(entry, request)
+                if isinstance(result, Response):
+                    return result  # Return early on error
+                created_logs.append(result)
+            serializer = self.get_serializer(created_logs, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            result = self._create_goal_progress_log(data, request)
+            if isinstance(result, Response):
+                return result
+            serializer = self.get_serializer(result)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _create_goal_progress_log(self, data, request):
         goal_id = data.get('goal_id')
         goalschedule_id = data.get('goalschedule_id')
         session_date = data.get('session_date')
@@ -1999,36 +2027,27 @@ class GoalProgressViewSet(viewsets.ModelViewSet):
         session_end_time = data.get('session_end_time')
         session_duration = data.get('session_duration')
 
-        # Validate input
         if not all([goal_id, goalschedule_id, session_date, session_start_time, session_end_time, session_duration]):
-            return Response(
-                {'error': 'Missing fields.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+            return Response({'error': 'Missing fields.'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            # Validate the goal and goal schedule exists
             goal = Goals.objects.get(goal_id=goal_id, student_id=request.user)
             schedule = GoalSchedule.objects.get(goalschedule_id=goalschedule_id, goal_id=goal)
 
-            # Check if a time log already exists for the same goal schedule and date
             existing_log = GoalProgress.objects.filter(
                 goal_id=goal,
                 goalschedule_id=schedule,
                 session_date=session_date
             ).first()
-
             if existing_log:
                 return Response(
-                    {'error': 'A time log for this goal schedule and date already exists.'},
+                    {'error': f'Time log already exists for goal schedule {goalschedule_id} on {session_date}.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Convert duration from string to timedelta
+
             hours, minutes, seconds = map(int, session_duration.split(':'))
             duration_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
-            # Check if attendance already exists for the event
             log = GoalProgress.objects.create(
                 goal_id=goal,
                 goalschedule_id=schedule,
@@ -2038,29 +2057,20 @@ class GoalProgressViewSet(viewsets.ModelViewSet):
                 session_duration=duration_timedelta
             )
 
-            # Update the goal schedule status to "Completed"
             schedule.status = "Completed"
             schedule.save()
 
-            # Serialize and return the new attendance
-            serializer = self.get_serializer(log)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return log
 
         except Goals.DoesNotExist:
-            return Response(
-                {'error': 'Goal not found or not associated with the logged-in user.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'error': f'Goal {goal_id} not found or not associated with the logged-in user.'},
+                            status=status.HTTP_404_NOT_FOUND)
         except GoalSchedule.DoesNotExist:
-            return Response(
-                {'error': 'Goal schedule not found or not associated with the logged-in user.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'error': f'Goal schedule {goalschedule_id} not found or not associated with the goal.'},
+                            status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response(
-                {'error': f'An error occurred: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'An error occurred: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #Sleep
 class SleepLogViewSet(viewsets.ModelViewSet):
