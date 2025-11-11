@@ -164,7 +164,7 @@ class _EditActivity extends State<EditActivity> {
     );
   }
 
-  void _editActivity(BuildContext context) async {
+  Future<void> _editActivity(BuildContext context) async {
     final provider = Provider.of<ActivityProvider>(context, listen: false);
 
     String activityName = _activityNameController.text.trim();
@@ -343,11 +343,17 @@ class _EditActivity extends State<EditActivity> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     _isLoading = true; // Show loading indicator
                   });
-                  _editActivity(context);
+
+                  await _editActivity(context);
+
+                  setState(() {
+                    _isLoading =
+                        false; // Hide loading indicator after submission
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF173F70),

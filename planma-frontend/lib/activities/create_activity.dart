@@ -116,7 +116,7 @@ class _AddActivityState extends State<AddActivityScreen> {
     );
   }
 
-  void _createActivity(BuildContext context) async {
+  Future<void> _createActivity(BuildContext context) async {
     final provider = Provider.of<ActivityProvider>(context, listen: false);
 
     String activityName = _activityNameController.text.trim();
@@ -298,12 +298,18 @@ class _AddActivityState extends State<AddActivityScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isLoading = true; // Show loading indicator
-                  });
-                  _createActivity(context);
-                },
+                onPressed: () async {
+                    setState(() {
+                      _isLoading = true; // Show loading indicator
+                    });
+
+                    await _createActivity(context);
+
+                    setState(() {
+                      _isLoading =
+                          false; // Hide loading indicator after submission
+                    });
+                  },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),
                   shape: RoundedRectangleBorder(

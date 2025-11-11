@@ -245,7 +245,7 @@ class _EditClassState extends State<EditClass> {
   }
 
   // Method to handle editing a class
-  void _editClassSchedule(BuildContext context) async {
+  Future<void> _editClassSchedule(BuildContext context) async {
     final provider = Provider.of<ClassScheduleProvider>(context, listen: false);
 
     String subjectCode = _subjectCodeController.text.trim();
@@ -552,11 +552,17 @@ class _EditClassState extends State<EditClass> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14.0, vertical: 20.0),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         _isLoading = true; // Show loading indicator
                       });
-                      _editClassSchedule(context);
+
+                      await _editClassSchedule(context);
+
+                      setState(() {
+                        _isLoading =
+                            false; // Hide loading indicator after submission
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70),

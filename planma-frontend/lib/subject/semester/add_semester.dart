@@ -123,7 +123,7 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
     );
   }
 
-  void _submitSemester(BuildContext context) async {
+  Future<void> _submitSemester(BuildContext context) async {
     final provider = Provider.of<SemesterProvider>(context, listen: false);
 
     // Validate input fields individually with meaningful error messages
@@ -330,11 +330,17 @@ class _AddSemesterScreenState extends State<AddSemesterScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16.0, vertical: 20.0),
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     setState(() {
                       _isLoading = true; // Show loading indicator
                     });
-                    _submitSemester(context);
+
+                    await _submitSemester(context);
+
+                    setState(() {
+                      _isLoading =
+                          false; // Hide loading indicator after submission
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF173F70),

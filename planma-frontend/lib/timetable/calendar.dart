@@ -164,16 +164,16 @@ class _CalendarViewState extends State<CustomCalendar> {
       ),
       body: Column(
         children: [
-          if (isCalendarActive)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GestureDetector(
-                onTap: () {
-                  // Placeholder for search functionality
-                },
-                child: CustomSearchBar(),
-              ),
-            ),
+          // if (isCalendarActive)
+          //   Padding(
+          //     padding: const EdgeInsets.symmetric(horizontal: 20),
+          //     child: GestureDetector(
+          //       onTap: () {
+          //         // Placeholder for search functionality
+          //       },
+          //       child: CustomSearchBar(),
+          //     ),
+          //   ),
           if (isCalendarActive)
             Expanded(
               child: Column(

@@ -162,7 +162,7 @@ class _EditGoalSessionState extends State<EditGoalSession> {
     );
   }
 
-  void _editGoalSession(BuildContext context) async {
+  Future<void> _editGoalSession(BuildContext context) async {
     final provider = Provider.of<GoalScheduleProvider>(context, listen: false);
 
     String startTimeString = _startTimeController.text.trim();
@@ -317,11 +317,17 @@ class _EditGoalSessionState extends State<EditGoalSession> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     _isLoading = true; // Show loading indicator
                   });
-                  _editGoalSession(context);
+
+                  await _editGoalSession(context);
+
+                  setState(() {
+                    _isLoading =
+                        false; // Hide loading indicator after submission
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),

@@ -133,7 +133,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
     );
   }
 
-  void _submitTask(BuildContext context) async {
+  Future <void> _submitTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
     final subjects =
         Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
@@ -403,11 +403,17 @@ class _CreateTaskState extends State<AddTaskScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     _isLoading = true; // Show loading indicator
                   });
-                  _submitTask(context);
+
+                  await _submitTask(context);
+
+                  setState(() {
+                    _isLoading =
+                        false; // Hide loading indicator after submission
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF173F70),

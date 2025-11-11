@@ -122,7 +122,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
     );
   }
 
-  void _submitClassSchedule(BuildContext context) async {
+  Future<void> _submitClassSchedule(BuildContext context) async {
     final provider = Provider.of<ClassScheduleProvider>(context, listen: false);
 
     String subjectCode = _subjectCodeController.text.trim();
@@ -554,12 +554,18 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 20.0),
                   child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _isLoading = true; // Show loading indicator
-                      });
-                      _submitClassSchedule(context);
-                    },
+                    onPressed: () async {
+                    setState(() {
+                      _isLoading = true; // Show loading indicator
+                    });
+
+                    await _submitClassSchedule(context);
+
+                    setState(() {
+                      _isLoading =
+                          false; // Hide loading indicator after submission
+                    });
+                  },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70),
                       shape: RoundedRectangleBorder(
