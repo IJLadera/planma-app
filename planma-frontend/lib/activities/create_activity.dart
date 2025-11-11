@@ -314,7 +314,7 @@ class _AddActivityState extends State<AddActivityScreen> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        'Edit Activity',
+                        'Create Activity',
                         style: GoogleFonts.openSans(
                           fontSize: 16,
                           color: Colors.white,
