@@ -169,7 +169,7 @@ class _EditEvent extends State<EditEvent> {
     );
   }
 
-  void _editEvent(BuildContext context) async {
+  Future<void> _editEvent(BuildContext context) async {
     final provider = Provider.of<EventsProvider>(context, listen: false);
 
     String eventName = _eventNameController.text.trim();
@@ -383,11 +383,17 @@ class _EditEvent extends State<EditEvent> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     _isLoading = true; // Show loading indicator
                   });
-                  _editEvent;
+
+                  await _editEvent(context);
+
+                  setState(() {
+                    _isLoading =
+                        false; // Hide loading indicator after submission
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF173F70),

@@ -324,60 +324,6 @@ class _TimetableState extends State<Timetable> {
   }
 }
 
-// List<Appointment> getWeeklyClasses() {
-//   final List<Appointment> classes = <Appointment>[];
-//   final DateTime today = DateTime.now();
-
-//   classes.addAll(_createRecurringClass(
-//     subject: 'Subject 1',
-//     startTime: getNextWeekday(today, DateTime.monday, 9),
-//     endTime: getNextWeekday(today, DateTime.monday, 11),
-//     weeks: 4,
-//     color: Colors.blueAccent,
-//   ));
-
-//   classes.addAll(_createRecurringClass(
-//     subject: 'Subject 2',
-//     startTime: getNextWeekday(today, DateTime.monday, 14),
-//     endTime: getNextWeekday(today, DateTime.monday, 16),
-//     weeks: 4,
-//     color: Colors.purple,
-//   ));
-
-//   classes.addAll(_createRecurringClass(
-//     subject: 'Subject 3',
-//     startTime: getNextWeekday(today, DateTime.tuesday, 10),
-//     endTime: getNextWeekday(today, DateTime.tuesday, 12),
-//     weeks: 4,
-//     color: Colors.green,
-//   ));
-
-//   return classes;
-// }
-
-// List<Appointment> _createRecurringClass({
-//   required String subject,
-//   required DateTime startTime,
-//   required DateTime endTime,
-//   required int weeks,
-//   required Color color,
-// }) {
-//   List<Appointment> recurringClasses = [];
-//   for (int i = 0; i < weeks; i++) {
-//     DateTime start =
-//         startTime.add(Duration(days: i * 7)); // Add 7 days for each week
-//     DateTime end = endTime.add(Duration(days: i * 7));
-
-//     recurringClasses.add(Appointment(
-//       startTime: start,
-//       endTime: end,
-//       subject: subject,
-//       color: color,
-//     ));
-//   }
-//   return recurringClasses;
-// }
-
 DateTime getNextWeekday(DateTime startDate, int weekday, int hour) {
   final int daysToAdd = (weekday - startDate.weekday + 7) % 7;
   final DateTime nextDate = startDate.add(Duration(days: daysToAdd));

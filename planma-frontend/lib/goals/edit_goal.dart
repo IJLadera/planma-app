@@ -124,7 +124,7 @@ class _EditGoal extends State<EditGoal> {
     );
   }
 
-  void _editGoal(BuildContext context) async {
+  Future<void> _editGoal(BuildContext context) async {
     final provider = Provider.of<GoalProvider>(context, listen: false);
 
     String goalName = _goalCodeController.text.trim();
@@ -362,11 +362,17 @@ class _EditGoal extends State<EditGoal> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 20.0),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         _isLoading = true; // Show loading indicator
                       });
-                      _editGoal(context);
+
+                      await _editGoal(context);
+
+                      setState(() {
+                        _isLoading =
+                            false; // Hide loading indicator after submission
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70),

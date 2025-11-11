@@ -198,7 +198,7 @@ class _EditTask extends State<EditTask> {
     );
   }
 
-  void _editTask(BuildContext context) async {
+  Future<void> _editTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
     final subjects =
         Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
@@ -429,11 +429,17 @@ class _EditTask extends State<EditTask> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     _isLoading = true; // Show loading indicator
                   });
-                  _editTask(context);
+
+                  await _editTask(context);
+
+                  setState(() {
+                    _isLoading =
+                        false; // Hide loading indicator after submission
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF173F70),

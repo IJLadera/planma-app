@@ -142,7 +142,7 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
                       GoogleFonts.openSans(fontSize: 18, color: Colors.white),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 5),
               Center(
                 child: RichText(
                   text: TextSpan(
@@ -157,7 +157,7 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => GoalSelectionPage(),
+                            builder: (context) => SuccessScreen(),
                           ),
                         );
                       },

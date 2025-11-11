@@ -79,7 +79,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
     );
   }
 
-  void _submitGoal(BuildContext context) async {
+  Future<void> _submitGoal(BuildContext context) async {
     final provider = Provider.of<GoalProvider>(context, listen: false);
 
     String goalName = _goalNameController.text.trim();
@@ -312,11 +312,17 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 20.0),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         _isLoading = true; // Show loading indicator
                       });
-                      _submitGoal(context);
+
+                      await _submitGoal(context);
+
+                      setState(() {
+                        _isLoading =
+                            false; // Hide loading indicator after submission
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF173F70),

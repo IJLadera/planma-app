@@ -79,9 +79,8 @@ class TaskCharts extends StatelessWidget {
       for (var item in taskTimeSpent) item.day: item
     };
 
-    double totalTimeSpent = taskTimeSpent.isNotEmpty 
-        ? taskTimeSpent.first.totalTimeSpent 
-        : 0;
+    double totalTimeSpent =
+        taskTimeSpent.isNotEmpty ? taskTimeSpent.first.totalTimeSpent : 0;
 
     return labels.map((label) {
       return mappedData[label] ?? TaskTimeSpent(label, 0, totalTimeSpent);
@@ -123,7 +122,10 @@ class TaskCharts extends StatelessWidget {
               ),
               minimum: 0,
               maximum: filledData.isNotEmpty
-                  ? filledData.map((e) => e.minutes).reduce((a, b) => a > b ? a : b) + 10
+                  ? filledData
+                          .map((e) => e.minutes)
+                          .reduce((a, b) => a > b ? a : b) +
+                      10
                   : 10,
             ),
             series: <CartesianSeries<TaskTimeSpent, String>>[
@@ -582,9 +584,8 @@ class ActivitiesChart extends StatelessWidget {
       for (var item in activitiesDone) item.day: item
     };
 
-    int totalCount = activitiesDone.isNotEmpty 
-        ? activitiesDone.first.totalActivityDone 
-        : 0;
+    int totalCount =
+        activitiesDone.isNotEmpty ? activitiesDone.first.totalActivityDone : 0;
 
     return labels.map((label) {
       return mappedData[label] ?? ActivitiesDone(label, 0, totalCount);
@@ -626,7 +627,10 @@ class ActivitiesChart extends StatelessWidget {
               ),
               minimum: 0,
               maximum: filledData1.isNotEmpty
-                  ? filledData1.map((e) => e.minutes).reduce((a, b) => a > b ? a : b) + 10
+                  ? filledData1
+                          .map((e) => e.minutes)
+                          .reduce((a, b) => a > b ? a : b) +
+                      10
                   : 10,
             ),
             series: <CartesianSeries>[
@@ -789,7 +793,8 @@ class GoalsCharts extends StatelessWidget {
           title: 'Time Spent Distribution',
           isLoading: isLoading,
           subtitle: "Total Time Spent:",
-          subtitleValue: "No logic yet",
+          subtitleValue:
+              "${filledData.isNotEmpty ? filledData.first.totalTimeSpent : 0} mins",
           child: SfCartesianChart(
             primaryXAxis: CategoryAxis(
               labelPlacement: LabelPlacement.betweenTicks,
@@ -810,7 +815,10 @@ class GoalsCharts extends StatelessWidget {
               ),
               minimum: 0,
               maximum: filledData.isNotEmpty
-                  ? filledData.map((e) => e.minutes).reduce((a, b) => a > b ? a : b) + 10
+                  ? filledData
+                          .map((e) => e.minutes)
+                          .reduce((a, b) => a > b ? a : b) +
+                      10
                   : 10,
             ),
             series: <CartesianSeries>[
