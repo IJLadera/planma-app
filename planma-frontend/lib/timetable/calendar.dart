@@ -36,41 +36,17 @@ class _CalendarViewState extends State<CustomCalendar> {
 
   Future<void> _loadScheduleEntries() async {
     final provider = Provider.of<ScheduleEntryProvider>(context, listen: false);
-    await provider.fetchScheduleEntries();
+    await provider.loadScheduleEntriesWithRelated();
 
     Map<DateTime, List<Map<String, String>>> tempEvents = {};
 
-    // Group by categoryType + referenceId
-    Map<String, List<ScheduleEntry>> grouped = {};
-    for (var entry in provider.scheduleEntries) {
-      String key = "${entry.categoryType}-${entry.referenceId}";
-      grouped.putIfAbsent(key, () => []).add(entry);
-    }
-
-    // Prepare filters for bulk request
-    List<Map<String, dynamic>> filters = grouped.values
-        .map((entries) => {
-              "category_type": entries.first.categoryType,
-              "reference_id": entries.first.referenceId,
-            })
-        .toList();
-
-    // Bulk fetch all related info
-    var bulkResponse = await provider.fetchBulkFilteredEntries(filters);
-    if (bulkResponse == null) return;
-
-    // Map results by categoryType-referenceId for easy lookup
-    Map<String, dynamic> relatedInfoMap = {
-      for (var item in bulkResponse)
-        "${item['category_type']}-${item['reference_id']}": item["related_info"]
-    };
-
-    // Fill calendar events
+    // Now we can use the already available provider.relatedInfoMap
     for (var entry in provider.scheduleEntries) {
       DateTime dateKey = normalizeDate(entry.scheduledDate);
       String groupKey = "${entry.categoryType}-${entry.referenceId}";
-      var relatedInfo =
-          relatedInfoMap[groupKey] ?? {"name": "Unknown", "status": null};
+
+      var relatedInfo = provider.relatedInfoMap[groupKey] ??
+          {"name": "Unknown", "status": null};
 
       Map<String, String> eventDetails = {
         "categoryType": entry.categoryType,
@@ -85,7 +61,7 @@ class _CalendarViewState extends State<CustomCalendar> {
       events = tempEvents;
     });
 
-    debugPrint("Loaded events: ${events.toString()}");
+    debugPrint("✅ Loaded events (from cache): ${events.length}");
   }
 
   List<Map<String, String>> _getEventsForDay(DateTime day) {

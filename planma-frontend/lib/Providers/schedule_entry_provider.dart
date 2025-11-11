@@ -7,6 +7,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ScheduleEntryProvider with ChangeNotifier {
   List<ScheduleEntry> _scheduleEntries = [];
+  Map<String, dynamic> relatedInfoMap = {}; // store from bulk_filter
+  bool isLoaded = false;
   String? _accessToken;
 
   List<ScheduleEntry> get scheduleEntries => _scheduleEntries;
@@ -93,6 +95,37 @@ class ScheduleEntryProvider with ChangeNotifier {
       debugPrint("Failed to fetch bulk filtered entries: ${response.body}");
       return null;
     }
+  }
+
+  Future<void> loadScheduleEntriesWithRelated() async {
+    // if (isLoaded) return; // prevent re-fetching if already loaded
+
+    await fetchScheduleEntries();
+
+    // group by categoryType-referenceId
+    Map<String, List<ScheduleEntry>> grouped = {};
+    for (var entry in scheduleEntries) {
+      String key = "${entry.categoryType}-${entry.referenceId}";
+      grouped.putIfAbsent(key, () => []).add(entry);
+    }
+
+    List<Map<String, dynamic>> filters = grouped.values
+        .map((entries) => {
+              "category_type": entries.first.categoryType,
+              "reference_id": entries.first.referenceId,
+            })
+        .toList();
+
+    var bulkResponse = await fetchBulkFilteredEntries(filters);
+    if (bulkResponse == null) return;
+
+    relatedInfoMap = {
+      for (var item in bulkResponse)
+        "${item['category_type']}-${item['reference_id']}": item["related_info"]
+    };
+
+    // isLoaded = true;
+    notifyListeners();
   }
 
   void resetState() {
