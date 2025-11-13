@@ -313,6 +313,14 @@ class AttendedClass(models.Model):
 
 
 class CustomTask(models.Model):
+    # inside your CustomTask model
+    class Meta:
+        indexes = [
+            models.Index(fields=['student_id']),
+            models.Index(fields=['scheduled_date']),
+            models.Index(fields=['status']),
+        ]
+
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
         ('In Progress', 'In Progress'),

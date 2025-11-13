@@ -214,33 +214,30 @@ class _DashboardState extends State<Dashboard> {
                   style: GoogleFonts.openSans(fontSize: 16, color: Colors.grey),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  'Menu',
-                  style: GoogleFonts.openSans(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Menu',
+                      style: GoogleFonts.openSans(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF173F70),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.info_outline, color: Colors.grey),
+                      tooltip: 'Dashboard Legend',
+                      onPressed: () {
+                        _showDashboardLegend(context);
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 Expanded(
                   child: ListView(
                     children: [
-                      Consumer<TaskProvider>(
-                        builder: (context, taskProvider, _) => MenuButtonWidget(
-                          color: const Color(0xFF50B6FF),
-                          icon: Icons.check_circle,
-                          title: 'Tasks',
-                          subtitle: '${taskProvider.pendingTasks.length} tasks',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TasksPage()),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 15),
                       Consumer2<ClassScheduleProvider, SemesterProvider>(
                         builder: (context, classScheduleProvider,
                                 semesterProvider, _) =>
@@ -256,6 +253,22 @@ class _DashboardState extends State<Dashboard> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => ClassSchedule()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Consumer<TaskProvider>(
+                        builder: (context, taskProvider, _) => MenuButtonWidget(
+                          color: const Color(0xFF50B6FF),
+                          icon: Icons.check_circle,
+                          title: 'Tasks',
+                          subtitle: '${taskProvider.pendingTasks.length} tasks',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TasksPage()),
                             );
                           },
                         ),
@@ -413,4 +426,130 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+}
+
+void _showDashboardLegend(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  height: 5,
+                  width: 80,
+                  margin: const EdgeInsets.only(bottom: 15),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF173F70),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              Center(
+                child: Text(
+                  'Dashboard Legend',
+                  style: GoogleFonts.openSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF173F70),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+              _legendItem(
+                Icons.description,
+                "Class Schedule",
+                "View and manage your daily and weekly class schedules.",
+                color: Color(0xFFFFE1BF),
+              ),
+              _legendItem(
+                Icons.check_circle,
+                "Tasks",
+                "Track assignments and deadlines efficiently.",
+                color: Color(0xFF50B6FF),
+              ),
+              _legendItem(
+                  Icons.event, "Events", "Stay updated with upcoming events.",
+                  color: Colors.greenAccent),
+              _legendItem(
+                Icons.accessibility,
+                "Activities",
+                "List personal, club, or extracurricular activities.",
+                color: Color(0xFFFBA2A2),
+              ),
+              _legendItem(
+                FontAwesomeIcons.flag,
+                "Goals",
+                "Set and monitor your short- and long-term goals.",
+                color: Color(0xFFD7C0F3),
+              ),
+              _legendItem(
+                FontAwesomeIcons.moon,
+                "Sleep",
+                "Record and review your sleep habits.",
+                color: Color(0xFF535D88),
+              ),
+              _legendItem(
+                Icons.bar_chart_outlined,
+                "Reports",
+                "View summaries and progress insights.",
+                color: Color(0xFF537488),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Widget _legendItem(
+  IconData icon,
+  String title,
+  String description, {
+  required Color color,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          color: color,
+          size: 35,
+        ),
+        const SizedBox(width: 15),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.openSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF173F70),
+                ),
+              ),
+              Text(
+                description,
+                style: GoogleFonts.openSans(
+                  fontSize: 14,
+                  color: const Color(0xFF173F70),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
