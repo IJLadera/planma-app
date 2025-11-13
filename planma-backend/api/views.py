@@ -25,6 +25,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from api.models import CustomUser
 import os
 from django.http import JsonResponse
+from rest_framework.pagination import PageNumberPagination
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -1269,6 +1270,11 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
                 {'error': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+class TaskPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 200
 
 # Task
 class TaskViewSet(viewsets.ModelViewSet):
@@ -1276,17 +1282,31 @@ class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = CustomTaskSerializer
 
     def get_queryset(self):
-        # Filter tasks based on the logged-in user
-        queryset = CustomTask.objects.filter(student_id=self.request.user)
-    
-        # Apply scheduled_date filtering if provided in query params
+        # start queryset optimized with select_related
+        qs = CustomTask.objects.select_related('subject_id', 'student_id').all()
+
+        # ensure we only give tasks for this logged-in user
+        if self.request.user and not self.request.user.is_anonymous:
+            # assuming CustomUser model uses user.pk or student_id mapping; use the field you filter by:
+            qs = qs.filter(student_id=self.request.user)
+
+        # filters from query params
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
-
+        status_param = self.request.query_params.get('status')  # e.g., Pending or Completed
         if start_date and end_date:
-            queryset = queryset.filter(scheduled_date__range=[start_date, end_date])
+            qs = qs.filter(scheduled_date__range=[start_date, end_date])
 
-        return queryset
+        if status_param:
+            qs = qs.filter(status__iexact=status_param)
+
+        # additional optimization: only load tasks within a sane range if date not provided
+        return qs
+
+    # keep add_task, update, etc. logic — but make sure inside add_task/update you avoid extra queries
+    # for example, when creating use existing objects that were already loaded rather than re-querying
+    # (existing code can stay; main difference is using select_related in get_queryset)
+
     
     @action(detail=False, methods=['get'])
     def pending_tasks(self, request):

@@ -27,6 +27,22 @@ class _CreateTaskState extends State<AddTaskScreen> {
   int? _subject;
   bool _isLoading = false;
 
+  bool get _isSubjectAccessible {
+    final classProvider =
+        Provider.of<ClassScheduleProvider>(context, listen: false);
+
+    // Check if the user has any subjects
+    if (classProvider.subjects.isEmpty) return false;
+
+    // Optionally, check if a specific subject is selected
+    if (_subject != null) {
+      return classProvider.isSubjectAccessible(_subject!);
+    }
+
+    // If user has subjects but hasn't selected one yet, enable button
+    return true;
+  }
+
   // Method to select date
   Future<void> _selectDate(BuildContext context, bool isScheduledDate) async {
     final currentDate = isScheduledDate ? _scheduledDate : _deadline;
@@ -133,7 +149,7 @@ class _CreateTaskState extends State<AddTaskScreen> {
     );
   }
 
-  Future <void> _submitTask(BuildContext context) async {
+  Future<void> _submitTask(BuildContext context) async {
     final provider = Provider.of<TaskProvider>(context, listen: false);
     final subjects =
         Provider.of<ClassScheduleProvider>(context, listen: false).subjects;
@@ -258,21 +274,18 @@ class _CreateTaskState extends State<AddTaskScreen> {
   void initState() {
     super.initState();
 
-    // Fetch semesters and subjects when the screen loads
     final semesterProvider =
         Provider.of<SemesterProvider>(context, listen: false);
     final classScheduleProvider =
         Provider.of<ClassScheduleProvider>(context, listen: false);
 
-    semesterProvider.fetchSemesters().then((_) {
-      // Fetch subjects based on the active semester (determined in ClassScheduleProvider)
-      classScheduleProvider.fetchSubjects(semesterProvider).then((_) {
-        print("Subjects successfully fetched for the active semester.");
-      }).catchError((error) {
-        print("Error fetching subjects 1: $error");
-      });
+    Future.wait([
+      semesterProvider.fetchSemesters(),
+      classScheduleProvider.fetchSubjects(semesterProvider),
+    ]).then((_) {
+      print("Semesters and subjects loaded in parallel.");
     }).catchError((error) {
-      print("Error fetching semesters: $error");
+      print("Error fetching data: $error");
     });
   }
 
@@ -402,36 +415,48 @@ class _CreateTaskState extends State<AddTaskScreen> {
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-              child: ElevatedButton(
-                onPressed: () async {
-                  setState(() {
-                    _isLoading = true; // Show loading indicator
-                  });
+              child: Tooltip(
+                message: _isSubjectAccessible
+                    ? ''
+                    : 'This subject is not accessible yet. Complete its prerequisite first.',
+                child: AbsorbPointer(
+                  absorbing: !_isSubjectAccessible,
+                  child: Opacity(
+                    opacity: _isSubjectAccessible ? 1.0 : 0.5,
+                    child: ElevatedButton(
+                      onPressed: _isSubjectAccessible
+                          ? () async {
+                              setState(() {
+                                _isLoading = true;
+                              });
 
-                  await _submitTask(context);
+                              await _submitTask(context);
 
-                  setState(() {
-                    _isLoading =
-                        false; // Hide loading indicator after submission
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF173F70),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        'Create Task',
-                        style: GoogleFonts.openSans(
-                          fontSize: 16,
-                          color: Colors.white,
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF173F70),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 100),
                       ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Create Task',
+                              style: GoogleFonts.openSans(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

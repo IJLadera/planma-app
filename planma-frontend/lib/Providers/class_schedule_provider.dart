@@ -330,6 +330,29 @@ class ClassScheduleProvider with ChangeNotifier {
     }
   }
 
+  bool isSubjectAccessible(int subjectId) {
+    try {
+      final subject = subjects.firstWhere((s) => s.subjectId == subjectId);
+
+      if (subject.prerequisiteSubjectId == null) return true;
+
+      final prerequisite = subjects.firstWhere(
+        (s) => s.subjectId == subject.prerequisiteSubjectId,
+        orElse: () => Subject(
+          subjectId: -1,
+          subjectCode: '',
+          subjectTitle: '',
+          semesterId: 0,
+          isUnlocked: false,
+        ),
+      );
+
+      return prerequisite.isUnlocked;
+    } catch (e) {
+      return false;
+    }
+  }
+
   void resetState() {
     _classSchedules = [];
     notifyListeners();

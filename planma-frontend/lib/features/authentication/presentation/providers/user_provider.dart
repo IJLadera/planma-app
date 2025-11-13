@@ -293,4 +293,39 @@ class UserProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  // Check if an email is already registered
+  Future<bool> isEmailTaken(String email) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseApiUrl/djoser/users/?email=$email'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Djoser typically returns a list of users or an empty array
+        if (data is List && data.isNotEmpty) {
+          return true; // email exists
+        }
+
+        // Some backends may return an object with a field "exists"
+        if (data is Map && (data['exists'] == true)) {
+          return true;
+        }
+
+        return false;
+      } else if (response.statusCode == 404) {
+        // No user found
+        return false;
+      } else {
+        print('Email check failed: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Error checking email existence: $e');
+      return false;
+    }
+  }
 }

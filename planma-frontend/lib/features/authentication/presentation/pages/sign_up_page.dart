@@ -118,36 +118,80 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  String? validatePassword(String? value) {
-    final originalPassword = passwordController.text;
+  String? validateFirstName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'First name is required';
+    }
+    if (!RegExp(r"^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$").hasMatch(value)) {
+      return 'Enter a valid first name';
+    }
+    if (value.trim().length < 2) {
+      return 'First name must be at least 2 characters';
+    }
+    return null;
+  }
 
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
+  String? validateLastName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Last name is required';
     }
-    if (value != originalPassword) {
-      return 'Passwords do not match';
+    if (!RegExp(r"^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$").hasMatch(value)) {
+      return 'Enter a valid last name';
     }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters long';
+    if (value.trim().length < 2) {
+      return 'Last name must be at least 2 characters';
     }
-    // Uncomment below if you want uppercase requirement
-    // if (!RegExp(r'[A-Z]').hasMatch(value)) {
-    //   return 'Password must contain at least one uppercase letter';
-    // }
-    if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'Password must contain at least one number';
+    return null;
+  }
+
+  Future<String?> validateEmail(
+      String? value, UserProvider userProvider) async {
+    if (value == null || value.trim().isEmpty) {
+      return 'Email is required';
     }
-    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
-      return 'Password must contain at least one special character';
+
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegex.hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+
+    // Check if email exists in DB
+    final isTaken = await userProvider.isEmailTaken(value.trim());
+    if (isTaken) {
+      return 'This email is already registered';
     }
 
     return null;
   }
 
-  String? validateConfirmPassword(String? value) {
-    final originalPassword = passwordController.text;
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return 'Include at least one uppercase letter';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      return 'Include at least one lowercase letter';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(value)) {
+      return 'Include at least one number';
+    }
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+      return 'Include at least one special character';
+    }
+    return null;
+  }
 
-    if (value != originalPassword) {
+  String? validateConfirmPassword(String? value, String password) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (value != password) {
       return 'Passwords do not match';
     }
     return null;
@@ -184,87 +228,22 @@ class _SignUpPageState extends State<SignUpPage> {
                           controller: firstNameController,
                           labelText: 'First Name',
                           icon: Icons.person,
-                          validator: (value) => value!.isEmpty
-                              ? 'Please enter your first name'
-                              : null,
+                          validator: validateFirstName,
                         ),
                         const SizedBox(height: 15),
                         _buildTextFormField(
                           controller: lastNameController,
                           labelText: 'Last Name',
                           icon: Icons.person_outline,
-                          validator: (value) => value!.isEmpty
-                              ? 'Please enter your last name'
-                              : null,
-                        ),
-                        const SizedBox(height: 15),
-                        _buildTextFormField(
-                          controller: userNameController,
-                          labelText: 'Username',
-                          icon: Icons.account_circle,
-                          validator: (value) => value!.isEmpty
-                              ? 'Please enter your username'
-                              : null,
+                          validator: validateLastName,
                         ),
                         const SizedBox(height: 15),
                         _buildTextFormField(
                           controller: emailController,
                           labelText: 'Email',
                           icon: Icons.email,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Email is required';
-                            }
-                            final emailRegex = RegExp(
-                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-                            if (!emailRegex.hasMatch(value)) {
-                              return 'Enter a valid email address';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 15),
-                        _buildTextFormField(
-                          controller: passwordController,
-                          labelText: 'Password',
-                          icon: Icons.lock,
-                          obscureText: obscurePassword,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: const Color(0xFF173F70),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                obscurePassword = !obscurePassword;
-                              });
-                            },
-                          ),
-                          validator: validatePassword,
-                        ),
-                        const SizedBox(height: 15),
-                        _buildTextFormField(
-                          controller: confirmPasswordController,
-                          labelText: 'Confirm Password',
-                          icon: Icons.lock_outline,
-                          obscureText: obscureConfirmPassword,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obscureConfirmPassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: const Color(0xFF173F70),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                obscureConfirmPassword =
-                                    !obscureConfirmPassword;
-                              });
-                            },
-                          ),
-                          validator: validateConfirmPassword,
+                          validator: (value) =>
+                              null, // We’ll handle async validation below
                         ),
                         const SizedBox(height: 50),
                         Padding(
@@ -273,8 +252,20 @@ class _SignUpPageState extends State<SignUpPage> {
                           child: ElevatedButton(
                             onPressed: _isLoading
                                 ? null
-                                : () {
+                                : () async {
                                     if (_formKey.currentState!.validate()) {
+                                      final userProvider =
+                                          Provider.of<UserProvider>(context,
+                                              listen: false);
+                                      final emailError = await validateEmail(
+                                          emailController.text, userProvider);
+                                      if (emailError != null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(content: Text(emailError)),
+                                        );
+                                        return; // Stop if email already exists
+                                      }
                                       _signUp(context);
                                     }
                                   },
