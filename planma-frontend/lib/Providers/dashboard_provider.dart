@@ -77,7 +77,7 @@ class DashboardProvider with ChangeNotifier {
       return;
     }
 
-    final url = Uri.parse('$baseApiUrl/dashboard/');
+    final url = Uri.parse('$baseApiUrl/api/dashboard/');
     try {
       final response = await http.get(
         url,
