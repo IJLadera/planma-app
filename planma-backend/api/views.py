@@ -14,8 +14,11 @@ from datetime import datetime, timedelta, time as dtime
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.timezone import make_aware, now
 from django.http import JsonResponse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from api.tasks import send_push_notification
+from django.core.cache import cache
+from django.db.models import Prefetch
+
 
 # views.py
 # from djoser.views import TokenCreateView
@@ -26,6 +29,8 @@ from api.models import CustomUser
 import os
 from django.http import JsonResponse
 from rest_framework.pagination import PageNumberPagination
+
+CACHE_TIMEOUT_SECONDS = 15
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -2418,3 +2423,165 @@ class YourUserViewSet(viewsets.ModelViewSet):
             "This is a manual test notification"
         )
         return Response({"status": "Push triggered"}, status=200)
+    
+class DashboardAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_most_recent_semester_id(self, user):
+        # choose most recent sem that already started; fallback to latest
+        sems = CustomSemester.objects.filter(student_id=user.student_id).order_by('-sem_start_date')
+        today = date.today()
+        recent = sems.filter(sem_start_date__lte=today).first()
+        if recent:
+            return recent.semester_id
+        fallback = sems.first()
+        return fallback.semester_id if fallback else None
+
+    def assemble_dashboard_data(self, user):
+        """
+        Build a lightweight JSON-able structure with minimal fields needed by the UI.
+        Use .values()/.only() and select_related/prefetch to avoid heavy model instantiation.
+        """
+        # 1) Semesters (only the fields needed)
+        semesters_qs = CustomSemester.objects.filter(student_id=user.student_id).order_by('-sem_start_date').values(
+            'semester_id', 'acad_year_start', 'acad_year_end', 'semester', 'sem_start_date', 'sem_end_date', 'year_level'
+        )
+        semesters = list(semesters_qs)
+
+        # 2) determine selected semester id (most recent)
+        selected_semester_id = self.get_most_recent_semester_id(user)
+
+        # 3) Class schedules for selected semester
+        class_schedule_qs = CustomClassSchedule.objects.filter(student_id=user.student_id)
+        if selected_semester_id:
+            class_schedule_qs = class_schedule_qs.filter(subject__semester_id=selected_semester_id)
+
+        # Use select_related to pull the subject row
+        class_schedule_qs = class_schedule_qs.select_related('subject').only(
+            'classsched_id', 'day_of_week', 'scheduled_start_time', 'scheduled_end_time', 'room',
+            'subject__subject_id', 'subject__subject_code', 'subject__subject_title'
+        )
+
+        class_schedule = [
+            {
+                'classsched_id': cs.classsched_id,
+                'day_of_week': cs.day_of_week,
+                'scheduled_start_time': cs.scheduled_start_time.strftime('%H:%M') if cs.scheduled_start_time else None,
+                'scheduled_end_time': cs.scheduled_end_time.strftime('%H:%M') if cs.scheduled_end_time else None,
+                'room': cs.room,
+                'subject': {
+                    'subject_id': cs.subject.subject_id,
+                    'subject_code': cs.subject.subject_code,
+                    'subject_title': cs.subject.subject_title,
+                }
+            } for cs in class_schedule_qs
+        ]
+
+        # 4) Pending tasks (minimal fields)
+        pending_tasks_qs = CustomTask.objects.filter(student_id=user.student_id, status='Pending').select_related('subject_id').only(
+            'task_id', 'task_name', 'scheduled_date', 'scheduled_start_time', 'scheduled_end_time',
+            'deadline', 'status', 'subject_id__subject_id', 'subject_id__subject_code', 'subject_id__subject_title'
+        )
+        pending_tasks = [
+            {
+                'task_id': t.task_id,
+                'task_name': t.task_name,
+                'scheduled_date': t.scheduled_date.isoformat() if t.scheduled_date else None,
+                'scheduled_start_time': t.scheduled_start_time.strftime('%H:%M') if t.scheduled_start_time else None,
+                'scheduled_end_time': t.scheduled_end_time.strftime('%H:%M') if t.scheduled_end_time else None,
+                'deadline': t.deadline.isoformat() if t.deadline else None,
+                'status': t.status,
+                'subject': {
+                    'subject_id': getattr(t.subject_id, 'subject_id', None),
+                    'subject_code': getattr(t.subject_id, 'subject_code', None),
+                    'subject_title': getattr(t.subject_id, 'subject_title', None),
+                }
+            } for t in pending_tasks_qs
+        ]
+
+        # 5) Upcoming events (today onwards)
+        upcoming_events_qs = CustomEvents.objects.filter(student_id=user.student_id, scheduled_date__gte=now().date()).only(
+            'event_id', 'event_name', 'location', 'scheduled_date', 'scheduled_start_time', 'scheduled_end_time', 'event_type'
+        ).order_by('scheduled_date')
+        upcoming_events = [
+            {
+                'event_id': e.event_id,
+                'event_name': e.event_name,
+                'location': e.location,
+                'scheduled_date': e.scheduled_date.isoformat() if e.scheduled_date else None,
+                'scheduled_start_time': e.scheduled_start_time.strftime('%H:%M') if e.scheduled_start_time else None,
+                'scheduled_end_time': e.scheduled_end_time.strftime('%H:%M') if e.scheduled_end_time else None,
+                'event_type': e.event_type,
+            } for e in upcoming_events_qs
+        ]
+
+        # 6) Pending activities
+        pending_activities_qs = CustomActivity.objects.filter(student_id=user.student_id, status='Pending').only(
+            'activity_id', 'activity_name', 'scheduled_date', 'scheduled_start_time', 'scheduled_end_time', 'status'
+        )
+        pending_activities = [
+            {
+                'activity_id': a.activity_id,
+                'activity_name': a.activity_name,
+                'scheduled_date': a.scheduled_date.isoformat() if a.scheduled_date else None,
+                'scheduled_start_time': a.scheduled_start_time.strftime('%H:%M') if a.scheduled_start_time else None,
+                'scheduled_end_time': a.scheduled_end_time.strftime('%H:%M') if a.scheduled_end_time else None,
+                'status': a.status,
+            } for a in pending_activities_qs
+        ]
+
+        # 7) Goals (minimal)
+        goals_qs = Goals.objects.filter(student_id=user.student_id).only(
+            'goal_id', 'goal_name', 'target_hours', 'timeframe', 'goal_type'
+        )
+        goals = [
+            {
+                'goal_id': g.goal_id,
+                'goal_name': g.goal_name,
+                'target_hours': g.target_hours,
+                'timeframe': g.timeframe,
+                'goal_type': g.goal_type,
+            } for g in goals_qs
+        ]
+
+        # 8) User preferences (should be only one record or empty)
+        prefs_qs = UserPref.objects.filter(student_id=user.student_id).only('pref_id', 'usual_sleep_time', 'usual_wake_time', 'reminder_offset_time')
+        prefs = prefs_qs.first()
+        preferences = {
+            'pref_id': prefs.pref_id,
+            'usual_sleep_time': prefs.usual_sleep_time.strftime('%H:%M') if prefs.usual_sleep_time else None,
+            'usual_wake_time': prefs.usual_wake_time.strftime('%H:%M') if prefs.usual_wake_time else None,
+            'reminder_offset_time': prefs.reminder_offset_time.total_seconds() if prefs.reminder_offset_time else None,
+        } if prefs else {}
+
+        return {
+            'semesters': semesters,
+            'selected_semester_id': selected_semester_id,
+            'class_schedule': class_schedule,
+            'pending_tasks': pending_tasks,
+            'upcoming_events': upcoming_events,
+            'pending_activities': pending_activities,
+            'goals': goals,
+            'preferences': preferences
+        }
+
+    def get(self, request, format=None):
+        user = request.user
+        if user.is_anonymous:
+            return Response({'detail': 'Authentication required.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        cache_key = f"dashboard:{user.id}"
+        cached = cache.get(cache_key)
+        if cached:
+            # Return cached snapshot
+            return Response(cached, status=status.HTTP_200_OK)
+
+        # assemble fresh
+        try:
+            data = self.assemble_dashboard_data(user)
+            cache.set(cache_key, data, CACHE_TIMEOUT_SECONDS)
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            # fallback: return partial data if anything fails and log it
+            # Make sure to log exceptions in real app
+            return Response({'detail': 'Error assembling dashboard', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

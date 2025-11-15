@@ -4,6 +4,7 @@ import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:planma_app/Providers/attended_class_provider.dart';
 import 'package:planma_app/Providers/attended_events_provider.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
+import 'package:planma_app/Providers/dashboard_provider.dart';
 import 'package:planma_app/Providers/events_provider.dart';
 import 'package:planma_app/Providers/goal_progress_provider.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
@@ -14,6 +15,7 @@ import 'package:planma_app/Providers/sleep_provider.dart';
 import 'package:planma_app/Providers/task_log_provider.dart';
 import 'package:planma_app/Providers/task_provider.dart';
 import 'package:planma_app/Providers/user_preferences_provider.dart';
+import 'package:planma_app/config/api_config.dart';
 import 'package:planma_app/features/authentication/presentation/providers/user_provider.dart';
 import 'package:planma_app/Providers/userprof_provider.dart';
 import 'package:planma_app/Providers/web_socket_provider.dart';
@@ -50,7 +52,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => GoalProgressProvider()),
         ChangeNotifierProvider(create: (context) => ScheduleEntryProvider()),
         ChangeNotifierProvider(create: (context) => WebSocketProvider()),
-        
+        // main.dart or wherever you create providers
+        ChangeNotifierProvider(
+          create: (ctx) => DashboardProvider(
+            baseApiUrl: ApiConfig.baseUrl, // same central config
+            tokenProvider: () async => ctx.read<UserProvider>().accessToken,
+          ),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

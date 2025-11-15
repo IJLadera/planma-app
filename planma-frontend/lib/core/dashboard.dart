@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:planma_app/Notifications/local_notification_service.dart';
 import 'package:planma_app/Providers/activity_provider.dart';
 import 'package:planma_app/Providers/class_schedule_provider.dart';
+import 'package:planma_app/Providers/dashboard_provider.dart';
 import 'package:planma_app/Providers/events_provider.dart';
 import 'package:planma_app/Providers/goal_provider.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
@@ -48,9 +49,6 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
 
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    if (!userProvider.isAuthenticated) return;
-
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       try {
         print('📩 Received message while app is in foreground!');
@@ -67,66 +65,20 @@ class _DashboardState extends State<Dashboard> {
       }
     });
 
-    // Use dotenv to get API_URL and remove trailing slash if present
-    String baseUrl =
-        dotenv.env['API_URL'] ?? 'https://planma-app-production.up.railway.app';
-    if (baseUrl.endsWith('/')) {
-      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
-    }
-    _baseApiUrl = baseUrl;
-
-    // Providers
-    final semesterProvider =
-        Provider.of<SemesterProvider>(context, listen: false);
-    final classScheduleProvider =
-        Provider.of<ClassScheduleProvider>(context, listen: false);
-
     // final socketService = Provider.of<WebSocketService>(context, listen: false);
     // socketService.disconnect();  // Disconnect WebSocket when widget is disposed
     // super.dispose();
 
-    semesterProvider.fetchSemesters().then((_) {
-      if (semesterProvider.semesters.isNotEmpty) {
-        final now = DateTime.now();
-
-        // Find the most recent semester that has already started
-        final validSemesters = semesterProvider.semesters.where((semester) {
-          final startDate = DateTime.parse(semester['sem_start_date']);
-          return startDate.isBefore(now) || startDate.isAtSameMomentAs(now);
-        }).toList();
-
-        // Sort by start date descending to get the most recent one
-        validSemesters.sort((a, b) => DateTime.parse(b['sem_start_date'])
-            .compareTo(DateTime.parse(a['sem_start_date'])));
-
-        final selected = validSemesters.isNotEmpty
-            ? validSemesters.first
-            : semesterProvider
-                .semesters.first; // fallback to first if none match
-
-        setState(() {
-          selectedSemester =
-              "${selected['acad_year_start']} - ${selected['acad_year_end']} ${selected['semester']}";
-        });
-
-        classScheduleProvider.fetchClassSchedules(
-          selectedSemesterId: selected['semester_id'],
-        );
-      } else {
-        setState(() {
-          selectedSemester = "No semester available";
-        });
-      }
-    });
-
     // Fetch data for all relevant providers when the screen loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TaskProvider>().fetchPendingTasks();
-      // context.read<ClassScheduleProvider>().fetchClassSchedules(selectedSemesterId: 1);
-      context.read<EventsProvider>().fetchUpcomingEvents();
-      context.read<ActivityProvider>().fetchPendingActivities();
-      context.read<GoalProvider>().fetchGoals();
-      context.read<UserPreferencesProvider>().fetchUserPreferences();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (!userProvider.isAuthenticated) return;
+      
+      // instantiate DashboardProvider via Provider tree
+      final dashboard = context.read<DashboardProvider>();
+
+      // load cached UI immediately then fetch remote
+      await dashboard.fetchDashboardData(forceRefresh: false);
     });
   }
 
@@ -238,16 +190,15 @@ class _DashboardState extends State<Dashboard> {
                 Expanded(
                   child: ListView(
                     children: [
-                      Consumer2<ClassScheduleProvider, SemesterProvider>(
-                        builder: (context, classScheduleProvider,
-                                semesterProvider, _) =>
+                      Consumer<DashboardProvider>(
+                        builder: (context, dashboard, _) =>
                             MenuButtonWidget(
                           color: const Color(0xFFFFE1BF),
                           icon: Icons.description,
                           title: 'Class Schedule',
-                          subtitle: semesterProvider.semesters.isEmpty
+                          subtitle: dashboard.semesters.isEmpty
                               ? "0 classes"
-                              : '${classScheduleProvider.classSchedules.length} classes',
+                              : '${dashboard.classSchedule.length} classes',
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -258,12 +209,12 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                       const SizedBox(height: 15),
-                      Consumer<TaskProvider>(
-                        builder: (context, taskProvider, _) => MenuButtonWidget(
+                      Consumer<DashboardProvider>(
+                        builder: (context, dashboard, _) => MenuButtonWidget(
                           color: const Color(0xFF50B6FF),
                           icon: Icons.check_circle,
                           title: 'Tasks',
-                          subtitle: '${taskProvider.pendingTasks.length} tasks',
+                          subtitle: '${dashboard.pendingTasks.length} tasks',
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -274,14 +225,14 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                       const SizedBox(height: 15),
-                      Consumer<EventsProvider>(
-                        builder: (context, eventsProvider, _) =>
+                      Consumer<DashboardProvider>(
+                        builder: (context, dashboard, _) =>
                             MenuButtonWidget(
                           color: const Color(0xFF7DCFB6),
                           icon: Icons.event,
                           title: 'Events',
                           subtitle:
-                              '${eventsProvider.upcomingEvents.length} events',
+                              '${dashboard.upcomingEvents.length} events',
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -292,14 +243,14 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                       const SizedBox(height: 15),
-                      Consumer<ActivityProvider>(
-                        builder: (context, activityProvider, _) =>
+                      Consumer<DashboardProvider>(
+                        builder: (context, dashboard, _) =>
                             MenuButtonWidget(
                           color: const Color(0xFFFBA2A2),
                           icon: Icons.accessibility,
                           title: 'Activities',
                           subtitle:
-                              '${activityProvider.pendingActivities.length} activities',
+                              '${dashboard.pendingActivities.length} activities',
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -310,12 +261,12 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                       const SizedBox(height: 15),
-                      Consumer<GoalProvider>(
-                        builder: (context, goalProvider, _) => MenuButtonWidget(
+                      Consumer<DashboardProvider>(
+                        builder: (context, dashboard, _) => MenuButtonWidget(
                           color: Color(0xFFD7C0F3),
                           icon: FontAwesomeIcons.flag,
                           title: 'Goals',
-                          subtitle: '${goalProvider.goals.length} goals',
+                          subtitle: '${dashboard.goals.length} goals',
                           onPressed: () {
                             Navigator.push(
                               context,
