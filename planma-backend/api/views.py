@@ -2570,7 +2570,7 @@ class DashboardAPIView(APIView):
         if user.is_anonymous:
             return Response({'detail': 'Authentication required.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        cache_key = f"dashboard:{user.id}"
+        cache_key = f"dashboard:{user.student_id}"
         cached = cache.get(cache_key)
         if cached:
             # Return cached snapshot
