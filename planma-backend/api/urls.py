@@ -38,4 +38,5 @@ urlpatterns = [
     path('auth/jwt/create/', CustomTokenObtainPairView.as_view(), name='jwt-create'),
     path('auth/', include('djoser.urls.jwt')),
     path('', include(router.urls)),
+    path('dashboard/', DashboardAPIView.as_view(), name='dashboard'),
 ]
