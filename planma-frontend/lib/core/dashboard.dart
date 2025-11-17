@@ -44,6 +44,7 @@ class _DashboardState extends State<Dashboard> {
 
   // Base API URL - adjust this to match your backend URL
   late final String _baseApiUrl;
+  bool _refreshAttached = false;
 
   @override
   void initState() {
@@ -78,7 +79,7 @@ class _DashboardState extends State<Dashboard> {
       final dashboard = context.read<DashboardProvider>();
 
       // load cached UI immediately then fetch remote
-      await dashboard.fetchDashboardData(forceRefresh: false);
+      await dashboard.fetchDashboardData();
     });
   }
 

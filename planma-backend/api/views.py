@@ -2570,19 +2570,19 @@ class DashboardAPIView(APIView):
         if user.is_anonymous:
             return Response({'detail': 'Authentication required.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        cache_key = f"dashboard:{user.student_id}"
-        cached = cache.get(cache_key)
-        if cached:
-            print("CACHE HIT:", cache_key)
-            # Return cached snapshot
-            return Response(cached, status=status.HTTP_200_OK)
-        else:
-            print("CACHE MISS:", cache_key)
+        # cache_key = f"dashboard:{user.student_id}"
+        # cached = cache.get(cache_key)
+        # if cached:
+        #     print("CACHE HIT:", cache_key)
+        #     # Return cached snapshot
+        #     return Response(cached, status=status.HTTP_200_OK)
+        # else:
+        #     print("CACHE MISS:", cache_key)
 
         # assemble fresh
         try:
             data = self.assemble_dashboard_data(user)
-            cache.set(cache_key, data, CACHE_TIMEOUT_SECONDS)
+            # cache.set(cache_key, data, CACHE_TIMEOUT_SECONDS)
             return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             # fallback: return partial data if anything fails and log it
