@@ -6,7 +6,6 @@ from .views import *
 from django.http import JsonResponse
 from django.conf import settings  # <-- Add this
 from django.conf.urls.static import static  # <-- Add this
-from .views import EnrichedScheduleEntryListView # ✅ Import the new view
 
 router = DefaultRouter()
 router.register(r'class-schedules', ClassScheduleViewSet, basename='classschedule')
