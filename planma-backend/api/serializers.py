@@ -124,7 +124,6 @@ class AttendedClassSerializer(serializers.ModelSerializer):
 class CustomTaskSerializer(serializers.ModelSerializer):
     subject_id = CustomSubjectSerializer()
     student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-    
     class Meta:
         model = CustomTask
         fields = [
