@@ -2573,8 +2573,11 @@ class DashboardAPIView(APIView):
         cache_key = f"dashboard:{user.student_id}"
         cached = cache.get(cache_key)
         if cached:
+            print("CACHE HIT:", cache_key)
             # Return cached snapshot
             return Response(cached, status=status.HTTP_200_OK)
+        else:
+            print("CACHE MISS:", cache_key)
 
         # assemble fresh
         try:
