@@ -315,28 +315,35 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       const SizedBox(height: 15),
                       Consumer<UserPreferencesProvider>(
-                        builder: (context, userPreferencesProvider, _) =>
-                            MenuButtonWidget(
-                          color: Color(0xFF535D88),
-                          icon: FontAwesomeIcons.moon,
-                          title: 'Sleep',
-                          subtitle: '',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ClockScreen(
-                                  themeColor: Color(0xFF535D88),
-                                  title: "Sleep",
-                                  clockContext: ClockContext(
-                                      type: ClockContextType.sleep),
-                                  record: userPreferencesProvider
-                                      .userPreferences[0],
+                        builder: (context, userPreferencesProvider, _) {
+                          final hasPrefs = userPreferencesProvider
+                              .userPreferences.isNotEmpty;
+
+                          return MenuButtonWidget(
+                            color: Color(0xFF535D88),
+                            icon: FontAwesomeIcons.moon,
+                            title: 'Sleep',
+                            subtitle: '', // or some loading text if you want
+                            onPressed: () {
+                              if (!hasPrefs)
+                                return; // do nothing if the list is empty
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ClockScreen(
+                                    themeColor: Color(0xFF535D88),
+                                    title: "Sleep",
+                                    clockContext: ClockContext(
+                                        type: ClockContextType.sleep),
+                                    record: userPreferencesProvider
+                                        .userPreferences[0],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          );
+                        },
                       ),
                       const SizedBox(height: 15),
                       MenuButtonWidget(
