@@ -122,13 +122,9 @@ class AttendedClassSerializer(serializers.ModelSerializer):
         read_only_fields = ['att_class_id']
         
 class CustomTaskSerializer(serializers.ModelSerializer):
-    # expose a few subject fields inline to avoid heavy nested serialization
     subject_id = CustomSubjectSerializer()
-    # subject_name = serializers.CharField(source='subject_id.subject_name', read_only=True)
-    # subject_code = serializers.CharField(source='subject_id.subject_code', read_only=True)
-
-    student_id = serializers.PrimaryKeyRelatedField(read_only=True)
-
+    student_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    
     class Meta:
         model = CustomTask
         fields = [
