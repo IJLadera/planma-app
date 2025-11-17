@@ -28,7 +28,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from api.models import CustomUser
 import os
 from django.http import JsonResponse
-from rest_framework.pagination import PageNumberPagination
 
 CACHE_TIMEOUT_SECONDS = 15
 
@@ -1276,11 +1275,6 @@ class AttendedClassViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
-class TaskPagination(PageNumberPagination):
-    page_size = 20
-    page_size_query_param = 'page_size'
-    max_page_size = 200
-
 # Task
 class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
