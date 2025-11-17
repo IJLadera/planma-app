@@ -197,9 +197,7 @@ class _DashboardState extends State<Dashboard> {
                           color: const Color(0xFFFFE1BF),
                           icon: Icons.description,
                           title: 'Class Schedule',
-                          subtitle: dashboard.semesters.isEmpty
-                              ? "0 classes"
-                              : '${dashboard.classSchedule.length} classes',
+                          subtitle: '${dashboard.classScheduleCount} classes',
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -215,7 +213,7 @@ class _DashboardState extends State<Dashboard> {
                           color: const Color(0xFF50B6FF),
                           icon: Icons.check_circle,
                           title: 'Tasks',
-                          subtitle: '${dashboard.pendingTasks.length} tasks',
+                          subtitle: '${dashboard.pendingTasksCount} tasks',
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -233,7 +231,7 @@ class _DashboardState extends State<Dashboard> {
                           icon: Icons.event,
                           title: 'Events',
                           subtitle:
-                              '${dashboard.upcomingEvents.length} events',
+                              '${dashboard.upcomingEventsCount} events',
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -251,7 +249,7 @@ class _DashboardState extends State<Dashboard> {
                           icon: Icons.accessibility,
                           title: 'Activities',
                           subtitle:
-                              '${dashboard.pendingActivities.length} activities',
+                              '${dashboard.pendingActivitiesCount} activities',
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -267,7 +265,7 @@ class _DashboardState extends State<Dashboard> {
                           color: Color(0xFFD7C0F3),
                           icon: FontAwesomeIcons.flag,
                           title: 'Goals',
-                          subtitle: '${dashboard.goals.length} goals',
+                          subtitle: '${dashboard.goalsCount} goals',
                           onPressed: () {
                             Navigator.push(
                               context,

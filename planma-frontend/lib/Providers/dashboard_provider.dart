@@ -4,15 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class DashboardProvider with ChangeNotifier {
-  // Data containers
-  List<dynamic> semesters = [];
-  int? selectedSemesterId;
-  List<dynamic> classSchedule = [];
-  List<dynamic> pendingTasks = [];
-  List<dynamic> upcomingEvents = [];
-  List<dynamic> pendingActivities = [];
-  List<dynamic> goals = [];
-  Map<String, dynamic> preferences = {};
+  int classScheduleCount = 0;
+  int pendingTasksCount = 0;
+  int upcomingEventsCount = 0;
+  int pendingActivitiesCount = 0;
+  int goalsCount = 0;
 
   bool isLoading = false;
   String? errorMessage;
@@ -23,14 +19,12 @@ class DashboardProvider with ChangeNotifier {
   DashboardProvider({required this.baseApiUrl, required this.tokenProvider});
 
   void _applyJson(Map<String, dynamic> jsonData, {bool notify = true}) {
-    semesters = List.from(jsonData['semesters'] ?? []);
-    selectedSemesterId = jsonData['selected_semester_id'];
-    classSchedule = List.from(jsonData['class_schedule'] ?? []);
-    pendingTasks = List.from(jsonData['pending_tasks'] ?? []);
-    upcomingEvents = List.from(jsonData['upcoming_events'] ?? []);
-    pendingActivities = List.from(jsonData['pending_activities'] ?? []);
-    goals = List.from(jsonData['goals'] ?? []);
-    preferences = Map<String, dynamic>.from(jsonData['preferences'] ?? {});
+    classScheduleCount = jsonData['class_schedule_count'] ?? 0;
+    pendingTasksCount = jsonData['pending_tasks_count'] ?? 0;
+    upcomingEventsCount = jsonData['upcoming_events_count'] ?? 0;
+    pendingActivitiesCount = jsonData['pending_activities_count'] ?? 0;
+    goalsCount = jsonData['goals_count'] ?? 0;
+
     if (notify) notifyListeners();
   }
 
@@ -73,3 +67,4 @@ class DashboardProvider with ChangeNotifier {
     }
   }
 }
+
