@@ -7,6 +7,7 @@ from .models import (
 )   
 
 def invalidate_dashboard(student_id):
+    print("CACHE INVALIDATED FOR:", student_id)
     cache.delete(f"dashboard:{student_id}")
 
 
@@ -91,4 +92,3 @@ def invalidate_semester(sender, instance, **kwargs):
 #         reference_id=instance.classsched_id,
 #         student_id=instance.student_id
 #     ).delete()
-
