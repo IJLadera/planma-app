@@ -82,6 +82,9 @@ class TaskProvider with ChangeNotifier {
         },
       );
 
+      print("STATUS CODE: ${response.statusCode}");
+      print("BODY: ${response.body}");
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         final newTasks = data.map((item) => Task.fromJson(item)).toList();

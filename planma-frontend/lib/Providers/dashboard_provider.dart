@@ -18,34 +18,9 @@ class DashboardProvider with ChangeNotifier {
   String? errorMessage;
 
   final String baseApiUrl;
-  final Future<String?> Function() tokenProvider; // inject token getter
+  final Future<String?> Function() tokenProvider;
 
   DashboardProvider({required this.baseApiUrl, required this.tokenProvider});
-
-  static const String _cacheKey = 'dashboard_cache';
-
-  Future<void> loadFromCache() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_cacheKey);
-      if (raw != null && raw.isNotEmpty) {
-        final jsonData = jsonDecode(raw);
-        _applyJson(jsonData, notify: false);
-      }
-    } catch (e) {
-      // ignore cache parse errors
-      print('Dashboard cache error: $e');
-    }
-  }
-
-  Future<void> saveToCache(Map<String, dynamic> data) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_cacheKey, jsonEncode(data));
-    } catch (e) {
-      print('Error saving dashboard cache: $e');
-    }
-  }
 
   void _applyJson(Map<String, dynamic> jsonData, {bool notify = true}) {
     semesters = List.from(jsonData['semesters'] ?? []);
@@ -60,11 +35,6 @@ class DashboardProvider with ChangeNotifier {
   }
 
   Future<void> fetchDashboardData({bool forceRefresh = false}) async {
-    // Load cached snapshot immediately (non-blocking)
-    if (!forceRefresh) {
-      await loadFromCache();
-    }
-
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -90,8 +60,6 @@ class DashboardProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
         _applyJson(jsonData);
-        // cache it
-        await saveToCache(jsonData);
       } else {
         errorMessage = 'Server error: ${response.statusCode}';
         print('Dashboard fetch error: ${response.statusCode} - ${response.body}');
