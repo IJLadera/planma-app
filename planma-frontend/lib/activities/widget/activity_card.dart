@@ -96,26 +96,28 @@ class ActivityCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 // Activity Details
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      activity.activityName,
-                      style: GoogleFonts.openSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF173F70),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        activity.activityName,
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF173F70),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '$startTime - $endTime',
-                      style: GoogleFonts.openSans(
-                        fontSize: 14,
-                        color: Color(0xFF173F70),
+                      const SizedBox(height: 5),
+                      Text(
+                        '$startTime - $endTime',
+                        style: GoogleFonts.openSans(
+                          fontSize: 14,
+                          color: Color(0xFF173F70),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
