@@ -51,20 +51,25 @@ class _SignUpPageState extends State<SignUpPage> {
       });
 
       try {
-        // Show signing up message
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(
-        //     content: Text(
-        //       "Signing up...",
-        //       style: GoogleFonts.openSans(fontSize: 14),
-        //     ),
-        //   ),
-        // );
-
-        // Get the UserProvider
         final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-        // Call the register method from UserProvider
+        // ✅ ASYNC EMAIL VALIDATION BEFORE REGISTER
+        final emailError =
+            await validateEmail(emailController.text, userProvider);
+        if (emailError != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                emailError,
+                style: GoogleFonts.openSans(fontSize: 14),
+              ),
+            ),
+          );
+          setState(() => _isLoading = false);
+          return;
+        }
+
+        // ✅ Proceed with register
         final success = await userProvider.register(
           firstName: firstNameController.text,
           lastName: lastNameController.text,
@@ -74,14 +79,11 @@ class _SignUpPageState extends State<SignUpPage> {
           rePassword: confirmPasswordController.text,
         );
 
-        // Remove the signing up message
-        ScaffoldMessenger.of(context).clearSnackBars();
-
         if (success) {
-          // Initialize user profile provider
+          // Initialize user profile
           await context.read<UserProfileProvider>().init();
 
-          // Navigate to sleep/wake setup screen
+          // Navigate to Sleep/Wake setup page
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -89,7 +91,6 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           );
         } else {
-          // Sign-up failed
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -100,7 +101,6 @@ class _SignUpPageState extends State<SignUpPage> {
           );
         }
       } catch (e) {
-        // Handle errors
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -110,7 +110,6 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         );
       } finally {
-        // Reset loading state
         setState(() {
           _isLoading = false;
         });
@@ -239,11 +238,73 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         const SizedBox(height: 15),
                         _buildTextFormField(
+                          controller: userNameController,
+                          labelText: 'Username',
+                          icon: Icons.account_circle,
+                          validator: (value) => value!.isEmpty
+                              ? 'Please enter your username'
+                              : null,
+                        ),
+                        const SizedBox(height: 15),
+                        _buildTextFormField(
                           controller: emailController,
                           labelText: 'Email',
                           icon: Icons.email,
-                          validator: (value) =>
-                              null, // We’ll handle async validation below
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Email is required';
+                            }
+                            final emailRegex = RegExp(
+                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                            if (!emailRegex.hasMatch(value)) {
+                              return 'Enter a valid email address';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        _buildTextFormField(
+                          controller: passwordController,
+                          labelText: 'Password',
+                          icon: Icons.lock,
+                          obscureText: obscurePassword,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: const Color(0xFF173F70),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                obscurePassword = !obscurePassword;
+                              });
+                            },
+                          ),
+                          validator: validatePassword,
+                        ),
+                        const SizedBox(height: 15),
+                        _buildTextFormField(
+                          controller: confirmPasswordController,
+                          labelText: 'Confirm Password',
+                          icon: Icons.lock_outline,
+                          obscureText: obscureConfirmPassword,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscureConfirmPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: const Color(0xFF173F70),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                obscureConfirmPassword =
+                                    !obscureConfirmPassword;
+                              });
+                            },
+                          ),
+                          validator: (value) => validateConfirmPassword(
+                              value, passwordController.text),
                         ),
                         const SizedBox(height: 50),
                         Padding(
