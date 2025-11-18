@@ -1,7 +1,16 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
-from api.models import CustomUser, CustomTask, CustomSemester, CustomSubject, UserPref
+from .models import (
+    CustomUser, CustomTask, CustomSemester, CustomSubject, UserPref,
+    CustomEvents, AttendedEvents,
+    CustomActivity, ActivityTimeLog,
+    CustomClassSchedule, AttendedClass,
+    TaskTimeLog,
+    Goals, GoalSchedule, GoalProgress,
+    SleepLog, ScheduleEntry,
+    FCMToken,
+)
 
 # Custom User Change Form
 class CustomUserChangeForm(UserChangeForm):
@@ -38,3 +47,16 @@ admin.site.register(CustomTask)
 admin.site.register(CustomSemester)
 admin.site.register(CustomSubject)
 admin.site.register(UserPref)
+admin.site.register(CustomEvents)
+admin.site.register(AttendedEvents)
+admin.site.register(CustomActivity)
+admin.site.register(ActivityTimeLog)
+admin.site.register(AttendedClass)
+admin.site.register(CustomClassSchedule)
+admin.site.register(TaskTimeLog)
+admin.site.register(GoalSchedule)
+admin.site.register(GoalProgress)
+admin.site.register(ScheduleEntry)
+admin.site.register(Goals)
+admin.site.register(SleepLog)
+admin.site.register(FCMToken)

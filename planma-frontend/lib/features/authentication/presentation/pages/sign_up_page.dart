@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:planma_app/features/authentication/presentation/providers/user_provider.dart';
@@ -28,6 +30,12 @@ class _SignUpPageState extends State<SignUpPage> {
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
   bool _isLoading = false;
+  String? _emailAsyncError;
+
+  final RegExp emailRegex =
+      RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
+  Timer? _debounce;
 
   // Global key for the form
   final _formKey = GlobalKey<FormState>();
@@ -41,6 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -53,23 +62,7 @@ class _SignUpPageState extends State<SignUpPage> {
       try {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-        // ✅ ASYNC EMAIL VALIDATION BEFORE REGISTER
-        final emailError =
-            await validateEmail(emailController.text, userProvider);
-        if (emailError != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                emailError,
-                style: GoogleFonts.openSans(fontSize: 14),
-              ),
-            ),
-          );
-          setState(() => _isLoading = false);
-          return;
-        }
-
-        // ✅ Proceed with register
+        // ✅ Proceed with registration
         final success = await userProvider.register(
           firstName: firstNameController.text,
           lastName: lastNameController.text,
@@ -80,10 +73,8 @@ class _SignUpPageState extends State<SignUpPage> {
         );
 
         if (success) {
-          // Initialize user profile
           await context.read<UserProfileProvider>().init();
 
-          // Navigate to Sleep/Wake setup page
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -97,6 +88,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 "Failed to create account. Please try again.",
                 style: GoogleFonts.openSans(fontSize: 14),
               ),
+              backgroundColor: Colors.red[400],
             ),
           );
         }
@@ -107,6 +99,7 @@ class _SignUpPageState extends State<SignUpPage> {
               "Error: ${e.toString()}",
               style: GoogleFonts.openSans(fontSize: 14),
             ),
+            backgroundColor: Colors.red[400],
           ),
         );
       } finally {
@@ -254,12 +247,37 @@ class _SignUpPageState extends State<SignUpPage> {
                             if (value == null || value.isEmpty) {
                               return 'Email is required';
                             }
-                            final emailRegex = RegExp(
-                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
                             if (!emailRegex.hasMatch(value)) {
                               return 'Enter a valid email address';
                             }
+                            if (_emailAsyncError != null) {
+                              return _emailAsyncError;
+                            }
                             return null;
+                          },
+                          onChanged: (value) {
+                            if (_debounce?.isActive ?? false)
+                              _debounce!.cancel();
+                            _debounce = Timer(const Duration(milliseconds: 500),
+                                () async {
+                              if (value.isNotEmpty &&
+                                  emailRegex.hasMatch(value)) {
+                                final userProvider = Provider.of<UserProvider>(
+                                    context,
+                                    listen: false);
+                                final isTaken = await userProvider
+                                    .isEmailTaken(value.trim());
+
+                                setState(() {
+                                  _emailAsyncError = isTaken
+                                      ? 'This email is already registered'
+                                      : null;
+                                });
+
+                                _formKey.currentState
+                                    ?.validate(); // re-run validator
+                              }
+                            });
                           },
                         ),
                         const SizedBox(height: 15),
@@ -314,19 +332,21 @@ class _SignUpPageState extends State<SignUpPage> {
                             onPressed: _isLoading
                                 ? null
                                 : () async {
+                                    final userProvider =
+                                        Provider.of<UserProvider>(context,
+                                            listen: false);
+                                    final isTaken =
+                                        await userProvider.isEmailTaken(
+                                            emailController.text.trim());
+
+                                    setState(() {
+                                      _emailAsyncError = isTaken
+                                          ? 'This email is already registered'
+                                          : null;
+                                    });
+
+                                    // ✅ Only validate once, after async check
                                     if (_formKey.currentState!.validate()) {
-                                      final userProvider =
-                                          Provider.of<UserProvider>(context,
-                                              listen: false);
-                                      final emailError = await validateEmail(
-                                          emailController.text, userProvider);
-                                      if (emailError != null) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(content: Text(emailError)),
-                                        );
-                                        return; // Stop if email already exists
-                                      }
                                       _signUp(context);
                                     }
                                   },
@@ -402,6 +422,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String? Function(String?)? validator,
     bool obscureText = false,
     Widget? suffixIcon,
+    void Function(String)? onChanged,
   }) {
     return TextFormField(
       controller: controller,
@@ -419,6 +440,7 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
       validator: validator,
       style: GoogleFonts.openSans(),
+      onChanged: onChanged, // ✅ USE IT HERE
     );
   }
 }
