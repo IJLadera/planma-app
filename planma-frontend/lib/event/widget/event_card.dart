@@ -74,31 +74,33 @@ class EventCard extends StatelessWidget {
                   width: 12,
                   height: 5,
                 ), // Event Details
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Event Name
-                    Text(
-                      event.eventName,
-                      style: GoogleFonts.openSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF173F70),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Event Name
+                      Text(
+                        event.eventName,
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF173F70),
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      width: 12,
-                      height: 5,
-                    ),
-                    // Event Time
-                    Text(
-                      '$startTime - $endTime',
-                      style: GoogleFonts.openSans(
-                        fontSize: 14,
-                        color: const Color(0xFF173F70),
+                      const SizedBox(
+                        width: 12,
+                        height: 5,
                       ),
-                    ),
-                  ],
+                      // Event Time
+                      Text(
+                        '$startTime - $endTime',
+                        style: GoogleFonts.openSans(
+                          fontSize: 14,
+                          color: const Color(0xFF173F70),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
