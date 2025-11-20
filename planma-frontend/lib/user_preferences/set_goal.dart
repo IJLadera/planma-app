@@ -22,6 +22,8 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
     'Create Custom',
   ];
 
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,21 +113,34 @@ class _GoalSelectionPageState extends State<GoalSelectionPage> {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {
-                  if (selectedIndex != null) {
+                onPressed: () async {
+                  if (selectedIndex == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Please select a goal first")),
+                    );
+                    return; // Stop execution
+                  }
+
+                  setState(() {
+                    _isLoading = true; // Show loading spinner
+                  });
+
+                  try {
+                    // Simulate API call or logic before navigating
+                    await Future.delayed(Duration(milliseconds: 300));
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => CreateGoal(
-                          initialGoalName: goals[selectedIndex!], // Pass title
+                          initialGoalName: goals[selectedIndex!],
                         ),
                       ),
                     );
-                  } else {
-                    // Optionally show a snackbar or dialog if nothing is selected
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Please select a goal first")),
-                    );
+                  } finally {
+                    setState(() {
+                      _isLoading = false; // Stop the loader after navigation
+                    });
                   }
                 },
                 style: ElevatedButton.styleFrom(
