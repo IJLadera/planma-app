@@ -32,6 +32,8 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
     "02 h : 00 m",
   ];
 
+  bool _isLoading = false;
+
   Future<void> _saveReminderToDatabase(String reminderTime) async {
     final provider =
         Provider.of<UserPreferencesProvider>(context, listen: false);
@@ -129,8 +131,16 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
               // Next Button
               ElevatedButton(
                 onPressed: () async {
-                  // Save reminder to database using the provider
+                  setState(() {
+                    _isLoading = true; // Show loading indicator
+                  });
+
                   await _saveReminderToDatabase(_selectedTime);
+
+                  setState(() {
+                    _isLoading =
+                        false; // Hide loading indicator after submission
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF173F70),
@@ -140,13 +150,15 @@ class _ReminderOffsetSetupScreenState extends State<ReminderOffsetSetupScreen> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                child: Text(
-                  "Next",
-                  style: GoogleFonts.openSans(
-                    fontSize: 18.0,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'Next',
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ],
           ),

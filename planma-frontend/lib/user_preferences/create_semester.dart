@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:planma_app/Providers/semester_provider.dart';
 import 'package:planma_app/user_preferences/set_goal.dart';
-import 'package:planma_app/user_preferences/widget/create_goal.dart';
 import 'package:planma_app/user_preferences/widget/widget.dart';
 import 'package:provider/provider.dart';
 
